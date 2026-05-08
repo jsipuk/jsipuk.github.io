@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netskope One — Product Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ns-teal: #00A7CE;
+    --ns-orange: #FF8300;
+    --ns-navy: #002B49;
+    --ns-teal-light: rgba(0,167,206,0.1);
+    --ns-orange-light: rgba(255,131,0,0.1);
+    --ns-navy-light: rgba(0,43,73,0.07);
+    --bg: #F4F6F9;
+    --surface: #ffffff;
+    --surface2: #F0F3F7;
+    --border: rgba(0,43,73,0.1);
+    --border-strong: rgba(0,43,73,0.2);
+    --text: #0A1628;
+    --text-2: #4A5568;
+    --text-3: #8A97A8;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,43,73,0.06), 0 4px 12px rgba(0,43,73,0.05);
+    --shadow-hover: 0 4px 16px rgba(0,43,73,0.1), 0 8px 32px rgba(0,43,73,0.08);
+    --sidebar: 260px;
+    --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOP NAV */
+  .topbar {
+    background: var(--ns-navy);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .logo-mark {
+    width: 30px;
+    height: 30px;
+    background: var(--ns-teal);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-mark svg { width: 18px; height: 18px; }
+  .logo-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .logo-text span { color: var(--ns-teal); }
+  .topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.12); }
+  .topbar-title { font-size: 13px; color: rgba(255,255,255,0.55); font-weight: 400; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .topbar-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 0 12px;
+    height: 34px;
+    transition: var(--transition);
+  }
+  .search-box:focus-within {
+    background: rgba(255,255,255,0.12);
+    border-color: var(--ns-teal);
+  }
+  .search-box svg { width: 14px; height: 14px; color: rgba(255,255,255,0.4); flex-shrink: 0; }
+  .search-box input {
+    background: none;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    width: 180px;
+  }
+  .search-box input::placeholder { color: rgba(255,255,255,0.35); }
+
+  /* LAYOUT */
+  .layout { display: flex; flex: 1; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 20px 0;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+
+  .sidebar-section { margin-bottom: 4px; }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    padding: 8px 20px 4px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--text-2);
+    position: relative;
+    user-select: none;
+  }
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active {
+    border-left-color: var(--ns-teal);
+    background: var(--ns-teal-light);
+    color: var(--ns-navy);
+    font-weight: 500;
+  }
+  .sidebar-item .si-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .sidebar-item .si-count {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--text-3);
+  }
+  .sidebar-item.active .si-count { background: rgba(0,167,206,0.15); color: var(--ns-teal); }
+
+  /* MAIN */
+  .main { flex: 1; padding: 28px 32px; overflow: auto; min-width: 0; }
+
+  /* HERO STRIP */
+  .hero-strip {
+    background: var(--ns-navy);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-strip::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(0,167,206,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-strip::after {
+    content: '';
+    position: absolute;
+    right: 80px; bottom: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(255,131,0,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-text { position: relative; z-index: 1; }
+  .hero-text h1 { font-size: 20px; font-weight: 600; color: #fff; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .hero-text p { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.5; max-width: 480px; }
+  .hero-stats { margin-left: auto; display: flex; gap: 20px; position: relative; z-index: 1; flex-shrink: 0; }
+  .hero-stat { text-align: center; }
+  .hero-stat .hs-num { font-size: 24px; font-weight: 600; color: var(--ns-teal); letter-spacing: -0.03em; font-family: 'DM Mono', monospace; }
+  .hero-stat .hs-label { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .section-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+  .section-count {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-3);
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  /* PRODUCT GRID */
+  .product-section { margin-bottom: 32px; }
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .product-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: transparent;
+    transition: var(--transition);
+  }
+  .product-card:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(0,167,206,0.3);
+    transform: translateY(-2px);
+  }
+  .product-card:hover::after { background: var(--ns-teal); }
+  .product-card.selected {
+    border: 2px solid var(--ns-teal);
+    box-shadow: 0 0 0 3px rgba(0,167,206,0.1);
+    transform: translateY(-2px);
+  }
+  .product-card.selected::after { background: var(--ns-teal); height: 3px; }
+  .pc-icon {
+    width: 38px; height: 38px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    font-size: 18px;
+    transition: var(--transition);
+  }
+  .product-card:hover .pc-icon { transform: scale(1.08); }
+  .pc-name { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.35; margin-bottom: 8px; }
+  .pc-cat {
+    font-size: 10.5px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    letter-spacing: 0.01em;
+  }
+  .pc-arrow {
+    position: absolute;
+    top: 14px; right: 14px;
+    opacity: 0;
+    font-size: 13px;
+    transition: var(--transition);
+  }
+  .product-card:hover .pc-arrow,
+  .product-card.selected .pc-arrow { opacity: 1; }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 8px;
+    margin-bottom: 28px;
+    animation: slideDown 0.2s ease;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .dp-top {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .dp-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .dp-info { flex: 1; }
+  .dp-info h3 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; margin-bottom: 6px; }
+  .dp-cat {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .dp-desc { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+  .dp-actions { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    background: var(--ns-teal);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: #008faf; }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    background: var(--surface2);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+  .btn-secondary:hover { background: var(--ns-teal-light); border-color: var(--ns-teal); color: var(--ns-navy); }
+  .dp-close-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 30px; height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 13px;
+    color: var(--text-3);
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  .dp-close-btn:hover { background: #fce8e8; border-color: #f5c0c0; color: #c0392b; }
+  .dp-bottom {
+    padding: 18px 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .dp-features h4 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-3); margin-bottom: 10px; }
+  .feat-list { display: flex; flex-wrap: wrap; gap: 7px; }
+  .feat-chip {
+    font-size: 12px;
+    padding: 4px 11px;
+    border-radius: 6px;
+    background: var(--surface2);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .feat-chip svg { width: 11px; height: 11px; flex-shrink: 0; }
+  .dp-related h4 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-3); margin-bottom: 10px; }
+  .related-list { display: flex; flex-direction: column; gap: 6px; }
+  .related-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-2);
+    border: 1px solid transparent;
+    transition: var(--transition);
+  }
+  .related-item:hover { border-color: var(--ns-teal); background: var(--ns-teal-light); color: var(--ns-navy); }
+  .ri-icon { font-size: 14px; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-3);
+  }
+  .empty-state svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.3; }
+  .empty-state p { font-size: 14px; }
+
+  /* FOOTER */
+  footer {
+    padding: 16px 32px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+  }
+  footer a { color: var(--ns-teal); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* SCROLLBAR */
+  .main::-webkit-scrollbar { width: 5px; }
+  .main::-webkit-scrollbar-track { background: transparent; }
+  .main::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+  /* NEW BADGE */
+  .badge-new {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #00A7CE, #0076a8);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  /* DETAIL PANEL ACCENT */
+  .detail-panel { border-top: 3px solid var(--dp-accent-color, var(--ns-teal)); }
+
+  /* KEYBOARD HINT */
+  .kbd-hint {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    font-family: 'DM Mono', monospace;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 4px;
+  }
+
+  /* CATEGORY SECTION HEADER ACCENT DOT */
+  .section-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .hero-stats { display: none; }
+    .sidebar { width: 220px; }
+    .main { padding: 20px; }
+  }
+  @media (max-width: 680px) {
+    .layout { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); padding: 12px 0; display: flex; flex-direction: row; overflow-x: auto; white-space: nowrap; }
+    .sidebar-label { display: none; }
+    .sidebar-section { display: flex; flex-direction: row; }
+    .sidebar-item { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .sidebar-item.active { border-bottom-color: var(--ns-teal); border-left-color: transparent; }
+    .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .dp-bottom { grid-template-columns: 1fr; }
+    .dp-top { flex-wrap: wrap; }
+    .dp-actions { flex-direction: row; flex-wrap: wrap; }
+    .search-box input { width: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topbar">
+  <a class="logo" href="https://www.netskope.com/products" target="_blank">
+    <img src="https://cdn.brandfetch.io/id8gc0ILB0/theme/light/logo.svg?c=1dxbfHSJFAPEGdCLU4o5B" alt="Netskope" style="height:26px;width:auto">
+  </a>
+  <div class="topbar-divider"></div>
+  <span class="topbar-title">Product Explorer</span>
+  <div class="topbar-right">
+    <div class="search-box">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="m11 11 2.5 2.5" stroke-linecap="round"/></svg>
+      <input type="text" id="search-input" placeholder="Search products…" autocomplete="off">
+      <span class="kbd-hint">/</span>
+    </div>
+    <span class="topbar-badge" id="topbar-count">28 products</span>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="main">
+    <!-- Hero strip -->
+    <div class="hero-strip">
+      <div class="hero-text">
+        <h1>Netskope One Platform</h1>
+        <p>The industry's leading SSE and SASE platform — built natively on a single cloud for AI-powered, data-centric security everywhere.</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hs-num" id="stat-products">28</div>
+          <div class="hs-label">Products</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-num" id="stat-cats">7</div>
+          <div class="hs-label">Categories</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-num">1</div>
+          <div class="hs-label">Platform</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product grid area -->
+    <div id="product-area"></div>
+  </main>
+</div>
+
+<footer>
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1" stroke-linecap="round"/></svg>
+  Last updated May 2026 &nbsp;·&nbsp; Created by John Saunders &nbsp;·&nbsp;
+  <a href="https://www.netskope.com/products" target="_blank">netskope.com/products ↗</a>
+</footer>
+
+<script>
+const CAT_META = {
+  "All":                    { color: "#002B49", bg: "rgba(0,43,73,0.07)", icon: "⊞" },
+  "Converged":              { color: "#FF8300", bg: "rgba(255,131,0,0.1)", icon: "⬡" },
+  "AI Security":            { color: "#00A7CE", bg: "rgba(0,167,206,0.1)", icon: "◈" },
+  "Web & Cloud":            { color: "#1a6fbd", bg: "rgba(26,111,189,0.1)", icon: "☁" },
+  "ZTNA & Private Access":  { color: "#0E7490", bg: "rgba(14,116,144,0.1)", icon: "🔑" },
+  "Data Security":          { color: "#7B4FD4", bg: "rgba(123,79,212,0.1)", icon: "⬡" },
+  "Networking":             { color: "#0F7A5A", bg: "rgba(15,122,90,0.1)", icon: "⬡" },
+  "Analytics":              { color: "#D97706", bg: "rgba(217,119,6,0.1)", icon: "◇" }
+};
+
+const PRODUCTS = [
+  {name:"SASE",              cat:"Converged",     icon:"🔐",
+   desc:"Netskope One SASE combines market-leading SSE and SD-WAN to protect users, apps, and data everywhere with AI-powered zero trust security — fast, reliable access from any location or device, including IoT, at scale.",
+   features:["SSE + SD-WAN converged","AI-powered zero trust","Any device, any location","IoT at scale","Single policy engine"],
+   related:["SSE","Converged Access","Secure SD-WAN"],
+   url:"https://www.netskope.com/products/secure-access-service-edge"},
+
+  {name:"SSE",               cat:"Converged",     icon:"🛡️",
+   desc:"Netskope One Security Service Edge (SSE) consolidates critical security services in one platform — securing access to web, cloud, and private apps from anywhere with a data-centric, AI-powered approach.",
+   features:["Cloud-delivered","AI-powered enforcement","Data-centric approach","Hybrid workforce ready","Zero trust inline"],
+   related:["SASE","Next Gen SWG","ZTNA"],
+   url:"https://www.netskope.com/products/security-service-edge"},
+
+  {name:"Converged Access",  cat:"Converged",     icon:"↔️",
+   desc:"A 100% SaaS-based, converged remote connectivity platform built with one platform, one software, and one policy for multiple deployment scenarios — users, branches, and clouds.",
+   features:["One platform, one policy","SaaS-based SD-WAN","Multi-deployment","Zero trust access","Cloud-managed"],
+   related:["SASE","Secure SD-WAN","Endpoint SD-WAN"],
+   url:"https://www.netskope.com/products/converged-access"},
+
+  {name:"Unified Data Security",cat:"Converged",  icon:"🗄️",
+   desc:"Re-imagine how you protect your organization's data in the AI era — the most comprehensive, unified data security in a single platform combining DLP, DSPM, CASB, and SSPM.",
+   features:["Unified DLP","DSPM","CASB integration","SSPM","AI-era data protection"],
+   related:["DLP","DSPM","CASB (API)"],
+   url:"https://www.netskope.com/products/data-security"},
+
+  {name:"Agentic Broker",    cat:"AI Security",   icon:"🤖", isNew:true,
+   desc:"Secure and govern AI agents operating across your enterprise — visibility, control, and policy enforcement for every agentic AI action, workflow, and data interaction.",
+   features:["Agent visibility","Policy enforcement","Zero trust for AI","Risk detection","Agentic workflow control"],
+   related:["AI Gateway","AI Guardrails","GenAI Security"],
+   url:"https://www.netskope.com/products/agentic-broker"},
+
+  {name:"AI Gateway",        cat:"AI Security",   icon:"⚡", isNew:true,
+   desc:"A gateway for all AI traffic that gives your organization visibility and control over how employees use AI tools — without sacrificing speed or user experience.",
+   features:["AI traffic visibility","Access control","Data protection","Usage analytics","Shadow AI discovery"],
+   related:["Agentic Broker","AI Guardrails","GenAI Security"],
+   url:"https://www.netskope.com/products/ai-gateway"},
+
+  {name:"AI Red Teaming",    cat:"AI Security",   icon:"⚔️", isNew:true,
+   desc:"Proactively test and harden your AI systems against adversarial attacks — automated red teaming to find vulnerabilities in LLMs and AI pipelines before attackers do.",
+   features:["Adversarial testing","LLM vulnerability scanning","Risk scoring","Continuous testing","Prompt injection testing"],
+   related:["AI Guardrails","AI Gateway","Agentic Broker"],
+   url:"https://www.netskope.com/products/ai-red-teaming"},
+
+  {name:"AI Guardrails",     cat:"AI Security",   icon:"🚧", isNew:true,
+   desc:"Enforce real-time policies on AI inputs and outputs — prevent data leakage, harmful content, and policy violations across all AI model interactions in your organization.",
+   features:["Input/output filtering","Data leakage prevention","Harmful content blocking","Prompt injection defense","Policy-driven controls"],
+   related:["AI Gateway","Agentic Broker","AI Red Teaming"],
+   url:"https://www.netskope.com/products/ai-guardrails"},
+
+  {name:"GenAI Security",    cat:"AI Security",   icon:"✨",
+   desc:"Comprehensive security for generative AI adoption — discover, analyze, and control all GenAI app usage across your organization with granular policy controls.",
+   features:["GenAI app discovery","Usage controls","Data protection","Risk scoring","Policy enforcement"],
+   related:["AI Gateway","AI Guardrails","Cloud Inline Security"],
+   url:"https://www.netskope.com/products/securing-generative-ai"},
+
+  {name:"Next Gen SWG",      cat:"Web & Cloud",   icon:"🌐",
+   desc:"The foundation for SSE web and cloud inline security — a next-generation secure web gateway providing real-time threat and data protection for all web and cloud traffic.",
+   features:["Inline threat detection","DLP inline","Cloud app controls","SSL inspection","Zero-day protection"],
+   related:["Cloud Inline Security","Threat Protection","Remote Browser Isolation"],
+   url:"https://www.netskope.com/products/next-gen-swg"},
+
+  {name:"Cloud Inline Security",cat:"Web & Cloud",icon:"☁️",
+   desc:"Netskope One CASB lets you confidently adopt cloud applications without sacrificing security — inline and out-of-band protection for managed and unmanaged cloud apps.",
+   features:["Inline + API CASB","Shadow IT discovery","Policy enforcement","Managed/unmanaged apps","Real-time coaching"],
+   related:["Next Gen SWG","CASB (API)","SSPM"],
+   url:"https://www.netskope.com/products/casb"},
+
+  {name:"ZTNA / Private Access", cat:"ZTNA & Private Access", icon:"🔑",
+   desc:"Netskope One Private Access ensures secure, optimized access to all private apps from anywhere — combining ZTNA with Endpoint SD-WAN for best-in-class zero trust private application access. The cornerstone of VPN replacement.",
+   features:["App-level zero trust","Continuous trust verification","Endpoint SD-WAN built-in","Replace VPN","Any app, any location"],
+   related:["Endpoint SD-WAN","Universal ZTNA","SASE"],
+   url:"https://www.netskope.com/products/private-access"},
+
+  {name:"Universal ZTNA",       cat:"ZTNA & Private Access", icon:"🛂",
+   desc:"Extend zero trust access beyond remote workers to every user type — managed, unmanaged, contractors, IoT, and OT — with a single consistent policy framework that eliminates both VPN and NAC complexity.",
+   features:["All user types covered","Managed + unmanaged","Replaces VPN & NAC","Consistent policy","IoT/OT support"],
+   related:["ZTNA / Private Access","Device Intelligence","SASE"],
+   url:"https://www.netskope.com/solutions/modernize-access-with-universal-ztna"},
+
+  {name:"Endpoint SD-WAN",      cat:"ZTNA & Private Access", icon:"💻",
+   desc:"Extend SD-WAN intelligence to every endpoint — give remote users the same optimized, secure connectivity experience as branch office users, with per-device policy and ZTNA integration.",
+   features:["Per-device SD-WAN","Optimized routing","ZTNA integration","Unified policy","No extra agent"],
+   related:["ZTNA / Private Access","Secure SD-WAN","Converged Access"],
+   url:"https://www.netskope.com/products/endpoint-sd-wan"},
+
+  {name:"Firewall as a Service",cat:"Web & Cloud",icon:"🔥",
+   desc:"Netskope One Cloud Firewall delivers FWaaS for egress traffic in a SASE architecture — cloud-delivered, policy-driven firewall for all users and locations, no hardware required.",
+   features:["Cloud-delivered FWaaS","SASE-integrated","Egress control","DNS security","IPS/IDS"],
+   related:["Next Gen SWG","SASE","SSE"],
+   url:"https://www.netskope.com/products/firewall"},
+
+  {name:"Enterprise Browser", cat:"Web & Cloud",  icon:"🖥️",
+   desc:"Increase productivity and streamline secure access for unmanaged devices to websites, company applications, collaboration tools, and resources — no endpoint agent required.",
+   features:["Unmanaged device access","Secure browsing","BYOD support","No agent required","Isolation built-in"],
+   related:["Remote Browser Isolation","ZTNA","Next Gen SWG"],
+   url:"https://www.netskope.com/products/enterprise-browser"},
+
+  {name:"Remote Browser Isolation",cat:"Web & Cloud",icon:"🔒",
+   desc:"Netskope One RBI isolates uncategorized and risky websites, executing all browser code remotely — protecting endpoints from web-borne threats without impacting user experience.",
+   features:["Remote code execution","Risky site isolation","Transparent experience","Integrated with SWG","Zero endpoint risk"],
+   related:["Next Gen SWG","Enterprise Browser","Threat Protection"],
+   url:"https://www.netskope.com/products/remote-browser-isolation"},
+
+  {name:"Threat Protection",  cat:"Web & Cloud",  icon:"🛡️",
+   desc:"High-efficacy threat detection and blocking for advanced malware (including ransomware) and phishing — inline, real-time, AI-powered protection built into the SSE platform.",
+   features:["Anti-malware","Anti-phishing","Ransomware defense","AI threat detection","Zero-day protection"],
+   related:["Next Gen SWG","Cloud Inline Security","Advanced Analytics"],
+   url:"https://www.netskope.com/netskope-one/threat-protection"},
+
+  {name:"DLP",               cat:"Data Security", icon:"📂",
+   desc:"Unified, ML-enhanced data loss prevention for cloud, web, email, private apps, and devices — reduce the risk of data exfiltration across every channel from one policy engine.",
+   features:["Multi-channel DLP","ML-enhanced detection","Cloud + endpoint","Policy automation","Exact Data Match"],
+   related:["DSPM","Unified Data Security","Cloud Inline Security"],
+   url:"https://www.netskope.com/products/data-loss-prevention"},
+
+  {name:"DSPM",              cat:"Data Security", icon:"🗺️",
+   desc:"Netskope One DSPM empowers security teams to discover, map, and protect sensitive data across cloud, on-premises, and hybrid environments — find data risk before it becomes a breach.",
+   features:["Data discovery","Risk posture scoring","Cloud + on-prem","Compliance mapping","Auto-remediation"],
+   related:["DLP","CASB (API)","Unified Data Security"],
+   url:"https://www.netskope.com/products/data-security-posture-management"},
+
+  {name:"CASB (API)",        cat:"Data Security", icon:"🔗",
+   desc:"Out-of-band CASB protection for sanctioned SaaS apps via API — visibility and control for data at rest in Microsoft 365, Salesforce, Google Workspace, and hundreds more.",
+   features:["API-connected","Data at rest scanning","Compliance enforcement","SaaS app coverage","Misconfiguration detection"],
+   related:["Cloud Inline Security","SSPM","DLP"],
+   url:"https://www.netskope.com/products/casb"},
+
+  {name:"SSPM",              cat:"Data Security", icon:"⚙️",
+   desc:"Netskope One SSPM continuously enforces SaaS security policies and best practices — prevent configuration drift, ensure compliance, and prioritize risk across your entire SaaS estate.",
+   features:["Continuous monitoring","Config drift prevention","Compliance benchmarks","Risk prioritization","Auto-remediation"],
+   related:["CASB (API)","DSPM","Cloud Inline Security"],
+   url:"https://www.netskope.com/products/saas-security-posture-management"},
+
+  {name:"Secure SD-WAN",     cat:"Networking",    icon:"🌐",
+   desc:"Netskope One SD-WAN — a 100% SaaS-based converged connectivity platform for branches, remote users, and clouds — one platform, one software, one policy with full SASE integration.",
+   features:["SaaS-based","SASE-native","High-performance","Zero trust integrated","Cloud-managed"],
+   related:["SASE","Converged Access","Micro Branch"],
+   url:"https://www.netskope.com/products/sase-branch"},
+
+  {name:"Micro Branch",      cat:"Networking",    icon:"📡",
+   desc:"Bring secure SASE connectivity to small branch locations and remote sites — a lightweight, cloud-managed branch solution with zero-touch deployment.",
+   features:["Small site SASE","Cloud-managed","Zero touch deploy","Inline security","Compact hardware"],
+   related:["Secure SD-WAN","SASE","Device Intelligence"],
+   url:"https://www.netskope.com/products/micro-branch"},
+
+  {name:"Device Intelligence",cat:"Networking",   icon:"📱",
+   desc:"Gain visibility into every device — IoT, unmanaged, and BYOD — and apply zero trust policies based on real device context, risk, and behavior.",
+   features:["IoT discovery","Device profiling","Zero trust enforcement","Risk-based access","OT/IoT security"],
+   related:["ZTNA","Micro Branch","Advanced Analytics"],
+   url:"https://www.netskope.com/products/device-intelligence"},
+
+  {name:"Advanced Analytics", cat:"Analytics",    icon:"📊",
+   desc:"Transform security operations with data-driven insights — identify trends, zero in on areas of risk, and use evidence to take action with powerful analytics built natively into the platform.",
+   features:["Custom dashboards","Risk trending","Behavioral analytics","Policy impact analysis","Threat intelligence"],
+   related:["Digital Experience Mgmt","Threat Protection","DSPM"],
+   url:"https://www.netskope.com/products/advanced-analytics"},
+
+  {name:"Digital Experience Mgmt",cat:"Analytics",icon:"😊",
+   desc:"Proactive Digital Experience Management (P-DEM) gives IT teams end-to-end visibility into user experience quality across apps, networks, and devices — resolve issues before users notice.",
+   features:["End-to-end visibility","Proactive alerting","App performance scoring","Remote user insights","Network path analysis"],
+   related:["Advanced Analytics","Secure SD-WAN","Device Intelligence"],
+   url:"https://www.netskope.com/products/digital-experience-management"}
+];
+
+// State
+let activeCat = "All";
+let selectedProduct = null;
+let searchQuery = "";
+
+// ——————————————————————
+// SIDEBAR
+// ——————————————————————
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  const cats = ["All", ...new Set(PRODUCTS.map(p=>p.cat))];
+  sb.innerHTML = '';
+
+  const s1 = document.createElement('div'); s1.className = 'sidebar-section';
+  const lbl1 = document.createElement('div'); lbl1.className = 'sidebar-label'; lbl1.textContent = 'Categories';
+  s1.appendChild(lbl1);
+
+  cats.forEach(cat => {
+    const count = cat === "All" ? PRODUCTS.length : PRODUCTS.filter(p=>p.cat===cat).length;
+    const m = CAT_META[cat] || CAT_META["All"];
+    const item = document.createElement('div');
+    item.className = 'sidebar-item' + (activeCat===cat?' active':'');
+    item.innerHTML = `
+      <div class="si-icon" style="background:${m.bg};color:${m.color}">
+        ${catIcon(cat)}
+      </div>
+      ${cat}
+      <span class="si-count">${count}</span>
+    `;
+    item.onclick = () => { activeCat = cat; selectedProduct = null; render(); };
+    s1.appendChild(item);
+  });
+
+  sb.appendChild(s1);
+
+  // Quick links
+  const s2 = document.createElement('div'); s2.className = 'sidebar-section'; s2.style.marginTop='16px';
+  const lbl2 = document.createElement('div'); lbl2.className = 'sidebar-label'; lbl2.textContent = 'Quick Links';
+  s2.appendChild(lbl2);
+
+  [["Netskope One Platform","https://www.netskope.com/netskope-one"],
+   ["Netskope AI Security","https://www.netskope.com/ai"],
+   ["NewEdge Network","https://www.netskope.com/netskope-one/newedge"],
+   ["Experience Netskope","https://www.netskope.com/experience-netskope"],
+   ["Netskope Documentation","https://docs.netskope.com/"]
+  ].forEach(([label,url]) => {
+    const item = document.createElement('a');
+    item.href = url; item.target = '_blank';
+    item.className = 'sidebar-item';
+    item.style.textDecoration = 'none';
+    item.innerHTML = `
+      <div class="si-icon" style="background:var(--surface2);color:var(--text-3)">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h5v5M12 2 6 8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 4H2v8h8V9" stroke-linecap="round"/></svg>
+      </div>
+      ${label}
+    `;
+    s2.appendChild(item);
+  });
+  sb.appendChild(s2);
+}
+
+function catIcon(cat) {
+  const icons = {
+    "All": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>`,
+    "Converged": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M4 7h6M7 4v6" stroke-linecap="round"/></svg>`,
+    "AI Security": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1 2 4v3c0 2.8 2.1 5.4 5 6 2.9-.6 5-3.2 5-6V4L7 1z"/></svg>`,
+    "Web & Cloud": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9.5A2.5 2.5 0 0 1 3 5a3 3 0 0 1 5.6-1.4A2 2 0 1 1 11 7.5H3z"/></svg>`,
+    "ZTNA & Private Access": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2" stroke-linecap="round"/></svg>`,
+    "Data Security": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="7" cy="4" rx="4" ry="2"/><path d="M3 4v3c0 1.1 1.8 2 4 2s4-.9 4-2V4"/><path d="M3 7v3c0 1.1 1.8 2 4 2s4-.9 4-2V7"/></svg>`,
+    "Networking": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="3" cy="7" r="1.5"/><circle cx="11" cy="3" r="1.5"/><circle cx="11" cy="11" r="1.5"/><path d="M4.4 6.3 9.6 3.7M4.4 7.7l5.2 2.6"/></svg>`,
+    "Analytics": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11 5 7l3 2 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  };
+  return icons[cat] || icons["All"];
+}
+
+// ——————————————————————
+// MAIN PRODUCT AREA
+// ——————————————————————
+function renderMain() {
+  const area = document.getElementById('product-area');
+  area.innerHTML = '';
+
+  const q = searchQuery.toLowerCase().trim();
+  let filtered = activeCat === "All" ? [...PRODUCTS] : PRODUCTS.filter(p=>p.cat===activeCat);
+  if(q) {
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.cat.toLowerCase().includes(q) ||
+      p.desc.toLowerCase().includes(q) ||
+      p.features.some(f=>f.toLowerCase().includes(q))
+    );
+  }
+
+  if(!filtered.length) {
+    area.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="18" cy="18" r="11"/><path d="m28 28 8 8" stroke-linecap="round"/></svg>
+      <p>No products match "<strong>${q}</strong>"</p>
+    </div>`;
+    return;
+  }
+
+  // Group by category
+  const grouped = {};
+  filtered.forEach(p => { if(!grouped[p.cat]) grouped[p.cat]=[]; grouped[p.cat].push(p); });
+
+  Object.entries(grouped).forEach(([cat, prods]) => {
+    const section = document.createElement('div');
+    section.className = 'product-section';
+
+    const m = CAT_META[cat] || CAT_META["All"];
+    section.innerHTML = `
+      <div class="section-header">
+        <div class="section-dot" style="background:${m.color}"></div>
+        <h2>${cat}</h2>
+        <div class="section-line"></div>
+        <span class="section-count">${prods.length}</span>
+      </div>
+      <div class="product-grid" id="grid-${cat.replace(/\s/g,'_').replace(/&/g,'_')}"></div>
+    `;
+    area.appendChild(section);
+
+    const grid = section.querySelector('.product-grid');
+    prods.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'product-card' + (selectedProduct===p.name?' selected':'');
+      card.innerHTML = `
+        <div class="pc-icon" style="background:${m.bg};color:${m.color}">${p.icon}</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px">
+          <div class="pc-name" style="margin-bottom:0">${p.name}</div>
+          ${p.isNew ? '<span class="badge-new">New</span>' : ''}
+        </div>
+        <span class="pc-cat" style="background:${m.bg};color:${m.color}">${p.cat}</span>
+        <span class="pc-arrow" style="color:${m.color}">→</span>
+      `;
+      card.onclick = () => { selectedProduct = p.name; renderDetail(p); renderCards(); };
+      grid.appendChild(card);
+    });
+
+    // Insert detail panel after this section if selected product is in this cat
+    if(selectedProduct) {
+      const sel = PRODUCTS.find(p=>p.name===selectedProduct);
+      if(sel && sel.cat===cat) {
+        const panel = buildDetailPanel(sel);
+        section.appendChild(panel);
+      }
+    }
+  });
+}
+
+function renderCards() {
+  document.querySelectorAll('.product-card').forEach(card => {
+    const name = card.querySelector('.pc-name').textContent;
+    if(name === selectedProduct) card.classList.add('selected');
+    else card.classList.remove('selected');
+  });
+}
+
+function buildDetailPanel(p) {
+  const m = CAT_META[p.cat] || CAT_META["All"];
+  const panel = document.createElement('div');
+  panel.className = 'detail-panel';
+  panel.id = 'detail-panel';
+  panel.style.setProperty('--dp-accent-color', m.color);
+
+  const relatedProds = (p.related||[]).map(rn => {
+    const rp = PRODUCTS.find(x=>x.name===rn);
+    if(!rp) return '';
+    const rm = CAT_META[rp.cat]||CAT_META["All"];
+    return `<div class="related-item" onclick="selectProduct('${rp.name}')">
+      <span class="ri-icon">${rp.icon}</span>
+      <span>${rp.name}</span>
+      ${rp.isNew ? '<span class="badge-new">New</span>' : ''}
+      <span style="margin-left:auto;font-size:11px;color:${rm.color};background:${rm.bg};padding:2px 7px;border-radius:4px;font-weight:500">${rp.cat}</span>
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="dp-top">
+      <div class="dp-icon" style="background:${m.bg};color:${m.color};font-size:26px">${p.icon}</div>
+      <div class="dp-info">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <h3 style="margin-bottom:0">${p.name}</h3>
+          ${p.isNew ? '<span class="badge-new">New</span>' : ''}
+        </div>
+        <div class="dp-cat" style="background:${m.bg};color:${m.color}">${p.cat}</div>
+        <div class="dp-desc">${p.desc}</div>
+      </div>
+      <div class="dp-actions">
+        <a class="btn-primary" href="${p.url}" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2h5v5M11 2 5 8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 3H2v8h8V8.5" stroke-linecap="round"/></svg>
+          Learn more
+        </a>
+        <button class="btn-secondary" onclick="window.open('https://www.netskope.com/get-started','_blank')">
+          Get started →
+        </button>
+      </div>
+      <button class="dp-close-btn" onclick="closeDetail()" title="Close">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l10 10M11 1 1 11" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="dp-bottom">
+      <div class="dp-features">
+        <h4>Key capabilities</h4>
+        <div class="feat-list">
+          ${p.features.map(f=>`
+            <span class="feat-chip">
+              <svg viewBox="0 0 11 11" fill="none" stroke="${m.color}" stroke-width="2"><path d="M1.5 5.5l2.5 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              ${f}
+            </span>`).join('')}
+        </div>
+      </div>
+      <div class="dp-related">
+        <h4>Related products</h4>
+        <div class="related-list">${relatedProds || '<p style="font-size:13px;color:var(--text-3)">—</p>'}</div>
+      </div>
+    </div>
+  `;
+  return panel;
+}
+
+function renderDetail(p) {
+  const existing = document.getElementById('detail-panel');
+  if(existing) existing.remove();
+  const section = findProductSection(p.cat);
+  if(section) {
+    const panel = buildDetailPanel(p);
+    section.appendChild(panel);
+    setTimeout(() => panel.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
+  }
+}
+
+function findProductSection(cat) {
+  const sections = document.querySelectorAll('.product-section');
+  for(const s of sections) {
+    const h2 = s.querySelector('h2');
+    if(h2 && h2.textContent === cat) return s;
+  }
+  return null;
+}
+
+function closeDetail() {
+  const p = document.getElementById('detail-panel');
+  if(p) p.remove();
+  selectedProduct = null;
+  renderCards();
+}
+
+function selectProduct(name) {
+  const p = PRODUCTS.find(x=>x.name===name);
+  if(!p) return;
+  selectedProduct = name;
+  const existing = document.getElementById('detail-panel');
+  if(existing) existing.remove();
+  renderDetail(p);
+  renderCards();
+}
+
+function render() {
+  renderSidebar();
+  renderMain();
+  // Dynamic page title
+  const titleSuffix = activeCat === "All" ? "All Products" : activeCat;
+  document.title = `Netskope One — ${titleSuffix}`;
+}
+
+// Search
+document.getElementById('search-input').addEventListener('input', function() {
+  searchQuery = this.value;
+  selectedProduct = null;
+  renderMain();
+});
+
+// Keyboard shortcut: / to focus search, Escape to clear
+document.addEventListener('keydown', function(e) {
+  const input = document.getElementById('search-input');
+  if(e.key === '/' && document.activeElement !== input) {
+    e.preventDefault();
+    input.focus();
+    input.select();
+  }
+  if(e.key === 'Escape') {
+    if(document.activeElement === input) {
+      input.blur();
+      if(searchQuery) {
+        searchQuery = '';
+        input.value = '';
+        selectedProduct = null;
+        renderMain();
+      }
+    } else if(selectedProduct) {
+      closeDetail();
+    }
+  }
+});
+
+// Auto-calculate stats from actual data
+const totalProducts = PRODUCTS.length;
+const totalCats = new Set(PRODUCTS.map(p=>p.cat)).size;
+document.getElementById('stat-products').textContent = totalProducts;
+document.getElementById('stat-cats').textContent = totalCats;
+document.getElementById('topbar-count').textContent = totalProducts + ' products';
+
+// Init
+render();
+</script>
+</body>
+</html>
