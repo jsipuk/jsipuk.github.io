@@ -22,7 +22,7 @@
     font-family:'Share Tech Mono',monospace;pointer-events:none;transition:opacity 0.4s;
   }
   #hud.hidden { opacity:0; }
-  #hud-left { display:flex;align-items:center;gap:10px;pointer-events:all; }
+  #hud-left { display:flex;align-items:center;gap:10px;pointer-events:auto; }
   #pause-btn { font-size:18px;color:rgba(255,255,255,0.42);cursor:pointer;touch-action:manipulation;padding:5px 7px; }
   #pause-btn:active { color:rgba(255,255,255,0.9); }
   #time { font-size:28px;color:#fff;letter-spacing:2px;text-shadow:0 0 22px rgba(80,200,255,0.9); }
@@ -38,7 +38,7 @@
     touch-action:manipulation;cursor:pointer;
     transition:all 0.5s cubic-bezier(0.2,0,0,1);opacity:0;pointer-events:none;z-index:5;
   }
-  #blast.show { opacity:1;pointer-events:all; }
+  #blast.show { opacity:1;pointer-events:auto; }
   #blast.ready {
     border-color:rgba(0,220,255,0.9);background:rgba(0,200,255,0.15);color:#0cf;
     box-shadow:0 0 22px rgba(0,200,255,0.55),0 0 55px rgba(0,200,255,0.22),inset 0 0 22px rgba(0,200,255,0.1);
@@ -98,7 +98,6 @@
 </style>
 </head>
 <body>
-  <div style="position:fixed;bottom:10px;right:14px;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.22);pointer-events:none;z-index:99">Built by John Saunders</div>
 <canvas id="c"></canvas>
 
 <div id="hud" class="hidden">
@@ -401,7 +400,9 @@ function spk(x,y,col,n=14,ms=4) {
 //  I N P U T
 // ═══════════════════════════════════════════════════════
 function onTouchStart(e) {
-  e.preventDefault(); const t=e.touches[0]; G.tx=t.clientX; G.ty=t.clientY;
+  if (e.target !== C) return;   // touch landed on a UI element — let it handle itself
+  e.preventDefault();
+  const t=e.touches[0]; G.tx=t.clientX; G.ty=t.clientY;
   if(G.phase!=='play') startGame();
 }
 function onTouchMove(e) {
@@ -716,5 +717,6 @@ function rrect(x,y,w,h,r){
 initGame();
 requestAnimationFrame(loop);
 </script>
+<div style="position:fixed;bottom:10px;right:14px;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.22);pointer-events:none;z-index:99">Built by John Saunders</div>
 </body>
 </html>
