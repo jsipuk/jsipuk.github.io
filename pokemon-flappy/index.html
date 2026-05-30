@@ -158,290 +158,438 @@ body{
 <script>
 'use strict';
 
-// ─── CHARACTER DRAWING ───────────────────────────────────────────────────────
-// Each fn: drawXxx(ctx, cx, cy, sz, angle)
-// sz = diameter of bounding circle; angle = tilt (radians, + = nose down)
+// ─── CHARACTER DRAWINGS ──────────────────────────────────────────────────────
+// fn(ctx, cx, cy, sz, angle)  sz=diameter, angle=tilt radians (+=nose down)
+// Scale factor: s = sz/40, so all coords are in a ±20 unit space
 
 function drawCharizard(ctx, cx, cy, sz, angle) {
-  const s = sz * 0.025;
+  const s = sz / 40;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle * .35);
-  // Wings
-  ctx.fillStyle='#D05020';
-  ctx.beginPath(); ctx.moveTo(-s*4,-s*5); ctx.lineTo(-s*19,-s*17); ctx.lineTo(-s*17,s*3); ctx.lineTo(-s*4,s*3); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(s*4,-s*5); ctx.lineTo(s*19,-s*17); ctx.lineTo(s*17,s*3); ctx.lineTo(s*4,s*3); ctx.closePath(); ctx.fill();
+
+  // Wings — blue-purple interior, orange outer edge
+  ctx.fillStyle = '#5050A8';
+  ctx.beginPath(); ctx.moveTo(-s*3,-s*4); ctx.lineTo(-s*20,-s*20); ctx.lineTo(-s*17,s*2); ctx.lineTo(-s*3,s*3); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*3,-s*4); ctx.lineTo(s*20,-s*20); ctx.lineTo(s*17,s*2); ctx.lineTo(s*3,s*3); ctx.closePath(); ctx.fill();
+  // Wing leading-edge highlight
+  ctx.strokeStyle = '#FF6B35'; ctx.lineWidth = s*2; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-s*3,-s*3); ctx.lineTo(-s*20,-s*20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s*3,-s*3); ctx.lineTo(s*20,-s*20); ctx.stroke();
+  ctx.lineCap = 'butt';
+
   // Body
-  ctx.fillStyle='#FF6B35';
-  ctx.beginPath(); ctx.ellipse(0,s*5,s*11,s*15,0,0,Math.PI*2); ctx.fill();
-  // Belly
-  ctx.fillStyle='#FFCFA0';
-  ctx.beginPath(); ctx.ellipse(0,s*7,s*6,s*9,0,0,Math.PI*2); ctx.fill();
-  // Tail
-  ctx.fillStyle='#FF6B35';
-  ctx.beginPath(); ctx.moveTo(s*6,s*17); ctx.quadraticCurveTo(s*18,s*20,s*16,s*28); ctx.quadraticCurveTo(s*10,s*22,s*5,s*17); ctx.closePath(); ctx.fill();
-  ctx.fillStyle='#FF4400'; ctx.beginPath(); ctx.arc(s*16,s*27,s*4.5,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#FFAA00'; ctx.beginPath(); ctx.arc(s*16,s*27,s*2.5,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#FFE040'; ctx.beginPath(); ctx.arc(s*16,s*27,s*1.2,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FF6B35';
+  ctx.beginPath(); ctx.ellipse(0,s*5,s*11,s*14,0,0,Math.PI*2); ctx.fill();
+  // Belly (cream/peach, large)
+  ctx.fillStyle = '#FFCFA0';
+  ctx.beginPath(); ctx.ellipse(s*1,s*7,s*7,s*10,0,0,Math.PI*2); ctx.fill();
+
+  // Flame tail
+  ctx.fillStyle = '#FF6B35';
+  ctx.beginPath(); ctx.moveTo(s*5,s*16); ctx.quadraticCurveTo(s*18,s*19,s*15,s*29); ctx.quadraticCurveTo(s*9,s*22,s*4,s*16); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#FF4400'; ctx.beginPath(); ctx.arc(s*15,s*27,s*5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FF9900'; ctx.beginPath(); ctx.arc(s*15,s*27,s*3,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFE840'; ctx.beginPath(); ctx.arc(s*15,s*27,s*1.5,0,Math.PI*2); ctx.fill();
+
   // Head
-  ctx.fillStyle='#FF6B35';
-  ctx.beginPath(); ctx.arc(0,-s*13,s*11,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FF6B35';
+  ctx.beginPath(); ctx.arc(0,-s*14,s*10,0,Math.PI*2); ctx.fill();
+  // Snout
+  ctx.beginPath(); ctx.ellipse(s*4,-s*13,s*5,s*3.5,.15,0,Math.PI*2); ctx.fill();
+  // Nostrils
+  ctx.fillStyle = '#C84818';
+  ctx.beginPath(); ctx.arc(s*3,-s*13,s*1,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*6,-s*13,s*1,0,Math.PI*2); ctx.fill();
+
   // Horns
-  ctx.fillStyle='#FFD700';
-  ctx.beginPath(); ctx.moveTo(-s*4,-s*22); ctx.lineTo(-s*7,-s*30); ctx.lineTo(-s*1,-s*23); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(s*4,-s*22); ctx.lineTo(s*7,-s*30); ctx.lineTo(s*1,-s*23); ctx.closePath(); ctx.fill();
-  // Eyes
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.arc(-s*4,-s*14,s*3,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*4,-s*14,s*3,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#111';
-  ctx.beginPath(); ctx.arc(-s*4,-s*14,s*1.8,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*4,-s*14,s*1.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#C8A000';
+  ctx.beginPath(); ctx.moveTo(-s*4,-s*22); ctx.lineTo(-s*7,-s*31); ctx.lineTo(-s*1,-s*23); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*2,-s*22); ctx.lineTo(s*5,-s*31); ctx.lineTo(s*1,-s*23); ctx.closePath(); ctx.fill();
+
+  // Eyes — teal (Charizard's actual eye colour)
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*4,-s*16,s*3,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*3,-s*16,s*3,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#18A898';
+  ctx.beginPath(); ctx.arc(-s*4,-s*16,s*1.8,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*3,-s*16,s*1.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.arc(-s*3.5,-s*16.5,s*.7,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*3.5,-s*16.5,s*.7,0,Math.PI*2); ctx.fill();
+
   ctx.restore();
 }
 
 function drawBulbasaur(ctx, cx, cy, sz, angle) {
-  const s = sz * 0.025;
+  const s = sz / 40;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle * .2);
-  // Bulb
-  ctx.fillStyle='#3A7830';
-  ctx.beginPath(); ctx.ellipse(-s*1,-s*10,s*9,s*12,-.15,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#6AAE50';
-  for(let i=0;i<5;i++){const a=i*Math.PI*.4-Math.PI*.4; ctx.beginPath(); ctx.ellipse(-s*1+Math.cos(a)*s*8,-s*18+Math.sin(a)*s*6,s*4,s*2,a,0,Math.PI*2); ctx.fill();}
-  // Body
-  ctx.fillStyle='#78C850';
+
+  // Bulb — behind body, big and prominent
+  ctx.fillStyle = '#2A6828';
+  ctx.beginPath(); ctx.ellipse(-s*2,-s*12,s*10,s*13,-.1,0,Math.PI*2); ctx.fill();
+  // Bulb inner highlight
+  ctx.fillStyle = '#4A9840';
+  ctx.beginPath(); ctx.ellipse(-s*2,-s*15,s*6,s*7,0,0,Math.PI*2); ctx.fill();
+  // Leaf tips (5 pointed leaves)
+  ctx.fillStyle = '#68C050';
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+    ctx.beginPath();
+    ctx.ellipse(-s*2 + Math.cos(a)*s*9, -s*20 + Math.sin(a)*s*7, s*3.5, s*2, a, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Round teal-green body
+  ctx.fillStyle = '#78C850';
   ctx.beginPath(); ctx.ellipse(s*1,s*5,s*13,s*13,0,0,Math.PI*2); ctx.fill();
-  // Spots
-  ctx.fillStyle='#4A9040';
-  ctx.beginPath(); ctx.arc(-s*7,s*2,s*3.5,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*8,s*8,s*3,0,Math.PI*2); ctx.fill();
-  // Head
-  ctx.fillStyle='#78C850';
-  ctx.beginPath(); ctx.arc(s*2,-s*11,s*11,0,Math.PI*2); ctx.fill();
-  // Ears
-  ctx.fillStyle='#78C850';
-  ctx.beginPath(); ctx.moveTo(-s*4,-s*20); ctx.lineTo(-s*9,-s*28); ctx.lineTo(s*0,-s*21); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(s*9,-s*20); ctx.lineTo(s*14,-s*27); ctx.lineTo(s*10,-s*21); ctx.closePath(); ctx.fill();
-  // Eyes
-  ctx.fillStyle='#8B0000';
-  ctx.beginPath(); ctx.arc(-s*1,-s*12,s*3,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*7,-s*12,s*3,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.arc(s*0,-s*13,s*1,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*8,-s*13,s*1,0,Math.PI*2); ctx.fill();
+  // Dark spots (Bulbasaur's signature markings)
+  ctx.fillStyle = '#4A8830';
+  ctx.beginPath(); ctx.arc(-s*7,s*1,s*4,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*8,s*8,s*3.5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0,s*12,s*3,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-s*3,s*8,s*2.5,0,Math.PI*2); ctx.fill();
+
+  // Head (blends into body — no visible neck)
+  ctx.fillStyle = '#78C850';
+  ctx.beginPath(); ctx.arc(s*2,-s*12,s*11,0,Math.PI*2); ctx.fill();
+  // Small triangular ears
+  ctx.fillStyle = '#68B840';
+  ctx.beginPath(); ctx.moveTo(-s*5,-s*21); ctx.lineTo(-s*10,-s*29); ctx.lineTo(-s*0,-s*22); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*9,-s*21); ctx.lineTo(s*14,-s*28); ctx.lineTo(s*10,-s*22); ctx.closePath(); ctx.fill();
+
+  // Big red-brown eyes (Bulbasaur's distinctive eyes)
+  ctx.fillStyle = '#A01010';
+  ctx.beginPath(); ctx.arc(-s*1,-s*13,s*3.5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*7,-s*13,s*3.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*.3,-s*14,s*1.2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*7.7,-s*14,s*1.2,0,Math.PI*2); ctx.fill();
+
   ctx.restore();
 }
 
 function drawCharmander(ctx, cx, cy, sz, angle) {
-  const s = sz * 0.025;
+  const s = sz / 40;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle * .25);
-  // Tail + flame
-  ctx.fillStyle='#F08030';
-  ctx.beginPath(); ctx.moveTo(s*7,s*10); ctx.quadraticCurveTo(s*20,s*12,s*18,s*23); ctx.quadraticCurveTo(s*12,s*20,s*6,s*11); ctx.closePath(); ctx.fill();
-  ctx.fillStyle='#FF4400'; ctx.beginPath(); ctx.arc(s*18,s*22,s*4,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#FFAA00'; ctx.beginPath(); ctx.arc(s*18,s*22,s*2.2,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#FFE040'; ctx.beginPath(); ctx.arc(s*18,s*22,s*1,0,Math.PI*2); ctx.fill();
-  // Body
-  ctx.fillStyle='#F08030';
+
+  // Flame tail
+  ctx.fillStyle = '#F08030';
+  ctx.beginPath(); ctx.moveTo(s*6,s*11); ctx.quadraticCurveTo(s*19,s*14,s*17,s*25); ctx.quadraticCurveTo(s*11,s*20,s*5,s*12); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#FF4400'; ctx.beginPath(); ctx.arc(s*17,s*24,s*4.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FF9900'; ctx.beginPath(); ctx.arc(s*17,s*24,s*2.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFE040'; ctx.beginPath(); ctx.arc(s*17,s*24,s*1.3,0,Math.PI*2); ctx.fill();
+
+  // Body — bright orange
+  ctx.fillStyle = '#F08030';
   ctx.beginPath(); ctx.ellipse(0,s*5,s*10,s*13,0,0,Math.PI*2); ctx.fill();
-  // Belly
-  ctx.fillStyle='#FFD8A0';
-  ctx.beginPath(); ctx.ellipse(s*1,s*7,s*5.5,s*8,0,0,Math.PI*2); ctx.fill();
-  // Head
-  ctx.fillStyle='#F08030';
-  ctx.beginPath(); ctx.arc(0,-s*12,s*11,0,Math.PI*2); ctx.fill();
+  // Cream belly (quite prominent on Charmander)
+  ctx.fillStyle = '#FFE0A8';
+  ctx.beginPath(); ctx.ellipse(s*1,s*6,s*6.5,s*9,0,0,Math.PI*2); ctx.fill();
+
+  // Large round head (big relative to body)
+  ctx.fillStyle = '#F08030';
+  ctx.beginPath(); ctx.arc(0,-s*13,s*12,0,Math.PI*2); ctx.fill();
+  // Snout / lower face slightly lighter
+  ctx.fillStyle = '#FFB070';
+  ctx.beginPath(); ctx.ellipse(s*2,-s*12,s*6,s*4,.1,0,Math.PI*2); ctx.fill();
+
+  // Small bumps on head (Charmander's head has slight ridges)
+  ctx.fillStyle = '#E07028';
+  ctx.beginPath(); ctx.arc(-s*6,-s*22,s*2.5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-s*1,-s*24,s*2,0,Math.PI*2); ctx.fill();
+
   // Eyes
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.arc(-s*4,-s*13,s*3,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*4,-s*13,s*3,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#111';
-  ctx.beginPath(); ctx.arc(-s*4,-s*13,s*1.8,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*4,-s*13,s*1.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*4,-s*14,s*3.5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*4,-s*14,s*3.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.arc(-s*4,-s*14,s*2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*4,-s*14,s*2,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*3,-s*15,s*.8,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*5,-s*15,s*.8,0,Math.PI*2); ctx.fill();
+
   ctx.restore();
 }
 
 function drawSquirtle(ctx, cx, cy, sz, angle) {
-  const s = sz * 0.025;
+  const s = sz / 40;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle * .2);
-  // Shell
-  ctx.fillStyle='#8B6020';
+
+  // Shell (brown, hexagonal pattern) — behind body
+  ctx.fillStyle = '#966428';
   ctx.beginPath(); ctx.ellipse(0,s*5,s*14,s*15,0,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='#5A3800'; ctx.lineWidth=s*1.5;
-  ctx.beginPath(); ctx.moveTo(-s*11,s*5); ctx.lineTo(s*11,s*5); ctx.stroke();
+  // Shell hex lines
+  ctx.strokeStyle = '#5A3A10'; ctx.lineWidth = s*1.5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-s*10,s*5); ctx.lineTo(s*10,s*5); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,-s*8); ctx.lineTo(0,s*18); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-s*9,-s*2); ctx.lineTo(-s*4,s*17); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(s*9,-s*2); ctx.lineTo(s*4,s*17); ctx.stroke();
-  // Body
-  ctx.fillStyle='#6890F0';
+  ctx.beginPath(); ctx.moveTo(-s*9,-s*2); ctx.lineTo(-s*3,s*17); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s*9,-s*2); ctx.lineTo(s*3,s*17); ctx.stroke();
+  // Shell ridge highlight
+  ctx.fillStyle = '#C88040';
+  ctx.beginPath(); ctx.arc(0,-s*2,s*3,0,Math.PI*2); ctx.fill();
+
+  // Blue body overlay
+  ctx.fillStyle = '#5878E0';
   ctx.beginPath(); ctx.ellipse(0,s*5,s*10,s*12,0,0,Math.PI*2); ctx.fill();
-  // Tail
-  ctx.fillStyle='#6890F0';
-  ctx.beginPath(); ctx.moveTo(s*10,s*14); ctx.quadraticCurveTo(s*22,s*15,s*20,s*23); ctx.quadraticCurveTo(s*16,s*24,s*12,s*19); ctx.quadraticCurveTo(s*16,s*14,s*9,s*14); ctx.closePath(); ctx.fill();
-  // Head
-  ctx.fillStyle='#6890F0';
+  // Cream belly
+  ctx.fillStyle = '#C8D8FF';
+  ctx.beginPath(); ctx.ellipse(s*1,s*6,s*6,s*8,0,0,Math.PI*2); ctx.fill();
+
+  // Curly spiral tail
+  ctx.strokeStyle = '#5878E0'; ctx.lineWidth = s*4; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(s*10,s*12);
+  ctx.bezierCurveTo(s*22,s*10, s*24,s*22, s*18,s*24);
+  ctx.bezierCurveTo(s*14,s*26, s*12,s*20, s*16,s*18);
+  ctx.stroke();
+  ctx.lineCap = 'butt';
+
+  // Blue head
+  ctx.fillStyle = '#5878E0';
   ctx.beginPath(); ctx.arc(0,-s*12,s*11,0,Math.PI*2); ctx.fill();
-  // Eyes
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.arc(-s*4,-s*14,s*3.5,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*4,-s*14,s*3.5,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#111';
-  ctx.beginPath(); ctx.arc(-s*4,-s*14,s*2,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*4,-s*14,s*2,0,Math.PI*2); ctx.fill();
+  // Squirtle's distinctive ear nubs
+  ctx.beginPath(); ctx.arc(-s*9,-s*18,s*3.5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*9,-s*18,s*3.5,0,Math.PI*2); ctx.fill();
+
+  // Large round eyes
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*4,-s*13,s*4,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*4,-s*13,s*4,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.arc(-s*4,-s*13,s*2.5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*4,-s*13,s*2.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*3,-s*14,s*1,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*5,-s*14,s*1,0,Math.PI*2); ctx.fill();
+
   ctx.restore();
 }
 
 function drawPikachu(ctx, cx, cy, sz, angle) {
-  const s = sz * 0.025;
+  const s = sz / 40;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle * .25);
-  // Lightning tail
-  ctx.fillStyle='#F8D030';
-  ctx.beginPath(); ctx.moveTo(s*10,s*4); ctx.lineTo(s*20,-s*3); ctx.lineTo(s*15,s*6); ctx.lineTo(s*26,-s*3); ctx.lineTo(s*22,s*12); ctx.lineTo(s*12,s*14); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle='#B09010'; ctx.lineWidth=s*.8; ctx.stroke();
-  // Body
-  ctx.fillStyle='#F8D030';
+
+  // Lightning bolt tail — brown base, yellow tip
+  ctx.fillStyle = '#8B5010';
+  ctx.beginPath(); ctx.moveTo(s*9,s*6); ctx.lineTo(s*17,s*1); ctx.lineTo(s*14,s*7); ctx.lineTo(s*20,s*1); ctx.lineTo(s*18,s*8); ctx.lineTo(s*12,s*10); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#F8D030';
+  ctx.beginPath(); ctx.moveTo(s*11,s*5); ctx.lineTo(s*18,s*0); ctx.lineTo(s*15,s*6); ctx.lineTo(s*22,s*0); ctx.lineTo(s*20,s*7); ctx.lineTo(s*13,s*9); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#C09010'; ctx.lineWidth = s*.6; ctx.stroke();
+
+  // Body — chubby yellow oval
+  ctx.fillStyle = '#F8D030';
   ctx.beginPath(); ctx.ellipse(0,s*5,s*11,s*13,0,0,Math.PI*2); ctx.fill();
-  // Dark back stripe
-  ctx.fillStyle='#C09010';
-  ctx.beginPath(); ctx.arc(s*8,s*0,s*4,0,Math.PI*2); ctx.fill();
-  // Head
-  ctx.fillStyle='#F8D030';
+  // Two brown horizontal back stripes (Pikachu's distinctive back markings)
+  ctx.fillStyle = '#8B5010';
+  ctx.beginPath(); ctx.ellipse(s*7,s*0,s*4,s*2.5,.1,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*7,s*5,s*4,s*2.5,.1,0,Math.PI*2); ctx.fill();
+
+  // Head — round yellow
+  ctx.fillStyle = '#F8D030';
   ctx.beginPath(); ctx.arc(0,-s*13,s*12,0,Math.PI*2); ctx.fill();
-  // Ears
-  ctx.fillStyle='#F8D030';
-  ctx.beginPath(); ctx.moveTo(-s*8,-s*22); ctx.lineTo(-s*12,-s*35); ctx.lineTo(-s*2,-s*23); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(s*8,-s*22); ctx.lineTo(s*12,-s*35); ctx.lineTo(s*2,-s*23); ctx.closePath(); ctx.fill();
-  ctx.fillStyle='#111';
-  ctx.beginPath(); ctx.moveTo(-s*10,-s*31); ctx.lineTo(-s*12,-s*35); ctx.lineTo(-s*6,-s*28); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(s*10,-s*31); ctx.lineTo(s*12,-s*35); ctx.lineTo(s*6,-s*28); ctx.closePath(); ctx.fill();
-  // Cheeks
-  ctx.fillStyle='rgba(220,50,50,.75)';
-  ctx.beginPath(); ctx.ellipse(-s*8,-s*10,s*4.5,s*3,0,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(s*8,-s*10,s*4.5,s*3,0,0,Math.PI*2); ctx.fill();
+
+  // Tall black-tipped ears (key Pikachu feature)
+  ctx.fillStyle = '#F8D030';
+  ctx.beginPath(); ctx.moveTo(-s*8,-s*23); ctx.lineTo(-s*12,-s*36); ctx.lineTo(-s*2,-s*24); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*8,-s*23); ctx.lineTo(s*12,-s*36); ctx.lineTo(s*2,-s*24); ctx.closePath(); ctx.fill();
+  // Black ear tips
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.moveTo(-s*9,-s*32); ctx.lineTo(-s*12,-s*36); ctx.lineTo(-s*5,-s*29); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*9,-s*32); ctx.lineTo(s*12,-s*36); ctx.lineTo(s*5,-s*29); ctx.closePath(); ctx.fill();
+  // Inner ear pink
+  ctx.fillStyle = '#FFB8B8';
+  ctx.beginPath(); ctx.moveTo(-s*9,-s*25); ctx.lineTo(-s*11,-s*33); ctx.lineTo(-s*4,-s*25); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*9,-s*25); ctx.lineTo(s*11,-s*33); ctx.lineTo(s*4,-s*25); ctx.closePath(); ctx.fill();
+
+  // Red circular cheeks (Pikachu's most iconic feature)
+  ctx.fillStyle = '#E83030';
+  ctx.beginPath(); ctx.ellipse(-s*9,-s*10,s*5,s*4,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*9,-s*10,s*5,s*4,0,0,Math.PI*2); ctx.fill();
+
   // Eyes
-  ctx.fillStyle='#111';
+  ctx.fillStyle = '#111';
   ctx.beginPath(); ctx.arc(-s*4,-s*15,s*2.5,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(s*4,-s*15,s*2.5,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#fff';
+  ctx.fillStyle = '#fff';
   ctx.beginPath(); ctx.arc(-s*3,-s*16,s*1,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(s*5,-s*16,s*1,0,Math.PI*2); ctx.fill();
+
   ctx.restore();
 }
 
 function drawDragonair(ctx, cx, cy, sz, angle) {
-  const s = sz * 0.025;
-  ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle * .15);
-  // Serpentine body
-  ctx.lineWidth=s*10; ctx.strokeStyle='#98D8D8'; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(0,s*18); ctx.bezierCurveTo(-s*12,s*10,s*10,s*0,s*2,-s*12); ctx.stroke();
-  // Fins
-  ctx.fillStyle='#70B0C0';
-  ctx.beginPath(); ctx.moveTo(-s*2,-s*1); ctx.lineTo(-s*16,-s*8); ctx.lineTo(-s*6,s*3); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(s*6,-s*1); ctx.lineTo(s*18,-s*8); ctx.lineTo(s*8,s*3); ctx.closePath(); ctx.fill();
-  // Body orbs
-  ctx.fillStyle='#D8F0FF'; ctx.strokeStyle='#80B0C8'; ctx.lineWidth=s;
-  ctx.beginPath(); ctx.arc(s*1,s*13,s*3,0,Math.PI*2); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.arc(-s*2,s*3,s*3,0,Math.PI*2); ctx.fill(); ctx.stroke();
-  // Head
-  ctx.fillStyle='#98D8D8';
-  ctx.beginPath(); ctx.ellipse(s*2,-s*15,s*7,s*8,0,0,Math.PI*2); ctx.fill();
-  // Horn
-  ctx.fillStyle='#B8E8F0';
-  ctx.beginPath(); ctx.moveTo(s*2,-s*22); ctx.lineTo(-s*1,-s*30); ctx.lineTo(s*5,-s*24); ctx.closePath(); ctx.fill();
+  const s = sz / 40;
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle * .12);
+
+  // Long serpentine body — two-tone (blue outside, cream underside)
+  ctx.lineWidth = s*12; ctx.strokeStyle = '#5BB8C8'; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(s*2,s*20); ctx.bezierCurveTo(-s*14,s*12,s*12,s*0,s*2,-s*14); ctx.stroke();
+  // Cream underbelly stripe along body
+  ctx.lineWidth = s*5; ctx.strokeStyle = '#E8F8FF';
+  ctx.beginPath(); ctx.moveTo(s*2,s*20); ctx.bezierCurveTo(-s*12,s*12,s*10,s*0,s*2,-s*14); ctx.stroke();
+
+  // Two wing/fin appendages on neck
+  ctx.fillStyle = '#3898A8';
+  ctx.beginPath(); ctx.moveTo(-s*2,-s*4); ctx.lineTo(-s*17,-s*11); ctx.lineTo(-s*10,-s*1); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*5,-s*4); ctx.lineTo(s*18,-s*11); ctx.lineTo(s*10,-s*1); ctx.closePath(); ctx.fill();
+
+  // Pearl orbs on body (Dragonair's distinctive feature — 3 orbs)
+  ctx.fillStyle = '#E0F0FF'; ctx.strokeStyle = '#70B8D0'; ctx.lineWidth = s*1.2;
+  ctx.beginPath(); ctx.arc(-s*3,s*4,s*4,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(s*1,s*14,s*4,0,Math.PI*2); ctx.fill(); ctx.stroke();
+
+  // Elegant head — elongated oval
+  ctx.fillStyle = '#5BB8C8';
+  ctx.beginPath(); ctx.ellipse(s*2,-s*17,s*7,s*9,0,0,Math.PI*2); ctx.fill();
+  // Cream chin
+  ctx.fillStyle = '#E8F8FF';
+  ctx.beginPath(); ctx.ellipse(s*3,-s*16,s*4,s*6,.1,0,Math.PI*2); ctx.fill();
+  // Forehead pearl orb (on head)
+  ctx.fillStyle = '#E0F0FF'; ctx.strokeStyle = '#70B8D0'; ctx.lineWidth = s*1.2;
+  ctx.beginPath(); ctx.arc(s*2,-s*24,s*3.5,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  // Small horn behind orb
+  ctx.fillStyle = '#B8E8F8';
+  ctx.beginPath(); ctx.moveTo(s*2,-s*27); ctx.lineTo(-s*1,-s*34); ctx.lineTo(s*5,-s*28); ctx.closePath(); ctx.fill();
+
   // Eyes
-  ctx.fillStyle='#111';
-  ctx.beginPath(); ctx.arc(s*0,-s*15,s*2,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*5,-s*15,s*2,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.arc(s*0,-s*16,s*.8,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*6,-s*16,s*.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.arc(s*0,-s*17,s*2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*5,-s*17,s*2,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(s*.5,-s*17.8,s*.8,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*5.5,-s*17.8,s*.8,0,Math.PI*2); ctx.fill();
+
   ctx.restore();
 }
 
 function drawPidgey(ctx, cx, cy, sz, angle) {
-  const s = sz * 0.025;
+  const s = sz / 40;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle * .3);
-  // Tail
-  ctx.fillStyle='#C8C880';
-  ctx.beginPath(); ctx.moveTo(-s*5,s*10); ctx.lineTo(-s*9,s*22); ctx.lineTo(-s*3,s*18); ctx.lineTo(0,s*24); ctx.lineTo(s*3,s*18); ctx.lineTo(s*9,s*22); ctx.lineTo(s*5,s*10); ctx.closePath(); ctx.fill();
-  // Wings
-  const flap=Math.sin(Date.now()*.012)*.4;
-  ctx.fillStyle='#A8A878';
-  ctx.save(); ctx.translate(-s*9,s*0); ctx.rotate(-flap-.15);
-  ctx.beginPath(); ctx.ellipse(0,0,s*15,s*6,-.3,0,Math.PI*2); ctx.fill(); ctx.restore();
-  ctx.save(); ctx.translate(s*9,s*0); ctx.rotate(flap+.15);
-  ctx.beginPath(); ctx.ellipse(0,0,s*15,s*6,.3,0,Math.PI*2); ctx.fill(); ctx.restore();
+
+  // Fan tail feathers
+  ctx.fillStyle = '#B8A860';
+  ctx.beginPath(); ctx.moveTo(-s*5,s*10); ctx.lineTo(-s*10,s*23); ctx.lineTo(-s*3,s*19); ctx.lineTo(s*0,s*25); ctx.lineTo(s*3,s*19); ctx.lineTo(s*10,s*23); ctx.lineTo(s*5,s*10); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#A09850';
+  ctx.beginPath(); ctx.moveTo(0,s*10); ctx.lineTo(-s*1,s*25); ctx.lineTo(s*1,s*25); ctx.closePath(); ctx.fill();
+
+  // Wings — animated flap
+  const flap = Math.sin(Date.now() * .012) * .4;
+  ctx.fillStyle = '#B8A870';
+  ctx.save(); ctx.translate(-s*9,s*0); ctx.rotate(-flap - .15);
+  ctx.beginPath(); ctx.ellipse(0,0,s*16,s*6,-.25,0,Math.PI*2); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.translate(s*9,s*0); ctx.rotate(flap + .15);
+  ctx.beginPath(); ctx.ellipse(0,0,s*16,s*6,.25,0,Math.PI*2); ctx.fill(); ctx.restore();
+  // Wing tips (darker brown)
+  ctx.fillStyle = '#806840';
+  ctx.save(); ctx.translate(-s*18,s*2); ctx.rotate(-flap-.15);
+  ctx.beginPath(); ctx.ellipse(0,0,s*5,s*3,.1,0,Math.PI*2); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.translate(s*18,s*2); ctx.rotate(flap+.15);
+  ctx.beginPath(); ctx.ellipse(0,0,s*5,s*3,-.1,0,Math.PI*2); ctx.fill(); ctx.restore();
+
   // Body
-  ctx.fillStyle='#A8A878';
+  ctx.fillStyle = '#B8A870';
   ctx.beginPath(); ctx.ellipse(0,s*4,s*9,s*12,0,0,Math.PI*2); ctx.fill();
-  // Belly
-  ctx.fillStyle='#E8E8C0';
+  // Cream breast
+  ctx.fillStyle = '#E8E0B0';
   ctx.beginPath(); ctx.ellipse(s*1,s*6,s*5.5,s*8,0,0,Math.PI*2); ctx.fill();
-  // Head
-  ctx.fillStyle='#A8A878';
+
+  // Round head
+  ctx.fillStyle = '#B8A870';
   ctx.beginPath(); ctx.arc(0,-s*10,s*9,0,Math.PI*2); ctx.fill();
-  // Crest
-  ctx.fillStyle='#C8C890';
-  ctx.beginPath(); ctx.moveTo(-s*2,-s*18); ctx.lineTo(-s*5,-s*26); ctx.lineTo(s*1,-s*19); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(s*1,-s*19); ctx.lineTo(s*3,-s*27); ctx.lineTo(s*5,-s*19); ctx.closePath(); ctx.fill();
-  // Eyes
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.arc(-s*3,-s*11,s*3,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*4,-s*11,s*3,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#111';
+  // Crest feathers
+  ctx.fillStyle = '#C8B880';
+  ctx.beginPath(); ctx.moveTo(-s*3,-s*17); ctx.lineTo(-s*6,-s*27); ctx.lineTo(s*0,-s*18); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*0,-s*18); ctx.lineTo(s*2,-s*28); ctx.lineTo(s*4,-s*18); ctx.closePath(); ctx.fill();
+
+  // Cream face with brown eye-stripe (Pidgey's most distinctive marking)
+  ctx.fillStyle = '#E8E0B0'; // cream face
+  ctx.beginPath(); ctx.ellipse(s*1,-s*10,s*7,s*6,0,0,Math.PI*2); ctx.fill();
+  // Brown stripe through eyes — key Pidgey feature
+  ctx.fillStyle = '#806840';
+  ctx.beginPath(); ctx.ellipse(s*1,-s*11,s*8,s*2.5,0,0,Math.PI*2); ctx.fill();
+  // Re-draw cream below stripe
+  ctx.fillStyle = '#E8E0B0';
+  ctx.beginPath(); ctx.ellipse(s*1,-s*8.5,s*6,s*3.5,0,0,Math.PI*2); ctx.fill();
+
+  // Eyes (sit inside the stripe)
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*3,-s*11,s*2.8,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*4,-s*11,s*2.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#111';
   ctx.beginPath(); ctx.arc(-s*3,-s*11,s*1.8,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(s*4,-s*11,s*1.8,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#fff';
+  ctx.fillStyle = '#fff';
   ctx.beginPath(); ctx.arc(-s*2,-s*12,s*.7,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(s*5,-s*12,s*.7,0,Math.PI*2); ctx.fill();
-  // Beak
-  ctx.fillStyle='#D0A000';
-  ctx.beginPath(); ctx.moveTo(s*6,-s*10); ctx.lineTo(s*14,-s*8); ctx.lineTo(s*6,-s*7); ctx.closePath(); ctx.fill();
-  ctx.fillStyle='#A07800';
-  ctx.beginPath(); ctx.moveTo(s*6,-s*9); ctx.lineTo(s*13,-s*8); ctx.lineTo(s*6,-s*8); ctx.closePath(); ctx.fill();
+
+  // Short hooked orange beak
+  ctx.fillStyle = '#E09020';
+  ctx.beginPath(); ctx.moveTo(s*7,-s*10); ctx.lineTo(s*15,-s*8); ctx.lineTo(s*13,-s*5); ctx.lineTo(s*7,-s*8); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#B07010';
+  ctx.beginPath(); ctx.moveTo(s*7,-s*9); ctx.lineTo(s*14,-s*8); ctx.lineTo(s*13,-s*7); ctx.lineTo(s*7,-s*8); ctx.closePath(); ctx.fill();
+
   ctx.restore();
 }
 
 function drawMagikarp(ctx, cx, cy, sz, angle) {
-  const s = sz * 0.025;
+  const s = sz / 40;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle * .4);
-  // Tail
-  ctx.fillStyle='#E02020';
-  ctx.beginPath(); ctx.moveTo(-s*3,s*12); ctx.lineTo(-s*12,s*22); ctx.lineTo(-s*3,s*18); ctx.lineTo(-s*8,s*28); ctx.lineTo(0,s*20); ctx.lineTo(s*8,s*28); ctx.lineTo(s*3,s*18); ctx.lineTo(s*12,s*22); ctx.lineTo(s*3,s*12); ctx.closePath(); ctx.fill();
-  // Body
-  ctx.fillStyle='#F03030';
-  ctx.beginPath(); ctx.ellipse(0,s*2,s*12,s*14,0,0,Math.PI*2); ctx.fill();
-  // Scales
-  ctx.fillStyle='#CC1010';
-  for(let row=0;row<3;row++) for(let col=0;col<3;col++){
-    ctx.beginPath(); ctx.arc(-s*7+col*s*7,-s*4+row*s*8,s*3,Math.PI,0); ctx.fill();
+
+  // Fan tail fin
+  ctx.fillStyle = '#CC1818';
+  ctx.beginPath(); ctx.moveTo(-s*3,s*11); ctx.lineTo(-s*12,s*22); ctx.lineTo(-s*3,s*17); ctx.lineTo(-s*9,s*28); ctx.lineTo(s*0,s*20); ctx.lineTo(s*9,s*28); ctx.lineTo(s*3,s*17); ctx.lineTo(s*12,s*22); ctx.lineTo(s*3,s*11); ctx.closePath(); ctx.fill();
+
+  // Main body
+  ctx.fillStyle = '#E82020';
+  ctx.beginPath(); ctx.ellipse(0,s*2,s*12,s*13,0,0,Math.PI*2); ctx.fill();
+  // Scale pattern (arcs, row by row)
+  ctx.fillStyle = '#C01010';
+  for (let row = 0; row < 3; row++) for (let col = 0; col < 3; col++) {
+    ctx.beginPath(); ctx.arc(-s*7 + col*s*7, -s*4 + row*s*8, s*3.5, Math.PI, 0); ctx.fill();
   }
-  // Belly
-  ctx.fillStyle='#FFE0E0';
+  // Cream/white belly
+  ctx.fillStyle = '#FFE8E8';
   ctx.beginPath(); ctx.ellipse(s*2,s*3,s*7,s*10,0,0,Math.PI*2); ctx.fill();
+
   // Pectoral fins
-  ctx.fillStyle='#E04040';
-  ctx.beginPath(); ctx.moveTo(-s*10,-s*2); ctx.lineTo(-s*20,-s*10); ctx.lineTo(-s*11,s*6); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(s*10,-s*2); ctx.lineTo(s*20,-s*10); ctx.lineTo(s*11,s*6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#D83030';
+  ctx.beginPath(); ctx.moveTo(-s*10,-s*2); ctx.lineTo(-s*21,-s*11); ctx.lineTo(-s*11,s*6); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*10,-s*2); ctx.lineTo(s*21,-s*11); ctx.lineTo(s*11,s*6); ctx.closePath(); ctx.fill();
+  // Dorsal fin
+  ctx.fillStyle = '#D83030';
+  ctx.beginPath(); ctx.moveTo(-s*4,-s*13); ctx.lineTo(-s*5,-s*22); ctx.lineTo(s*4,-s*22); ctx.lineTo(s*4,-s*13); ctx.closePath(); ctx.fill();
+
   // Head
-  ctx.fillStyle='#F03030';
-  ctx.beginPath(); ctx.arc(0,-s*13,s*11,0,Math.PI*2); ctx.fill();
-  // Whiskers
-  ctx.strokeStyle='#FFD700'; ctx.lineWidth=s*2;
-  ctx.beginPath(); ctx.moveTo(-s*3,-s*16); ctx.lineTo(-s*14,-s*20); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(s*3,-s*16); ctx.lineTo(s*14,-s*20); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-s*3,-s*15); ctx.lineTo(-s*14,-s*14); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(s*3,-s*15); ctx.lineTo(s*14,-s*14); ctx.stroke();
-  // Eyes
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.arc(-s*4,-s*15,s*4,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*4,-s*15,s*4,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#111';
-  ctx.beginPath(); ctx.arc(-s*4,-s*15,s*2.5,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*4,-s*15,s*2.5,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.arc(-s*3,-s*16,s*1,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*5,-s*16,s*1,0,Math.PI*2); ctx.fill();
-  // Lips
-  ctx.fillStyle='#FF8080';
-  ctx.beginPath(); ctx.ellipse(0,-s*9,s*6,s*3,0,0,Math.PI); ctx.fill();
+  ctx.fillStyle = '#E82020';
+  ctx.beginPath(); ctx.arc(0,-s*14,s*11,0,Math.PI*2); ctx.fill();
+
+  // Long gold whiskers — Magikarp's most iconic feature
+  ctx.strokeStyle = '#FFD700'; ctx.lineWidth = s*2.5; ctx.lineCap = 'round';
+  // Upper whiskers sweep forward
+  ctx.beginPath(); ctx.moveTo(-s*4,-s*17); ctx.quadraticCurveTo(-s*14,-s*24,-s*20,-s*19); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s*4,-s*17); ctx.quadraticCurveTo(s*14,-s*24,s*20,-s*19); ctx.stroke();
+  // Lower whiskers sweep forward and slightly down
+  ctx.beginPath(); ctx.moveTo(-s*4,-s*15); ctx.quadraticCurveTo(-s*13,-s*17,-s*19,-s*13); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s*4,-s*15); ctx.quadraticCurveTo(s*13,-s*17,s*19,-s*13); ctx.stroke();
+  ctx.lineCap = 'butt';
+
+  // Large eyes
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*4,-s*16,s*4.5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*4,-s*16,s*4.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.arc(-s*4,-s*16,s*2.8,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*4,-s*16,s*2.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*2.5,-s*17.2,s*1.1,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*5.5,-s*17.2,s*1.1,0,Math.PI*2); ctx.fill();
+
+  // Big puffy lips / mouth
+  ctx.fillStyle = '#FF9090';
+  ctx.beginPath(); ctx.ellipse(0,-s*9.5,s*6,s*3.5,0,0,Math.PI); ctx.fill();
+  ctx.fillStyle = '#CC5050';
+  ctx.beginPath(); ctx.moveTo(-s*6,-s*9.5); ctx.lineTo(s*6,-s*9.5); ctx.strokeStyle = '#CC5050'; ctx.lineWidth = s*1.5; ctx.stroke();
+
   ctx.restore();
 }
 
@@ -472,8 +620,8 @@ let gamePhase = 'idle'; // 'idle' | 'playing' | 'dead'
 // Bird
 const BIRD_X = 85;
 const BIRD_R = 22;
-const GRAVITY = 0.46;
-const FLAP_V  = -8.5;
+const GRAVITY = 0.50;   // slightly higher gravity for tighter arc
+const FLAP_V  = -7.0;   // reduced from -8.5 so taps feel less explosive
 
 let bird = { y:CH/2, vy:0, angle:0 };
 
@@ -483,27 +631,24 @@ let pipes = [];
 let pipeTimer = 0;
 
 // Ground
-const GH = 58; // ground height
+const GH = 58;
 let groundX = 0;
 
 // Clouds
 let clouds = [
   {x:80, y:75, w:90, spd:.4},
-  {x:260,y:130,w:70, spd:.35},
-  {x:160,y:45, w:110,spd:.5},
+  {x:265,y:130,w:70, spd:.35},
+  {x:165,y:48, w:110,spd:.5},
 ];
-
-// Stars (background detail)
-const STARS = Array.from({length:12},()=>({x:Math.random()*CW,y:Math.random()*(CH*.55),r:Math.random()*2+1,a:Math.random()}));
 
 // ─── DIFFICULTY ───────────────────────────────────────────────────────────────
 
 function diff() {
   const t = Math.min(score, 50);
   return {
-    speed:   2.0 + t * 0.055,
-    gap:     Math.max(105, 170 - t * 1.3),
-    spawn:   Math.max(58, 95 - t * 0.75),
+    speed:  2.0 + t * 0.055,
+    gap:    Math.max(105, 170 - t * 1.3),
+    spawn:  Math.max(58, 95 - t * 0.75),
   };
 }
 
@@ -519,76 +664,53 @@ function resetGame() {
 }
 
 function flap() {
-  if (gamePhase === 'idle')    gamePhase = 'playing';
-  if (gamePhase !== 'dead')    bird.vy = FLAP_V;
+  if (gamePhase === 'idle') gamePhase = 'playing';
+  if (gamePhase !== 'dead') bird.vy = FLAP_V;
 }
 
 function update(dt) {
   const d = diff();
-
-  // Clouds always scroll
   clouds.forEach(c => { c.x -= c.spd * dt; if (c.x + c.w < 0) c.x = CW + c.w; });
 
   if (gamePhase !== 'playing') {
-    // Bob bird gently when idle
-    if (gamePhase === 'idle') {
-      bird.y = CH/2 + Math.sin(Date.now()*.002)*12;
-      bird.angle = 0;
-    }
+    if (gamePhase === 'idle') { bird.y = CH/2 + Math.sin(Date.now()*.002)*12; bird.angle = 0; }
     return;
   }
 
-  // Physics
-  bird.vy     += GRAVITY * dt;
-  bird.y      += bird.vy * dt;
-  bird.angle   = Math.atan2(bird.vy, 9) * .75;
+  bird.vy   += GRAVITY * dt;
+  bird.y    += bird.vy * dt;
+  bird.angle = Math.atan2(bird.vy, 9) * .75;
+  groundX    = (groundX - d.speed * dt) % 40;
 
-  // Ground scroll
-  groundX = (groundX - d.speed * dt) % 40;
-
-  // Spawn pipes
   pipeTimer += dt;
   if (pipeTimer >= d.spawn) {
     pipeTimer = 0;
     const minGap = 70, maxGap = CH - GH - d.gap - 70;
-    const gy = minGap + Math.random() * (maxGap - minGap);
-    pipes.push({ x: CW + 20, gy, gap: d.gap, scored: false });
+    pipes.push({ x: CW + 20, gy: minGap + Math.random() * (maxGap - minGap), gap: d.gap, scored: false });
   }
 
-  // Move pipes + score
   for (const p of pipes) {
     p.x -= d.speed * dt;
     if (!p.scored && p.x + PIPE_W < BIRD_X) {
-      p.scored = true;
-      score++;
-      if (score > bestScore) {
-        bestScore = score;
-        localStorage.setItem('pkflap_best', bestScore);
-      }
+      p.scored = true; score++;
+      if (score > bestScore) { bestScore = score; localStorage.setItem('pkflap_best', bestScore); }
     }
   }
   pipes = pipes.filter(p => p.x > -PIPE_W - 20);
 
-  // Ceiling
   if (bird.y - BIRD_R < 0) { bird.y = BIRD_R; bird.vy = Math.max(0, bird.vy); }
-
-  // Ground collision
   if (bird.y + BIRD_R > CH - GH) { die(); return; }
 
-  // Pipe collision (with slight forgiveness on edges)
-  const FORGIVE = 5;
+  const FG = 5;
   for (const p of pipes) {
-    if (BIRD_X + BIRD_R - FORGIVE > p.x && BIRD_X - BIRD_R + FORGIVE < p.x + PIPE_W) {
-      if (bird.y - BIRD_R + FORGIVE < p.gy || bird.y + BIRD_R - FORGIVE > p.gy + p.gap) {
-        die(); return;
-      }
+    if (BIRD_X + BIRD_R - FG > p.x && BIRD_X - BIRD_R + FG < p.x + PIPE_W) {
+      if (bird.y - BIRD_R + FG < p.gy || bird.y + BIRD_R - FG > p.gy + p.gap) { die(); return; }
     }
   }
 }
 
 function die() {
-  gamePhase = 'dead';
-  bird.vy = -5;
+  gamePhase = 'dead'; bird.vy = -5;
   setTimeout(() => {
     document.getElementById('go-score').textContent = score;
     document.getElementById('go-best').textContent = bestScore;
@@ -599,129 +721,239 @@ function die() {
 // ─── RENDERING ────────────────────────────────────────────────────────────────
 
 function render() {
-  // Sky
+  // Sky gradient
   const sky = ctx.createLinearGradient(0,0,0,CH);
-  sky.addColorStop(0,'#5AADE8'); sky.addColorStop(.65,'#A8DCFF'); sky.addColorStop(1,'#B8EEB8');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0,0,CW,CH);
+  sky.addColorStop(0,'#4899D8'); sky.addColorStop(.5,'#98D4F8'); sky.addColorStop(1,'#C8EEBB');
+  ctx.fillStyle = sky; ctx.fillRect(0,0,CW,CH);
 
-  // Stars (top area, faint)
-  ctx.fillStyle = 'rgba(255,255,255,.4)';
-  STARS.forEach(st => { ctx.beginPath(); ctx.arc(st.x,st.y,st.r,0,Math.PI*2); ctx.fill(); });
-
-  // Clouds
+  drawSun();
+  drawMountains();
   clouds.forEach(c => drawCloud(c.x, c.y, c.w));
-
-  // Pipes
   pipes.forEach(p => drawPipe(p));
-
-  // Ground
   drawGround();
 
-  // Bird/character
-  selectedChar.draw(ctx, BIRD_X, bird.y, BIRD_R*2, bird.angle);
+  selectedChar.draw(ctx, BIRD_X, bird.y, BIRD_R * 2, bird.angle);
 
-  // Score (in-game)
   if (gamePhase === 'playing' || gamePhase === 'dead') drawScoreHUD();
-
-  // Tap hint (idle)
   if (gamePhase === 'idle') drawTapHint();
 }
 
-function drawCloud(x, y, w) {
-  ctx.fillStyle = 'rgba(255,255,255,.82)';
-  ctx.beginPath(); ctx.arc(x,       y,    w*.28, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(x+w*.28, y-w*.1,w*.2, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(x+w*.5,  y,    w*.23, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(x+w*.18, y+w*.05,w*.18,0,Math.PI*2); ctx.fill();
+// ─── SUN ─────────────────────────────────────────────────────────────────────
+
+function drawSun() {
+  const sx = CW - 60, sy = 58;
+  // Rotating rays
+  ctx.strokeStyle = 'rgba(255,230,60,.65)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  const rot = Date.now() * .0003;
+  for (let i = 0; i < 8; i++) {
+    const a = i * Math.PI / 4 + rot;
+    ctx.beginPath();
+    ctx.moveTo(sx + Math.cos(a)*25, sy + Math.sin(a)*25);
+    ctx.lineTo(sx + Math.cos(a)*38, sy + Math.sin(a)*38);
+    ctx.stroke();
+  }
+  ctx.lineCap = 'butt';
+  // Glow halo
+  const grd = ctx.createRadialGradient(sx,sy,10, sx,sy,32);
+  grd.addColorStop(0,'rgba(255,240,80,.55)'); grd.addColorStop(1,'rgba(255,220,0,0)');
+  ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(sx,sy,32,0,Math.PI*2); ctx.fill();
+  // Sun disc
+  ctx.fillStyle = '#FFE830'; ctx.beginPath(); ctx.arc(sx,sy,20,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFF260'; ctx.beginPath(); ctx.arc(sx,sy,14,0,Math.PI*2); ctx.fill();
+  // Simple smiley
+  ctx.strokeStyle = '#C89000'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(-3+sx, sy-1, 3, 0, Math.PI); ctx.stroke(); // smile
+  ctx.fillStyle = '#C89000';
+  ctx.beginPath(); ctx.arc(sx-5,sy-3,1.5,0,Math.PI*2); ctx.fill(); // left eye
+  ctx.beginPath(); ctx.arc(sx+2,sy-3,1.5,0,Math.PI*2); ctx.fill(); // right eye
+  ctx.lineCap = 'butt';
 }
+
+// ─── MOUNTAINS ───────────────────────────────────────────────────────────────
+
+function drawMountains() {
+  // Far layer — pale blue-violet peaks
+  ctx.fillStyle = 'rgba(160,168,210,.65)';
+  ctx.beginPath(); ctx.moveTo(0,CH-GH);
+  ctx.lineTo(0,275); ctx.lineTo(35,225); ctx.lineTo(65,255); ctx.lineTo(100,200);
+  ctx.lineTo(130,240); ctx.lineTo(160,190); ctx.lineTo(195,230); ctx.lineTo(225,185);
+  ctx.lineTo(255,220); ctx.lineTo(285,195); ctx.lineTo(315,235); ctx.lineTo(348,185);
+  ctx.lineTo(375,215); ctx.lineTo(400,200); ctx.lineTo(400,CH-GH);
+  ctx.closePath(); ctx.fill();
+  // Snow caps
+  ctx.fillStyle = 'rgba(240,245,255,.7)';
+  const peaks = [[35,225],[100,200],[160,190],[225,185],[285,195],[348,185]];
+  peaks.forEach(([px,py]) => {
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px-14,py+22); ctx.lineTo(px+14,py+22); ctx.closePath(); ctx.fill();
+  });
+
+  // Near layer — rounded green hills
+  ctx.fillStyle = 'rgba(100,170,100,.6)';
+  ctx.beginPath(); ctx.moveTo(0,CH-GH);
+  ctx.quadraticCurveTo(40,310, 80,330);
+  ctx.quadraticCurveTo(130,285, 180,315);
+  ctx.quadraticCurveTo(230,275, 280,308);
+  ctx.quadraticCurveTo(330,280, 380,305);
+  ctx.lineTo(400,320); ctx.lineTo(400,CH-GH); ctx.lineTo(0,CH-GH);
+  ctx.closePath(); ctx.fill();
+
+  // Trees on hills — small stylised firs
+  const trees = [[55,328],[120,308],[210,310],[300,300],[365,315]];
+  trees.forEach(([tx,ty]) => drawTree(tx, ty));
+}
+
+function drawTree(tx, ty) {
+  ctx.fillStyle = 'rgba(50,120,50,.7)';
+  // Three layered triangles (fir tree silhouette)
+  ctx.beginPath(); ctx.moveTo(tx,ty-28); ctx.lineTo(tx-12,ty-8); ctx.lineTo(tx+12,ty-8); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(tx,ty-18); ctx.lineTo(tx-14,ty-2); ctx.lineTo(tx+14,ty-2); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(tx,ty-8); ctx.lineTo(tx-10,ty+6); ctx.lineTo(tx+10,ty+6); ctx.closePath(); ctx.fill();
+  // Trunk
+  ctx.fillStyle = 'rgba(100,60,20,.6)';
+  ctx.fillRect(tx-3, ty+5, 6, 8);
+}
+
+// ─── CLOUD ────────────────────────────────────────────────────────────────────
+
+function drawCloud(x, y, w) {
+  ctx.fillStyle = 'rgba(255,255,255,.84)';
+  ctx.beginPath(); ctx.arc(x,        y,    w*.28, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+w*.28,  y-w*.12,w*.2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+w*.52,  y,    w*.23, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+w*.18,  y+w*.06,w*.18,0, Math.PI*2); ctx.fill();
+}
+
+// ─── PIPES ───────────────────────────────────────────────────────────────────
 
 function drawPipe(p) {
   const capH = 18, capX = p.x - 5, capW = PIPE_W + 10;
 
-  // Top pipe
+  // Top pipe body
   ctx.fillStyle = '#2A8A45';
   ctx.fillRect(p.x, 0, PIPE_W, p.gy - capH);
   ctx.fillStyle = '#38A858';
   ctx.fillRect(capX, p.gy - capH, capW, capH);
-  // Highlights
   ctx.fillStyle = 'rgba(255,255,255,.18)';
-  ctx.fillRect(p.x+5, 0, 9, p.gy - capH);
+  ctx.fillRect(p.x+5, 0, 8, p.gy - capH);
   ctx.fillStyle = '#1A6030';
   ctx.fillRect(p.x, 0, 4, p.gy - capH);
   ctx.fillRect(capX, p.gy-capH, 4, capH);
+  // Leaf tufts on top pipe cap
+  drawPipeLeaves(p.x + PIPE_W/2, p.gy - capH, false);
 
-  // Bottom pipe
-  const by = p.gy + p.gap;
-  const bh = CH - GH - by;
+  // Bottom pipe body
+  const by = p.gy + p.gap, bh = CH - GH - by;
   ctx.fillStyle = '#2A8A45';
   ctx.fillRect(p.x, by + capH, PIPE_W, bh - capH);
   ctx.fillStyle = '#38A858';
   ctx.fillRect(capX, by, capW, capH);
   ctx.fillStyle = 'rgba(255,255,255,.18)';
-  ctx.fillRect(p.x+5, by+capH, 9, bh-capH);
+  ctx.fillRect(p.x+5, by+capH, 8, bh-capH);
   ctx.fillStyle = '#1A6030';
   ctx.fillRect(p.x, by+capH, 4, bh-capH);
   ctx.fillRect(capX, by, 4, capH);
+  // Leaf tufts on bottom pipe cap
+  drawPipeLeaves(p.x + PIPE_W/2, by, true);
 }
+
+function drawPipeLeaves(cx, cy, flipped) {
+  const dir = flipped ? 1 : -1;
+  ctx.fillStyle = '#228838';
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath();
+    ctx.ellipse(cx + i * 14, cy + dir * 10, 7, 12, i * .4, 0, Math.PI*2);
+    ctx.fill();
+  }
+  // Lighter vein on each leaf
+  ctx.fillStyle = '#44AA55';
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath();
+    ctx.ellipse(cx + i * 14, cy + dir * 10, 3, 7, i * .4, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+// ─── GROUND ───────────────────────────────────────────────────────────────────
 
 function drawGround() {
+  // Tall grass blades just above ground (Pokémon-style!)
+  const grassY = CH - GH;
+  ctx.fillStyle = '#3A9818';
+  for (let x = (groundX * 1.2) % 20 - 20; x < CW + 20; x += 14) {
+    // Left-leaning blade
+    ctx.beginPath();
+    ctx.moveTo(x, grassY);
+    ctx.quadraticCurveTo(x - 7, grassY - 18, x - 4, grassY - 30);
+    ctx.quadraticCurveTo(x + 2, grassY - 18, x + 5, grassY);
+    ctx.fill();
+    // Right-leaning blade
+    ctx.beginPath();
+    ctx.moveTo(x + 7, grassY);
+    ctx.quadraticCurveTo(x + 14, grassY - 15, x + 10, grassY - 26);
+    ctx.quadraticCurveTo(x + 5, grassY - 15, x + 3, grassY);
+    ctx.fill();
+  }
+  // Lighter tall grass layer
+  ctx.fillStyle = '#58BC28';
+  for (let x = (groundX * .9) % 24 - 24; x < CW + 24; x += 18) {
+    ctx.beginPath();
+    ctx.moveTo(x + 4, grassY);
+    ctx.quadraticCurveTo(x - 3, grassY - 20, x + 0, grassY - 32);
+    ctx.quadraticCurveTo(x + 6, grassY - 20, x + 8, grassY);
+    ctx.fill();
+  }
+
   // Dirt
-  ctx.fillStyle = '#8B6914';
-  ctx.fillRect(0, CH-GH, CW, GH);
+  ctx.fillStyle = '#8B6914'; ctx.fillRect(0, grassY, CW, GH);
   // Grass strip
-  ctx.fillStyle = '#4A8A20';
-  ctx.fillRect(0, CH-GH, CW, 15);
-  // Grass tufts
+  ctx.fillStyle = '#4A8A20'; ctx.fillRect(0, grassY, CW, 14);
+  // Ground tufts
   ctx.fillStyle = '#3A7A10';
   for (let x = groundX; x < CW + 40; x += 40) {
-    ctx.beginPath(); ctx.arc(x, CH-GH+7, 11, Math.PI, 0); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, grassY+7, 11, Math.PI, 0); ctx.fill();
   }
-  // Ground detail lines
+  // Dirt texture
   ctx.fillStyle = '#7A5A0A';
   for (let x = groundX+2; x < CW + 40; x += 40) {
-    ctx.fillRect(x, CH-GH+17, 20, 5);
-    ctx.fillRect(x+22, CH-GH+26, 14, 4);
+    ctx.fillRect(x, grassY+16, 20, 5);
+    ctx.fillRect(x+22, grassY+26, 14, 4);
   }
 }
 
+// ─── HUD ─────────────────────────────────────────────────────────────────────
+
 function drawScoreHUD() {
-  const txt = String(score);
-  const bw = Math.max(70, txt.length * 18 + 30);
+  const txt = String(score), bw = Math.max(70, txt.length * 18 + 30);
   const bx = CW/2 - bw/2, by = 14;
   ctx.fillStyle = 'rgba(0,0,0,.35)';
   roundRect(ctx, bx+2, by+3, bw, 36, 10); ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,.92)';
   roundRect(ctx, bx, by, bw, 36, 10); ctx.fill();
-  ctx.fillStyle = '#222';
-  ctx.font = 'bold 24px Arial';
+  ctx.fillStyle = '#222'; ctx.font = 'bold 24px Arial';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(txt, CW/2, by+18);
 }
 
 function drawTapHint() {
   const alpha = .5 + .5 * Math.sin(Date.now() * .004);
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 17px Arial';
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 17px Arial';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
+  ctx.shadowColor = '#000'; ctx.shadowBlur = 5;
   ctx.fillText('Tap / Space to start!', CW/2, CH/2 + 70);
   ctx.restore();
 }
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.lineTo(x+w-r, y); ctx.arcTo(x+w,y, x+w,y+r, r);
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.arcTo(x+w,y, x+w,y+r, r);
   ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w,y+h, x+w-r,y+h, r);
   ctx.lineTo(x+r, y+h); ctx.arcTo(x,y+h, x,y+h-r, r);
   ctx.lineTo(x, y+r); ctx.arcTo(x,y, x+r,y, r);
   ctx.closePath();
 }
 
-// ─── SCREEN MANAGEMENT ────────────────────────────────────────────────────────
+// ─── SCREENS ─────────────────────────────────────────────────────────────────
 
 function showScreen(name) {
   document.getElementById('s-start').classList.add('hide');
@@ -730,13 +962,9 @@ function showScreen(name) {
   if (name === 'start')    document.getElementById('s-start').classList.remove('hide');
   if (name === 'select')   document.getElementById('s-select').classList.remove('hide');
   if (name === 'gameover') document.getElementById('s-gameover').classList.remove('hide');
-  // 'game' shows nothing extra
 }
 
-function startGame() {
-  resetGame();
-  showScreen('game');
-}
+function startGame() { resetGame(); showScreen('game'); }
 
 // ─── CHARACTER SELECT UI ──────────────────────────────────────────────────────
 
@@ -746,18 +974,14 @@ function buildCharGrid() {
   CHARS.forEach(ch => {
     const card = document.createElement('div');
     card.className = 'cc' + (ch.id === selectedChar.id ? ' sel' : '');
-    card.dataset.id = ch.id;
-
     const mc = document.createElement('canvas');
     mc.width = 56; mc.height = 56;
     const mctx = mc.getContext('2d');
     mctx.fillStyle = ch.col + '28';
     mctx.beginPath(); mctx.arc(28,28,25,0,Math.PI*2); mctx.fill();
     ch.draw(mctx, 28, 28, 46, 0);
-
     const lbl = document.createElement('span');
     lbl.textContent = ch.name;
-
     card.appendChild(mc); card.appendChild(lbl);
     card.addEventListener('click', () => {
       document.querySelectorAll('.cc').forEach(c => c.classList.remove('sel'));
@@ -768,11 +992,9 @@ function buildCharGrid() {
   });
 }
 
-// ─── PREVIEW ANIMATION ────────────────────────────────────────────────────────
+// ─── PREVIEW ─────────────────────────────────────────────────────────────────
 
-const previewCanvas = document.getElementById('preview-canvas');
-const pCtx = previewCanvas.getContext('2d');
-
+const pCtx = document.getElementById('preview-canvas').getContext('2d');
 function animPreview() {
   pCtx.clearRect(0,0,80,80);
   pCtx.fillStyle = selectedChar.col + '28';
@@ -783,12 +1005,11 @@ function animPreview() {
 }
 animPreview();
 
-// ─── EVENT HANDLERS ───────────────────────────────────────────────────────────
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
 
 document.addEventListener('keydown', e => {
   if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); flap(); }
 });
-
 canvas.addEventListener('click', flap);
 canvas.addEventListener('touchstart', e => { e.preventDefault(); flap(); }, { passive:false });
 
@@ -799,20 +1020,15 @@ document.getElementById('btn-back').addEventListener('click', () => showScreen('
 document.getElementById('btn-again').addEventListener('click', startGame);
 document.getElementById('btn-change').addEventListener('click', () => { buildCharGrid(); showScreen('select'); });
 
-// ─── GAME LOOP ────────────────────────────────────────────────────────────────
+// ─── LOOP ────────────────────────────────────────────────────────────────────
 
 let lastTs = 0;
-
 function loop(ts) {
   const dt = Math.min((ts - lastTs) / 16.667, 3);
   lastTs = ts;
-  update(dt);
-  render();
+  update(dt); render();
   requestAnimationFrame(loop);
 }
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-
 showScreen('start');
 requestAnimationFrame(ts => { lastTs = ts; requestAnimationFrame(loop); });
 </script>
