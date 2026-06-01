@@ -620,8 +620,8 @@ let gamePhase = 'idle'; // 'idle' | 'playing' | 'dead'
 // Bird
 const BIRD_X = 85;
 const BIRD_R = 22;
-const GRAVITY = 0.50;   // slightly higher gravity for tighter arc
-const FLAP_V  = -7.0;   // reduced from -8.5 so taps feel less explosive
+const GRAVITY = 0.35;   // gentle — floaty fall without being sluggish
+const FLAP_V  = -6.8;   // moderate — less height than original, still responsive
 
 let bird = { y:CH/2, vy:0, angle:0 };
 
@@ -678,8 +678,9 @@ function update(dt) {
   }
 
   bird.vy   += GRAVITY * dt;
+  bird.vy    = Math.min(bird.vy, 9);   // terminal velocity — stops runaway drops
   bird.y    += bird.vy * dt;
-  bird.angle = Math.atan2(bird.vy, 9) * .75;
+  bird.angle = Math.atan2(bird.vy, 9) * .65;
   groundX    = (groundX - d.speed * dt) % 40;
 
   pipeTimer += dt;
