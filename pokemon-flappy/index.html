@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Pokémon Flappy</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -16,12 +19,16 @@ body{
 }
 #wrap{
   position:relative;
-  width:400px;height:600px;
+  /* always keep the 2:3 canvas aspect, shrink to fit small screens */
+  width:min(400px,100vw,66.66vh);
+  width:min(400px,100vw,66.66svh);
+  height:min(600px,100vh,150vw);
+  height:min(600px,100svh,150vw);
   border-radius:14px;overflow:hidden;
   box-shadow:0 0 50px rgba(255,200,0,.3),0 0 100px rgba(200,0,0,.2);
   flex-shrink:0;
 }
-#gc{display:block;width:400px;height:600px;}
+#gc{display:block;width:100%;height:100%;}
 .ov{
   position:absolute;inset:0;
   display:flex;flex-direction:column;
@@ -100,21 +107,37 @@ body{
 .btn-b{background:#3B4CCA;color:#fff;}
 .btn-b:hover{filter:brightness(1.15);}
 
-@media(max-width:420px){
-  #wrap{width:100vw;height:100svh;height:100vh;border-radius:0;}
-  #gc{width:100%;height:100%;}
-  body{align-items:stretch;}
-  .ov{border-radius:0;}
+/* MUTE */
+#btn-mute{
+  position:absolute;top:10px;left:10px;z-index:30;
+  width:40px;height:40px;border:none;border-radius:50%;
+  background:rgba(255,255,255,.55);font-size:1.1rem;cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+  display:flex;align-items:center;justify-content:center;
 }
-@media(max-height:620px) and (orientation:portrait){
-  #wrap{height:100svh;height:100vh;}
-  #gc{height:100%;}
+#btn-mute:active{transform:scale(.9);}
+
+/* MEDAL / NEW BEST */
+#go-medal{font-size:2.6rem;line-height:1.1;}
+#go-medal.hide,#go-newbest.hide{display:none;}
+#go-newbest{
+  display:inline-block;background:#FFD700;color:#7A4810;
+  font-weight:900;font-size:.8rem;padding:3px 12px;border-radius:12px;
+  margin-top:6px;letter-spacing:.5px;
+  animation:pulse .9s infinite alternate;
+}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.1)}}
+
+@media(max-width:420px),(max-height:620px){
+  #wrap{border-radius:0;}
+  .ov{border-radius:0;}
 }
 </style>
 </head>
 <body>
 <div id="wrap">
   <canvas id="gc" width="400" height="600"></canvas>
+  <button id="btn-mute" title="Sound on/off">🔊</button>
 
   <!-- START SCREEN -->
   <div id="s-start" class="ov">
@@ -143,9 +166,11 @@ body{
   <div id="s-gameover" class="ov hide">
     <div id="go-box">
       <h2>Oh no!</h2>
+      <div id="go-medal" class="hide"></div>
       <div class="sc">
         <p>Score: <strong id="go-score">0</strong></p>
         <p style="color:#888">Best: <strong id="go-best">0</strong></p>
+        <div id="go-newbest" class="hide">★ NEW BEST! ★</div>
       </div>
       <div class="brow">
         <button class="btn btn-r" id="btn-again">Try Again!</button>
@@ -723,10 +748,64 @@ const canvas = document.getElementById('gc');
 const ctx    = canvas.getContext('2d');
 const CW = 400, CH = 600;
 
+// HiDPI: render at device resolution so the art is crisp on retina/mobile
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+canvas.width = CW * DPR; canvas.height = CH * DPR;
+ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
 let selectedChar = CHARS[0];
 let score = 0;
 let bestScore = parseInt(localStorage.getItem('pkflap_best') || '0');
 let gamePhase = 'idle'; // 'idle' | 'playing' | 'dead'
+let curScreen = 'start'; // 'start' | 'select' | 'gameover' | 'game'
+let paused = false;
+let runStartBest = bestScore, newBest = false;
+
+// ─── SOUND (synthesised — no audio assets) ────────────────────────────────────
+
+const SFX = (() => {
+  let ac = null, muted = localStorage.getItem('pkflap_mute') === '1';
+  function audio() {
+    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  function tone(freq, dur, type, vol, slide, delay) {
+    if (muted) return;
+    try {
+      const a = audio(), t = a.currentTime + (delay || 0);
+      const o = a.createOscillator(), g = a.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t + dur);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(.001, t + dur);
+      o.connect(g); g.connect(a.destination);
+      o.start(t); o.stop(t + dur + .02);
+    } catch (e) { /* no audio available — play silently */ }
+  }
+  return {
+    flap()  { tone(440, .09, 'triangle', .15, 240); },
+    score() { tone(660, .08, 'square', .08); tone(880, .1, 'square', .08, 0, .07); },
+    ball()  { tone(523, .07, 'sine', .15); tone(784, .08, 'sine', .15, 0, .06); tone(1047, .12, 'sine', .15, 0, .12); },
+    hit()   { tone(160, .22, 'sawtooth', .2, -100); tone(500, .35, 'square', .07, -420, .08); },
+    isMuted() { return muted; },
+    toggle()  { muted = !muted; localStorage.setItem('pkflap_mute', muted ? '1' : '0'); return muted; },
+  };
+})();
+
+function buzz(ms) { if (navigator.vibrate) try { navigator.vibrate(ms); } catch (e) {} }
+
+// ─── PARTICLES & SCREEN JUICE ─────────────────────────────────────────────────
+
+let parts = [];
+let shake = 0, flash = 0, scorePop = 0;
+
+function burst(x, y, n, col, spd) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, v = Math.random() * (spd || 2.5) + .8;
+    parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1, life: 1, col, r: Math.random() * 2.5 + 1.5 });
+  }
+}
 
 // Bird
 const BIRD_X = 85;
@@ -743,7 +822,8 @@ let pipeTimer = 0;
 
 // Ground
 const GH = 58;
-let groundX = 0;
+let groundX = 0;  // wrapped offset for ground tufts, derived from scrollX
+let scrollX = 0;  // continuous distance travelled — keeps grass layers seam-free
 
 // Clouds
 let clouds = [
@@ -754,6 +834,18 @@ let clouds = [
 
 // Butterfree flying the opposite direction to the game scroll
 let bgFlyer = { x: 200, baseY: 152 };
+
+// Poké Ball pickups — drift between pipes, +1 bonus point when collected
+let balls = [];
+
+// Day → sunset → night cycle, advancing one phase every 10 points (loops)
+let skyCur = 0;
+
+// Fixed starfield for the night sky
+const STARS = Array.from({ length: 34 }, () => ({
+  x: Math.random() * CW, y: Math.random() * 300,
+  r: Math.random() * 1.3 + .5, tw: Math.random() * Math.PI * 2,
+}));
 
 // ─── DIFFICULTY ───────────────────────────────────────────────────────────────
 
@@ -771,15 +863,42 @@ function diff() {
 function resetGame() {
   bird = { y:CH/2, vy:0, angle:0 };
   pipes = [];
+  balls = [];
+  parts = [];
   pipeTimer = 0;
-  groundX = 0;
+  groundX = scrollX = 0;
   score = 0;
+  shake = flash = scorePop = 0;
+  skyCur = 0;
+  runStartBest = bestScore;
+  newBest = false;
+  paused = false;
   gamePhase = 'idle';
 }
 
 function flap() {
+  if (curScreen !== 'game') return;
+  if (paused) { paused = false; return; }
+  if (gamePhase === 'dead') return;
   if (gamePhase === 'idle') gamePhase = 'playing';
-  if (gamePhase !== 'dead') bird.vy = FLAP_V;
+  bird.vy = FLAP_V;
+  SFX.flap();
+  // little air puff under the tail
+  for (let i = 0; i < 4; i++) parts.push({
+    x: BIRD_X - 14 + Math.random() * 8, y: bird.y + 16,
+    vx: -1 - Math.random(), vy: .5 + Math.random(), life: .7,
+    col: 'rgba(255,255,255,.9)', r: Math.random() * 2 + 1.5,
+  });
+}
+
+function addPoint(quiet) {
+  score++; scorePop = 1;
+  if (!quiet) { SFX.score(); buzz(10); }
+  if (score > bestScore) {
+    bestScore = score;
+    localStorage.setItem('pkflap_best', bestScore);
+  }
+  if (score > runStartBest) newBest = true;
 }
 
 function update(dt) {
@@ -787,8 +906,24 @@ function update(dt) {
   clouds.forEach(c => { c.x -= c.spd * dt; if (c.x + c.w < 0) c.x = CW + c.w; });
   bgFlyer.x += 0.55 * dt; if (bgFlyer.x > CW + 60) bgFlyer.x = -60;
 
+  // Juice decay + particle physics run in every phase
+  shake    = Math.max(0, shake - .6 * dt);
+  flash    = Math.max(0, flash - .05 * dt);
+  scorePop = Math.max(0, scorePop - .06 * dt);
+  for (const p of parts) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += .1 * dt; p.life -= .035 * dt; }
+  parts = parts.filter(p => p.life > 0);
+
+  // Sky eases toward the phase set by score
+  skyCur += (score / 10 - skyCur) * Math.min(.02 * dt, 1);
+
   if (gamePhase !== 'playing') {
     if (gamePhase === 'idle') { bird.y = CH/2 + Math.sin(Date.now()*.002)*12; bird.angle = 0; }
+    if (gamePhase === 'dead' && bird.y + BIRD_R < CH - GH + 14) {
+      // tumble to the ground
+      bird.vy += GRAVITY * dt;
+      bird.y += bird.vy * dt;
+      bird.angle = Math.min(bird.angle + .06 * dt, 1.35);
+    }
     return;
   }
 
@@ -796,23 +931,40 @@ function update(dt) {
   bird.vy    = Math.min(bird.vy, 9);   // terminal velocity — stops runaway drops
   bird.y    += bird.vy * dt;
   bird.angle = Math.atan2(bird.vy, 9) * .65;
-  groundX    = (groundX - d.speed * dt) % 40;
+  scrollX   += d.speed * dt;
+  groundX    = -(scrollX % 40);
 
   pipeTimer += dt;
   if (pipeTimer >= d.spawn) {
     pipeTimer = 0;
     const minGap = 70, maxGap = CH - GH - d.gap - 70;
     pipes.push({ x: CW + 20, gy: minGap + Math.random() * (maxGap - minGap), gap: d.gap, scored: false });
+    // Sometimes drop a Poké Ball halfway to the next pipe
+    if (Math.random() < .35) balls.push({
+      x: CW + 20 + d.spawn * d.speed * .5,
+      y: 90 + Math.random() * (CH - GH - 180),
+      rot: Math.random() * Math.PI * 2, got: false,
+    });
   }
 
   for (const p of pipes) {
     p.x -= d.speed * dt;
     if (!p.scored && p.x + PIPE_W < BIRD_X) {
-      p.scored = true; score++;
-      if (score > bestScore) { bestScore = score; localStorage.setItem('pkflap_best', bestScore); }
+      p.scored = true; addPoint();
+      burst(BIRD_X + 18, bird.y, 6, '#FFE060', 2);
     }
   }
   pipes = pipes.filter(p => p.x > -PIPE_W - 20);
+
+  for (const b of balls) {
+    b.x -= d.speed * dt; b.rot += .04 * dt;
+    if (!b.got && Math.hypot(b.x - BIRD_X, b.y - bird.y) < BIRD_R + 12) {
+      b.got = true; addPoint(true); SFX.ball(); buzz(12);
+      burst(b.x, b.y, 12, '#FF4444', 3);
+      burst(b.x, b.y, 8, '#FFFFFF', 2.2);
+    }
+  }
+  balls = balls.filter(b => !b.got && b.x > -30);
 
   if (bird.y - BIRD_R < 0) { bird.y = BIRD_R; bird.vy = Math.max(0, bird.vy); }
   if (bird.y + BIRD_R > CH - GH) { die(); return; }
@@ -827,61 +979,184 @@ function update(dt) {
 
 function die() {
   gamePhase = 'dead'; bird.vy = -5;
+  SFX.hit(); buzz(60);
+  shake = 11; flash = .55;
+  burst(BIRD_X, bird.y, 14, '#FFFFFF', 3.5);
+  burst(BIRD_X, bird.y, 10, selectedChar.col, 3);
   setTimeout(() => {
     document.getElementById('go-score').textContent = score;
     document.getElementById('go-best').textContent = bestScore;
+    const medal = score >= 40 ? '🏆' : score >= 25 ? '🥇' : score >= 15 ? '🥈' : score >= 8 ? '🥉' : '';
+    const mEl = document.getElementById('go-medal');
+    mEl.textContent = medal;
+    mEl.classList.toggle('hide', !medal);
+    document.getElementById('go-newbest').classList.toggle('hide', !(newBest && score > 0));
     showScreen('gameover');
   }, 700);
 }
 
 // ─── RENDERING ────────────────────────────────────────────────────────────────
 
-function render() {
-  // Sky gradient
-  const sky = ctx.createLinearGradient(0,0,0,CH);
-  sky.addColorStop(0,'#4899D8'); sky.addColorStop(.5,'#98D4F8'); sky.addColorStop(1,'#C8EEBB');
-  ctx.fillStyle = sky; ctx.fillRect(0,0,CW,CH);
+// Sky gradients are built once, not per frame
+const SKIES = [
+  ['#4899D8', '#98D4F8', '#C8EEBB'],   // day
+  ['#5858A8', '#F88860', '#FFD8A0'],   // sunset
+  ['#0A1038', '#283068', '#3A4880'],   // night
+].map(stops => {
+  const g = ctx.createLinearGradient(0, 0, 0, CH);
+  g.addColorStop(0, stops[0]); g.addColorStop(.5, stops[1]); g.addColorStop(1, stops[2]);
+  return g;
+});
 
-  drawSun();
-  drawMountains();
+function nightAmount() {
+  const p = ((skyCur % 3) + 3) % 3;
+  const d = Math.min(Math.abs(p - 2), 3 - Math.abs(p - 2));
+  return Math.max(0, 1 - d);
+}
+
+function render() {
+  // Sky: crossfade between the current phase and the next
+  const p = ((skyCur % 3) + 3) % 3, pi = Math.floor(p) % 3, pf = p - Math.floor(p);
+  ctx.fillStyle = SKIES[pi]; ctx.fillRect(0, 0, CW, CH);
+  if (pf > .001) {
+    ctx.globalAlpha = pf;
+    ctx.fillStyle = SKIES[(pi + 1) % 3]; ctx.fillRect(0, 0, CW, CH);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.save();
+  if (shake > 0) ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
+
+  const night = nightAmount();
+  if (night > .05) drawStars(night);
+  drawSun(night);
+  drawScenery();
   clouds.forEach(c => drawCloud(c.x, c.y, c.w));
   drawBgButterfree(bgFlyer.x, bgFlyer.baseY + Math.sin(Date.now() * .0009) * 14);
-  pipes.forEach(p => drawPipe(p));
+  pipes.forEach(pp => drawPipe(pp));
+  balls.forEach(b => drawPokeball(b));
   drawGround();
 
   selectedChar.draw(ctx, BIRD_X, bird.y, BIRD_R * 2, bird.angle);
 
+  for (const pt of parts) {
+    ctx.globalAlpha = Math.max(0, Math.min(1, pt.life));
+    ctx.fillStyle = pt.col;
+    ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+
+  // Atmosphere + impact overlays
+  if (night > .05) { ctx.fillStyle = 'rgba(15,20,60,' + (night * .22).toFixed(3) + ')'; ctx.fillRect(0, 0, CW, CH); }
+  if (flash > 0)   { ctx.fillStyle = 'rgba(255,255,255,' + flash.toFixed(3) + ')'; ctx.fillRect(0, 0, CW, CH); }
+
   if (gamePhase === 'playing' || gamePhase === 'dead') drawScoreHUD();
-  if (gamePhase === 'idle') drawTapHint();
+  if (gamePhase === 'idle' && curScreen === 'game') drawTapHint();
+  if (paused) drawPaused();
+}
+
+function drawStars(a) {
+  const t = Date.now() * .002;
+  ctx.fillStyle = '#FFF8D8';
+  for (const st of STARS) {
+    ctx.globalAlpha = a * (.4 + .6 * Math.abs(Math.sin(t + st.tw)));
+    ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// Static scenery (mountains, Pokémon Center, trees, Oddish) is pre-rendered
+// once to an offscreen canvas — a single drawImage per frame after that
+let sceneryCache = null;
+function drawScenery() {
+  if (!sceneryCache) {
+    sceneryCache = document.createElement('canvas');
+    sceneryCache.width = CW * DPR; sceneryCache.height = CH * DPR;
+    const g = sceneryCache.getContext('2d');
+    g.setTransform(DPR, 0, 0, DPR, 0, 0);
+    drawMountains(g);
+  }
+  ctx.drawImage(sceneryCache, 0, 0, CW, CH);
+}
+
+function drawPokeball(b) {
+  const r = 12;
+  ctx.save();
+  ctx.translate(b.x, b.y + Math.sin(Date.now() * .004 + b.rot) * 3);
+  ctx.rotate(Math.sin(b.rot) * .25);
+  ctx.fillStyle = '#F8F8F8';
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI); ctx.fill();
+  ctx.fillStyle = '#E83030';
+  ctx.beginPath(); ctx.arc(0, 0, r, Math.PI, 0); ctx.fill();
+  ctx.fillStyle = '#222';
+  ctx.fillRect(-r, -1.6, r * 2, 3.2);
+  ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(0, 0, 2.2, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.beginPath(); ctx.ellipse(-4, -6, 3, 2, -.6, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+function drawPaused() {
+  ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, CW, CH);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 26px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('Paused', CW / 2, CH / 2 - 16);
+  ctx.font = 'bold 15px Arial';
+  ctx.fillText('Tap / Space to resume', CW / 2, CH / 2 + 16);
 }
 
 // ─── SUN ─────────────────────────────────────────────────────────────────────
 
-function drawSun() {
+const SUN_GLOW = (() => {
+  const g = ctx.createRadialGradient(CW-60,58,10, CW-60,58,32);
+  g.addColorStop(0,'rgba(255,240,80,.55)'); g.addColorStop(1,'rgba(255,220,0,0)');
+  return g;
+})();
+
+function drawSun(night) {
   const sx = CW - 60, sy = 58;
-  // Rotating rays
-  ctx.strokeStyle = 'rgba(255,230,60,.65)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
-  const rot = Date.now() * .0003;
-  for (let i = 0; i < 8; i++) {
-    const a = i * Math.PI / 4 + rot;
-    ctx.beginPath();
-    ctx.moveTo(sx + Math.cos(a)*25, sy + Math.sin(a)*25);
-    ctx.lineTo(sx + Math.cos(a)*38, sy + Math.sin(a)*38);
-    ctx.stroke();
+  const day = 1 - (night || 0);
+  if (day > .03) {
+    ctx.globalAlpha = day;
+    // Rotating rays
+    ctx.strokeStyle = 'rgba(255,230,60,.65)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    const rot = Date.now() * .0003;
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4 + rot;
+      ctx.beginPath();
+      ctx.moveTo(sx + Math.cos(a)*25, sy + Math.sin(a)*25);
+      ctx.lineTo(sx + Math.cos(a)*38, sy + Math.sin(a)*38);
+      ctx.stroke();
+    }
+    ctx.lineCap = 'butt';
+    // Glow halo
+    ctx.fillStyle = SUN_GLOW; ctx.beginPath(); ctx.arc(sx,sy,32,0,Math.PI*2); ctx.fill();
+    // Sun disc
+    ctx.fillStyle = '#FFE830'; ctx.beginPath(); ctx.arc(sx,sy,20,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFF260'; ctx.beginPath(); ctx.arc(sx,sy,14,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
   }
-  ctx.lineCap = 'butt';
-  // Glow halo
-  const grd = ctx.createRadialGradient(sx,sy,10, sx,sy,32);
-  grd.addColorStop(0,'rgba(255,240,80,.55)'); grd.addColorStop(1,'rgba(255,220,0,0)');
-  ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(sx,sy,32,0,Math.PI*2); ctx.fill();
-  // Sun disc
-  ctx.fillStyle = '#FFE830'; ctx.beginPath(); ctx.arc(sx,sy,20,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#FFF260'; ctx.beginPath(); ctx.arc(sx,sy,14,0,Math.PI*2); ctx.fill();
+  if (night > .03) {
+    // Moon with craters
+    ctx.globalAlpha = night;
+    ctx.fillStyle = '#E8E8D8'; ctx.beginPath(); ctx.arc(sx, sy, 17, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(180,180,160,.55)';
+    ctx.beginPath(); ctx.arc(sx-5, sy-3, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(sx+6, sy+5, 3, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(sx+2, sy-8, 2.2, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
 }
 
 // ─── MOUNTAINS ───────────────────────────────────────────────────────────────
 
-function drawMountains() {
+function drawMountains(ctx) {
   // Far layer — pale blue-violet peaks
   ctx.fillStyle = 'rgba(160,168,210,.65)';
   ctx.beginPath(); ctx.moveTo(0,CH-GH);
@@ -909,17 +1184,17 @@ function drawMountains() {
 
   // Trees on hills — small stylised firs
   const trees = [[55,328],[120,308],[210,310],[300,300],[365,315]];
-  trees.forEach(([tx,ty]) => drawTree(tx, ty));
+  trees.forEach(([tx,ty]) => drawTree(ctx, tx, ty));
 
   // Pokémon Center on the hill
-  drawPokeCenter();
+  drawPokeCenter(ctx);
 
   // Wild Oddish peeking above the grass line
-  drawOddish(92, CH - GH);
-  drawOddish(305, CH - GH);
+  drawOddish(ctx, 92, CH - GH);
+  drawOddish(ctx, 305, CH - GH);
 }
 
-function drawTree(tx, ty) {
+function drawTree(ctx, tx, ty) {
   ctx.fillStyle = 'rgba(50,120,50,.7)';
   // Three layered triangles (fir tree silhouette)
   ctx.beginPath(); ctx.moveTo(tx,ty-28); ctx.lineTo(tx-12,ty-8); ctx.lineTo(tx+12,ty-8); ctx.closePath(); ctx.fill();
@@ -992,33 +1267,45 @@ function drawPipeLeaves(cx, cy, flipped) {
 
 // ─── GROUND ───────────────────────────────────────────────────────────────────
 
+// Tall-grass layers are pre-rendered to strips once and scrolled with two
+// drawImage calls per frame instead of ~60 bézier path fills
+const GRASS_H = 34;
+function makeGrassStrip(period, col, blades) {
+  const c = document.createElement('canvas');
+  c.width = (CW + period) * DPR; c.height = GRASS_H * DPR;
+  const g = c.getContext('2d');
+  g.setTransform(DPR, 0, 0, DPR, 0, 0);
+  g.fillStyle = col;
+  // overdraw one period either side so the sampling window never shows a seam
+  for (let x = -period; x < CW + period * 2; x += period) blades(g, x, GRASS_H);
+  return c;
+}
+const grassDark = makeGrassStrip(14, '#3A9818', (g, x, h) => {
+  g.beginPath();
+  g.moveTo(x, h);
+  g.quadraticCurveTo(x - 7, h - 18, x - 4, h - 30);
+  g.quadraticCurveTo(x + 2, h - 18, x + 5, h);
+  g.fill();
+  g.beginPath();
+  g.moveTo(x + 7, h);
+  g.quadraticCurveTo(x + 14, h - 15, x + 10, h - 26);
+  g.quadraticCurveTo(x + 5, h - 15, x + 3, h);
+  g.fill();
+});
+const grassLight = makeGrassStrip(18, '#58BC28', (g, x, h) => {
+  g.beginPath();
+  g.moveTo(x + 4, h);
+  g.quadraticCurveTo(x - 3, h - 20, x, h - 32);
+  g.quadraticCurveTo(x + 6, h - 20, x + 8, h);
+  g.fill();
+});
+
 function drawGround() {
-  // Tall grass blades just above ground (Pokémon-style!)
   const grassY = CH - GH;
-  ctx.fillStyle = '#3A9818';
-  for (let x = (groundX * 1.2) % 20 - 20; x < CW + 20; x += 14) {
-    // Left-leaning blade
-    ctx.beginPath();
-    ctx.moveTo(x, grassY);
-    ctx.quadraticCurveTo(x - 7, grassY - 18, x - 4, grassY - 30);
-    ctx.quadraticCurveTo(x + 2, grassY - 18, x + 5, grassY);
-    ctx.fill();
-    // Right-leaning blade
-    ctx.beginPath();
-    ctx.moveTo(x + 7, grassY);
-    ctx.quadraticCurveTo(x + 14, grassY - 15, x + 10, grassY - 26);
-    ctx.quadraticCurveTo(x + 5, grassY - 15, x + 3, grassY);
-    ctx.fill();
-  }
-  // Lighter tall grass layer
-  ctx.fillStyle = '#58BC28';
-  for (let x = (groundX * .9) % 24 - 24; x < CW + 24; x += 18) {
-    ctx.beginPath();
-    ctx.moveTo(x + 4, grassY);
-    ctx.quadraticCurveTo(x - 3, grassY - 20, x + 0, grassY - 32);
-    ctx.quadraticCurveTo(x + 6, grassY - 20, x + 8, grassY);
-    ctx.fill();
-  }
+  const dOff = (scrollX * 1.2) % 14;
+  const lOff = (scrollX * .9) % 18;
+  ctx.drawImage(grassDark,  dOff * DPR, 0, CW * DPR, GRASS_H * DPR, 0, grassY - GRASS_H, CW, GRASS_H);
+  ctx.drawImage(grassLight, lOff * DPR, 0, CW * DPR, GRASS_H * DPR, 0, grassY - GRASS_H, CW, GRASS_H);
 
   // Dirt
   ctx.fillStyle = '#8B6914'; ctx.fillRect(0, grassY, CW, GH);
@@ -1039,7 +1326,7 @@ function drawGround() {
 
 // ─── POKÉMON CENTER ──────────────────────────────────────────────────────────
 
-function drawPokeCenter() {
+function drawPokeCenter(ctx) {
   const bx = 138, by = 279, bw = 72, bh = 50;
   ctx.save();
   ctx.globalAlpha = 0.82;
@@ -1104,7 +1391,7 @@ function drawPokeCenter() {
 
 // ─── WILD ODDISH ─────────────────────────────────────────────────────────────
 
-function drawOddish(ox, oy) {
+function drawOddish(ctx, ox, oy) {
   // oy = ground line; body and leaves peek above it
   ctx.save();
   ctx.globalAlpha = 0.76;
@@ -1190,9 +1477,13 @@ function drawScoreHUD() {
   roundRect(ctx, bx+2, by+3, bw, 36, 10); ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,.92)';
   roundRect(ctx, bx, by, bw, 36, 10); ctx.fill();
+  ctx.save();
+  ctx.translate(CW/2, by+18);
+  ctx.scale(1 + scorePop*.35, 1 + scorePop*.35);
   ctx.fillStyle = '#222'; ctx.font = 'bold 24px Arial';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(txt, CW/2, by+18);
+  ctx.fillText(txt, 0, 0);
+  ctx.restore();
 }
 
 function drawTapHint() {
@@ -1217,10 +1508,14 @@ function roundRect(ctx, x, y, w, h, r) {
 // ─── SCREENS ─────────────────────────────────────────────────────────────────
 
 function showScreen(name) {
+  curScreen = name;
   document.getElementById('s-start').classList.add('hide');
   document.getElementById('s-select').classList.add('hide');
   document.getElementById('s-gameover').classList.add('hide');
-  if (name === 'start')    document.getElementById('s-start').classList.remove('hide');
+  if (name === 'start') {
+    document.getElementById('start-best').textContent = 'Best: ' + bestScore;
+    document.getElementById('s-start').classList.remove('hide');
+  }
   if (name === 'select')   document.getElementById('s-select').classList.remove('hide');
   if (name === 'gameover') document.getElementById('s-gameover').classList.remove('hide');
 }
@@ -1236,8 +1531,10 @@ function buildCharGrid() {
     const card = document.createElement('div');
     card.className = 'cc' + (ch.id === selectedChar.id ? ' sel' : '');
     const mc = document.createElement('canvas');
-    mc.width = 56; mc.height = 56;
+    mc.width = 56 * DPR; mc.height = 56 * DPR;
+    mc.style.width = '56px'; mc.style.height = '56px';
     const mctx = mc.getContext('2d');
+    mctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     mctx.fillStyle = ch.col + '28';
     mctx.beginPath(); mctx.arc(28,28,25,0,Math.PI*2); mctx.fill();
     ch.draw(mctx, 28, 28, 46, 0);
@@ -1255,13 +1552,21 @@ function buildCharGrid() {
 
 // ─── PREVIEW ─────────────────────────────────────────────────────────────────
 
-const pCtx = document.getElementById('preview-canvas').getContext('2d');
+const pCanvas = document.getElementById('preview-canvas');
+pCanvas.width = 80 * DPR; pCanvas.height = 80 * DPR;
+pCanvas.style.width = '80px'; pCanvas.style.height = '80px';
+const pCtx = pCanvas.getContext('2d');
+pCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+const startScreenEl = document.getElementById('s-start');
+
 function animPreview() {
-  pCtx.clearRect(0,0,80,80);
-  pCtx.fillStyle = selectedChar.col + '28';
-  pCtx.beginPath(); pCtx.arc(40,40,36,0,Math.PI*2); pCtx.fill();
-  selectedChar.draw(pCtx, 40, 40, 64, Math.sin(Date.now()*.002)*.2);
-  document.getElementById('start-best').textContent = 'Best: ' + bestScore;
+  // only draw while the start screen is actually visible
+  if (!startScreenEl.classList.contains('hide')) {
+    pCtx.clearRect(0,0,80,80);
+    pCtx.fillStyle = selectedChar.col + '28';
+    pCtx.beginPath(); pCtx.arc(40,40,36,0,Math.PI*2); pCtx.fill();
+    selectedChar.draw(pCtx, 40, 40, 64, Math.sin(Date.now()*.002)*.2);
+  }
   requestAnimationFrame(animPreview);
 }
 animPreview();
@@ -1269,10 +1574,33 @@ animPreview();
 // ─── EVENTS ──────────────────────────────────────────────────────────────────
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); flap(); }
+  if (e.code === 'Space' || e.code === 'ArrowUp') {
+    e.preventDefault();
+    if (curScreen === 'game') flap();
+    else if (curScreen === 'start' || curScreen === 'gameover') startGame();
+  }
+  if (e.code === 'Enter') {
+    e.preventDefault();
+    if (curScreen !== 'game') startGame();
+  }
+  if (e.code === 'KeyR' && curScreen === 'gameover') startGame();
+  if (e.code === 'KeyP' && curScreen === 'game' && gamePhase === 'playing') paused = !paused;
 });
 canvas.addEventListener('click', flap);
 canvas.addEventListener('touchstart', e => { e.preventDefault(); flap(); }, { passive:false });
+
+const muteBtn = document.getElementById('btn-mute');
+muteBtn.textContent = SFX.isMuted() ? '🔇' : '🔊';
+muteBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  muteBtn.textContent = SFX.toggle() ? '🔇' : '🔊';
+  muteBtn.blur();
+});
+
+// Auto-pause if the tab/app goes to the background mid-run
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && curScreen === 'game' && gamePhase === 'playing') paused = true;
+});
 
 document.getElementById('btn-play').addEventListener('click', startGame);
 document.getElementById('btn-to-sel').addEventListener('click', () => { buildCharGrid(); showScreen('select'); });
@@ -1287,7 +1615,8 @@ let lastTs = 0;
 function loop(ts) {
   const dt = Math.min((ts - lastTs) / 16.667, 3);
   lastTs = ts;
-  update(dt); render();
+  if (!paused) update(dt);
+  render();
   requestAnimationFrame(loop);
 }
 showScreen('start');
