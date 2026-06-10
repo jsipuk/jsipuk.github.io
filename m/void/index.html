@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="VOID — drag to survive, nova to destroy. A fast arcade survival game.">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="VOID">
@@ -13,7 +15,7 @@
   *, *::before, *::after { margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none; }
   html,body { width:100%;height:100%;overflow:hidden;background:#00000f;touch-action:none;user-select:none;-webkit-user-select:none; }
   #c { position:fixed;top:0;left:0;width:100%;height:100%;display:block; }
-
+ /* Created by John Saunders */
   /* HUD */
   #hud {
     position:fixed;top:0;left:0;right:0;z-index:5;
@@ -22,7 +24,7 @@
     font-family:'Share Tech Mono',monospace;pointer-events:none;transition:opacity 0.4s;
   }
   #hud.hidden { opacity:0; }
-  #hud-left { display:flex;align-items:center;gap:10px;pointer-events:auto; }
+  #hud-left { display:flex;align-items:center;gap:10px;pointer-events:all; }
   #pause-btn { font-size:18px;color:rgba(255,255,255,0.42);cursor:pointer;touch-action:manipulation;padding:5px 7px; }
   #pause-btn:active { color:rgba(255,255,255,0.9); }
   #time { font-size:28px;color:#fff;letter-spacing:2px;text-shadow:0 0 22px rgba(80,200,255,0.9); }
@@ -38,7 +40,7 @@
     touch-action:manipulation;cursor:pointer;
     transition:all 0.5s cubic-bezier(0.2,0,0,1);opacity:0;pointer-events:none;z-index:5;
   }
-  #blast.show { opacity:1;pointer-events:auto; }
+  #blast.show { opacity:1;pointer-events:all; }
   #blast.ready {
     border-color:rgba(0,220,255,0.9);background:rgba(0,200,255,0.15);color:#0cf;
     box-shadow:0 0 22px rgba(0,200,255,0.55),0 0 55px rgba(0,200,255,0.22),inset 0 0 22px rgba(0,200,255,0.1);
@@ -48,6 +50,19 @@
     0%,100%{box-shadow:0 0 22px rgba(0,200,255,0.55),0 0 55px rgba(0,200,255,0.22);transform:translateX(-50%) scale(1);}
     50%    {box-shadow:0 0 38px rgba(0,200,255,0.85),0 0 80px rgba(0,200,255,0.38);transform:translateX(-50%) scale(1.08);}
   }
+
+  /* Share button (game over) */
+  #share {
+    position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 34px);left:50%;transform:translateX(-50%);
+    padding:13px 34px;z-index:5;
+    font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;
+    color:rgba(200,240,255,0.88);background:rgba(0,150,255,0.08);
+    border:1.5px solid rgba(0,180,255,0.38);border-radius:3px;
+    cursor:pointer;touch-action:manipulation;
+    transition:opacity 0.4s,background 0.15s;opacity:0;pointer-events:none;
+  }
+  #share.show { opacity:1;pointer-events:all; }
+  #share:active { background:rgba(0,150,255,0.22); }
 
   /* Pause overlay */
   #pause-overlay {
@@ -105,10 +120,11 @@
     <div id="pause-btn">&#9646;&#9646;</div>
     <div id="time">00:00</div>
   </div>
-  <div id="lives">● ● ●</div>
+  <div id="lives">&#9679; &#9679; &#9679;</div>
 </div>
 
 <div id="blast">NOVA</div>
+<div id="share">SHARE SCORE</div>
 
 <div id="pause-overlay" class="hidden">
   <div class="po-title">PAUSED</div>
@@ -118,15 +134,15 @@
       <div class="po-hdr">TOUCH &amp; MOUSE</div>
       <div class="po-row"><span class="pk">DRAG</span><span class="pv">move your orb</span></div>
       <div class="po-row"><span class="pk">NOVA BTN</span><span class="pv">fire blast when charged</span></div>
-      <div class="po-row"><span class="pk">&#9646;&#9646; BTN</span><span class="pv">pause game</span></div>
-      <div class="po-row"><span class="pk">CLICK</span><span class="pv">start / restart</span></div>
+      <div class="po-row"><span class="pk">ORBS</span><span class="pv">grab for bonuses</span></div>
+      <div class="po-row"><span class="pk">GRAZE</span><span class="pv">near-misses charge nova</span></div>
     </div>
     <div class="po-col">
       <div class="po-hdr">KEYBOARD</div>
-      <div class="po-row"><span class="pk">P</span><span class="pv">pause / resume</span></div>
+      <div class="po-row"><span class="pk">WASD / &#8592;&#8593;&#8594;&#8595;</span><span class="pv">move</span></div>
       <div class="po-row"><span class="pk">SPACE</span><span class="pv">fire nova blast</span></div>
-      <div class="po-row"><span class="pk">M</span><span class="pv">mute / unmute</span></div>
-      <div class="po-row"><span class="pk">ENTER</span><span class="pv">start / restart</span></div>
+      <div class="po-row"><span class="pk">P / ESC</span><span class="pv">pause / resume</span></div>
+      <div class="po-row"><span class="pk">M</span><span class="pv">mute &#183; ENTER start</span></div>
     </div>
   </div>
 
@@ -146,22 +162,113 @@ const hudEl      = document.getElementById('hud');
 const timeEl     = document.getElementById('time');
 const livesEl    = document.getElementById('lives');
 const blastEl    = document.getElementById('blast');
+const shareEl    = document.getElementById('share');
 const pauseOL    = document.getElementById('pause-overlay');
 const btnResume  = document.getElementById('btn-resume');
 const btnMute    = document.getElementById('btn-mute');
 const btnQuit    = document.getElementById('btn-quit');
 const pauseBtn   = document.getElementById('pause-btn');
 const PI2        = Math.PI * 2;
-
-let W = 0, H = 0;
-function resize() { W = C.width = window.innerWidth; H = C.height = window.innerHeight; }
-resize();
-window.addEventListener('resize', () => { resize(); if (G) G.stars = makeStars(); });
+const clamp      = (v,a,b)=>v<a?a:v>b?b:v;
 
 // ── Constants ────────────────────────────────────────────
 const PR=14, TRAIL=26, NOVA_MS=9500, NOVA_SPD=9;
 const LERP=0.17, INV_MS=1600, BASE_INT=1750, BASE_SPD=1.25, LVL_INT=12000;
-const LS_KEY = 'void_v4_hi';
+const MAX_LIVES=4, MAX_ENEMIES=90, MAX_ESPD=6.0;
+const GRAZE=30, SLOW_MS=4500, SLOW_F=0.35;
+const KEY_REACH=90;             // how far ahead keyboard sets the move target
+const LS_KEY='void_v4_hi';
+
+// ── Canvas sizing (high-DPI aware) ──────────────────────
+let W=0, H=0, vignette=null;
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  C.width  = Math.round(W * dpr);
+  C.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  vignette = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.6);
+  vignette.addColorStop(0, 'rgba(10,35,80,0.10)');
+  vignette.addColorStop(1, 'rgba(0,0,0,0.35)');
+  if (G) {
+    G.stars = makeStars();
+    G.px = clamp(G.px, PR, W-PR); G.py = clamp(G.py, PR, H-PR);
+    G.tx = clamp(G.tx, PR, W-PR); G.ty = clamp(G.ty, PR, H-PR);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  S P R I T E S  (pre-baked glows — shadowBlur only at bake
+//  time, never in the frame loop: huge win on mobile GPUs)
+// ═══════════════════════════════════════════════════════
+const E_BASE = 24;                 // baked enemy radius (px)
+const enemySprites = new Map();
+
+function enemySprite(hue, lit) {
+  const key = hue*1000 + lit;
+  let s = enemySprites.get(key);
+  if (s) return s;
+  const size = E_BASE*5, cx = size/2;
+  s = document.createElement('canvas'); s.width = s.height = size;
+  const g = s.getContext('2d');
+  const gr = g.createRadialGradient(cx,cx,E_BASE*0.45, cx,cx,E_BASE*2.2);
+  gr.addColorStop(0, `hsla(${hue},90%,${lit}%,0.32)`);
+  gr.addColorStop(1, `hsla(${hue},90%,${lit}%,0)`);
+  g.fillStyle = gr; g.fillRect(0,0,size,size);
+  g.shadowColor = `hsl(${hue},90%,${lit}%)`; g.shadowBlur = 12;
+  g.fillStyle = 'rgba(0,0,8,0.85)';
+  g.beginPath(); g.arc(cx,cx,E_BASE,0,PI2); g.fill();
+  g.strokeStyle = `hsl(${hue},90%,${lit}%)`; g.lineWidth = 4.5;
+  g.stroke();
+  enemySprites.set(key, s);
+  return s;
+}
+
+let playerSprite = null;
+function bakePlayer() {
+  const r = PR*2, size = r*6, cx = size/2;   // baked at 2x for crispness
+  playerSprite = document.createElement('canvas');
+  playerSprite.width = playerSprite.height = size;
+  const g = playerSprite.getContext('2d');
+  g.shadowColor='#4af'; g.shadowBlur=76; g.globalAlpha=0.40; g.fillStyle='#4af';
+  g.beginPath(); g.arc(cx,cx,r*1.85,0,PI2); g.fill();
+  g.globalAlpha=0.72; g.shadowBlur=32; g.fillStyle='#8df';
+  g.beginPath(); g.arc(cx,cx,r*1.12,0,PI2); g.fill();
+  g.globalAlpha=1; g.shadowColor='#fff'; g.shadowBlur=28; g.fillStyle='#f0faff';
+  g.beginPath(); g.arc(cx,cx,r,0,PI2); g.fill();
+}
+
+const PICKUP_COL = { life:'#44ff88', slow:'#cc88ff', nova:'#00ccff' };
+const pickupSprites = {};
+function bakePickups() {
+  for (const type of ['life','slow','nova']) {
+    const size=72, cx=36, col=PICKUP_COL[type];
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const g = c.getContext('2d');
+    const gr = g.createRadialGradient(cx,cx,4, cx,cx,34);
+    gr.addColorStop(0, col); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.globalAlpha=0.38; g.fillStyle=gr; g.fillRect(0,0,size,size);
+    g.globalAlpha=1;
+    g.fillStyle='rgba(0,0,10,0.8)';
+    g.beginPath(); g.arc(cx,cx,15,0,PI2); g.fill();
+    g.strokeStyle=col; g.lineWidth=2;
+    g.beginPath(); g.arc(cx,cx,15,0,PI2); g.stroke();
+    g.fillStyle=col; g.strokeStyle=col;
+    if (type==='life') {                       // plus
+      g.fillRect(cx-2,cx-8,4,16); g.fillRect(cx-8,cx-2,16,4);
+    } else if (type==='slow') {                // clock
+      g.lineWidth=2;
+      g.beginPath(); g.arc(cx,cx,7,0,PI2); g.stroke();
+      g.beginPath(); g.moveTo(cx,cx); g.lineTo(cx,cx-5); g.moveTo(cx,cx); g.lineTo(cx+4,cx); g.stroke();
+    } else {                                   // 4-point star
+      g.beginPath();
+      g.moveTo(cx,cx-9); g.lineTo(cx+2.5,cx-2.5); g.lineTo(cx+9,cx); g.lineTo(cx+2.5,cx+2.5);
+      g.lineTo(cx,cx+9); g.lineTo(cx-2.5,cx+2.5); g.lineTo(cx-9,cx); g.lineTo(cx-2.5,cx-2.5);
+      g.closePath(); g.fill();
+    }
+    pickupSprites[type] = c;
+  }
+}
 
 // ═══════════════════════════════════════════════════════
 //  C H I P T U N E   E N G I N E
@@ -341,6 +448,18 @@ function sndLevelUp() {
   });
 }
 
+function sndPickup() {
+  if (muted) return;
+  const ac=ensureAudio();
+  [660,880,1320].forEach((f,i)=>{
+    const osc=ac.createOscillator(),g=ac.createGain();
+    osc.connect(g);g.connect(ac.destination);osc.type='sine';osc.frequency.value=f;
+    const t=ac.currentTime+i*0.05;
+    g.gain.setValueAtTime(0.18,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.14);
+    osc.start(t);osc.stop(t+0.15);
+  });
+}
+
 function sndDead() {
   if (muted) return;
   const ac=ensureAudio(),osc=ac.createOscillator(),g=ac.createGain();
@@ -352,6 +471,17 @@ function sndDead() {
   osc.start();osc.stop(ac.currentTime+0.96);
 }
 
+// ── Haptics & wake lock ──────────────────────────────────
+function buzz(p) { if (navigator.vibrate) try { navigator.vibrate(p); } catch(e){} }
+
+let wakeLock = null;
+async function reqWake() {
+  try { wakeLock = await navigator.wakeLock?.request('screen'); } catch(e){}
+}
+function relWake() {
+  if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
+}
+
 // ═══════════════════════════════════════════════════════
 //  G A M E   S T A T E
 // ═══════════════════════════════════════════════════════
@@ -359,34 +489,92 @@ let G;
 function initGame() {
   G = {
     phase:'start', px:W/2,py:H/2, tx:W/2,ty:H/2,
-    trail:[],enemies:[],sparks:[],stars:makeStars(),
-    startMs:0,elapsedMs:0,lives:3,
-    novaCharge:0,novaReady:false,burst:null,
-    shakeAmt:0,invUntil:0,
+    trail:[],trailAcc:0,enemies:[],sparks:[],texts:[],pickups:[],stars:makeStars(),
+    startMs:0,elapsedMs:0,lives:3,level:1,
+    novaCharge:0,novaReady:false,burst:null,burstId:0,
+    shakeAmt:0,invUntil:0,slowUntil:0,flash:0,
     spawnMs:BASE_INT,eSpd:BASE_SPD,
-    lastSpawn:0,lastLevel:0,paused:false,
+    lastSpawn:0,lastLevel:0,nextPickup:0,paused:false,
     hi:+localStorage.getItem(LS_KEY)||0,
   };
 }
 
 function makeStars() {
-  return Array.from({length:110},()=>({
+  const n = clamp(Math.round(W*H/9000), 70, 170);
+  return Array.from({length:n},()=>({
     x:Math.random()*W,y:Math.random()*H,
     r:Math.random()*1.3+0.15,a:Math.random()*0.65+0.12,
     ph:Math.random()*PI2,spd:Math.random()*0.018+0.004,
   }));
 }
 
-function spawnEnemy() {
-  const side=(Math.random()*4)|0,m=24;
+// ── Enemies ──────────────────────────────────────────────
+// Types: 0 chaser · 1 speeder · 2 weaver · 3 splitter
+function pickType(sec) {
+  const w1 = sec>25 ? Math.min(5,(sec-25)*0.12) : 0;
+  const w2 = sec>55 ? Math.min(4,(sec-55)*0.10) : 0;
+  const w3 = sec>90 ? Math.min(3,(sec-90)*0.08) : 0;
+  let r = Math.random()*(10+w1+w2+w3);
+  if ((r-=10)<0) return 0;
+  if ((r-=w1)<0) return 1;
+  if ((r-=w2)<0) return 2;
+  return 3;
+}
+
+function spawnEnemy(now) {
+  if (G.enemies.length >= MAX_ENEMIES) return;
+  const sec=(now-G.startMs)/1000, type=pickType(sec);
+  const side=(Math.random()*4)|0, m=28;
   let x,y;
   if(side===0){x=Math.random()*W;y=-m;}
   else if(side===1){x=W+m;y=Math.random()*H;}
   else if(side===2){x=Math.random()*W;y=H+m;}
   else{x=-m;y=Math.random()*H;}
-  const r=Math.random()*10+7;
-  const hue=[355,12,330,348,20][(Math.random()*5)|0];
-  G.enemies.push({x,y,r,col:`hsl(${hue},90%,${Math.floor(Math.random()*16+56)}%)`,spd:G.eSpd*(0.75+Math.random()*0.5),ph:Math.random()*PI2});
+
+  let spd=G.eSpd*(0.75+Math.random()*0.5), r, hue, wAmp=0;
+  if (type===1)      { r=4.5+Math.random()*3;  spd*=1.75; hue=[24,34,16][(Math.random()*3)|0]; }
+  else if (type===2) { r=8+Math.random()*5;    spd*=0.95; hue=[286,300,272][(Math.random()*3)|0]; wAmp=1.4+Math.random()*1.4; }
+  else if (type===3) { r=16+Math.random()*5;   spd*=0.55; hue=350; }
+  else               { r=7+Math.random()*10;               hue=[355,12,330,348,20][(Math.random()*5)|0]; }
+  const lit=56+4*((Math.random()*5)|0);
+  G.enemies.push({x,y,r,type,hue,lit,col:`hsl(${hue},90%,${lit}%)`,
+    spr:enemySprite(hue,lit),spd,ph:Math.random()*PI2,
+    wAmp,wPh:Math.random()*PI2,ignoreBurst:0});
+}
+
+function splitEnemy(e, burstId) {
+  for (let k=0;k<2;k++) {
+    const a=Math.random()*PI2, lit=68;
+    G.enemies.push({x:e.x+Math.cos(a)*16,y:e.y+Math.sin(a)*16,
+      r:5.5+Math.random()*2,type:0,hue:e.hue,lit,col:`hsl(${e.hue},90%,${lit}%)`,
+      spr:enemySprite(e.hue,lit),spd:e.spd*1.9,ph:Math.random()*PI2,
+      wAmp:0,wPh:0,ignoreBurst:burstId});
+  }
+}
+
+// ── Pickups ──────────────────────────────────────────────
+function spawnPickup(now) {
+  const types=['slow','nova'];
+  if (G.lives<MAX_LIVES) types.push('life');
+  const type=types[(Math.random()*types.length)|0];
+  let x,y,tries=0;
+  do {
+    x=60+Math.random()*(W-120); y=90+Math.random()*(H-180);
+  } while (Math.hypot(x-G.px,y-G.py)<140 && ++tries<8);
+  const a=Math.random()*PI2;
+  G.pickups.push({x,y,type,born:now,vx:Math.cos(a)*0.25,vy:Math.sin(a)*0.25,ph:Math.random()*PI2});
+}
+
+function applyPickup(p, now) {
+  if (p.type==='life')      { G.lives=Math.min(MAX_LIVES,G.lives+1); addText(p.x,p.y,'+1 LIFE',PICKUP_COL.life); }
+  else if (p.type==='slow') { G.slowUntil=now+SLOW_MS; addText(p.x,p.y,'TIME WARP',PICKUP_COL.slow); }
+  else {
+    G.novaCharge=1;
+    if (!G.novaReady) { G.novaReady=true; blastEl.classList.add('ready'); }
+    addText(p.x,p.y,'NOVA CHARGED',PICKUP_COL.nova);
+  }
+  spk(p.x,p.y,PICKUP_COL[p.type],16,4);
+  sndPickup(); buzz(12);
 }
 
 function spk(x,y,col,n=14,ms=4) {
@@ -396,13 +584,15 @@ function spk(x,y,col,n=14,ms=4) {
   }
 }
 
+function addText(x,y,txt,col) {
+  G.texts.push({x,y:y-22,txt,col,a:1});
+}
+
 // ═══════════════════════════════════════════════════════
 //  I N P U T
 // ═══════════════════════════════════════════════════════
 function onTouchStart(e) {
-  if (e.target !== C) return;   // touch landed on a UI element — let it handle itself
-  e.preventDefault();
-  const t=e.touches[0]; G.tx=t.clientX; G.ty=t.clientY;
+  e.preventDefault(); const t=e.touches[0]; G.tx=t.clientX; G.ty=t.clientY;
   if(G.phase!=='play') startGame();
 }
 function onTouchMove(e) {
@@ -415,16 +605,32 @@ C.addEventListener('touchend', e=>e.preventDefault(), {passive:false});
 C.addEventListener('mousedown', e=>{G.tx=e.clientX;G.ty=e.clientY;if(G.phase!=='play')startGame();});
 C.addEventListener('mousemove', e=>{if(G.phase==='play'&&!G.paused){G.tx=e.clientX;G.ty=e.clientY;}});
 
-// ── Keyboard shortcuts ────────────────────────────────
+// ── Keyboard ──────────────────────────────────────────
+const KEYS = new Set();
+const MOVE_KEYS = ['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'];
 document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
+  if (MOVE_KEYS.includes(k) || k===' ') e.preventDefault();
+  KEYS.add(k);
   if (k==='p' || k==='escape') {
     if (G.phase==='play') { G.paused ? resumeGame() : pauseGame(); }
   }
-  if (k===' ' || k==='spacebar') { e.preventDefault(); fireNova(); }
+  if (k===' ' || k==='spacebar') fireNova();
   if (k==='m') toggleMute();
   if (k==='enter' && G.phase!=='play') startGame();
 });
+document.addEventListener('keyup', e => KEYS.delete(e.key.toLowerCase()));
+window.addEventListener('blur', () => KEYS.clear());
+
+function keyboardMove() {
+  const kx=(KEYS.has('arrowright')||KEYS.has('d')?1:0)-(KEYS.has('arrowleft')||KEYS.has('a')?1:0);
+  const ky=(KEYS.has('arrowdown')||KEYS.has('s')?1:0)-(KEYS.has('arrowup')||KEYS.has('w')?1:0);
+  if (kx||ky) {
+    const n=Math.hypot(kx,ky);
+    G.tx=clamp(G.px+kx/n*KEY_REACH,PR,W-PR);
+    G.ty=clamp(G.py+ky/n*KEY_REACH,PR,H-PR);
+  }
+}
 
 function addBtn(el,fn) {
   el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
@@ -435,6 +641,7 @@ addBtn(pauseBtn,  pauseGame);
 addBtn(btnResume, resumeGame);
 addBtn(btnMute,   toggleMute);
 addBtn(btnQuit,   quitGame);
+addBtn(shareEl,   shareScore);
 
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden&&G.phase==='play'&&!G.paused) pauseGame();
@@ -445,10 +652,10 @@ document.addEventListener('visibilitychange',()=>{
 // ═══════════════════════════════════════════════════════
 function fireNova() {
   if(G.phase==='play'&&G.novaReady&&!G.burst&&!G.paused){
-    G.burst={x:G.px,y:G.py,r:PR+4,maxR:Math.hypot(W,H)*0.62+60};
+    G.burst={id:++G.burstId,x:G.px,y:G.py,r:PR+4,maxR:Math.hypot(W,H)*0.62+60};
     G.novaCharge=0;G.novaReady=false;
     blastEl.classList.remove('ready');
-    spk(G.px,G.py,'#0cf',32,7);sndNovaFire();
+    spk(G.px,G.py,'#0cf',32,7);sndNovaFire();buzz(20);
   }
 }
 
@@ -458,11 +665,15 @@ function startGame() {
     if(!music) music=new Chiptune(AC);
     else music.resetBpm();
     const hi=G.hi;initGame();G.hi=hi;
-    G.phase='play';G.startMs=performance.now();G.lastLevel=G.startMs;
+    const now=performance.now();
+    G.phase='play';G.startMs=now;G.lastLevel=now;
+    G.nextPickup=now+14000+Math.random()*8000;
     G.tx=G.px=W/2;G.ty=G.py=H/2;
     hudEl.classList.remove('hidden');
     blastEl.classList.add('show');blastEl.classList.remove('ready');
+    shareEl.classList.remove('show');shareEl.textContent='SHARE SCORE';
     music.start();
+    reqWake();
   }
 }
 
@@ -470,9 +681,11 @@ function endGame(now) {
   G.phase='over';G.elapsedMs=now-G.startMs;
   if(G.elapsedMs>G.hi){G.hi=G.elapsedMs;localStorage.setItem(LS_KEY,G.hi);}
   hudEl.classList.add('hidden');blastEl.classList.remove('show','ready');
-  G.enemies=[];
+  shareEl.classList.add('show');
+  G.enemies=[];G.pickups=[];
   if(music) music.stop();
-  sndDead();
+  sndDead();buzz([60,40,90]);
+  relWake();
 }
 
 function pauseGame() {
@@ -480,6 +693,7 @@ function pauseGame() {
   G.paused=true;pauseOL.classList.remove('hidden');
   blastEl.classList.remove('show');
   if(music) music.stop();
+  relWake();
 }
 
 function resumeGame() {
@@ -488,6 +702,8 @@ function resumeGame() {
   if(G.novaReady) blastEl.classList.add('ready');
   if(music) music.start();
   prevNow=performance.now();
+  G.invUntil=prevNow+1000;   // grace period so you can't die the instant you unpause
+  reqWake();
 }
 
 function quitGame() {
@@ -495,6 +711,8 @@ function quitGame() {
   if(music) music.stop();
   const hi=G.hi;initGame();G.hi=hi;
   hudEl.classList.add('hidden');blastEl.classList.remove('show','ready');
+  shareEl.classList.remove('show');
+  relWake();
 }
 
 function toggleMute() {
@@ -504,6 +722,18 @@ function toggleMute() {
   if(!muted) sndNovaPing();
 }
 
+function shareScore() {
+  const txt=`I survived ${msToTime(G.elapsedMs)} in VOID — can you beat it?`;
+  if (navigator.share) {
+    navigator.share({title:'VOID',text:txt,url:location.href}).catch(()=>{});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(`${txt} ${location.href}`).then(()=>{
+      shareEl.textContent='COPIED!';
+      setTimeout(()=>{shareEl.textContent='SHARE SCORE';},1400);
+    }).catch(()=>{});
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 //  L O O P
 // ═══════════════════════════════════════════════════════
@@ -511,13 +741,14 @@ let prevNow=0;
 function loop(now) {
   requestAnimationFrame(loop);
   const dt=Math.min(now-prevNow,50);prevNow=now;
+  const f=dt/16.667;                      // 60fps-equivalent frames elapsed
   let ox=0,oy=0;
-  if(G.shakeAmt>0.5){ox=(Math.random()-0.5)*G.shakeAmt*2;oy=(Math.random()-0.5)*G.shakeAmt*2;G.shakeAmt*=0.78;}
+  if(G.shakeAmt>0.5){ox=(Math.random()-0.5)*G.shakeAmt*2;oy=(Math.random()-0.5)*G.shakeAmt*2;G.shakeAmt*=Math.pow(0.78,f);}
   else G.shakeAmt=0;
   ctx.save();if(ox||oy)ctx.translate(ox,oy);
   drawBG(now);
   if(G.paused)           {drawScene(now);}
-  else if(G.phase==='play') {update(now,dt);drawScene(now);updateHUD(now);}
+  else if(G.phase==='play') {update(now,dt,f);drawScene(now);updateHUD(now);}
   else if(G.phase==='start'){drawScene(now);drawStart(now);}
   else if(G.phase==='over') {drawScene(now);drawOver(now);}
   ctx.restore();
@@ -525,73 +756,147 @@ function loop(now) {
 
 function drawBG(now) {
   ctx.fillStyle='#00000f';ctx.fillRect(0,0,W,H);
-  G.stars.forEach(s=>{
+  ctx.fillStyle='#fff';
+  for(let i=0;i<G.stars.length;i++){
+    const s=G.stars[i];
     ctx.globalAlpha=s.a*(0.6+0.4*Math.sin(now*s.spd+s.ph));
-    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,PI2);ctx.fill();
-  });
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,PI2);ctx.fill();
+  }
   ctx.globalAlpha=1;
-  const vg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.6);
-  vg.addColorStop(0,'rgba(10,35,80,0.10)');vg.addColorStop(1,'rgba(0,0,0,0.35)');
-  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
 }
 
-function update(now,dt) {
-  G.px+=(G.tx-G.px)*LERP;G.py+=(G.ty-G.py)*LERP;
-  G.px=Math.max(PR,Math.min(W-PR,G.px));G.py=Math.max(PR,Math.min(H-PR,G.py));
-  G.trail.unshift({x:G.px,y:G.py});if(G.trail.length>TRAIL)G.trail.length=TRAIL;
+function update(now,dt,f) {
+  keyboardMove();
+  // frame-rate-correct exponential approach to target
+  const lerp=1-Math.pow(1-LERP,f);
+  G.px+=(G.tx-G.px)*lerp;G.py+=(G.ty-G.py)*lerp;
+  G.px=clamp(G.px,PR,W-PR);G.py=clamp(G.py,PR,H-PR);
+
+  G.trailAcc+=dt;
+  while(G.trailAcc>=16){G.trail.unshift({x:G.px,y:G.py});G.trailAcc-=16;}
+  if(G.trail.length>TRAIL)G.trail.length=TRAIL;
 
   if(!G.novaReady){
     G.novaCharge=Math.min(1,G.novaCharge+dt/NOVA_MS);
     if(G.novaCharge>=1){G.novaReady=true;blastEl.classList.add('ready');sndNovaPing();}
   }
 
+  // Nova burst — expanding shell kills what it sweeps over
   if(G.burst){
-    G.burst.r+=NOVA_SPD;
-    G.enemies=G.enemies.filter(e=>{
+    const step=NOVA_SPD*f;
+    G.burst.r+=step;
+    for(let i=G.enemies.length-1;i>=0;i--){
+      const e=G.enemies[i];
+      if(e.ignoreBurst===G.burst.id) continue;
       const d=Math.hypot(e.x-G.burst.x,e.y-G.burst.y);
-      if(d>=G.burst.r-30&&d<=G.burst.r+10){spk(e.x,e.y,e.col,9,3.5);return false;}
-      return true;
-    });
+      if(d>=G.burst.r-30-step&&d<=G.burst.r+10){
+        spk(e.x,e.y,e.col,9,3.5);
+        if(e.type===3) splitEnemy(e,G.burst.id);
+        G.enemies[i]=G.enemies[G.enemies.length-1];G.enemies.pop();
+      }
+    }
     if(G.burst.r>G.burst.maxR)G.burst=null;
   }
 
-  if(now-G.lastSpawn>G.spawnMs){spawnEnemy();G.lastSpawn=now;}
+  const slow=now<G.slowUntil;
+  if(now-G.lastSpawn>G.spawnMs*(slow?1.4:1)){spawnEnemy(now);G.lastSpawn=now;}
 
   if(now-G.lastLevel>LVL_INT){
-    G.spawnMs=Math.max(520,G.spawnMs*0.9);G.eSpd*=1.14;G.lastLevel=now;
+    G.spawnMs=Math.max(520,G.spawnMs*0.9);
+    G.eSpd=Math.min(MAX_ESPD,G.eSpd*1.14);
+    G.lastLevel=now;G.level++;
     spk(G.px,G.py,'rgba(140,220,255,0.6)',8,2.5);
+    addText(G.px,G.py,'LEVEL '+G.level,'#8df');
     sndLevelUp();
     if(music)music.speedUp(); // BPM increases with difficulty
   }
 
+  // Pickups
+  if(now>G.nextPickup&&G.pickups.length<2){
+    spawnPickup(now);
+    G.nextPickup=now+16000+Math.random()*10000;
+  }
+  for(let i=G.pickups.length-1;i>=0;i--){
+    const p=G.pickups[i];
+    p.x+=p.vx*f;p.y+=p.vy*f;p.ph+=0.05*f;
+    if(p.x<40||p.x>W-40)p.vx*=-1;
+    if(p.y<80||p.y>H-80)p.vy*=-1;
+    let dead=now-p.born>9000;
+    if(!dead&&Math.hypot(p.x-G.px,p.y-G.py)<PR+15){applyPickup(p,now);dead=true;}
+    if(dead){G.pickups[i]=G.pickups[G.pickups.length-1];G.pickups.pop();}
+  }
+
+  // Enemies
   const inv=now<G.invUntil;
-  G.enemies=G.enemies.filter(e=>{
+  const spdMul=(slow?SLOW_F:1)*f;
+  for(let i=G.enemies.length-1;i>=0;i--){
+    const e=G.enemies[i];
     const dx=G.px-e.x,dy=G.py-e.y,d=Math.hypot(dx,dy)||1;
-    e.x+=(dx/d)*e.spd;e.y+=(dy/d)*e.spd;e.ph+=0.04;
-    if(!inv&&d<PR+e.r-5){
-      G.lives--;G.shakeAmt=15;G.invUntil=now+INV_MS;
-      spk(G.px,G.py,'#ff4466',22,5.5);sndHit();
-      if(G.lives<=0)endGame(now);
-      return false;
+    e.x+=(dx/d)*e.spd*spdMul;e.y+=(dy/d)*e.spd*spdMul;
+    if(e.wAmp){            // weavers oscillate perpendicular to their heading
+      e.wPh+=0.07*f;
+      const s=Math.sin(e.wPh)*e.wAmp*spdMul;
+      e.x+=(-dy/d)*s;e.y+=(dx/d)*s;
     }
-    return true;
-  });
-  G.sparks=G.sparks.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=0.93;p.vy*=0.93;p.a-=p.decay;return p.a>0;});
+    e.ph+=0.04*f;
+    if(!inv&&d<PR+e.r-5){
+      G.lives--;G.shakeAmt=15;G.invUntil=now+INV_MS;G.flash=0.6;
+      spk(G.px,G.py,'#ff4466',22,5.5);sndHit();buzz(45);
+      if(G.lives<=0){endGame(now);return;}
+      G.enemies[i]=G.enemies[G.enemies.length-1];G.enemies.pop();
+      continue;
+    }
+    // Graze: skimming past enemies charges the nova twice as fast
+    if(!inv&&!G.novaReady&&d<PR+e.r+GRAZE){
+      G.novaCharge=Math.min(1,G.novaCharge+dt/NOVA_MS);
+      if(Math.random()<0.06*f)spk(G.px,G.py,'#0cf',1,1.5);
+    }
+  }
+
+  // Sparks
+  const fric=Math.pow(0.93,f);
+  for(let i=G.sparks.length-1;i>=0;i--){
+    const p=G.sparks[i];
+    p.x+=p.vx*f;p.y+=p.vy*f;p.vx*=fric;p.vy*=fric;p.a-=p.decay*f;
+    if(p.a<=0){G.sparks[i]=G.sparks[G.sparks.length-1];G.sparks.pop();}
+  }
+
+  // Floating texts
+  for(let i=G.texts.length-1;i>=0;i--){
+    const t=G.texts[i];
+    t.y-=0.5*f;t.a-=0.012*f;
+    if(t.a<=0){G.texts[i]=G.texts[G.texts.length-1];G.texts.pop();}
+  }
+
+  if(G.flash>0)G.flash=Math.max(0,G.flash-0.035*f);
 }
 
 function drawScene(now) {
   const invBlink=(G.phase==='play')&&(now<G.invUntil)&&(Math.floor(now/80)%2===0);
 
-  G.enemies.forEach(e=>{
-    const pulse=1+0.13*Math.sin(e.ph);
-    ctx.save();ctx.shadowColor=e.col;ctx.shadowBlur=24;
-    ctx.globalAlpha=0.28;ctx.fillStyle=e.col;
-    ctx.beginPath();ctx.arc(e.x,e.y,e.r*pulse*1.75,0,PI2);ctx.fill();
-    ctx.globalAlpha=1;ctx.shadowBlur=12;ctx.fillStyle='rgba(0,0,8,0.85)';
-    ctx.beginPath();ctx.arc(e.x,e.y,e.r*pulse,0,PI2);ctx.fill();
-    ctx.strokeStyle=e.col;ctx.lineWidth=2.2;ctx.stroke();ctx.restore();
-  });
+  // Pickups
+  for(let i=0;i<G.pickups.length;i++){
+    const p=G.pickups[i];
+    const age=now-p.born;
+    let a=1;
+    if(age>6500)a=Math.floor(now/130)%2===0?0.25:0.9;   // expiry blink
+    const pulse=1+0.1*Math.sin(p.ph*2);
+    const spr=pickupSprites[p.type],sz=spr.width*pulse;
+    ctx.globalAlpha=a;
+    ctx.drawImage(spr,p.x-sz/2,p.y-sz/2,sz,sz);
+  }
+  ctx.globalAlpha=1;
 
+  // Enemies (pre-baked glow sprites)
+  for(let i=0;i<G.enemies.length;i++){
+    const e=G.enemies[i];
+    const pulse=1+0.13*Math.sin(e.ph);
+    const scale=(e.r*pulse)/E_BASE,sz=e.spr.width*scale;
+    ctx.drawImage(e.spr,e.x-sz/2,e.y-sz/2,sz,sz);
+  }
+
+  // Trail
   for(let i=G.trail.length-1;i>=0;i--){
     const t=(TRAIL-i)/TRAIL;
     ctx.globalAlpha=t*t*0.52;ctx.fillStyle=`hsl(${196+t*22},100%,${52+t*16}%)`;
@@ -599,18 +904,14 @@ function drawScene(now) {
   }
   ctx.globalAlpha=1;
 
+  // Player (pre-baked sprite)
   if(!invBlink){
-    ctx.save();
-    ctx.shadowColor='#4af';ctx.shadowBlur=38;ctx.globalAlpha=0.40;ctx.fillStyle='#4af';
-    ctx.beginPath();ctx.arc(G.px,G.py,PR*1.85,0,PI2);ctx.fill();
-    ctx.globalAlpha=0.72;ctx.shadowBlur=16;ctx.fillStyle='#8df';
-    ctx.beginPath();ctx.arc(G.px,G.py,PR*1.12,0,PI2);ctx.fill();
-    ctx.globalAlpha=1;ctx.shadowColor='#fff';ctx.shadowBlur=14;ctx.fillStyle='#f0faff';
-    ctx.beginPath();ctx.arc(G.px,G.py,PR,0,PI2);ctx.fill();
-    ctx.restore();
+    const sz=playerSprite.width*0.5;
+    ctx.drawImage(playerSprite,G.px-sz/2,G.py-sz/2,sz,sz);
     if(G.phase==='play')drawNovaRing(now);
   }
 
+  // Nova burst ring
   if(G.burst){
     const p=Math.min(1,G.burst.r/G.burst.maxR);
     ctx.save();
@@ -622,8 +923,33 @@ function drawScene(now) {
     ctx.restore();
   }
 
-  G.sparks.forEach(p=>{ctx.globalAlpha=p.a;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,PI2);ctx.fill();});
+  // Sparks
+  for(let i=0;i<G.sparks.length;i++){
+    const p=G.sparks[i];
+    ctx.globalAlpha=p.a;ctx.fillStyle=p.col;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,PI2);ctx.fill();
+  }
   ctx.globalAlpha=1;
+
+  // Floating texts
+  if(G.texts.length){
+    ctx.save();ctx.textAlign='center';ctx.font='700 11px Orbitron,monospace';
+    for(let i=0;i<G.texts.length;i++){
+      const t=G.texts[i];
+      ctx.globalAlpha=t.a;ctx.fillStyle=t.col;
+      ctx.fillText(t.txt,t.x,t.y);
+    }
+    ctx.restore();ctx.globalAlpha=1;
+  }
+
+  // Time-warp tint
+  if(G.phase==='play'&&now<G.slowUntil){
+    ctx.fillStyle='rgba(140,90,255,0.06)';ctx.fillRect(0,0,W,H);
+  }
+  // Hit flash
+  if(G.flash>0){
+    ctx.fillStyle=`rgba(255,40,70,${G.flash*0.30})`;ctx.fillRect(0,0,W,H);
+  }
 }
 
 function drawNovaRing(now) {
@@ -640,7 +966,7 @@ function drawNovaRing(now) {
 function updateHUD(now) {
   const s=Math.floor((now-G.startMs)/1000);
   timeEl.textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-  livesEl.textContent=(['','●','● ●','● ● ●'])[G.lives]||'';
+  livesEl.textContent='● '.repeat(Math.max(0,G.lives)).trim();
 }
 
 function msToTime(ms) {
@@ -657,16 +983,16 @@ function drawStart(now) {
 
   ctx.save();ctx.font='900 58px Orbitron,monospace';
   ctx.fillStyle='#fff';ctx.shadowColor='rgba(70,190,255,0.95)';ctx.shadowBlur=55;
-  ctx.fillText('VOID',W/2,H*0.30);ctx.restore();
+  ctx.fillText('VOID',W/2,H*0.28);ctx.restore();
 
   ctx.save();ctx.font='12px Share Tech Mono,monospace';ctx.fillStyle='rgba(100,200,255,0.65)';
-  ctx.fillText('drag to survive  \u00B7  nova to destroy',W/2,H*0.30+40);ctx.restore();
+  ctx.fillText('drag to survive  ·  nova to destroy',W/2,H*0.28+40);ctx.restore();
 
   // Instructions box
-  const bx=W/2-130,bw=260,by=H*0.40,bh=100;
+  const bx=W/2-130,bw=260,by=H*0.38,bh=127;
   ctx.save();ctx.fillStyle='rgba(0,25,55,0.45)';ctx.strokeStyle='rgba(0,180,255,0.2)';ctx.lineWidth=1;
   rrect(bx,by,bw,bh,7);ctx.fill();ctx.stroke();ctx.restore();
-  [{k:'DRAG',v:'move your orb'},{k:'NOVA',v:'blast all enemies'},{k:'\u25CF \u25CF \u25CF',v:'3 lives to survive'}].forEach((r,i)=>{
+  [{k:'DRAG',v:'move your orb'},{k:'NOVA',v:'blast all enemies'},{k:'ORBS',v:'grab for bonuses'},{k:'● ● ●',v:'3 lives to survive'}].forEach((r,i)=>{
     const ry=by+26+i*27;
     ctx.save();ctx.textAlign='right';ctx.font='10px Orbitron,monospace';ctx.fillStyle='rgba(0,210,255,0.78)';ctx.fillText(r.k,W/2-12,ry);ctx.restore();
     ctx.save();ctx.textAlign='left';ctx.font='10px Share Tech Mono,monospace';ctx.fillStyle='rgba(255,255,255,0.52)';ctx.fillText(r.v,W/2+12,ry);ctx.restore();
@@ -674,14 +1000,14 @@ function drawStart(now) {
 
   const pls=0.5+0.5*Math.sin(now*0.0025);
   ctx.save();ctx.font='12px Share Tech Mono,monospace';ctx.fillStyle=`rgba(255,255,255,${0.45+0.55*pls})`;
-  ctx.fillText('TAP  /  CLICK  /  ENTER  TO BEGIN',W/2,H*0.61);ctx.restore();
+  ctx.fillText('TAP  /  CLICK  /  ENTER  TO BEGIN',W/2,H*0.63);ctx.restore();
 
   if(G.hi>0){
     ctx.save();ctx.font='11px Share Tech Mono,monospace';ctx.fillStyle='rgba(80,170,255,0.5)';
-    ctx.fillText('BEST  '+msToTime(G.hi),W/2,H*0.67);ctx.restore();
+    ctx.fillText('BEST  '+msToTime(G.hi),W/2,H*0.69);ctx.restore();
   }
   ctx.save();ctx.font='10px Share Tech Mono,monospace';ctx.fillStyle='rgba(255,255,255,0.15)';
-  ctx.fillText('SHARE \u2192 ADD TO HOME SCREEN',W/2,H*0.91);ctx.restore();
+  ctx.fillText('SHARE → ADD TO HOME SCREEN',W/2,H*0.91);ctx.restore();
 }
 
 // ── Game Over screen ──────────────────────────────────
@@ -697,7 +1023,7 @@ function drawOver(now) {
   if(G.elapsedMs>0&&G.elapsedMs>=G.hi){
     const hp=0.7+0.3*Math.sin(now*0.005);
     ctx.save();ctx.font='11px Share Tech Mono,monospace';ctx.fillStyle=`rgba(255,215,80,${hp})`;
-    ctx.fillText('\u2736  NEW BEST  \u2736',W/2,H*0.545);ctx.restore();
+    ctx.fillText('✶  NEW BEST  ✶',W/2,H*0.545);ctx.restore();
   }else{
     ctx.save();ctx.font='11px Share Tech Mono,monospace';ctx.fillStyle='rgba(80,170,255,0.5)';
     ctx.fillText('BEST  '+msToTime(G.hi),W/2,H*0.545);ctx.restore();
@@ -714,9 +1040,13 @@ function rrect(x,y,w,h,r){
   ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
 }
 
+// ── Boot ──────────────────────────────────────────────
+resize();
+window.addEventListener('resize', resize);
+bakePlayer();
+bakePickups();
 initGame();
 requestAnimationFrame(loop);
 </script>
-<div style="position:fixed;bottom:10px;right:14px;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.22);pointer-events:none;z-index:99">Built by John Saunders</div>
 </body>
 </html>
