@@ -15,8 +15,9 @@
   *, *::before, *::after { margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none; }
   html,body { width:100%;height:100%;overflow:hidden;background:#00000f;touch-action:none;user-select:none;-webkit-user-select:none; }
   #c { position:fixed;top:0;left:0;width:100%;height:100%;display:block; }
+
  /* Created by John Saunders */
-  /* HUD */
+ /* HUD */
   #hud {
     position:fixed;top:0;left:0;right:0;z-index:5;
     padding:calc(env(safe-area-inset-top,0px) + 16px) 24px 0;
@@ -125,6 +126,7 @@
 
 <div id="blast">NOVA</div>
 <div id="share">SHARE SCORE</div>
+<label id="hap" style="position:fixed;width:0;height:0;overflow:hidden" aria-hidden="true"><input type="checkbox" switch></label>
 
 <div id="pause-overlay" class="hidden">
   <div class="po-title">PAUSED</div>
@@ -226,16 +228,27 @@ function enemySprite(hue, lit) {
 
 let playerSprite = null;
 function bakePlayer() {
-  const r = PR*2, size = r*6, cx = size/2;   // baked at 2x for crispness
+  // Radial gradients only — shadowBlur bleeds past the canvas edge and
+  // shows up as a faint square halo around the orb.
+  const r = PR*2, size = Math.ceil(r*6.5), cx = size/2;   // baked at 2x for crispness
   playerSprite = document.createElement('canvas');
   playerSprite.width = playerSprite.height = size;
   const g = playerSprite.getContext('2d');
-  g.shadowColor='#4af'; g.shadowBlur=76; g.globalAlpha=0.40; g.fillStyle='#4af';
-  g.beginPath(); g.arc(cx,cx,r*1.85,0,PI2); g.fill();
-  g.globalAlpha=0.72; g.shadowBlur=32; g.fillStyle='#8df';
-  g.beginPath(); g.arc(cx,cx,r*1.12,0,PI2); g.fill();
-  g.globalAlpha=1; g.shadowColor='#fff'; g.shadowBlur=28; g.fillStyle='#f0faff';
-  g.beginPath(); g.arc(cx,cx,r,0,PI2); g.fill();
+  let gr = g.createRadialGradient(cx,cx,0, cx,cx,r*3);
+  gr.addColorStop(0,'rgba(68,170,255,0.50)');
+  gr.addColorStop(0.38,'rgba(68,170,255,0.20)');
+  gr.addColorStop(1,'rgba(68,170,255,0)');
+  g.fillStyle=gr; g.beginPath(); g.arc(cx,cx,r*3,0,PI2); g.fill();
+  gr = g.createRadialGradient(cx,cx,0, cx,cx,r*1.5);
+  gr.addColorStop(0,'rgba(136,221,255,0.85)');
+  gr.addColorStop(0.65,'rgba(136,221,255,0.50)');
+  gr.addColorStop(1,'rgba(136,221,255,0)');
+  g.fillStyle=gr; g.beginPath(); g.arc(cx,cx,r*1.5,0,PI2); g.fill();
+  gr = g.createRadialGradient(cx,cx,0, cx,cx,r*1.18);
+  gr.addColorStop(0,'rgba(240,250,255,1)');
+  gr.addColorStop(0.8,'rgba(240,250,255,1)');
+  gr.addColorStop(1,'rgba(240,250,255,0)');
+  g.fillStyle=gr; g.beginPath(); g.arc(cx,cx,r*1.18,0,PI2); g.fill();
 }
 
 const PICKUP_COL = { life:'#44ff88', slow:'#cc88ff', nova:'#00ccff' };
@@ -274,19 +287,35 @@ function bakePickups() {
 //  C H I P T U N E   E N G I N E
 // ═══════════════════════════════════════════════════════
 
-// Music patterns (32 steps = 2 bars of 16th notes)
+// Music patterns (64 steps = 4 bars of 16th notes; the chord changes
+// every 4 steps: C G Am Em F C G G, twice, with a varied answer phrase).
 // Semitones from C4 (middle C = 261.63 Hz). null = rest.
 const MEL = [
+  // call
   16,null,19,null,24,null,23,null,   // E5 G5 C6 B5
   21,null,null,null,19,null,null,null,// A5 ... G5 ...
   17,null,21,null,24,null,21,null,   // F5 A5 C6 A5
-  19,null,16,null,12,null,null,null  // G5 E5 C5 ...
+  19,null,16,null,12,null,null,null, // G5 E5 C5 ...
+  // answer
+  24,null,null,null,23,null,19,null, // C6 ... B5 G5
+  21,null,16,null,16,null,11,null,   // A5 E5 E5 B4
+  17,null,21,null,16,null,12,null,   // F5 A5 E5 C5
+  14,null,null,null,11,null,14,null  // D5 ... B4 D5
 ];
 const BAS = [
   -12,null,null,null,-5,null,null,null,  // C3 ... G3 ...
   -3, null,null,null,-8,null,null,null,  // A3 ... E3 ...
   -7, null,null,null, 0,null,null,null,  // F3 ... C4 ...
-  -5, null,null,null,-5,null,  2,null   // G3 ... G3 D4
+  -5, null,null,null,-5,null,  2,null,   // G3 ... G3 D4
+  -12,null,-12,null,-5,null,-5,null,     // busier second half
+  -3, null,-3, null,-8,null,-8,null,
+  -7, null,-7, null, 0,null,-7,null,
+  -5, null,-5, null,-5,null,-1,null      // ... B3 leads back to C
+];
+// Arpeggio chord tones (one chord per 4 steps, looping every 32)
+const ARPCH = [
+  [12,16,19],[7,11,14],[9,12,16],[4,7,11],   // C  G  Am Em
+  [5,9,12],[12,16,19],[7,11,14],[7,11,14]    // F  C  G  G
 ];
 const KICK  = [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0];
 const SNARE = [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0];
@@ -300,11 +329,42 @@ class Chiptune {
     this.nextBeat = 0;
     this._tid     = null;
     this.playing  = false;
+    this.layer    = 0;     // extra musical layers fade in as levels rise
 
     // Dedicated gain so SFX and music are independent
     this.gain = ac.createGain();
     this.gain.gain.value = 0.13;
     this.gain.connect(ac.destination);
+
+    const pan = v => {
+      if (ac.createStereoPanner) { const p=ac.createStereoPanner(); p.pan.value=v; return p; }
+      return ac.createGain();
+    };
+
+    // Melody: soft lowpass to tame the square wave, panned slightly right,
+    // with a dotted-eighth feedback echo panned left for width.
+    this.melBus = ac.createGain();
+    const melLP = ac.createBiquadFilter(); melLP.type='lowpass'; melLP.frequency.value=4200;
+    const melPan = pan(0.12);
+    this.melBus.connect(melLP); melLP.connect(melPan); melPan.connect(this.gain);
+    this.echo = ac.createDelay(1); this.echo.delayTime.value = this._stepDur()*3;
+    const fb  = ac.createGain(); fb.gain.value = 0.30;
+    const wet = ac.createGain(); wet.gain.value = 0.20;
+    const echoPan = pan(-0.2);
+    this.melBus.connect(this.echo);
+    this.echo.connect(fb); fb.connect(this.echo);
+    this.echo.connect(wet); wet.connect(echoPan); echoPan.connect(this.gain);
+
+    // Bass: lowpassed square = rounder, warmer
+    this.basBus = ac.createGain();
+    const basLP = ac.createBiquadFilter(); basLP.type='lowpass'; basLP.frequency.value=750;
+    const basPan = pan(-0.08);
+    this.basBus.connect(basLP); basLP.connect(basPan); basPan.connect(this.gain);
+
+    // Arpeggio
+    this.arpBus = ac.createGain();
+    const arpPan = pan(-0.18);
+    this.arpBus.connect(arpPan); arpPan.connect(this.gain);
 
     // Pre-bake noise buffers (avoid per-step allocation)
     const sr = ac.sampleRate;
@@ -322,11 +382,11 @@ class Chiptune {
 
   _stepDur() { return 60 / this._bpm / 4; } // 16th note seconds
 
-  _osc(semi, t, type = 'square', dur = 0.11, vol = 0.26) {
+  _osc(semi, t, type = 'square', dur = 0.11, vol = 0.26, bus = null) {
     const freq = 261.63 * Math.pow(2, semi / 12);
     const osc  = this.ac.createOscillator();
     const g    = this.ac.createGain();
-    osc.connect(g); g.connect(this.gain);
+    osc.connect(g); g.connect(bus || this.gain);
     osc.type = type; osc.frequency.value = freq;
     g.gain.setValueAtTime(vol, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
@@ -358,12 +418,24 @@ class Chiptune {
   _schedule() {
     const look = 0.12;
     while (this.nextBeat < this.ac.currentTime + look) {
-      const s = this.step % 32, t = this.nextBeat;
-      if (MEL[s] !== null) this._osc(MEL[s],  t, 'square',   0.10, 0.26);
-      if (BAS[s] !== null) this._osc(BAS[s],  t, 'square',   0.09, 0.18);
-      if (KICK[s])         this._kick(t);
-      if (SNARE[s])        this._noise(this._snBuf, t, 1800, 0.22, 0.07);
-      if (HIHAT[s])        this._noise(this._htBuf, t, 6500, 0.07, 0.025);
+      const s = this.step % 64, s32 = this.step % 32, t = this.nextBeat;
+      if (MEL[s] !== null) {
+        this._osc(MEL[s], t, 'square', 0.10, 0.24, this.melBus);
+        // octave shimmer joins at higher levels
+        if (this.layer >= 3) this._osc(MEL[s]+12, t, 'square', 0.08, 0.06, this.melBus);
+      }
+      if (BAS[s] !== null) this._osc(BAS[s], t, 'square', 0.10, 0.30, this.basBus);
+      // gentle 8th-note arpeggio, louder once the game heats up
+      if (s % 2 === 0) {
+        const ch = ARPCH[s32 >> 2];
+        this._osc(ch[(s>>1) % 3], t, 'triangle', 0.09, this.layer>0 ? 0.085 : 0.05, this.arpBus);
+      }
+      if (KICK[s32])  this._kick(t);
+      if (SNARE[s32] || s===60 || s===62)             // drum fill closing each loop
+        this._noise(this._snBuf, t, 1800, 0.22, 0.07);
+      if (HIHAT[s32]) this._noise(this._htBuf, t, 6500, (s32%8===2)?0.085:0.05, 0.025);
+      else if (this.layer >= 2 && s % 2 === 0)        // denser hats when frantic
+        this._noise(this._htBuf, t, 7500, 0.03, 0.02);
       this.nextBeat += this._stepDur();
       this.step++;
     }
@@ -382,9 +454,16 @@ class Chiptune {
     this._tid = null;
   }
 
-  speedUp() { this._bpm = Math.min(195, this._bpm + 6); } // called on level-up
+  speedUp() {            // called on level-up
+    this._bpm = Math.min(195, this._bpm + 6);
+    this.layer++;
+    this.echo.delayTime.value = this._stepDur()*3;
+  }
   mute(v)   { this.gain.gain.value = v ? 0 : 0.13; }
-  resetBpm() { this._bpm = 148; }
+  resetBpm() {
+    this._bpm = 148; this.layer = 0; this.step = 0;
+    this.echo.delayTime.value = this._stepDur()*3;
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -396,9 +475,39 @@ function ensureAudio() {
   if (!AC) {
     AC = new (window.AudioContext || window.webkitAudioContext)();
   }
-  if (AC.state === 'suspended') AC.resume();
+  if (AC.state !== 'running') AC.resume();
   return AC;
 }
+
+// iOS plays WebAudio through the "ambient" audio session, which the
+// ring/silent switch mutes — so on most iPhones the game is silent.
+// Keeping a looping (actually silent) <audio> element playing flips the
+// session to "playback", which ignores the silent switch.
+function makeSilentWav() {
+  const sr=8000, n=sr/2, buf=new Uint8Array(44+n*2), dv=new DataView(buf.buffer);
+  const wr=(o,s)=>{for(let i=0;i<s.length;i++)buf[o+i]=s.charCodeAt(i);};
+  wr(0,'RIFF'); dv.setUint32(4,36+n*2,true); wr(8,'WAVE'); wr(12,'fmt ');
+  dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
+  dv.setUint32(24,sr,true); dv.setUint32(28,sr*2,true); dv.setUint16(32,2,true); dv.setUint16(34,16,true);
+  wr(36,'data'); dv.setUint32(40,n*2,true);
+  let b=''; for(let i=0;i<buf.length;i++) b+=String.fromCharCode(buf[i]);
+  return 'data:audio/wav;base64,'+btoa(b);
+}
+
+let sessionAudio=null, mediaUnlocked=false;
+function unlockAudio() {
+  ensureAudio();   // touchend/click are the most reliable unlock gestures on iOS
+  if (!mediaUnlocked) {
+    mediaUnlocked = true;
+    try {
+      sessionAudio = new Audio(makeSilentWav());
+      sessionAudio.loop = true;
+      sessionAudio.setAttribute('playsinline','');
+      sessionAudio.play().catch(()=>{ mediaUnlocked=false; });
+    } catch(e) { mediaUnlocked=false; }
+  }
+}
+['touchend','mousedown','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio));
 
 function sndHit() {
   if (muted) return;
@@ -472,7 +581,13 @@ function sndDead() {
 }
 
 // ── Haptics & wake lock ──────────────────────────────────
-function buzz(p) { if (navigator.vibrate) try { navigator.vibrate(p); } catch(e){} }
+// iOS Safari has no navigator.vibrate; toggling a switch-style checkbox
+// produces a haptic tick on iOS 17.4+ (no-op elsewhere).
+const hapEl = document.getElementById('hap');
+function buzz(p) {
+  if (navigator.vibrate) { try { navigator.vibrate(p); } catch(e){} }
+  else { try { hapEl.click(); } catch(e){} }
+}
 
 let wakeLock = null;
 async function reqWake() {
@@ -644,7 +759,11 @@ addBtn(btnQuit,   quitGame);
 addBtn(shareEl,   shareScore);
 
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden&&G.phase==='play'&&!G.paused) pauseGame();
+  if(document.hidden){
+    if(G.phase==='play'&&!G.paused) pauseGame();
+  }else if(AC&&AC.state!=='running'){
+    AC.resume().catch(()=>{});   // iOS suspends the context when backgrounded
+  }
 });
 
 // ═══════════════════════════════════════════════════════
@@ -700,6 +819,7 @@ function resumeGame() {
   G.paused=false;pauseOL.classList.add('hidden');
   blastEl.classList.add('show');
   if(G.novaReady) blastEl.classList.add('ready');
+  ensureAudio();
   if(music) music.start();
   prevNow=performance.now();
   G.invUntil=prevNow+1000;   // grace period so you can't die the instant you unpause
