@@ -75,7 +75,7 @@ body{
 .cc:hover{transform:scale(1.07);border-color:#FFD700;}
 .cc.sel{border-color:#CC0000;background:rgba(255,215,215,.95);}
 .cc canvas{display:block;margin:0 auto;}
-.cc span{display:block;font-size:.58rem;font-weight:700;color:#333;margin-top:3px;line-height:1.3;}
+.cc span{display:block;font-size:.68rem;font-weight:700;color:#333;margin-top:3px;line-height:1.3;}
 #s-select .brow{display:flex;gap:10px;margin-top:2px;}
 
 /* GAMEOVER */
@@ -100,6 +100,7 @@ body{
   transition:transform .1s,filter .1s;
   box-shadow:0 4px 0 rgba(0,0,0,.3);
   letter-spacing:.3px;
+  white-space:nowrap;
 }
 .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.3);}
 .btn-r{background:#CC0000;color:#fff;}
@@ -109,8 +110,8 @@ body{
 
 /* MUTE */
 #btn-mute{
-  position:absolute;top:10px;left:10px;z-index:30;
-  width:40px;height:40px;border:none;border-radius:50%;
+  position:absolute;top:8px;left:8px;z-index:30;
+  width:44px;height:44px;border:none;border-radius:50%;
   background:rgba(255,255,255,.55);font-size:1.1rem;cursor:pointer;
   box-shadow:0 2px 6px rgba(0,0,0,.25);
   display:flex;align-items:center;justify-content:center;
@@ -760,7 +761,7 @@ ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
 let selectedChar = CHARS[0];
 let score = 0;
-let bestScore = parseInt(localStorage.getItem('pkflap_best') || '0');
+let bestScore = (() => { try { return Math.max(0, parseInt(localStorage.getItem('pkflap_best'), 10) || 0); } catch(e) { return 0; } })();
 let gamePhase = 'idle'; // 'idle' | 'playing' | 'dead'
 let curScreen = 'start'; // 'start' | 'select' | 'gameover' | 'game'
 let paused = false;
@@ -769,7 +770,7 @@ let runStartBest = bestScore, newBest = false;
 // ─── SOUND (synthesised — no audio assets) ────────────────────────────────────
 
 const SFX = (() => {
-  let ac = null, muted = localStorage.getItem('pkflap_mute') === '1';
+  let ac = null, muted = (() => { try { return localStorage.getItem('pkflap_mute') === '1'; } catch(e) { return false; } })();
   function ensureAC() {
     if (!ac) {
       try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
@@ -799,7 +800,7 @@ const SFX = (() => {
     hit()    { tone(160, .22, 'sawtooth', .2, -100); tone(500, .35, 'square', .07, -420, .08); },
     unlock() { ensureAC(); },
     isMuted()  { return muted; },
-    toggle()   { muted = !muted; localStorage.setItem('pkflap_mute', muted ? '1' : '0'); return muted; },
+    toggle()   { muted = !muted; try { localStorage.setItem('pkflap_mute', muted ? '1' : '0'); } catch(e) {} return muted; },
   };
 })();
 
@@ -910,7 +911,7 @@ function addPoint(quiet) {
   if (!quiet) { SFX.score(); buzz(10); }
   if (score > bestScore) {
     bestScore = score;
-    localStorage.setItem('pkflap_best', bestScore);
+    try { localStorage.setItem('pkflap_best', bestScore); } catch(e) {}
   }
   if (score > runStartBest) newBest = true;
 }
@@ -1067,7 +1068,7 @@ function render() {
   ctx.restore();
 
   // Atmosphere + impact overlays
-  if (night > .05) { ctx.fillStyle = 'rgba(15,20,60,' + (night * .22).toFixed(3) + ')'; ctx.fillRect(0, 0, CW, CH); }
+  if (night > .05) { ctx.fillStyle = 'rgba(10,15,50,' + (night * .38).toFixed(3) + ')'; ctx.fillRect(0, 0, CW, CH); }
   if (flash > 0)   { ctx.fillStyle = 'rgba(255,255,255,' + flash.toFixed(3) + ')'; ctx.fillRect(0, 0, CW, CH); }
 
   if (gamePhase === 'playing' || gamePhase === 'dead') drawScoreHUD();
