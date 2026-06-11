@@ -19,11 +19,10 @@ body{
 }
 #wrap{
   position:relative;
-  /* always keep the 2:3 canvas aspect, shrink to fit small screens */
-  width:min(400px,100vw,66.66vh);
-  width:min(400px,100vw,66.66svh);
-  height:min(600px,100vh,150vw);
+  /* Fallback sizing — JS replaces width/height immediately at runtime */
+  width:min(400px,100vw);
   height:min(600px,100svh,150vw);
+  height:min(600px,100vh,150vw);
   border-radius:14px;overflow:hidden;
   box-shadow:0 0 50px rgba(255,200,0,.3),0 0 100px rgba(200,0,0,.2);
   flex-shrink:0;
@@ -752,7 +751,30 @@ const CHARS = [
 
 const canvas = document.getElementById('gc');
 const ctx    = canvas.getContext('2d');
-const CW = 400, CH = 600;
+const CW = 400;
+
+// Dynamic height: on portrait phones the screen is taller than 2:3, so we
+// compute CH from the real viewport so the game fills it completely.
+const CH = (() => {
+  const vp = window.visualViewport;
+  const vw = window.innerWidth  || 400;
+  const vh = (vp ? vp.height : window.innerHeight) || 600;
+  if (vw < 540 && vh > vw * 1.2) {
+    return Math.min(900, Math.round(vh * CW / Math.min(vw, CW)));
+  }
+  return 600;
+})();
+
+// Size the wrapper element to fill the viewport — no black bars on any device.
+// Cap at 1:1 CSS px so the game never balloons on large monitors.
+(function sizeWrap() {
+  const vp  = window.visualViewport;
+  const vw  = window.innerWidth  || 400;
+  const vh  = (vp ? vp.height : window.innerHeight) || 600;
+  const s   = Math.min(vw / CW, vh / CH, 1);
+  const el  = document.getElementById('wrap');
+  if (el) { el.style.width = Math.round(CW * s) + 'px'; el.style.height = Math.round(CH * s) + 'px'; }
+})();
 
 // HiDPI: render at device resolution so the art is crisp on retina/mobile
 const DPR = Math.min(window.devicePixelRatio || 1, 2);
