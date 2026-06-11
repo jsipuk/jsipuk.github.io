@@ -26,6 +26,12 @@ function seq(hand, pairs) {
   }).filter(Boolean);
 }
 
+// Combine hands (or any parts) into one sorted note list.
+function merge(...parts) {
+  return parts.flat().sort((a, b) => a.start - b.start || a.midi - b.midi);
+}
+
+const C3 = 48, D3 = 50, E3 = 52, F3 = 53, G3 = 55, A3 = 57, B3 = 59;
 const C4 = 60, D4 = 62, E4 = 64, F4 = 65, G4 = 67, A4 = 69, B4 = 71, C5 = 72;
 
 const DEMO_SONGS = [
@@ -39,6 +45,26 @@ const DEMO_SONGS = [
       [C5, 1, 5], [B4, 1, 4], [A4, 1, 3], [G4, 1, 2],
       [F4, 1, 1], [E4, 1, 3], [D4, 1, 2], [C4, 1, 1],
     ]),
+  },
+  {
+    title: 'Exercise: Scale — Both Hands',
+    bpm: 60,
+    beatsPerBar: 4,
+    // Parallel motion, left hand one octave below the right.
+    notes: merge(
+      seq('R', [
+        [C4, 1, 1], [D4, 1, 2], [E4, 1, 3], [F4, 1, 1],
+        [G4, 1, 2], [A4, 1, 3], [B4, 1, 4], [C5, 1, 5],
+        [C5, 1, 5], [B4, 1, 4], [A4, 1, 3], [G4, 1, 2],
+        [F4, 1, 1], [E4, 1, 3], [D4, 1, 2], [C4, 1, 1],
+      ]),
+      seq('L', [
+        [C3, 1, 5], [D3, 1, 4], [E3, 1, 3], [F3, 1, 2],
+        [G3, 1, 1], [A3, 1, 3], [B3, 1, 2], [C4, 1, 1],
+        [C4, 1, 1], [B3, 1, 2], [A3, 1, 3], [G3, 1, 1],
+        [F3, 1, 2], [E3, 1, 3], [D3, 1, 4], [C3, 1, 5],
+      ]),
+    ),
   },
   {
     title: 'Exercise: Five-Finger March',
@@ -66,6 +92,34 @@ const DEMO_SONGS = [
       [C4, 1, 1], [C4, 1, 1], [D4, 1, 2], [E4, 1, 3],
       [D4, 1.5, 2], [C4, 0.5, 1], [C4, 2, 1],
     ]),
+  },
+  {
+    title: 'Ode to Joy — Two Hands',
+    bpm: 90,
+    beatsPerBar: 4,
+    notes: merge(
+      seq('R', [
+        [E4, 1, 3], [E4, 1, 3], [F4, 1, 4], [G4, 1, 5],
+        [G4, 1, 5], [F4, 1, 4], [E4, 1, 3], [D4, 1, 2],
+        [C4, 1, 1], [C4, 1, 1], [D4, 1, 2], [E4, 1, 3],
+        [E4, 1.5, 3], [D4, 0.5, 2], [D4, 2, 2],
+        [E4, 1, 3], [E4, 1, 3], [F4, 1, 4], [G4, 1, 5],
+        [G4, 1, 5], [F4, 1, 4], [E4, 1, 3], [D4, 1, 2],
+        [C4, 1, 1], [C4, 1, 1], [D4, 1, 2], [E4, 1, 3],
+        [D4, 1.5, 2], [C4, 0.5, 1], [C4, 2, 1],
+      ]),
+      // Simple half-note accompaniment: chord roots and thirds.
+      seq('L', [
+        [C3, 2, 5], [E3, 2, 3],
+        [C3, 2, 5], [G3, 2, 1],
+        [C3, 2, 5], [E3, 2, 3],
+        [G3, 2, 1], [G3, 2, 1],
+        [C3, 2, 5], [E3, 2, 3],
+        [C3, 2, 5], [G3, 2, 1],
+        [C3, 2, 5], [E3, 2, 3],
+        [G3, 2, 1], [C3, 2, 5],
+      ]),
+    ),
   },
   {
     title: 'Twinkle, Twinkle (folk)',

@@ -21,6 +21,8 @@ const PC_SHARP = [false, true, false, true, false, false, true, false, true, fal
 const LETTER_INDEX = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6 };
 
 const midiName = m => PC_NAMES[m % 12];
+// Hand-practice filter: notes of the non-selected hand are dimmed and silent.
+const isHandMuted = (n, opts) => opts.hands !== 'both' && (n.hand || 'R') !== opts.hands;
 const midiOctave = m => Math.floor(m / 12) - 1;
 const isBlackKey = m => PC_SHARP[m % 12];
 // Diatonic staff position: one step per letter name (C4 = 28, E4 = 30, ...)
@@ -187,7 +189,9 @@ class SheetRenderer {
       const step = staffStep(n.midi);
       const y = yFor(step, clef);
       const active = beat >= n.start && beat < n.start + n.duration;
-      const color = active ? (n.hand === 'L' ? '#0e7d72' : '#c2541b') : ink;
+      const muted = isHandMuted(n, opts);
+      const color = muted ? 'rgba(43,38,32,0.22)'
+        : active ? (n.hand === 'L' ? '#0e7d72' : '#c2541b') : ink;
 
       this.drawLedgerLines(ctx, x, step, clef, gap, yFor);
       this.drawNote(ctx, x, y, n.duration, step, clef, gap, color);
@@ -197,6 +201,7 @@ class SheetRenderer {
         ctx.font = `${gap * 1.9}px serif`;
         ctx.fillText('♯', x - gap * 1.7, y + gap * 0.6);
       }
+      if (muted) continue; // no text labels for the resting hand
       if (opts.noteNames) {
         ctx.fillStyle = active ? color : 'rgba(43,38,32,0.6)';
         ctx.font = `600 ${Math.max(10, gap * 0.95)}px -apple-system, sans-serif`;
@@ -330,24 +335,27 @@ class FallRenderer {
 
     // Falling notes: the bottom edge reaches the hit line exactly at note.start.
     for (const n of song.notes) {
+      const muted = isHandMuted(n, opts);
       const yBottom = this.hitY - (n.start - beat) * this.pxPerBeat;
       const height = n.duration * this.pxPerBeat;
       const yTop = yBottom - height;
+      const active = !muted && beat >= n.start && beat < n.start + n.duration;
       if (yBottom < 0 || yTop > this.hitY) {
-        if (beat >= n.start && beat < n.start + n.duration) activeNow.add(n.midi);
+        if (active) activeNow.add(n.midi);
         continue;
       }
-      const active = beat >= n.start && beat < n.start + n.duration;
       if (active) activeNow.add(n.midi);
 
       const x = L.x.get(n.midi), w = L.keyWidth(n.midi);
       const clipBottom = Math.min(yBottom, this.hitY);
       const left = n.hand === 'L';
+      if (muted) ctx.globalAlpha = 0.18;
       ctx.fillStyle = active
         ? (left ? '#36d6c3' : '#ffb05c')
         : (left ? 'rgba(20,160,145,0.85)' : 'rgba(235,140,60,0.85)');
       this.roundRect(ctx, x + 2, Math.max(yTop, -height), w - 4, clipBottom - Math.max(yTop, -height), 6);
       ctx.fill();
+      if (muted) { ctx.globalAlpha = 1; continue; }
 
       if (opts.noteNames && clipBottom - yTop > 18) {
         ctx.fillStyle = 'rgba(15,18,26,0.9)';
@@ -487,7 +495,7 @@ class Player {
       }
       // Trigger notes whose onset we just crossed
       for (const n of this.song.notes) {
-        if (n.start >= this._lastBeat && n.start < this.beat) {
+        if (n.start >= this._lastBeat && n.start < this.beat && !(this.muted && this.muted(n))) {
           this.audio.playNote(n.midi, n.duration / bps, n.hand === 'L' ? 0.4 : 0.55);
         }
       }
@@ -513,9 +521,10 @@ const $ = id => document.getElementById(id);
 const audio = new AudioEngine();
 const sheet = new SheetRenderer($('sheet'));
 const fall = new FallRenderer($('fall'), audio);
-const opts = { noteNames: true, fingers: true };
+const opts = { noteNames: true, fingers: true, hands: 'both' };
 
 const player = new Player(audio, render);
+player.muted = n => isHandMuted(n, opts);
 
 function render() {
   sheet.draw(player.song, Math.max(player.beat, 0), opts);
@@ -560,6 +569,16 @@ speedInput.addEventListener('input', () => {
   player.speed = +speedInput.value;
   $('speed-label').textContent = `${Math.round(player.speed * 100)}%`;
 });
+
+// Hands selector
+for (const btn of document.querySelectorAll('.hands-group .seg')) {
+  btn.addEventListener('click', () => {
+    opts.hands = btn.dataset.hand;
+    document.querySelectorAll('.hands-group .seg')
+      .forEach(b => b.classList.toggle('active', b === btn));
+    render();
+  });
+}
 
 // Beginner toggles
 $('toggle-names').addEventListener('change', e => { opts.noteNames = e.target.checked; render(); });
