@@ -1,7 +1,7 @@
 /* Cache-first service worker so the app works offline once visited.
  * Bump VERSION whenever any app-shell file changes. */
 
-const VERSION = 'aria-v3';
+const VERSION = 'aria-v4';
 const SHELL = [
   './',
   './index.html',
