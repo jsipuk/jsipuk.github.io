@@ -31,22 +31,61 @@ const staffStep = m => midiOctave(m) * 7 + LETTER_INDEX[PC_LETTER[m % 12]];
 // ---------------------------------------------------------------- audio
 
 class AudioEngine {
-  constructor() { this.ctx = null; this.enabled = true; }
+  constructor() { this.ctx = null; this.enabled = true; this.samples = new Map(); }
 
   unlock() { // must be called from a user gesture (iPad Safari requirement)
-    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.loadSamples();
+    }
     if (this.ctx.state === 'suspended') this.ctx.resume();
+  }
+
+  // One piano sample per octave (FluidR3 GM, MIT licence), pitch-shifted to
+  // cover the notes in between. The synth below remains the fallback until
+  // these have decoded (and forever, if a fetch fails offline-first-load).
+  async loadSamples() {
+    for (const oct of [2, 3, 4, 5, 6, 7]) {
+      const midi = 12 * (oct + 1); // C2=36 ... C7=96
+      fetch(`samples/C${oct}.mp3`)
+        .then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); })
+        .then(buf => this.ctx.decodeAudioData(buf))
+        .then(audio => this.samples.set(midi, audio))
+        .catch(() => { /* keep synth fallback */ });
+    }
+  }
+
+  nearestSample(midi) {
+    let best = null;
+    for (const base of this.samples.keys())
+      if (best === null || Math.abs(midi - base) < Math.abs(midi - best)) best = base;
+    return best;
   }
 
   playNote(midi, durationSec, velocity = 0.5) {
     if (!this.enabled || !this.ctx) return;
     const t = this.ctx.currentTime;
-    const freq = 440 * Math.pow(2, (midi - 69) / 12);
+    const base = this.nearestSample(midi);
+
+    if (base !== null) {
+      const src = this.ctx.createBufferSource();
+      src.buffer = this.samples.get(base);
+      src.playbackRate.value = Math.pow(2, (midi - base) / 12);
+      const g = this.ctx.createGain();
+      const hold = Math.min(Math.max(durationSec, 0.3) + 0.3, src.buffer.duration);
+      g.gain.setValueAtTime(velocity * 1.6, t);
+      g.gain.setValueAtTime(velocity * 1.6, t + hold - 0.12);
+      g.gain.linearRampToValueAtTime(0, t + hold);
+      src.connect(g).connect(this.ctx.destination);
+      src.start(t);
+      src.stop(t + hold);
+      return;
+    }
+
+    // Synth fallback: two partials, fast attack, exponential decay.
     const out = this.ctx.createGain();
     out.connect(this.ctx.destination);
-
-    // Two detuned-octave partials with a fast attack and exponential decay
-    // gives a soft, piano-ish pluck without any samples.
+    const freq = 440 * Math.pow(2, (midi - 69) / 12);
     for (const [mult, level, type] of [[1, 1, 'triangle'], [2, 0.25, 'sine']]) {
       const osc = this.ctx.createOscillator();
       const g = this.ctx.createGain();
@@ -135,7 +174,7 @@ class SheetRenderer {
     this.w = r.width; this.h = r.height;
   }
 
-  draw(song, beat, opts) {
+  draw(song, beat, opts, loop) {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.w, this.h);
     if (!song) return;
@@ -169,6 +208,19 @@ class SheetRenderer {
     ctx.textBaseline = 'alphabetic';
     ctx.fillText('\u{1D11E}', 8, trebleBottom + gap * 1.4);            // 𝄞
     if (hasBass) { ctx.font = `${gap * 4.4}px serif`; ctx.fillText('\u{1D122}', 8, bassBottom - gap * 0.6); } // 𝄢
+
+    // A–B loop region
+    if (loop) {
+      const x0 = xFor(loop.start), x1 = xFor(loop.end);
+      ctx.fillStyle = 'rgba(194,84,27,0.07)';
+      ctx.fillRect(x0, 0, x1 - x0, this.h);
+      ctx.strokeStyle = 'rgba(194,84,27,0.5)';
+      ctx.lineWidth = 2;
+      for (const x of [x0, x1]) {
+        if (x < -10 || x > this.w + 10) continue;
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, this.h); ctx.stroke();
+      }
+    }
 
     // Barlines
     ctx.strokeStyle = 'rgba(43,38,32,0.35)';
@@ -282,6 +334,10 @@ class FallRenderer {
     this.pxPerBeat = 90;
     this.layout = null;
     this.pressed = new Set(); // keys the user is touching
+    this.wrong = new Set();   // touched keys that were wrong while waiting
+    this.waiting = null;      // mirror of player.waiting, set each render
+    this.onKey = null;        // callback(midi) -> false if wrong key
+    this.requestRender = null;
     this.bindTouch();
   }
 
@@ -309,11 +365,18 @@ class FallRenderer {
       if (midi === null) return;
       active.set(e.pointerId, midi);
       this.pressed.add(midi);
+      if (this.onKey && this.onKey(midi) === false) this.wrong.add(midi);
       this.audio.playNote(midi, 0.6, 0.6);
+      if (this.requestRender) this.requestRender();
     });
     const release = e => {
       const midi = active.get(e.pointerId);
-      if (midi !== undefined) { this.pressed.delete(midi); active.delete(e.pointerId); }
+      if (midi !== undefined) {
+        this.pressed.delete(midi);
+        this.wrong.delete(midi);
+        active.delete(e.pointerId);
+        if (this.requestRender) this.requestRender();
+      }
     };
     this.canvas.addEventListener('pointerup', release);
     this.canvas.addEventListener('pointercancel', release);
@@ -393,13 +456,16 @@ class FallRenderer {
 
   drawKeyboard(activeNow, opts) {
     const ctx = this.ctx, L = this.layout;
+    const pulse = 0.5 + 0.4 * Math.sin(performance.now() / 160); // wait-mode ring
     // White keys
     for (const m of L.whiteKeys) {
       const x = L.x.get(m);
       const lit = activeNow.has(m), touched = this.pressed.has(m);
-      ctx.fillStyle = lit ? '#ffb05c' : touched ? '#d9e2ec' : '#f7f3ec';
+      ctx.fillStyle = lit ? '#ffb05c'
+        : touched ? (this.wrong.has(m) ? '#e0867e' : '#d9e2ec') : '#f7f3ec';
       this.roundRect(ctx, x + 1, this.hitY, L.whiteW - 2, this.keyH, 5, true);
       ctx.fill();
+      if (this.waiting && this.waiting.has(m)) this.waitRing(x + 1, L.whiteW - 2, this.keyH, pulse);
       if (opts.noteNames) {
         ctx.fillStyle = lit ? '#3a2410' : 'rgba(40,40,50,0.55)';
         ctx.font = `600 ${Math.min(14, L.whiteW * 0.4)}px -apple-system, sans-serif`;
@@ -414,10 +480,20 @@ class FallRenderer {
       if (!isBlackKey(m)) continue;
       const x = L.x.get(m);
       const lit = activeNow.has(m), touched = this.pressed.has(m);
-      ctx.fillStyle = lit ? '#e8852f' : touched ? '#3a4252' : '#1b202b';
+      ctx.fillStyle = lit ? '#e8852f'
+        : touched ? (this.wrong.has(m) ? '#a04a44' : '#3a4252') : '#1b202b';
       this.roundRect(ctx, x, this.hitY, L.blackW, this.keyH * 0.62, 4, true);
       ctx.fill();
+      if (this.waiting && this.waiting.has(m)) this.waitRing(x, L.blackW, this.keyH * 0.62, pulse);
     }
+  }
+
+  waitRing(x, w, h, alpha) { // pulsing outline on the key the user must press
+    const ctx = this.ctx;
+    ctx.strokeStyle = `rgba(124, 196, 255, ${alpha})`;
+    ctx.lineWidth = 3;
+    this.roundRect(ctx, x + 2, this.hitY + 2, w - 4, h - 4, 4, true);
+    ctx.stroke();
   }
 
   roundRect(ctx, x, y, w, h, r, bottomOnly = false) {
@@ -451,6 +527,10 @@ class Player {
     this.beat = 0;
     this.speed = 1;
     this.playing = false;
+    this.muted = null;     // optional predicate: note -> exclude from playback
+    this.waitMode = null;  // optional predicate: () => wait-for-note enabled
+    this.waiting = null;   // Set of midi numbers the user still has to press
+    this.loop = null;      // { start, end } in beats (A–B repeat)
     this._raf = null;
     this._lastTime = 0;
     this._lastBeat = 0;
@@ -460,6 +540,7 @@ class Player {
   load(song) {
     this.pause();
     this.song = song;
+    this.loop = null;
     this.reset();
   }
 
@@ -467,11 +548,44 @@ class Player {
     this.beat = this.song ? -this.song.beatsPerBar : 0; // one-bar count-in
     this._lastBeat = this.beat;
     this._lastClick = Math.floor(this.beat) - 1;
+    this.waiting = null;
+    this.onTick();
+  }
+
+  // Jump to a beat. The tiny epsilon puts us just *before* it, so an onset
+  // exactly at the target still triggers (or arms wait mode) on the next frame.
+  seek(beat) {
+    this.beat = beat - 1e-6;
+    this._lastBeat = this.beat;
+    this._lastClick = Math.floor(beat) - 1;
+    this.waiting = null;
     this.onTick();
   }
 
   get duration() {
     return this.song ? this.song.notes.reduce((m, n) => Math.max(m, n.start + n.duration), 0) : 0;
+  }
+
+  audible(n) { return !(this.muted && this.muted(n)); }
+
+  // Earliest audible onset in (from, to], or null. Strictly greater than
+  // `from` so that resuming from an onset we just satisfied (beat sits
+  // exactly on it) doesn't re-arm the same onset; float drift below an
+  // onset is fine because `from` is the previous frame's clamped beat.
+  nextOnset(from, to) {
+    let best = null;
+    for (const n of this.song.notes)
+      if (n.start > from && n.start <= to && this.audible(n))
+        if (best === null || n.start < best) best = n.start;
+    return best;
+  }
+
+  keyPressed(midi) { // returns false if this was a wrong key while waiting
+    if (!this.waiting) return true;
+    if (!this.waiting.has(midi)) return false;
+    this.waiting.delete(midi);
+    if (this.waiting.size === 0) this.waiting = null; // all pressed: resume
+    return true;
   }
 
   play() {
@@ -480,30 +594,60 @@ class Player {
     if (this.beat >= this.duration) this.reset();
     this.playing = true;
     this._lastTime = performance.now();
-    const loop = now => {
+    const frame = now => {
       if (!this.playing) return;
       const dt = (now - this._lastTime) / 1000;
       this._lastTime = now;
+
+      if (this.waiting) { // holding at an onset until the right keys are tapped
+        this.onTick();
+        this._raf = requestAnimationFrame(frame);
+        return;
+      }
+
       const bps = (this.song.bpm * this.speed) / 60;
+      const wait = this.waitMode && this.waitMode();
       this._lastBeat = this.beat;
-      this.beat += dt * bps;
+      let next = this.beat + dt * bps;
+
+      // Wait mode: stop exactly on the next onset we would have crossed,
+      // and arm the set of keys that release it.
+      if (wait) {
+        const onset = this.nextOnset(this.beat, next);
+        if (onset !== null) {
+          next = onset;
+          const required = this.song.notes.filter(n =>
+            Math.abs(n.start - onset) < 1e-6 && this.audible(n));
+          if (required.length) this.waiting = new Set(required.map(n => n.midi));
+        }
+      }
+      this.beat = next;
 
       // Count-in clicks on every whole beat before 0
       if (this.beat < 0.0001) {
         const b = Math.floor(this.beat);
         if (b > this._lastClick) { this._lastClick = b; this.audio.tick(((b % this.song.beatsPerBar) + this.song.beatsPerBar) % this.song.beatsPerBar === 0); }
       }
-      // Trigger notes whose onset we just crossed
-      for (const n of this.song.notes) {
-        if (n.start >= this._lastBeat && n.start < this.beat && !(this.muted && this.muted(n))) {
-          this.audio.playNote(n.midi, n.duration / bps, n.hand === 'L' ? 0.4 : 0.55);
+      // Trigger note audio (in wait mode the user's own taps make the sound)
+      if (!wait) {
+        for (const n of this.song.notes) {
+          if (n.start >= this._lastBeat && n.start < this.beat && this.audible(n)) {
+            this.audio.playNote(n.midi, n.duration / bps, n.hand === 'L' ? 0.4 : 0.55);
+          }
         }
       }
+      // A–B loop wrap
+      if (this.loop && this.beat >= this.loop.end - 1e-9) {
+        this.beat = this.loop.start - 1e-6; // epsilon: see seek()
+        this._lastBeat = this.beat;
+        this.waiting = null;
+      }
+
       if (this.beat >= this.duration + 1) { this.pause(); this.beat = this.duration; }
       this.onTick();
-      this._raf = requestAnimationFrame(loop);
+      this._raf = requestAnimationFrame(frame);
     };
-    this._raf = requestAnimationFrame(loop);
+    this._raf = requestAnimationFrame(frame);
     this.onTick();
   }
 
@@ -521,16 +665,27 @@ const $ = id => document.getElementById(id);
 const audio = new AudioEngine();
 const sheet = new SheetRenderer($('sheet'));
 const fall = new FallRenderer($('fall'), audio);
-const opts = { noteNames: true, fingers: true, hands: 'both' };
+const opts = { noteNames: true, fingers: true, hands: 'both', wait: false };
 
 const player = new Player(audio, render);
 player.muted = n => isHandMuted(n, opts);
+player.waitMode = () => opts.wait;
+fall.onKey = midi => player.keyPressed(midi);
+fall.requestRender = () => render();
 
 function render() {
-  sheet.draw(player.song, Math.max(player.beat, 0), opts);
+  fall.waiting = player.waiting;
+  sheet.draw(player.song, Math.max(player.beat, 0), opts, player.loop);
   fall.draw(player.song, player.beat, opts);
   $('play').textContent = player.playing ? '❚❚' : '▶';
   $('play').setAttribute('aria-label', player.playing ? 'Pause' : 'Play');
+  if (player.song) {
+    const bpb = player.song.beatsPerBar;
+    const totalBars = Math.max(1, Math.ceil(player.duration / bpb));
+    $('progress').textContent = player.beat < 0
+      ? 'Count-in'
+      : `Bar ${Math.min(Math.floor(Math.max(player.beat, 0) / bpb) + 1, totalBars)} / ${totalBars}`;
+  }
 }
 
 function resize() {
@@ -542,50 +697,136 @@ function resize() {
 function loadSong(song) {
   fall.resize(song); // compute the new keyboard layout before the first render
   player.load(song);
+  resetLoopUi();
   render();
+  saveSettings();
+}
+
+// ---------------------------------------------------------------- persistence
+
+const SETTINGS_KEY = 'aria-settings';
+const IMPORTS_KEY = 'aria-imports';
+
+function saveSettings() {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+      song: player.song && player.song.title,
+      speed: player.speed,
+      hands: opts.hands,
+      noteNames: opts.noteNames,
+      fingers: opts.fingers,
+      wait: opts.wait,
+      sound: audio.enabled,
+    }));
+  } catch { /* private browsing etc. — settings just won't persist */ }
+}
+
+function saveImports() {
+  try { localStorage.setItem(IMPORTS_KEY, JSON.stringify(customSongs)); }
+  catch { showToast('Couldn’t save the import on this device (storage full?)', true); }
+}
+
+function loadStored(key) {
+  try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
 }
 
 // Song picker
 const select = $('song-select');
-const customSongs = [];
+const customSongs = Array.isArray(loadStored(IMPORTS_KEY)) ? loadStored(IMPORTS_KEY) : [];
+const allSongs = () => [...DEMO_SONGS, ...customSongs];
 function refreshSongList() {
   select.innerHTML = '';
-  [...DEMO_SONGS, ...customSongs].forEach((s, i) => {
+  allSongs().forEach((s, i) => {
     const o = document.createElement('option');
     o.value = i; o.textContent = s.title;
     select.appendChild(o);
   });
 }
 refreshSongList();
-select.addEventListener('change', () => loadSong([...DEMO_SONGS, ...customSongs][+select.value]));
+select.addEventListener('change', () => loadSong(allSongs()[+select.value]));
 
 // Transport
 $('play').addEventListener('click', () => player.playing ? player.pause() : player.play());
 $('reset').addEventListener('click', () => { player.pause(); player.reset(); });
+
+// A–B loop: press once at the start bar, again at the end bar, again to clear.
+let loopStage = 0, loopStartBar = 0;
+const loopBtn = $('loop');
+function resetLoopUi() {
+  loopStage = 0;
+  loopBtn.textContent = 'A–B';
+  loopBtn.classList.remove('active', 'armed');
+}
+loopBtn.addEventListener('click', () => {
+  if (!player.song) return;
+  const bpb = player.song.beatsPerBar;
+  const lastBar = Math.max(0, Math.ceil(player.duration / bpb) - 1);
+  const curBar = Math.min(Math.max(0, Math.floor(Math.max(player.beat, 0) / bpb)), lastBar);
+  if (loopStage === 0) {
+    loopStartBar = curBar;
+    loopStage = 1;
+    loopBtn.textContent = `A: bar ${loopStartBar + 1}…`;
+    loopBtn.classList.add('armed');
+    showToast('Loop start set — move to the end bar (tap the sheet) and press again');
+  } else if (loopStage === 1) {
+    const endBar = Math.max(curBar, loopStartBar) + 1;
+    player.loop = { start: loopStartBar * bpb, end: Math.min(endBar * bpb, Math.ceil(player.duration / bpb) * bpb) };
+    loopStage = 2;
+    loopBtn.textContent = `⟲ ${loopStartBar + 1}–${endBar}`;
+    loopBtn.classList.remove('armed');
+    loopBtn.classList.add('active');
+    player.seek(player.loop.start);
+    showToast(`Looping bars ${loopStartBar + 1}–${endBar} — press A–B again to clear`);
+  } else {
+    player.loop = null;
+    resetLoopUi();
+  }
+  render();
+});
+
+// Tap the sheet music to jump to that bar
+$('sheet').addEventListener('pointerdown', e => {
+  if (!player.song) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const beatAt = Math.max(player.beat, 0) + (e.clientX - rect.left - sheet.cursorX) / sheet.pxPerBeat;
+  const bpb = player.song.beatsPerBar;
+  const lastBar = Math.max(0, Math.ceil(player.duration / bpb) - 1);
+  const bar = Math.min(Math.max(0, Math.floor(beatAt / bpb)), lastBar);
+  player.seek(bar * bpb);
+});
 
 // Speed
 const speedInput = $('speed');
 speedInput.addEventListener('input', () => {
   player.speed = +speedInput.value;
   $('speed-label').textContent = `${Math.round(player.speed * 100)}%`;
+  saveSettings();
 });
 
 // Hands selector
+function setHands(hands) {
+  opts.hands = hands;
+  player.waiting = null; // requirements may have changed mid-wait
+  document.querySelectorAll('.hands-group .seg')
+    .forEach(b => b.classList.toggle('active', b.dataset.hand === hands));
+  render();
+}
 for (const btn of document.querySelectorAll('.hands-group .seg')) {
-  btn.addEventListener('click', () => {
-    opts.hands = btn.dataset.hand;
-    document.querySelectorAll('.hands-group .seg')
-      .forEach(b => b.classList.toggle('active', b === btn));
-    render();
-  });
+  btn.addEventListener('click', () => { setHands(btn.dataset.hand); saveSettings(); });
 }
 
 // Beginner toggles
-$('toggle-names').addEventListener('change', e => { opts.noteNames = e.target.checked; render(); });
-$('toggle-fingers').addEventListener('change', e => { opts.fingers = e.target.checked; render(); });
-$('toggle-sound').addEventListener('change', e => { audio.enabled = e.target.checked; });
+$('toggle-names').addEventListener('change', e => { opts.noteNames = e.target.checked; render(); saveSettings(); });
+$('toggle-fingers').addEventListener('change', e => { opts.fingers = e.target.checked; render(); saveSettings(); });
+$('toggle-sound').addEventListener('change', e => { audio.enabled = e.target.checked; saveSettings(); });
+$('toggle-wait').addEventListener('change', e => {
+  opts.wait = e.target.checked;
+  if (!opts.wait) player.waiting = null;
+  render();
+  saveSettings();
+});
 
-// MusicXML import
+// MusicXML import (.musicxml / .xml, or compressed .mxl)
 $('import-btn').addEventListener('click', () => $('file-input').click());
 $('file-input').addEventListener('change', async e => {
   const file = e.target.files[0];
@@ -593,19 +834,25 @@ $('file-input').addEventListener('change', async e => {
   try {
     const buf = await file.arrayBuffer();
     const head = new Uint8Array(buf.slice(0, 2));
-    if (head[0] === 0x50 && head[1] === 0x4B) { // zip magic: compressed .mxl
-      throw new Error('Compressed .mxl files aren’t supported yet — export as uncompressed MusicXML (.musicxml or .xml) instead.');
-    }
-    const song = parseMusicXML(new TextDecoder().decode(buf));
+    const isZip = head[0] === 0x50 && head[1] === 0x4B;
+    const xmlText = isZip ? await extractMusicXMLFromMxl(buf) : new TextDecoder().decode(buf);
+    const song = parseMusicXML(xmlText);
     customSongs.push(song);
+    saveImports();
     refreshSongList();
-    select.value = String(DEMO_SONGS.length + customSongs.length - 1);
+    select.value = String(allSongs().length - 1);
     loadSong(song);
-    showToast(`Imported “${song.title}” — ${song.notes.length} notes`);
+    showToast(`Imported “${song.title}” — ${song.notes.length} notes. Saved to your library.`);
   } catch (err) {
     showToast(err.message, true);
   }
   e.target.value = '';
+});
+
+// Import help popover
+$('import-help').addEventListener('click', () => { $('help-overlay').hidden = false; });
+$('help-overlay').addEventListener('click', e => {
+  if (e.target.id === 'help-overlay' || e.target.id === 'help-close') $('help-overlay').hidden = true;
 });
 
 let toastTimer;
@@ -618,11 +865,30 @@ function showToast(msg, isError = false) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
 }
 
-// Boot
+// ---------------------------------------------------------------- boot
+
+function applyStoredSettings() {
+  const s = loadStored(SETTINGS_KEY);
+  if (!s) return DEMO_SONGS[0];
+  if (typeof s.speed === 'number') {
+    player.speed = s.speed;
+    speedInput.value = String(s.speed);
+    $('speed-label').textContent = `${Math.round(s.speed * 100)}%`;
+  }
+  if (typeof s.noteNames === 'boolean') { opts.noteNames = s.noteNames; $('toggle-names').checked = s.noteNames; }
+  if (typeof s.fingers === 'boolean') { opts.fingers = s.fingers; $('toggle-fingers').checked = s.fingers; }
+  if (typeof s.sound === 'boolean') { audio.enabled = s.sound; $('toggle-sound').checked = s.sound; }
+  if (typeof s.wait === 'boolean') { opts.wait = s.wait; $('toggle-wait').checked = s.wait; }
+  if (s.hands === 'both' || s.hands === 'R' || s.hands === 'L') setHands(s.hands);
+  const idx = allSongs().findIndex(x => x.title === s.song);
+  if (idx >= 0) { select.value = String(idx); return allSongs()[idx]; }
+  return DEMO_SONGS[0];
+}
+
 window.addEventListener('resize', resize);
 sheet.resize();
 fall.resize(null);
-loadSong(DEMO_SONGS[0]);
+loadSong(applyStoredSettings());
 
 // Offline support (PWA)
 if ('serviceWorker' in navigator) {

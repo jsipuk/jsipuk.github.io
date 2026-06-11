@@ -1,7 +1,7 @@
 /* Cache-first service worker so the app works offline once visited.
  * Bump VERSION whenever any app-shell file changes. */
 
-const VERSION = 'aria-v2';
+const VERSION = 'aria-v3';
 const SHELL = [
   './',
   './index.html',
@@ -13,6 +13,12 @@ const SHELL = [
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './samples/C2.mp3',
+  './samples/C3.mp3',
+  './samples/C4.mp3',
+  './samples/C5.mp3',
+  './samples/C6.mp3',
+  './samples/C7.mp3',
 ];
 
 self.addEventListener('install', e => {

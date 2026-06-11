@@ -89,7 +89,12 @@ html, body {
 }
 .btn.primary:active { filter: brightness(1.1); }
 
+.btn-icon { min-width: 44px; padding: 0; font-weight: 700; color: var(--text-dim); }
+
 .transport { display: flex; gap: 8px; }
+
+#loop.armed { border-color: var(--accent); color: var(--accent); }
+#loop.active { background: var(--accent); border-color: var(--accent); color: #2c1a05; }
 
 .hands-group {
   display: flex;
@@ -155,8 +160,23 @@ html, body {
   min-height: 150px;
   background: var(--paper);
   border-bottom: 1px solid var(--line);
+  position: relative;
 }
 #sheet { width: 100%; height: 100%; display: block; --ink: #2b2620; }
+
+#progress {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 4px 10px;
+  background: rgba(43, 38, 32, 0.08);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
 
 .fall-panel { flex: 1 1 auto; min-height: 0; position: relative; }
 #fall { width: 100%; height: 100%; display: block; touch-action: none; }
@@ -181,6 +201,43 @@ html, body {
 }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 #toast.error { border-color: #c0463f; color: #ffb3ae; }
+
+/* ---------------------------------------------------------------- help overlay */
+
+#help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 10, 16, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 20;
+}
+#help-overlay[hidden] { display: none; }
+
+.help-card {
+  max-width: 520px;
+  max-height: 80dvh;
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.help-card h2 { font-size: 18px; margin-bottom: 12px; color: var(--accent); }
+.help-card p { margin-bottom: 10px; }
+.help-card ul { margin: 0 0 10px 20px; }
+.help-card li { margin-bottom: 8px; }
+.help-card code {
+  background: var(--bg);
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.help-card .btn { margin-top: 6px; }
 
 /* ---------------------------------------------------------------- compact phones */
 

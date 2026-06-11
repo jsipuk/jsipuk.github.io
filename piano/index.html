@@ -22,11 +22,13 @@
       <select id="song-select" aria-label="Choose a song"></select>
 
       <button id="import-btn" class="btn" aria-label="Import MusicXML file">Import</button>
+      <button id="import-help" class="btn btn-icon" aria-label="How to import sheet music">?</button>
       <input id="file-input" type="file" accept=".xml,.musicxml,.mxl" hidden>
 
       <div class="transport">
         <button id="play" class="btn primary" aria-label="Play">▶</button>
         <button id="reset" class="btn" aria-label="Restart">⟲</button>
+        <button id="loop" class="btn" aria-label="Set A–B loop">A–B</button>
       </div>
 
       <div class="hands-group" role="group" aria-label="Hands to practise">
@@ -45,11 +47,13 @@
         <label><input id="toggle-names" type="checkbox" checked> Note names</label>
         <label><input id="toggle-fingers" type="checkbox" checked> Fingers</label>
         <label><input id="toggle-sound" type="checkbox" checked> Sound</label>
+        <label><input id="toggle-wait" type="checkbox"> Wait for keys</label>
       </div>
     </header>
 
     <section class="sheet-panel" aria-label="Sheet music">
       <canvas id="sheet"></canvas>
+      <div id="progress" aria-live="off"></div>
     </section>
 
     <section class="fall-panel" aria-label="Falling notes and keyboard">
@@ -58,6 +62,20 @@
   </div>
 
   <div id="toast" role="status"></div>
+
+  <div id="help-overlay" hidden>
+    <div class="help-card" role="dialog" aria-label="How to import sheet music">
+      <h2>Importing sheet music</h2>
+      <p>Aria reads <strong>MusicXML</strong> files: <code>.musicxml</code>, <code>.xml</code>, or compressed <code>.mxl</code>.</p>
+      <ul>
+        <li><strong>musescore.com</strong> &mdash; open a score, tap Download &rarr; MusicXML, save it to the Files app, then tap Import here. Free for public-domain and original scores.</li>
+        <li><strong>MuseScore app</strong> (free, Mac/PC) &mdash; File &rarr; Export &rarr; MusicXML.</li>
+        <li><strong>Printed music or PDFs</strong> &mdash; convert with the free Audiveris scanner first, correct mistakes in MuseScore, then export MusicXML.</li>
+      </ul>
+      <p>Imported songs are stored on this device and stay in your song list.</p>
+      <button class="btn" id="help-close">Got it</button>
+    </div>
+  </div>
 
   <script src="songs.js"></script>
   <script src="musicxml.js"></script>

@@ -120,3 +120,54 @@ function ticksToBeats(el, divisions) {
   const d = parseFloat(el.querySelector(':scope > duration')?.textContent || '0');
   return divisions > 0 ? d / divisions : 0;
 }
+
+/* Extract the score XML from a compressed .mxl file (a zip archive).
+ * Uses the browser-native DecompressionStream — no zip library needed. */
+async function extractMusicXMLFromMxl(buf) {
+  if (typeof DecompressionStream === 'undefined') {
+    throw new Error('This device can’t unzip .mxl files (needs iPadOS 16.4+). Export as uncompressed MusicXML instead.');
+  }
+  const dv = new DataView(buf);
+  const td = new TextDecoder();
+
+  // Find the zip End Of Central Directory record, then walk the directory.
+  let p = buf.byteLength - 22;
+  while (p >= 0 && dv.getUint32(p, true) !== 0x06054b50) p--;
+  if (p < 0) throw new Error('Could not read this .mxl file (no zip directory found).');
+  const count = dv.getUint16(p + 10, true);
+  let off = dv.getUint32(p + 16, true);
+
+  const entries = [];
+  for (let i = 0; i < count && dv.getUint32(off, true) === 0x02014b50; i++) {
+    const method = dv.getUint16(off + 10, true);
+    const csize = dv.getUint32(off + 20, true);
+    const nameLen = dv.getUint16(off + 28, true);
+    const extraLen = dv.getUint16(off + 30, true);
+    const commentLen = dv.getUint16(off + 32, true);
+    const headerOff = dv.getUint32(off + 42, true);
+    entries.push({ name: td.decode(new Uint8Array(buf, off + 46, nameLen)), method, csize, headerOff });
+    off += 46 + nameLen + extraLen + commentLen;
+  }
+
+  const inflate = async e => {
+    const nameLen = dv.getUint16(e.headerOff + 26, true);
+    const extraLen = dv.getUint16(e.headerOff + 28, true);
+    const data = new Uint8Array(buf, e.headerOff + 30 + nameLen + extraLen, e.csize);
+    if (e.method === 0) return td.decode(data); // stored, not compressed
+    if (e.method !== 8) throw new Error('Unsupported compression inside this .mxl file.');
+    const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new Response(stream).text();
+  };
+
+  // META-INF/container.xml names the main score file; fall back to the
+  // first .xml/.musicxml entry outside META-INF.
+  let main = null;
+  const container = entries.find(e => e.name === 'META-INF/container.xml');
+  if (container) {
+    const m = (await inflate(container)).match(/full-path="([^"]+)"/);
+    if (m) main = entries.find(e => e.name === m[1]);
+  }
+  if (!main) main = entries.find(e => /\.(musicxml|xml)$/i.test(e.name) && !e.name.startsWith('META-INF'));
+  if (!main) throw new Error('No MusicXML score found inside the .mxl file.');
+  return inflate(main);
+}
