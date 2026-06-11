@@ -1050,6 +1050,10 @@ function render() {
   pipes.forEach(pp => drawPipe(pp));
   balls.forEach(b => drawPokeball(b));
   drawGround();
+  // Wild Pokémon drawn after grass so they appear in front of it
+  drawOddish(ctx, 92, CH - GH);
+  drawOddish(ctx, 305, CH - GH);
+  drawDiglett(ctx, 345, CH - GH);
 
   selectedChar.draw(ctx, BIRD_X, bird.y, BIRD_R * 2, bird.angle);
 
@@ -1202,11 +1206,7 @@ function drawMountains(ctx) {
 
   // Pokémon Center on the hill
   drawPokeCenter(ctx);
-
-  // Wild Pokémon peeking above the grass line
-  drawOddish(ctx, 92, CH - GH);
-  drawOddish(ctx, 305, CH - GH);
-  drawDiglett(ctx, 345, CH - GH);
+  // (Oddish and Diglett are drawn live after the grass strip, not cached here)
 }
 
 function drawTree(ctx, tx, ty) {
@@ -1342,8 +1342,9 @@ function drawGround() {
 // ─── POKÉMON CENTER ──────────────────────────────────────────────────────────
 
 function drawPokeCenter(ctx) {
-  // Sits on the nearest green hill, centred at cx=175
-  const cx = 175, baseY = 285;
+  // Sits on the nearest green hill, centred at cx=175.
+  // baseY = hill surface at x≈175 (quadratic through (80,330)→cp(130,285)→(180,315) ≈ y 312)
+  const cx = 175, baseY = 312;
   const bw = 100, bh = 62;
   const bx = cx - bw / 2;   // = 125
 
@@ -1418,12 +1419,11 @@ function drawPokeCenter(ctx) {
   ctx.strokeRect(cx - 10, baseY - 22, 20, 22);
   ctx.beginPath(); ctx.moveTo(cx, baseY - 22); ctx.lineTo(cx, baseY); ctx.stroke();
 
-  // ── "POKÉMON CENTER" sign above door ──────────────────────────
+  // ── Red cross above door (classic Pokémon Center symbol) ────────
+  const crossX = cx, crossY = baseY - bh + 42;
   ctx.fillStyle = '#CC2222';
-  ctx.fillRect(cx - 22, baseY - bh + 36, 44, 12);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 6px Arial';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('POKÉMON CENTER', cx, baseY - bh + 42);
+  ctx.fillRect(crossX - 3, crossY - 9, 6, 18);   // vertical bar
+  ctx.fillRect(crossX - 9, crossY - 3, 18, 6);   // horizontal bar
 
   // Wall outline
   ctx.strokeStyle = 'rgba(170,165,195,.35)'; ctx.lineWidth = 1;
