@@ -770,15 +770,19 @@ let runStartBest = bestScore, newBest = false;
 
 const SFX = (() => {
   let ac = null, muted = localStorage.getItem('pkflap_mute') === '1';
-  function audio() {
-    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
-    if (ac.state === 'suspended') ac.resume();
+  function ensureAC() {
+    if (!ac) {
+      try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    }
+    if (ac && ac.state === 'suspended') ac.resume();
     return ac;
   }
   function tone(freq, dur, type, vol, slide, delay) {
     if (muted) return;
     try {
-      const a = audio(), t = a.currentTime + (delay || 0);
+      const a = ensureAC();
+      if (!a) return;
+      const t = a.currentTime + (delay || 0);
       const o = a.createOscillator(), g = a.createGain();
       o.type = type; o.frequency.setValueAtTime(freq, t);
       if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t + dur);
@@ -789,14 +793,19 @@ const SFX = (() => {
     } catch (e) { /* no audio available — play silently */ }
   }
   return {
-    flap()  { tone(440, .09, 'triangle', .15, 240); },
-    score() { tone(660, .08, 'square', .08); tone(880, .1, 'square', .08, 0, .07); },
-    ball()  { tone(523, .07, 'sine', .15); tone(784, .08, 'sine', .15, 0, .06); tone(1047, .12, 'sine', .15, 0, .12); },
-    hit()   { tone(160, .22, 'sawtooth', .2, -100); tone(500, .35, 'square', .07, -420, .08); },
-    isMuted() { return muted; },
-    toggle()  { muted = !muted; localStorage.setItem('pkflap_mute', muted ? '1' : '0'); return muted; },
+    flap()   { tone(440, .09, 'triangle', .15, 240); },
+    score()  { tone(660, .08, 'square', .08); tone(880, .1, 'square', .08, 0, .07); },
+    ball()   { tone(523, .07, 'sine', .15); tone(784, .08, 'sine', .15, 0, .06); tone(1047, .12, 'sine', .15, 0, .12); },
+    hit()    { tone(160, .22, 'sawtooth', .2, -100); tone(500, .35, 'square', .07, -420, .08); },
+    unlock() { ensureAC(); },
+    isMuted()  { return muted; },
+    toggle()   { muted = !muted; localStorage.setItem('pkflap_mute', muted ? '1' : '0'); return muted; },
   };
 })();
+
+// Unlock AudioContext on first user gesture — critical for iOS Safari
+document.addEventListener('touchstart', () => SFX.unlock(), { once: true, passive: true });
+document.addEventListener('click',      () => SFX.unlock(), { once: true, passive: true });
 
 function buzz(ms) { if (navigator.vibrate) try { navigator.vibrate(ms); } catch (e) {} }
 
@@ -1194,9 +1203,10 @@ function drawMountains(ctx) {
   // Pokémon Center on the hill
   drawPokeCenter(ctx);
 
-  // Wild Oddish peeking above the grass line
+  // Wild Pokémon peeking above the grass line
   drawOddish(ctx, 92, CH - GH);
   drawOddish(ctx, 305, CH - GH);
+  drawDiglett(ctx, 345, CH - GH);
 }
 
 function drawTree(ctx, tx, ty) {
@@ -1332,64 +1342,92 @@ function drawGround() {
 // ─── POKÉMON CENTER ──────────────────────────────────────────────────────────
 
 function drawPokeCenter(ctx) {
-  const bx = 138, by = 279, bw = 72, bh = 50;
+  // Sits on the nearest green hill, centred at cx=175
+  const cx = 175, baseY = 285;
+  const bw = 100, bh = 62;
+  const bx = cx - bw / 2;   // = 125
+
   ctx.save();
-  ctx.globalAlpha = 0.82;
+  ctx.globalAlpha = 0.88;
 
   // Drop shadow
-  ctx.fillStyle = 'rgba(0,0,0,.14)';
-  ctx.fillRect(bx + 3, by + 2, bw, 6);
+  ctx.fillStyle = 'rgba(0,0,0,.13)';
+  ctx.fillRect(bx + 4, baseY - 2, bw, 6);
 
-  // Walls
-  ctx.fillStyle = '#E8E8F2';
-  ctx.fillRect(bx, by - bh, bw, bh);
+  // Main walls — white/off-white
+  ctx.fillStyle = '#F2F2FA';
+  ctx.fillRect(bx, baseY - bh, bw, bh);
 
-  // Peaked roof
-  ctx.fillStyle = '#CC3030';
+  // ── Dome arch roof ──────────────────────────────────────────
+  const roofBot = baseY - bh;      // top of walls = bottom of roof
+  const domeH   = 38;
+  ctx.fillStyle = '#CC2222';
   ctx.beginPath();
-  ctx.moveTo(bx - 5, by - bh);
-  ctx.lineTo(bx + bw / 2, by - bh - 28);
-  ctx.lineTo(bx + bw + 5, by - bh);
+  ctx.moveTo(bx - 5, roofBot + 3);
+  ctx.bezierCurveTo(bx - 5, roofBot - domeH + 8, cx - 22, roofBot - domeH - 4, cx, roofBot - domeH);
+  ctx.bezierCurveTo(cx + 22, roofBot - domeH - 4, bx + bw + 5, roofBot - domeH + 8, bx + bw + 5, roofBot + 3);
   ctx.closePath(); ctx.fill();
 
-  // Roof underside trim
-  ctx.fillStyle = '#AA2020';
-  ctx.fillRect(bx - 6, by - bh - 2, bw + 12, 4);
+  // Roof eave (darker trim at the bottom edge of the dome)
+  ctx.fillStyle = '#AA1818';
+  ctx.fillRect(bx - 6, roofBot - 2, bw + 12, 6);
 
-  // Globe at roof peak
-  ctx.fillStyle = '#DD4040';
-  ctx.beginPath(); ctx.arc(bx + bw / 2, by - bh - 30, 5, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#FF8888';
-  ctx.beginPath(); ctx.arc(bx + bw / 2 - 1.5, by - bh - 32, 2, 0, Math.PI * 2); ctx.fill();
+  // ── Pink dome / finial at peak ────────────────────────────────
+  const peakY = roofBot - domeH;
+  ctx.fillStyle = '#FF9999';
+  ctx.beginPath(); ctx.arc(cx, peakY, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FFBBBB';
+  ctx.beginPath(); ctx.arc(cx - 2.5, peakY - 2.5, 4.5, 0, Math.PI * 2); ctx.fill();
 
-  // Red cross on wall
-  const cx = bx + bw / 2, cy = by - bh + 10;
-  ctx.fillStyle = '#CC3030';
-  ctx.fillRect(cx - 3, cy, 6, 16);
-  ctx.fillRect(cx - 9, cy + 5, 18, 6);
+  // ── Poké Ball on the front dome face ─────────────────────────
+  const pbX = cx, pbY = roofBot - domeH / 2 - 2;
+  const pbR = 12;
+  // Red half
+  ctx.fillStyle = '#CC2222';
+  ctx.beginPath(); ctx.arc(pbX, pbY, pbR, Math.PI, 0); ctx.fill();
+  // White half
+  ctx.fillStyle = '#F8F8F8';
+  ctx.beginPath(); ctx.arc(pbX, pbY, pbR, 0, Math.PI); ctx.fill();
+  // Black outline + midline
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.arc(pbX, pbY, pbR, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pbX - pbR, pbY); ctx.lineTo(pbX + pbR, pbY); ctx.stroke();
+  // Centre button
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(pbX, pbY, 4.5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(pbX, pbY, 4.5, 0, Math.PI * 2); ctx.stroke();
 
-  // Windows
-  ctx.fillStyle = 'rgba(160,215,245,.75)';
-  ctx.fillRect(bx + 6, by - bh + 12, 16, 13);
-  ctx.fillRect(bx + bw - 22, by - bh + 12, 16, 13);
-  ctx.strokeStyle = 'rgba(110,165,210,.85)'; ctx.lineWidth = 1;
-  ctx.strokeRect(bx + 6, by - bh + 12, 16, 13);
-  ctx.strokeRect(bx + bw - 22, by - bh + 12, 16, 13);
+  // ── Windows ──────────────────────────────────────────────────
+  ctx.fillStyle = 'rgba(160,215,245,.78)';
+  ctx.fillRect(bx + 7, baseY - bh + 9, 18, 14);
+  ctx.fillRect(bx + bw - 25, baseY - bh + 9, 18, 14);
+  ctx.strokeStyle = 'rgba(100,160,210,.88)'; ctx.lineWidth = 1;
+  ctx.strokeRect(bx + 7, baseY - bh + 9, 18, 14);
+  ctx.strokeRect(bx + bw - 25, baseY - bh + 9, 18, 14);
+  // Window sash lines
   ctx.beginPath();
-  ctx.moveTo(bx + 14, by - bh + 12); ctx.lineTo(bx + 14, by - bh + 25);
-  ctx.moveTo(bx + bw - 14, by - bh + 12); ctx.lineTo(bx + bw - 14, by - bh + 25);
+  ctx.moveTo(bx + 16, baseY - bh + 9); ctx.lineTo(bx + 16, baseY - bh + 23);
+  ctx.moveTo(bx + bw - 16, baseY - bh + 9); ctx.lineTo(bx + bw - 16, baseY - bh + 23);
   ctx.stroke();
 
-  // Door
-  ctx.fillStyle = 'rgba(130,198,242,.82)';
-  ctx.fillRect(cx - 9, by - 20, 18, 20);
-  ctx.strokeStyle = 'rgba(85,148,198,.88)'; ctx.lineWidth = 1;
-  ctx.strokeRect(cx - 9, by - 20, 18, 20);
-  ctx.beginPath(); ctx.moveTo(cx, by - 20); ctx.lineTo(cx, by); ctx.stroke();
+  // ── Double door ───────────────────────────────────────────────
+  ctx.fillStyle = 'rgba(130,198,242,.85)';
+  ctx.fillRect(cx - 10, baseY - 22, 20, 22);
+  ctx.strokeStyle = 'rgba(80,145,198,.9)'; ctx.lineWidth = 1;
+  ctx.strokeRect(cx - 10, baseY - 22, 20, 22);
+  ctx.beginPath(); ctx.moveTo(cx, baseY - 22); ctx.lineTo(cx, baseY); ctx.stroke();
 
-  // Building outline
-  ctx.strokeStyle = 'rgba(180,175,200,.4)'; ctx.lineWidth = 1;
-  ctx.strokeRect(bx, by - bh, bw, bh);
+  // ── "POKÉMON CENTER" sign above door ──────────────────────────
+  ctx.fillStyle = '#CC2222';
+  ctx.fillRect(cx - 22, baseY - bh + 36, 44, 12);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 6px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('POKÉMON CENTER', cx, baseY - bh + 42);
+
+  // Wall outline
+  ctx.strokeStyle = 'rgba(170,165,195,.35)'; ctx.lineWidth = 1;
+  ctx.strokeRect(bx, baseY - bh, bw, bh);
 
   ctx.restore();
 }
@@ -1423,52 +1461,122 @@ function drawOddish(ctx, ox, oy) {
   ctx.restore();
 }
 
+// ─── DIGLETT ─────────────────────────────────────────────────────────────────
+
+function drawDiglett(ctx, x, groundY) {
+  // groundY = ground line; Diglett pokes head out of a rocky dirt mound
+  ctx.save();
+  ctx.globalAlpha = 0.80;
+
+  // Soil mound (rocky dirt pile around the hole)
+  ctx.fillStyle = '#9A7040';
+  ctx.beginPath(); ctx.ellipse(x, groundY + 2, 20, 9, 0, Math.PI, 0); ctx.fill();
+  // Stone highlights on the mound
+  ctx.fillStyle = '#7A5830';
+  ctx.beginPath(); ctx.ellipse(x - 10, groundY - 2, 6, 3.5, -0.3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + 9, groundY - 1, 5, 3, 0.25, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#C49858';
+  ctx.beginPath(); ctx.ellipse(x + 1, groundY - 4, 4, 2.5, -0.1, 0, Math.PI * 2); ctx.fill();
+
+  // Head — warm brown rounded dome
+  ctx.fillStyle = '#C07858';
+  ctx.beginPath(); ctx.arc(x, groundY - 12, 11, 0, Math.PI * 2); ctx.fill();
+  // Shading on head
+  ctx.fillStyle = '#A86040';
+  ctx.beginPath(); ctx.arc(x + 3, groundY - 10, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#C07858';
+  ctx.beginPath(); ctx.arc(x, groundY - 13, 8, 0, Math.PI * 2); ctx.fill();
+
+  // Big oval pink nose (most distinctive Diglett feature)
+  ctx.fillStyle = '#F07870';
+  ctx.beginPath(); ctx.ellipse(x, groundY - 11, 5, 4, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FFAAAA';
+  ctx.beginPath(); ctx.ellipse(x - 1.5, groundY - 12.5, 2.5, 1.8, -0.3, 0, Math.PI * 2); ctx.fill();
+
+  // Beady dot eyes
+  ctx.fillStyle = '#111111';
+  ctx.beginPath(); ctx.arc(x - 4, groundY - 16, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 4, groundY - 16, 2, 0, Math.PI * 2); ctx.fill();
+  // White glint
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath(); ctx.arc(x - 3.2, groundY - 16.8, 0.8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 4.8, groundY - 16.8, 0.8, 0, Math.PI * 2); ctx.fill();
+
+  ctx.restore();
+}
+
 // ─── BACKGROUND BUTTERFREE ───────────────────────────────────────────────────
 
 function drawBgButterfree(x, y) {
   ctx.save();
-  ctx.globalAlpha = 0.50;
+  ctx.globalAlpha = 0.58;
   const t = Date.now() * 0.009;
-  const liftU = Math.max(0,  Math.sin(t)) * 10;
-  const liftD = Math.max(0, -Math.sin(t)) * 6;
+  // Wings beat: upper rise, lower drop on opposite phase
+  const liftU = Math.sin(t) * 11;
+  const liftD = Math.cos(t) * 5;
 
-  // Upper wings
-  ctx.fillStyle = '#E8ECF8';
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.quadraticCurveTo(x - 18, y - 13 - liftU, x - 24, y - 2);
-  ctx.quadraticCurveTo(x - 13, y + 6, x, y);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.quadraticCurveTo(x + 18, y - 13 - liftU, x + 24, y - 2);
-  ctx.quadraticCurveTo(x + 13, y + 6, x, y);
-  ctx.fill();
+  // ── Upper wings (white + black border + black spot) ────────────
+  function upperWing(side) {
+    const s = side; // +1 right, -1 left
+    ctx.fillStyle = '#F4F4F0';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x + s * 7, y - 6 - liftU, x + s * 24, y - 16 - liftU, x + s * 27, y - 4);
+    ctx.bezierCurveTo(x + s * 22, y + 5, x + s * 10, y + 7, x, y);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#1a1818'; ctx.lineWidth = 1.4;
+    ctx.stroke();
+    // Black oval spot on upper wing
+    ctx.fillStyle = '#1a1818';
+    ctx.beginPath(); ctx.ellipse(x + s * 16, y - 10 - liftU * 0.5, 3.5, 2.5, s * 0.4, 0, Math.PI * 2); ctx.fill();
+  }
+  upperWing(1); upperWing(-1);
 
-  // Lower wings
-  ctx.fillStyle = '#C0CAEE';
-  ctx.beginPath();
-  ctx.moveTo(x - 3, y + 3);
-  ctx.quadraticCurveTo(x - 16, y + 7 + liftD, x - 18, y + 15);
-  ctx.quadraticCurveTo(x - 9, y + 17, x - 3, y + 8);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(x + 3, y + 3);
-  ctx.quadraticCurveTo(x + 16, y + 7 + liftD, x + 18, y + 15);
-  ctx.quadraticCurveTo(x + 9, y + 17, x + 3, y + 8);
-  ctx.fill();
+  // ── Lower wings (white + black border, wider/rounder) ──────────
+  function lowerWing(side) {
+    const s = side;
+    ctx.fillStyle = '#F4F4F0';
+    ctx.beginPath();
+    ctx.moveTo(x + s * 2, y + 4);
+    ctx.bezierCurveTo(x + s * 10, y + 3 + liftD, x + s * 21, y + 7 + liftD, x + s * 21, y + 18);
+    ctx.bezierCurveTo(x + s * 14, y + 22, x + s * 5, y + 16, x + s * 2, y + 8);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#1a1818'; ctx.lineWidth = 1.4;
+    ctx.stroke();
+    // Small oval spot on lower wing
+    ctx.fillStyle = '#1a1818';
+    ctx.beginPath(); ctx.ellipse(x + s * 14, y + 14 + liftD * 0.4, 2.8, 2, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  lowerWing(1); lowerWing(-1);
 
-  // Body
-  ctx.fillStyle = '#8888A0';
-  ctx.beginPath(); ctx.ellipse(x, y + 5, 3, 9, 0, 0, Math.PI * 2); ctx.fill();
+  // ── Blue-teal body ────────────────────────────────────────────
+  ctx.fillStyle = '#3A7A9A';
+  ctx.beginPath(); ctx.ellipse(x, y + 6, 3.2, 9, 0, 0, Math.PI * 2); ctx.fill();
 
-  // Antennae
-  ctx.strokeStyle = '#606075'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(x - 1, y); ctx.lineTo(x - 8, y - 11); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x + 1, y); ctx.lineTo(x + 8, y - 11); ctx.stroke();
-  ctx.fillStyle = '#606075';
-  ctx.beginPath(); ctx.arc(x - 8, y - 11, 2, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(x + 8, y - 11, 2, 0, Math.PI * 2); ctx.fill();
+  // ── Head (darker teal) ────────────────────────────────────────
+  ctx.fillStyle = '#2E6880';
+  ctx.beginPath(); ctx.arc(x, y - 1, 4.5, 0, Math.PI * 2); ctx.fill();
+
+  // ── Large compound eyes (prominent red) ───────────────────────
+  ctx.fillStyle = '#CC1818';
+  ctx.beginPath(); ctx.arc(x - 5, y - 2, 4.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 5, y - 2, 4.2, 0, Math.PI * 2); ctx.fill();
+  // Eye sheen
+  ctx.fillStyle = '#FF4444';
+  ctx.beginPath(); ctx.arc(x - 6, y - 3.5, 1.8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 4, y - 3.5, 1.8, 0, Math.PI * 2); ctx.fill();
+  // Pupils
+  ctx.fillStyle = '#220000';
+  ctx.beginPath(); ctx.arc(x - 4.5, y - 1.5, 1.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 5.5, y - 1.5, 1.5, 0, Math.PI * 2); ctx.fill();
+
+  // ── Antennae (black, curving outward, ball tips) ───────────────
+  ctx.strokeStyle = '#1a1818'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x - 2, y - 4); ctx.quadraticCurveTo(x - 7, y - 11, x - 10, y - 15); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + 2, y - 4); ctx.quadraticCurveTo(x + 7, y - 11, x + 10, y - 15); ctx.stroke();
+  ctx.fillStyle = '#1a1818';
+  ctx.beginPath(); ctx.arc(x - 10, y - 15, 2.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 10, y - 15, 2.2, 0, Math.PI * 2); ctx.fill();
 
   ctx.restore();
 }
