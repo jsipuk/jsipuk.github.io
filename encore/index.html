@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encore — the ten-minute piano room</title>
+<meta name="description" content="A warm little piano practice room: guided scales, sight-reading flash cards, public domain songs and short burst timers.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23171225'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='%23E9B850'%3E%E2%99%AA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#171225;
+  --panel:#221B33;
+  --panel-2:#2A2240;
+  --line:#3A3054;
+  --ivory:#F6F1E7;
+  --muted:#A89DC2;
+  --gold:#E9B850;
+  --gold-soft:rgba(233,184,80,.18);
+  --rose:#D77A9A;
+  --green:#7FC9A6;
+  --red:#E07A6B;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(1100px 520px at 50% -180px, rgba(215,122,154,.10), transparent 60%),
+    radial-gradient(900px 480px at 85% 0, rgba(233,184,80,.07), transparent 55%),
+    var(--ink);
+  color:var(--ivory);
+  font-family:'Karla',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:48px;
+}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+
+/* ---------- header ---------- */
+header{padding:42px 0 10px;text-align:center}
+.eyebrow{
+  font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold);font-weight:700;
+}
+h1{
+  font-family:'Fraunces',serif;font-weight:600;
+  font-size:clamp(34px,6vw,54px);line-height:1.05;margin:8px 0 10px;
+}
+h1 em{font-style:italic;color:var(--rose)}
+.sub{color:var(--muted);font-size:15px;max-width:520px;margin:0 auto}
+
+/* ---------- tabs ---------- */
+nav{
+  display:flex;gap:6px;justify-content:center;flex-wrap:wrap;
+  margin:26px auto 22px;padding:6px;width:fit-content;
+  background:var(--panel);border:1px solid var(--line);border-radius:999px;
+}
+nav button{
+  appearance:none;border:0;background:transparent;color:var(--muted);
+  font:inherit;font-weight:700;font-size:14px;
+  padding:9px 18px;border-radius:999px;cursor:pointer;
+  transition:color .15s,background .15s;
+}
+nav button:hover{color:var(--ivory)}
+nav button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+nav button.on{background:var(--gold);color:#241B07}
+
+/* ---------- panels ---------- */
+section{display:none}
+section.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);padding:22px;
+}
+.card + .card{margin-top:16px}
+h2{font-family:'Fraunces',serif;font-weight:600;font-size:22px;margin-bottom:4px}
+.hint{color:var(--muted);font-size:14px;line-height:1.5}
+
+/* ---------- controls ---------- */
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.chip{
+  appearance:none;border:1px solid var(--line);background:var(--panel-2);
+  color:var(--ivory);font:inherit;font-size:14px;font-weight:500;
+  padding:8px 14px;border-radius:999px;cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+.chip:hover{border-color:var(--gold)}
+.chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.chip.on{background:var(--gold-soft);border-color:var(--gold);color:var(--gold);font-weight:700}
+.big{
+  appearance:none;border:0;background:var(--gold);color:#241B07;
+  font:inherit;font-weight:700;font-size:15px;
+  padding:11px 22px;border-radius:999px;cursor:pointer;
+}
+.big:hover{filter:brightness(1.06)}
+.big:focus-visible{outline:2px solid var(--ivory);outline-offset:2px}
+.big.quiet{background:var(--panel-2);color:var(--ivory);border:1px solid var(--line)}
+
+/* ---------- the piano (signature) ---------- */
+.piano-shell{
+  margin-top:26px;background:linear-gradient(180deg,#100C1C,#1B1530);
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 14px 18px;overflow-x:auto;
+}
+.felt{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--rose),var(--gold));opacity:.85;margin-bottom:10px}
+.keys{position:relative;height:168px;display:flex;width:max-content;min-width:100%}
+.wkey{
+  position:relative;width:44px;height:100%;flex:none;
+  touch-action:pan-x;user-select:none;-webkit-user-select:none;
+  background:linear-gradient(180deg,#FBF7EC,#E9E2D0);
+  border:1px solid #C9C0AA;border-radius:0 0 7px 7px;
+  cursor:pointer;
+}
+.wkey:active,.wkey.down{background:linear-gradient(180deg,#EFE7D2,#DDD3B8)}
+.bkey{
+  position:absolute;top:0;width:28px;height:62%;z-index:2;
+  touch-action:pan-x;user-select:none;-webkit-user-select:none;
+  background:linear-gradient(180deg,#352F45,#0E0B18);
+  border:1px solid #000;border-radius:0 0 5px 5px;cursor:pointer;
+}
+.bkey:active,.bkey.down{background:linear-gradient(180deg,#221D31,#060410)}
+.wkey.target{box-shadow:0 0 0 2px var(--gold) inset,0 0 22px 4px rgba(233,184,80,.55);background:linear-gradient(180deg,#FFF6DC,#F2E2AE)}
+.bkey.target{box-shadow:0 0 0 2px var(--gold) inset,0 0 22px 4px rgba(233,184,80,.6)}
+.wkey.good{box-shadow:0 0 0 2px var(--green) inset,0 0 18px 3px rgba(127,201,166,.5)}
+.bkey.good{box-shadow:0 0 0 2px var(--green) inset,0 0 18px 3px rgba(127,201,166,.55)}
+.wkey.bad{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.klabel{
+  position:absolute;bottom:7px;left:0;right:0;text-align:center;
+  font-size:10px;font-weight:700;color:#8A7F66;pointer-events:none;
+}
+.kcomp{
+  position:absolute;bottom:24px;left:0;right:0;text-align:center;
+  font-size:10px;color:#B5A98C;pointer-events:none;
+}
+.bkey .klabel{color:#9A91AD;bottom:6px}
+.bkey .kcomp{color:#6F6590;bottom:22px}
+.finger-bubble{
+  position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  background:var(--gold);color:#241B07;font-weight:700;font-size:13px;
+  width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+}
+
+/* ---------- scale coach ---------- */
+.seq{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}
+.step{
+  min-width:46px;padding:8px 6px;text-align:center;border-radius:10px;
+  background:var(--panel-2);border:1px solid var(--line);
+}
+.step .n{font-weight:700;font-size:15px}
+.step .f{font-size:11px;color:var(--muted)}
+.step.now{background:var(--gold-soft);border-color:var(--gold)}
+.step.now .n{color:var(--gold)}
+.step.done{opacity:.45}
+.step.done .n{color:var(--green)}
+
+/* ---------- flash cards ---------- */
+.staffbox{display:flex;justify-content:center;margin-top:14px}
+.staffbox svg{max-width:100%}
+.streak{
+  font-family:'Fraunces',serif;font-size:40px;font-weight:700;color:var(--gold);
+  text-align:center;margin-top:6px;
+}
+.streak small{display:block;font-family:'Karla';font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+/* ---------- burst timer ---------- */
+.burst-grid{display:grid;grid-template-columns:1fr;gap:18px;align-items:center}
+@media(min-width:700px){.burst-grid{grid-template-columns:auto 1fr}}
+.ring{position:relative;width:210px;height:210px;margin:0 auto}
+.ring svg{transform:rotate(-90deg)}
+.ring .t{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.ring .t .big-num{font-family:'Fraunces',serif;font-size:44px;font-weight:700}
+.ring .t .lbl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stat{display:flex;gap:22px;flex-wrap:wrap;margin-top:14px}
+.stat div b{font-family:'Fraunces',serif;font-size:26px;display:block;color:var(--gold)}
+.stat div span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.log{margin-top:14px;font-size:14px;color:var(--muted)}
+.log li{list-style:none;padding:6px 0;border-bottom:1px dashed var(--line)}
+.log li b{color:var(--green)}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);
+  background:var(--panel-2);border:1px solid var(--gold);color:var(--ivory);
+  padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;
+  transition:transform .3s;z-index:50;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <div class="eyebrow">The ten-minute piano room</div>
+  <h1>Encore<em>.</em></h1>
+  <p class="sub">Short bursts, glowing keys, no sheet-music guilt. Built around the F major journey back to your wedding song.</p>
+</header>
+
+<div class="wrap">
+  <nav id="nav">
+    <button data-tab="play" class="on">Free play</button>
+    <button data-tab="scales">Scale coach</button>
+    <button data-tab="songs">Songs</button>
+    <button data-tab="flash">Note flash</button>
+    <button data-tab="burst">Burst timer</button>
+  </nav>
+
+  <section id="tab-play" class="on">
+    <div class="card">
+      <h2>Free play</h2>
+      <p class="hint">Click the keys or use your computer keyboard — the home row is the white keys from middle C, the row above is the black keys. Toggle the labels off once your hands know the way.</p>
+      <div class="row">
+        <button class="chip on" id="toggleNames">Note names: on</button>
+        <button class="chip" id="toggleComp">Keyboard letters: off</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-scales">
+    <div class="card">
+      <h2>Scale coach</h2>
+      <p class="hint">Follow the golden light. Each step shows the note and the finger number (1 = thumb). Get to the end and back without a wrong note to bank a clean run. F major is the home key of your goal piece — make friends with that B flat.</p>
+      <div class="row">
+        <button class="chip on" data-scale="fmaj">F major · RH</button>
+        <button class="chip" data-scale="fmajL">F major · LH</button>
+        <button class="chip" data-scale="cmaj">C major · RH</button>
+        <button class="chip" data-scale="cmajL">C major · LH</button>
+        <button class="chip" data-scale="farp">F arpeggio · RH</button>
+      </div>
+      <div class="seq" id="seq"></div>
+      <div class="row">
+        <button class="big" id="scaleStart">Start run</button>
+        <span class="hint" id="scaleMsg">Clean runs today: 0</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-songs">
+    <div class="card">
+      <h2>Songs</h2>
+      <p class="hint">Real tunes, same golden light, all public domain. Press <b>Listen</b> to hear it first, then <b>Follow</b> to play it at your own pace — the light waits for you, no metronome pressure. Frère Jacques and the F major pieces use your new friend B flat.</p>
+      <div class="row" id="songChips">
+        <button class="chip on" data-song="frere">Frère Jacques · F</button>
+        <button class="chip" data-song="twinkle">Twinkle Twinkle · C</button>
+        <button class="chip" data-song="ode">Ode to Joy · C</button>
+        <button class="chip" data-song="hbd">Happy Birthday · C</button>
+        <button class="chip" data-song="minuet">Minuet in G</button>
+        <button class="chip" data-song="furelise">Für Elise (opening) · Am</button>
+        <button class="chip" data-song="greensleeves">Greensleeves · Am</button>
+      </div>
+      <div class="seq" id="songSeq"></div>
+      <div class="row">
+        <button class="big quiet" id="songListen">Listen</button>
+        <button class="big" id="songStart">Follow the light</button>
+        <span class="hint" id="songMsg">Songs finished today: 0</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-flash">
+    <div class="card">
+      <h2>Note flash</h2>
+      <p class="hint">A note appears on the staff — play it on the piano below. Right answer, next card. Wrong answer, the streak resets (gently).</p>
+      <div class="row">
+        <button class="chip on" data-clef="treble">Treble 𝄞</button>
+        <button class="chip" data-clef="bass">Bass 𝄢</button>
+        <button class="chip" data-clef="both">Both</button>
+      </div>
+      <div class="staffbox" id="staffbox"></div>
+      <div class="streak" id="flashStreak">0<small>streak · best 0</small></div>
+    </div>
+  </section>
+
+  <section id="tab-burst">
+    <div class="card">
+      <h2>Burst timer</h2>
+      <p class="hint">Pick a burst, press start, play anything — scales, flash cards, free noodling. The ring fills, a chime lands, and the session goes in the log. Ten minutes counts. Five minutes counts. Sitting down counts.</p>
+      <div class="row">
+        <button class="chip" data-mins="5">5 min</button>
+        <button class="chip on" data-mins="10">10 min</button>
+        <button class="chip" data-mins="15">15 min</button>
+        <button class="big" id="burstBtn">Start burst</button>
+      </div>
+      <div class="burst-grid" style="margin-top:18px">
+        <div class="ring">
+          <svg width="210" height="210" viewBox="0 0 210 210">
+            <circle cx="105" cy="105" r="92" fill="none" stroke="var(--line)" stroke-width="10"/>
+            <circle id="ringFill" cx="105" cy="105" r="92" fill="none" stroke="var(--gold)" stroke-width="10"
+              stroke-linecap="round" stroke-dasharray="578" stroke-dashoffset="578"/>
+          </svg>
+          <div class="t">
+            <div class="big-num" id="ringTime">10:00</div>
+            <div class="lbl">remaining</div>
+          </div>
+        </div>
+        <div>
+          <div class="stat">
+            <div><b id="stNotes">0</b><span>notes this burst</span></div>
+            <div><b id="stSessions">0</b><span>bursts today</span></div>
+          </div>
+          <ul class="log" id="log"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="piano-shell">
+    <div class="felt"></div>
+    <div class="keys" id="keys" role="group" aria-label="Piano keyboard, C3 to C6"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ================= notes & keyboard ================= */
+const NOTE_ORDER = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLAT_NAME = {'C#':'Db','D#':'Eb','F#':'Gb','G#':'Ab','A#':'Bb'};
+const START_OCT = 3, END_OCT = 6; // C3..C6
+function freqOf(note, oct){
+  const idx = NOTE_ORDER.indexOf(note);
+  const midi = (oct + 1) * 12 + idx;
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+const keysEl = document.getElementById('keys');
+const keyEls = {}; // "C4" -> element
+const COMP_MAP = { // computer keyboard -> note id (C4 octave on home row)
+  'a':'C4','w':'C#4','s':'D4','e':'D#4','d':'E4','f':'F4','t':'F#4','g':'G4',
+  'y':'G#4','h':'A4','u':'A#4','j':'B4','k':'C5','o':'C#5','l':'D5','p':'D#5',';':'E5',"'":'F5'
+};
+const COMP_REV = {};
+for(const [k,v] of Object.entries(COMP_MAP)) COMP_REV[v] = k.toUpperCase();
+
+(function buildKeys(){
+  let x = 0;
+  for(let oct = START_OCT; oct <= END_OCT; oct++){
+    for(const n of NOTE_ORDER){
+      if(oct === END_OCT && n !== 'C') break;
+      const id = n + oct;
+      if(!n.includes('#')){
+        const w = document.createElement('div');
+        w.className = 'wkey'; w.dataset.id = id;
+        w.innerHTML = '<div class="kcomp">' + (COMP_REV[id]||'') + '</div><div class="klabel">' + n + oct + '</div>';
+        keysEl.appendChild(w); keyEls[id] = w; x += 44;
+      } else {
+        const b = document.createElement('div');
+        b.className = 'bkey'; b.dataset.id = id;
+        b.style.left = (x - 14) + 'px';
+        const disp = FLAT_NAME[n] || n;
+        b.innerHTML = '<div class="kcomp">' + (COMP_REV[id]||'') + '</div><div class="klabel">' + disp + '</div>';
+        keysEl.appendChild(b); keyEls[id] = b;
+      }
+    }
+  }
+})();
+
+/* ================= persistence (graceful if storage unavailable) ================= */
+const store = (()=>{ try{ const t='__enc_t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }
+  catch(e){ const m={}; return {getItem:k=>(k in m?m[k]:null), setItem:(k,v)=>{m[k]=String(v)}, removeItem:k=>{delete m[k]}}; } })();
+const TODAY = new Date().toISOString().slice(0,10);
+let state;
+try{ state = JSON.parse(store.getItem('encore')||'{}'); }catch(e){ state = {}; }
+if(state.day !== TODAY){ state.day = TODAY; state.cleanRuns = 0; state.songsDone = 0; state.sessions = 0; }
+state.best = state.best || 0;
+state.log = Array.isArray(state.log) ? state.log.slice(0,10) : [];
+function saveState(){ try{ store.setItem('encore', JSON.stringify(state)); }catch(e){} }
+
+/* ================= keyboard scrolling ================= */
+const shellEl = document.querySelector('.piano-shell');
+function centerKey(el, instant){
+  const left = el.offsetLeft + el.offsetWidth/2 - shellEl.clientWidth/2;
+  shellEl.scrollTo({left: Math.max(0, left), behavior: instant ? 'auto' : 'smooth'});
+}
+
+/* ================= sound ================= */
+let AC = null, MASTER = null;
+function audio(){
+  if(!AC){
+    AC = new (window.AudioContext||window.webkitAudioContext)();
+    MASTER = AC.createDynamicsCompressor();
+    MASTER.threshold.value = -18; MASTER.ratio.value = 6;
+    MASTER.connect(AC.destination);
+  }
+  if(AC.state==='suspended') AC.resume();
+  return AC;
+}
+function playNote(id){
+  const ctx = audio();
+  const n = id.slice(0,-1), oct = +id.slice(-1);
+  const f = freqOf(n, oct);
+  const t = ctx.currentTime;
+  const out = ctx.createGain(); out.gain.value = 0.0001; out.connect(MASTER);
+  const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = Math.min(f*6, 6500); lp.connect(out);
+  [[1,'triangle',.5],[2,'sine',.22],[3,'sine',.08]].forEach(([m,type,g])=>{
+    const o = ctx.createOscillator(); o.type = type; o.frequency.value = f*m;
+    const og = ctx.createGain(); og.gain.value = g;
+    o.connect(og); og.connect(lp); o.start(t); o.stop(t+2.2);
+  });
+  out.gain.setValueAtTime(0.0001,t);
+  out.gain.exponentialRampToValueAtTime(0.5,t+0.015);
+  out.gain.exponentialRampToValueAtTime(0.0001,t+1.9);
+}
+function chime(){
+  ['C5','E5','G5','C6'].forEach((n,i)=> setTimeout(()=>playNote(n), i*180));
+}
+
+/* ================= shared press handling ================= */
+let notesThisBurst = 0;
+function press(id){
+  const el = keyEls[id]; if(!el) return;
+  playNote(id);
+  el.classList.add('down');
+  setTimeout(()=>el.classList.remove('down'), 180);
+  notesThisBurst++; document.getElementById('stNotes').textContent = notesThisBurst;
+  scaleHear(id);
+  songHear(id);
+  flashHear(id);
+}
+keysEl.addEventListener('pointerdown', e=>{
+  const k = e.target.closest('.wkey,.bkey'); if(k) press(k.dataset.id);
+});
+const held = new Set();
+window.addEventListener('keydown', e=>{
+  if(e.repeat) return;
+  const id = COMP_MAP[e.key.toLowerCase()];
+  if(id && !held.has(e.key)){ held.add(e.key); press(id); }
+});
+window.addEventListener('keyup', e=> held.delete(e.key));
+
+/* labels toggles */
+const tn = document.getElementById('toggleNames');
+const tc = document.getElementById('toggleComp');
+let compOn = false;
+document.querySelectorAll('.kcomp').forEach(el=>el.style.display='none');
+tn.onclick = ()=>{
+  const on = tn.classList.toggle('on');
+  tn.textContent = 'Note names: ' + (on?'on':'off');
+  document.querySelectorAll('.klabel').forEach(el=>el.style.display = on?'':'none');
+};
+tc.onclick = ()=>{
+  compOn = tc.classList.toggle('on');
+  tc.textContent = 'Keyboard letters: ' + (compOn?'on':'off');
+  document.querySelectorAll('.kcomp').forEach(el=>el.style.display = compOn?'':'none');
+};
+
+/* ================= tabs ================= */
+document.getElementById('nav').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on', x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on', s.id === 'tab-'+b.dataset.tab));
+});
+
+/* ================= scale coach ================= */
+const SCALES = {
+  fmaj:{name:'F major · right hand', notes:['F4','G4','A4','A#4','C5','D5','E5','F5'], fingers:[1,2,3,4,1,2,3,4]},
+  fmajL:{name:'F major · left hand', notes:['F3','G3','A3','A#3','C4','D4','E4','F4'], fingers:[5,4,3,2,1,3,2,1]},
+  cmaj:{name:'C major · right hand', notes:['C4','D4','E4','F4','G4','A4','B4','C5'], fingers:[1,2,3,1,2,3,4,5]},
+  cmajL:{name:'C major · left hand', notes:['C3','D3','E3','F3','G3','A3','B3','C4'], fingers:[5,4,3,2,1,3,2,1]},
+  farp:{name:'F major arpeggio · right hand', notes:['F4','A4','C5','F5'], fingers:[1,2,3,5]}
+};
+let curScale = 'fmaj', run = null, cleanRuns = state.cleanRuns || 0;
+const seqEl = document.getElementById('seq');
+const scaleMsg = document.getElementById('scaleMsg');
+
+function buildRun(key){
+  const s = SCALES[key];
+  const up = s.notes.map((n,i)=>({note:n, finger:s.fingers[i]}));
+  const down = up.slice(0,-1).reverse();
+  return up.concat(down);
+}
+function renderSeq(){
+  const steps = buildRun(curScale);
+  seqEl.innerHTML = steps.map((st,i)=>{
+    let nm = st.note.slice(0,-1), oc = st.note.slice(-1);
+    if(FLAT_NAME[nm]) nm = FLAT_NAME[nm];
+    const cls = run && i < run.i ? 'step done' : (run && i === run.i ? 'step now' : 'step');
+    return '<div class="'+cls+'"><div class="n">'+nm+'</div><div class="f">'+st.finger+'</div></div>';
+  }).join('');
+}
+function clearTargets(){ document.querySelectorAll('.target').forEach(el=>{el.classList.remove('target'); const fb = el.querySelector('.finger-bubble'); if(fb) fb.remove();}); }
+function showTarget(){
+  clearTargets();
+  if(!run) return;
+  const st = buildRun(curScale)[run.i];
+  if(!st){ return; }
+  const el = keyEls[st.note];
+  el.classList.add('target');
+  const fb = document.createElement('div');
+  fb.className = 'finger-bubble'; fb.textContent = st.finger;
+  el.appendChild(fb);
+  centerKey(el);
+}
+document.querySelectorAll('[data-scale]').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('[data-scale]').forEach(x=>x.classList.toggle('on', x===b));
+    curScale = b.dataset.scale; run = null; clearTargets(); renderSeq();
+    scaleMsg.textContent = 'Clean runs today: ' + cleanRuns;
+  };
+});
+document.getElementById('scaleStart').onclick = ()=>{
+  audio();
+  stopSong();
+  run = {i:0, mistakes:0};
+  renderSeq(); showTarget();
+  scaleMsg.textContent = SCALES[curScale].name + ' — follow the light';
+};
+function scaleHear(id){
+  if(!run) return;
+  const steps = buildRun(curScale);
+  const want = steps[run.i].note;
+  if(id === want){
+    keyEls[id].classList.add('good');
+    setTimeout(()=>keyEls[id].classList.remove('good'), 250);
+    run.i++;
+    if(run.i >= steps.length){
+      const clean = run.mistakes === 0;
+      if(clean){ cleanRuns++; state.cleanRuns = cleanRuns; saveState(); toast('Clean run! ' + SCALES[curScale].name + ' ✦'); }
+      else toast('Run complete — ' + run.mistakes + ' slip' + (run.mistakes>1?'s':'') + '. Again?');
+      run = null; clearTargets(); renderSeq();
+      scaleMsg.textContent = 'Clean runs today: ' + cleanRuns;
+      return;
+    }
+    renderSeq(); showTarget();
+  } else {
+    run.mistakes++;
+    keyEls[id].classList.add('bad');
+    setTimeout(()=>keyEls[id].classList.remove('bad'), 300);
+  }
+}
+
+
+/* ================= songs ================= */
+const SONGS = {
+  frere:{name:'Frère Jacques', tempo:104, notes:[
+    ['F4',1],['G4',1],['A4',1],['F4',1],['F4',1],['G4',1],['A4',1],['F4',1],
+    ['A4',1],['A#4',1],['C5',2],['A4',1],['A#4',1],['C5',2],
+    ['C5',.5],['D5',.5],['C5',.5],['A#4',.5],['A4',1],['F4',1],
+    ['C5',.5],['D5',.5],['C5',.5],['A#4',.5],['A4',1],['F4',1],
+    ['F4',1],['C4',1],['F4',2],['F4',1],['C4',1],['F4',2]
+  ]},
+  twinkle:{name:'Twinkle Twinkle', tempo:92, notes:[
+    ['C4',1],['C4',1],['G4',1],['G4',1],['A4',1],['A4',1],['G4',2],
+    ['F4',1],['F4',1],['E4',1],['E4',1],['D4',1],['D4',1],['C4',2],
+    ['G4',1],['G4',1],['F4',1],['F4',1],['E4',1],['E4',1],['D4',2],
+    ['G4',1],['G4',1],['F4',1],['F4',1],['E4',1],['E4',1],['D4',2],
+    ['C4',1],['C4',1],['G4',1],['G4',1],['A4',1],['A4',1],['G4',2],
+    ['F4',1],['F4',1],['E4',1],['E4',1],['D4',1],['D4',1],['C4',2]
+  ]},
+  ode:{name:'Ode to Joy', tempo:104, notes:[
+    ['E4',1],['E4',1],['F4',1],['G4',1],['G4',1],['F4',1],['E4',1],['D4',1],
+    ['C4',1],['C4',1],['D4',1],['E4',1],['E4',1.5],['D4',.5],['D4',2],
+    ['E4',1],['E4',1],['F4',1],['G4',1],['G4',1],['F4',1],['E4',1],['D4',1],
+    ['C4',1],['C4',1],['D4',1],['E4',1],['D4',1.5],['C4',.5],['C4',2]
+  ]},
+  hbd:{name:'Happy Birthday', tempo:120, notes:[
+    ['G4',.75],['G4',.25],['A4',1],['G4',1],['C5',1],['B4',2],
+    ['G4',.75],['G4',.25],['A4',1],['G4',1],['D5',1],['C5',2],
+    ['G4',.75],['G4',.25],['G5',1],['E5',1],['C5',1],['B4',1],['A4',2],
+    ['F5',.75],['F5',.25],['E5',1],['C5',1],['D5',1],['C5',2]
+  ]},
+  minuet:{name:'Minuet in G', tempo:112, notes:[
+    ['D5',1],['G4',.5],['A4',.5],['B4',.5],['C5',.5],
+    ['D5',1],['G4',1],['G4',1],
+    ['E5',1],['C5',.5],['D5',.5],['E5',.5],['F#5',.5],
+    ['G5',1],['G4',1],['G4',1],
+    ['C5',1],['D5',.5],['C5',.5],['B4',.5],['A4',.5],
+    ['B4',1],['C5',.5],['B4',.5],['A4',.5],['G4',.5],
+    ['F#4',1],['G4',.5],['A4',.5],['B4',.5],['G4',.5],
+    ['A4',3]
+  ]},
+  furelise:{name:'Für Elise (opening)', tempo:132, notes:[
+    ['E5',.5],['D#5',.5],['E5',.5],['D#5',.5],['E5',.5],['B4',.5],['D5',.5],['C5',.5],['A4',1.5],
+    ['C4',.5],['E4',.5],['A4',.5],['B4',1.5],
+    ['E4',.5],['G#4',.5],['B4',.5],['C5',1.5],
+    ['E4',.5],
+    ['E5',.5],['D#5',.5],['E5',.5],['D#5',.5],['E5',.5],['B4',.5],['D5',.5],['C5',.5],['A4',1.5],
+    ['C4',.5],['E4',.5],['A4',.5],['B4',1.5],
+    ['E4',.5],['C5',.5],['B4',.5],['A4',2]
+  ]},
+  greensleeves:{name:'Greensleeves', tempo:100, notes:[
+    ['A4',1],['C5',2],['D5',1],['E5',1.5],['F5',.5],['E5',1],
+    ['D5',2],['B4',1],['G4',1.5],['A4',.5],['B4',1],
+    ['C5',2],['A4',1],['A4',1.5],['G#4',.5],['A4',1],
+    ['B4',2],['G#4',1],['E4',3],
+    ['A4',1],['C5',2],['D5',1],['E5',1.5],['F5',.5],['E5',1],
+    ['D5',2],['B4',1],['G4',1.5],['A4',.5],['B4',1],
+    ['C5',1.5],['B4',.5],['A4',1],['G#4',1.5],['F#4',.5],['G#4',1],
+    ['A4',3]
+  ]}
+};
+let curSong = 'frere', songRun = null, songsDone = state.songsDone || 0;
+let listenTimers = [];
+const songSeq = document.getElementById('songSeq');
+const songMsg = document.getElementById('songMsg');
+const songListenBtn = document.getElementById('songListen');
+
+function songNoteName(id){
+  let nm = id.slice(0,-1);
+  if(FLAT_NAME[nm]) nm = FLAT_NAME[nm];
+  return nm;
+}
+function renderSongSeq(playI){
+  const notes = SONGS[curSong].notes;
+  songSeq.innerHTML = notes.map((nt,i)=>{
+    let cls = 'step';
+    if(songRun){ if(i < songRun.i) cls += ' done'; else if(i === songRun.i) cls += ' now'; }
+    else if(playI !== undefined && i === playI) cls += ' now';
+    return '<div class="'+cls+'"><div class="n">'+songNoteName(nt[0])+'</div><div class="f">'+(nt[1]>=2?'hold':'&nbsp;')+'</div></div>';
+  }).join('');
+}
+function stopSong(){
+  listenTimers.forEach(clearTimeout); listenTimers = [];
+  songRun = null;
+  clearTargets();
+  songListenBtn.textContent = 'Listen';
+  renderSongSeq();
+}
+function showSongTarget(){
+  clearTargets();
+  if(!songRun) return;
+  const nt = SONGS[curSong].notes[songRun.i];
+  if(!nt) return;
+  const el = keyEls[nt[0]];
+  el.classList.add('target');
+  centerKey(el);
+}
+document.getElementById('songChips').addEventListener('click', e=>{
+  const b = e.target.closest('[data-song]'); if(!b) return;
+  document.querySelectorAll('[data-song]').forEach(x=>x.classList.toggle('on', x===b));
+  curSong = b.dataset.song;
+  stopSong();
+  songMsg.textContent = 'Songs finished today: ' + songsDone;
+});
+songListenBtn.onclick = ()=>{
+  audio();
+  if(listenTimers.length){ stopSong(); return; }
+  songRun = null; clearTargets();
+  const s = SONGS[curSong];
+  const beat = 60000 / s.tempo;
+  let t = 200;
+  songListenBtn.textContent = 'Stop';
+  s.notes.forEach((nt,i)=>{
+    listenTimers.push(setTimeout(()=>{
+      playNote(nt[0]);
+      const el = keyEls[nt[0]];
+      el.classList.add('target');
+      centerKey(el);
+      renderSongSeq(i);
+      listenTimers.push(setTimeout(()=>{ if(!songRun) el.classList.remove('target'); }, Math.min(nt[1]*beat, 600)));
+    }, t));
+    t += nt[1]*beat;
+  });
+  listenTimers.push(setTimeout(()=>{ stopSong(); songMsg.textContent = s.name + ' — your turn'; }, t + 400));
+};
+document.getElementById('songStart').onclick = ()=>{
+  audio();
+  listenTimers.forEach(clearTimeout); listenTimers = [];
+  songListenBtn.textContent = 'Listen';
+  run = null; renderSeq(); // pause any scale run
+  songRun = {i:0, mistakes:0};
+  renderSongSeq(); showSongTarget();
+  songMsg.textContent = SONGS[curSong].name + ' — follow the light';
+};
+function songHear(id){
+  if(!songRun) return;
+  const notes = SONGS[curSong].notes;
+  const want = notes[songRun.i][0];
+  if(id === want){
+    keyEls[id].classList.add('good');
+    setTimeout(()=>keyEls[id].classList.remove('good'), 250);
+    songRun.i++;
+    if(songRun.i >= notes.length){
+      const clean = songRun.mistakes === 0;
+      songsDone++; state.songsDone = songsDone; saveState();
+      toast(clean ? SONGS[curSong].name + ' — note perfect ✦' : SONGS[curSong].name + ' finished — ' + songRun.mistakes + ' slip' + (songRun.mistakes>1?'s':''));
+      songRun = null; clearTargets(); renderSongSeq();
+      songMsg.textContent = 'Songs finished today: ' + songsDone;
+      return;
+    }
+    renderSongSeq(); showSongTarget();
+  } else {
+    songRun.mistakes++;
+    keyEls[id].classList.add('bad');
+    setTimeout(()=>keyEls[id].classList.remove('bad'), 300);
+  }
+}
+renderSongSeq();
+
+/* ================= note flash ================= */
+const TREBLE = ['C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5','A5'];
+const BASS   = ['C3','D3','E3','F3','G3','A3','B3'];
+let clefMode = 'treble', flashNote = null, streak = 0, best = state.best || 0;
+const staffbox = document.getElementById('staffbox');
+const streakEl = document.getElementById('flashStreak');
+
+document.querySelectorAll('[data-clef]').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('[data-clef]').forEach(x=>x.classList.toggle('on', x===b));
+    clefMode = b.dataset.clef; nextFlash(true);
+  };
+});
+function staffStep(note, clef){
+  // diatonic steps above bottom line (E4 treble / G2 bass)
+  const letters = 'CDEFGAB';
+  const L = note[0], oct = +note.slice(-1);
+  const abs = oct*7 + letters.indexOf(L);
+  const base = clef==='treble' ? (4*7+2) /*E4*/ : (2*7+4) /*G2*/;
+  return abs - base;
+}
+function drawStaff(note, clef){
+  const W=320, H=170;
+  let s = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
+  const LS = 14, topLine = 38;
+  for(let i=0;i<5;i++) s += '<line x1="20" x2="'+(W-20)+'" y1="'+(topLine+i*LS)+'" y2="'+(topLine+i*LS)+'" stroke="var(--muted)" stroke-width="1.4"/>';
+  const clefGlyph = clef==='treble' ? '𝄞' : '𝄢';
+  const clefY = clef==='treble' ? topLine + 4*LS + 14 : topLine + 3*LS + 4;
+  const clefSize = clef==='treble' ? 76 : 58;
+  s += '<text x="30" y="'+clefY+'" font-size="'+clefSize+'" fill="var(--ivory)">'+clefGlyph+'</text>';
+  // note position: bottom line = step 0 => y = topLine + 4*LS; each step = LS/2 up
+  const st = staffStep(note, clef);
+  const y = topLine + 4*LS - st*(LS/2);
+  const x = 200;
+  // ledger lines
+  for(let li=-2; li>=st; li-=2){ const ly = topLine + 4*LS - li*(LS/2); s += '<line x1="'+(x-16)+'" x2="'+(x+16)+'" y1="'+ly+'" y2="'+ly+'" stroke="var(--muted)" stroke-width="1.4"/>'; }
+  for(let li=10; li<=st; li+=2){ const ly = topLine + 4*LS - li*(LS/2); s += '<line x1="'+(x-16)+'" x2="'+(x+16)+'" y1="'+ly+'" y2="'+ly+'" stroke="var(--muted)" stroke-width="1.4"/>'; }
+  s += '<ellipse cx="'+x+'" cy="'+y+'" rx="9" ry="6.6" fill="var(--gold)" transform="rotate(-12 '+x+' '+y+')"/>';
+  const stemUp = st < 4;
+  s += stemUp
+    ? '<line x1="'+(x+8)+'" x2="'+(x+8)+'" y1="'+y+'" y2="'+(y-38)+'" stroke="var(--gold)" stroke-width="2"/>'
+    : '<line x1="'+(x-8)+'" x2="'+(x-8)+'" y1="'+y+'" y2="'+(y+38)+'" stroke="var(--gold)" stroke-width="2"/>';
+  s += '</svg>';
+  staffbox.innerHTML = s;
+}
+function nextFlash(reset){
+  let pool, clef;
+  if(clefMode==='both'){ clef = Math.random()<0.5?'treble':'bass'; }
+  else clef = clefMode;
+  pool = clef==='treble' ? TREBLE : BASS;
+  let pick;
+  do { pick = pool[Math.floor(Math.random()*pool.length)]; } while(flashNote && pick===flashNote.note);
+  flashNote = {note:pick, clef};
+  drawStaff(pick, clef);
+  if(reset){ streak = 0; updStreak(); }
+}
+function updStreak(){
+  streakEl.innerHTML = streak + '<small>streak · best ' + best + '</small>';
+}
+function flashHear(id){
+  if(!flashNote) return;
+  if(!document.getElementById('tab-flash').classList.contains('on')) return;
+  if(id === flashNote.note){
+    streak++; if(streak>best){ best=streak; state.best = best; saveState(); }
+    if(streak>0 && streak%10===0) toast(streak + ' in a row ✦');
+    updStreak(); nextFlash(false);
+  } else {
+    if(streak>=5) toast('Streak of ' + streak + ' — good while it lasted');
+    streak = 0; updStreak();
+    keyEls[id].classList.add('bad');
+    setTimeout(()=>keyEls[id].classList.remove('bad'), 300);
+  }
+}
+nextFlash(true);
+
+/* ================= burst timer ================= */
+let mins = 10, burst = null, sessions = state.sessions || 0;
+const ringFill = document.getElementById('ringFill');
+const ringTime = document.getElementById('ringTime');
+const burstBtn = document.getElementById('burstBtn');
+const CIRC = 578;
+document.querySelectorAll('[data-mins]').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('[data-mins]').forEach(x=>x.classList.toggle('on', x===b));
+    mins = +b.dataset.mins;
+    if(!burst) ringTime.textContent = String(mins).padStart(2,'0') + ':00';
+  };
+});
+function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
+burstBtn.onclick = ()=>{
+  if(burst){ endBurst(false); return; }
+  audio();
+  notesThisBurst = 0; document.getElementById('stNotes').textContent = '0';
+  burst = {total: mins*60, endAt: Date.now() + mins*60000, left: mins*60, started: new Date()};
+  burstBtn.textContent = 'End early';
+  burstBtn.classList.add('quiet');
+  burst.iv = setInterval(()=>{
+    burst.left = Math.max(0, Math.round((burst.endAt - Date.now())/1000));
+    ringTime.textContent = fmt(burst.left);
+    ringFill.style.strokeDashoffset = CIRC * (burst.left / burst.total);
+    if(burst.left<=0) endBurst(true);
+  }, 250);
+  ringFill.style.strokeDashoffset = CIRC;
+  ringTime.textContent = fmt(burst.left);
+};
+function endBurst(complete){
+  clearInterval(burst.iv);
+  const mPlayed = Math.round((burst.total - burst.left)/60);
+  const when = burst.started.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  sessions++; state.sessions = sessions;
+  document.getElementById('stSessions').textContent = sessions;
+  const entry = {c: complete, t: when, m: Math.max(mPlayed, complete?mins:0), n: notesThisBurst, d: TODAY};
+  state.log.unshift(entry); state.log = state.log.slice(0,10); saveState();
+  document.getElementById('log').prepend(logItem(entry));
+  if(complete){ chime(); toast('Burst done. That counts.'); }
+  burst = null;
+  burstBtn.textContent = 'Start burst';
+  burstBtn.classList.remove('quiet');
+  ringFill.style.strokeDashoffset = CIRC;
+  ringTime.textContent = String(mins).padStart(2,'0') + ':00';
+}
+
+/* ================= toast ================= */
+let toastT = null;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+/* ================= restore + quality of life ================= */
+function logItem(e){
+  const li = document.createElement('li');
+  const day = e.d === TODAY ? '' : e.d + ' · ';
+  li.innerHTML = (e.c ? '<b>✦ Complete</b> — ' : 'Stopped — ') + day + e.t + ' · ' + e.m + ' min · ' + e.n + ' notes';
+  return li;
+}
+state.log.forEach(e=>document.getElementById('log').appendChild(logItem(e)));
+document.getElementById('stSessions').textContent = sessions;
+scaleMsg.textContent = 'Clean runs today: ' + cleanRuns;
+songMsg.textContent = 'Songs finished today: ' + songsDone;
+updStreak();
+window.addEventListener('keydown', e=>{
+  if(e.key !== 'Escape') return;
+  if(run){ run = null; clearTargets(); renderSeq(); scaleMsg.textContent = 'Run cancelled — clean runs today: ' + cleanRuns; }
+  if(songRun || listenTimers.length) stopSong();
+});
+centerKey(keyEls['C4'], true);
+renderSeq();
+</script>
+
+</body>
+</html>
