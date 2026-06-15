@@ -1,0 +1,2463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netskope Deal Room — Packaging & Products</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ns-teal: #00A7CE; --ns-orange: #FF8300; --ns-navy: #002B49;
+    --ns-teal-light: rgba(0,167,206,0.1); --ns-orange-light: rgba(255,131,0,0.1); --ns-navy-light: rgba(0,43,73,0.07);
+    --bg: #F4F6F9; --surface: #ffffff; --surface2: #F0F3F7;
+    --border: rgba(0,43,73,0.1); --border-strong: rgba(0,43,73,0.2);
+    --text: #0A1628; --text-2: #4A5568; --text-3: #8A97A8;
+    --radius: 12px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,43,73,0.06), 0 4px 12px rgba(0,43,73,0.05);
+    --shadow-hover: 0 4px 16px rgba(0,43,73,0.1), 0 8px 32px rgba(0,43,73,0.08);
+    --sidebar: 260px; --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+  }
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
+
+  /* PASSWORD GATE */
+  .gate { position:fixed; inset:0; background:linear-gradient(135deg,#001a2e 0%,#002B49 50%,#003a64 100%); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .gate-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:40px 36px; max-width:420px; width:100%; backdrop-filter:blur(8px); }
+  .gate-logo { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
+  .gate-mark { width:36px; height:36px; background:var(--ns-teal); border-radius:8px; }
+  .gate-title { font-size:18px; color:#fff; font-weight:600; letter-spacing:-0.02em; }
+  .gate-title span { color:var(--ns-teal); }
+  .gate h2 { color:#fff; font-size:24px; font-weight:600; letter-spacing:-0.02em; margin-bottom:8px; }
+  .gate p { color:rgba(255,255,255,0.6); font-size:13px; line-height:1.5; margin-bottom:24px; }
+  .gate-input { width:100%; padding:12px 14px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff; font-family:'DM Mono',monospace; font-size:13px; outline:none; transition:var(--transition); }
+  .gate-input:focus { border-color:var(--ns-teal); background:rgba(255,255,255,0.1); }
+  .gate-input.shake { animation:shake 0.4s; border-color:#e74c3c; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .gate-btn { margin-top:16px; width:100%; padding:12px; background:var(--ns-teal); color:#fff; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:var(--transition); }
+  .gate-btn:hover { background:#008faf; }
+  .gate-foot { color:rgba(255,255,255,0.35); font-size:11px; margin-top:18px; text-align:center; font-family:'DM Mono',monospace; }
+
+  /* TOP NAV */
+  .topbar { background:var(--ns-navy); height:56px; display:flex; align-items:center; padding:0 28px; gap:20px; position:sticky; top:0; z-index:100; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .logo { display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
+  .logo-text { font-size:15px; font-weight:600; color:#fff; letter-spacing:-0.02em; }
+  .logo-text span { color:var(--ns-teal); }
+  .topbar-divider { width:1px; height:20px; background:rgba(255,255,255,0.12); }
+  .topbar-title { font-size:13px; color:rgba(255,255,255,0.55); font-weight:400; }
+  .topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+  .topbar-badge { font-size:11px; font-weight:500; padding:3px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.7); font-family:'DM Mono',monospace; letter-spacing:0.02em; }
+  .search-box { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:0 12px; height:34px; transition:var(--transition); }
+  .search-box:focus-within { background:rgba(255,255,255,0.12); border-color:var(--ns-teal); }
+  .search-box svg { width:14px; height:14px; color:rgba(255,255,255,0.4); flex-shrink:0; }
+  .search-box input { background:none; border:none; outline:none; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; width:180px; }
+  .search-box input::placeholder { color:rgba(255,255,255,0.35); }
+  .kbd-hint { font-size:11px; color:rgba(255,255,255,0.3); font-family:'DM Mono',monospace; border:1px solid rgba(255,255,255,0.12); border-radius:4px; padding:1px 6px; margin-left:4px; }
+
+  /* LAYOUT */
+  .layout { display:flex; flex:1; }
+  .sidebar { width:var(--sidebar); background:var(--surface); border-right:1px solid var(--border); position:sticky; top:56px; height:calc(100vh - 56px); overflow-y:auto; flex-shrink:0; padding:20px 0; }
+  .sidebar::-webkit-scrollbar { width:4px; }
+  .sidebar::-webkit-scrollbar-thumb { background:var(--border-strong); border-radius:2px; }
+  .sidebar-section { margin-bottom:4px; }
+  .sidebar-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); padding:8px 20px 4px; }
+  .sidebar-item { display:flex; align-items:center; gap:10px; padding:8px 20px; cursor:pointer; transition:var(--transition); border-left:3px solid transparent; font-size:13.5px; font-weight:400; color:var(--text-2); user-select:none; }
+  .sidebar-item:hover { background:var(--surface2); color:var(--text); }
+  .sidebar-item.active { border-left-color:var(--ns-teal); background:var(--ns-teal-light); color:var(--ns-navy); font-weight:500; }
+  .sidebar-item .si-icon { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; }
+  .sidebar-item .si-count { margin-left:auto; font-size:11px; font-weight:500; padding:1px 7px; border-radius:10px; background:var(--surface2); color:var(--text-3); }
+  .sidebar-item.active .si-count { background:rgba(0,167,206,0.15); color:var(--ns-teal); }
+
+  .main { flex:1; padding:28px 32px; overflow:auto; min-width:0; position:relative; z-index:1; }
+  .main::-webkit-scrollbar { width:5px; }
+  .main::-webkit-scrollbar-thumb { background:var(--border-strong); border-radius:3px; }
+
+  /* HERO */
+  .hero-strip { background:var(--ns-navy); border-radius:var(--radius); padding:24px 28px; margin-bottom:28px; display:flex; align-items:center; gap:24px; position:relative; overflow:hidden; }
+  .hero-strip::before { content:''; position:absolute; right:-60px; top:-60px; width:220px; height:220px; background:radial-gradient(circle,rgba(0,167,206,0.15) 0%,transparent 70%); border-radius:50%; }
+  .hero-strip::after { content:''; position:absolute; right:80px; bottom:-40px; width:140px; height:140px; background:radial-gradient(circle,rgba(255,131,0,0.1) 0%,transparent 70%); border-radius:50%; }
+  .hero-text { position:relative; z-index:1; }
+  .hero-text h1 { font-size:20px; font-weight:600; color:#fff; letter-spacing:-0.02em; margin-bottom:6px; }
+  .hero-text p { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.5; max-width:520px; }
+  .hero-stats { margin-left:auto; display:flex; gap:20px; position:relative; z-index:1; flex-shrink:0; }
+  .hero-stat { text-align:center; }
+  .hero-stat .hs-num { font-size:24px; font-weight:600; color:var(--ns-teal); letter-spacing:-0.03em; font-family:'DM Mono',monospace; }
+  .hero-stat .hs-label { font-size:11px; color:rgba(255,255,255,0.45); margin-top:1px; }
+
+  /* SECTION HEADER */
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .section-header h2 { font-size:15px; font-weight:600; color:var(--text); letter-spacing:-0.01em; }
+  .section-line { flex:1; height:1px; background:var(--border); }
+  .section-count { font-size:11px; font-family:'DM Mono',monospace; color:var(--text-3); background:var(--surface2); padding:2px 8px; border-radius:6px; }
+  .section-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+  /* PRODUCT CARDS */
+  .product-section { margin-bottom:32px; }
+  .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
+  .product-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden; }
+  .product-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:transparent; transition:var(--transition); }
+  .product-card:hover { box-shadow:var(--shadow-hover); border-color:rgba(0,167,206,0.3); transform:translateY(-2px); }
+  .product-card:hover::after { background:var(--ns-teal); }
+  .product-card.selected { border:2px solid var(--ns-teal); box-shadow:0 0 0 3px rgba(0,167,206,0.1); transform:translateY(-2px); }
+  .product-card.selected::after { background:var(--ns-teal); height:3px; }
+  .pc-icon { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; font-size:18px; transition:var(--transition); }
+  .product-card:hover .pc-icon { transform:scale(1.08); }
+  .pc-name { font-size:13px; font-weight:500; color:var(--text); line-height:1.35; margin-bottom:8px; }
+  .pc-cat { font-size:10.5px; font-weight:500; padding:3px 8px; border-radius:4px; display:inline-block; letter-spacing:0.01em; }
+  .pc-arrow { position:absolute; top:14px; right:14px; opacity:0; font-size:13px; transition:var(--transition); }
+  .product-card:hover .pc-arrow, .product-card.selected .pc-arrow { opacity:1; }
+  .pc-pkg-row { display:flex; gap:4px; margin-top:8px; flex-wrap:wrap; }
+  .pc-pkg-chip { font-size:9.5px; font-weight:600; padding:2px 6px; border-radius:3px; letter-spacing:0.04em; text-transform:uppercase; background:var(--surface2); color:var(--text-3); }
+  .pc-pkg-chip.in-prime { background:rgba(0,167,206,0.12); color:var(--ns-teal); }
+  .pc-pkg-chip.in-max { background:rgba(255,131,0,0.12); color:var(--ns-orange); }
+  .pc-pkg-chip.addon { background:rgba(123,79,212,0.1); color:#7B4FD4; }
+
+  /* DETAIL PANEL */
+  .detail-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-top:8px; margin-bottom:28px; animation:slideDown 0.2s ease; border-top:3px solid var(--dp-accent-color, var(--ns-teal)); }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  .dp-top { padding:24px 28px; border-bottom:1px solid var(--border); display:flex; gap:20px; align-items:flex-start; }
+  .dp-icon { width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+  .dp-info { flex:1; }
+  .dp-info h3 { font-size:18px; font-weight:600; color:var(--text); letter-spacing:-0.02em; margin-bottom:6px; }
+  .dp-cat { font-size:11px; font-weight:600; padding:3px 10px; border-radius:4px; display:inline-block; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:10px; }
+  .dp-desc { font-size:14px; color:var(--text-2); line-height:1.65; }
+  .dp-meta { display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; font-size:12px; }
+  .dp-meta-item { display:flex; gap:6px; align-items:center; }
+  .dp-meta-label { color:var(--text-3); text-transform:uppercase; letter-spacing:0.06em; font-size:10px; font-weight:600; }
+  .dp-meta-value { color:var(--text); font-family:'DM Mono',monospace; font-size:12px; background:var(--surface2); padding:2px 8px; border-radius:4px; }
+  .dp-actions { display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
+  .btn-primary { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; background:var(--ns-teal); color:#fff; border:none; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; text-decoration:none; transition:var(--transition); white-space:nowrap; }
+  .btn-primary:hover { background:#008faf; }
+  .btn-secondary { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; background:var(--surface2); color:var(--text-2); border:1px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:400; cursor:pointer; transition:var(--transition); white-space:nowrap; }
+  .btn-secondary:hover { background:var(--ns-teal-light); border-color:var(--ns-teal); color:var(--ns-navy); }
+  .btn-bom { background:var(--ns-orange); color:#fff; border:none; }
+  .btn-bom:hover { background:#e07500; }
+  .dp-close-btn { background:var(--surface2); border:1px solid var(--border); border-radius:6px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:var(--transition); font-size:13px; color:var(--text-3); flex-shrink:0; align-self:flex-start; }
+  .dp-close-btn:hover { background:#fce8e8; border-color:#f5c0c0; color:#c0392b; }
+  .dp-bottom { padding:18px 28px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .dp-features h4, .dp-related h4, .dp-includedin h4 { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-3); margin-bottom:10px; }
+  .feat-list { display:flex; flex-wrap:wrap; gap:7px; }
+  .feat-chip { font-size:12px; padding:4px 11px; border-radius:6px; background:var(--surface2); color:var(--text-2); border:1px solid var(--border); display:flex; align-items:center; gap:5px; }
+  .feat-chip svg { width:11px; height:11px; flex-shrink:0; }
+  .related-list { display:flex; flex-direction:column; gap:6px; }
+  .related-item { display:flex; align-items:center; gap:9px; padding:8px 12px; background:var(--surface2); border-radius:var(--radius-sm); cursor:pointer; font-size:13px; color:var(--text-2); border:1px solid transparent; transition:var(--transition); }
+  .related-item:hover { border-color:var(--ns-teal); background:var(--ns-teal-light); color:var(--ns-navy); }
+  .ri-icon { font-size:14px; }
+
+  .empty-state { text-align:center; padding:60px 20px; color:var(--text-3); }
+  .empty-state p { font-size:14px; }
+
+  .badge-new { font-size:9px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; background:linear-gradient(135deg,#00A7CE,#0076a8); color:#fff; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; flex-shrink:0; }
+
+  /* FOOTER */
+  footer { padding:14px 32px; border-top:1px solid var(--border); font-size:11.5px; color:var(--text-3); display:flex; align-items:center; gap:8px; background:var(--surface); position:relative; z-index:1; flex-wrap:wrap; }
+  footer .conf { color:#c0392b; font-weight:600; letter-spacing:0.04em; }
+  footer a { color:var(--ns-teal); text-decoration:none; }
+  footer a:hover { text-decoration:underline; }
+
+  /* CONFIDENTIAL DIAGONAL WATERMARK */
+  .watermark { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; opacity:0.04; user-select:none; }
+  .watermark-row { white-space:nowrap; transform:rotate(-30deg); transform-origin:center; font-family:'DM Mono',monospace; font-size:48px; font-weight:700; color:var(--ns-navy); letter-spacing:0.2em; line-height:2.4; }
+
+  /* FLOATING BUTTONS */
+  .fab { position:fixed; bottom:22px; z-index:50; box-shadow:0 6px 24px rgba(0,43,73,0.18); border-radius:30px; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:8px; padding:12px 18px; font-family:'DM Sans',sans-serif; font-weight:500; font-size:13.5px; border:none; }
+  .fab:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(0,43,73,0.24); }
+  .fab-ai { right:22px; background:var(--ns-navy); color:#fff; }
+  .fab-ai .dot { width:8px; height:8px; border-radius:50%; background:var(--ns-teal); box-shadow:0 0 12px var(--ns-teal); }
+  .fab-bom { left:22px; background:var(--ns-orange); color:#fff; }
+  .fab-bom .count { background:rgba(255,255,255,0.25); padding:1px 8px; border-radius:10px; font-family:'DM Mono',monospace; font-size:12px; }
+
+  /* PACKAGE CARDS */
+  .pkg-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+  .pkg-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden; border-top:3px solid var(--pkg-color, var(--ns-navy)); }
+  .pkg-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-2px); }
+  .pkg-card.selected { border:2px solid var(--pkg-color); border-top-width:3px; box-shadow:0 0 0 3px var(--pkg-tint, rgba(0,167,206,0.1)); }
+  .pkg-tier { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--pkg-color); margin-bottom:6px; }
+  .pkg-name { font-size:16px; font-weight:600; color:var(--text); letter-spacing:-0.01em; margin-bottom:4px; }
+  .pkg-sku { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-3); background:var(--surface2); padding:2px 7px; border-radius:4px; display:inline-block; margin-bottom:10px; }
+  .pkg-tagline { font-size:13px; color:var(--text-2); line-height:1.5; margin-bottom:10px; }
+  .pkg-stats { display:flex; gap:10px; font-size:11px; color:var(--text-3); }
+  .pkg-stat-num { font-weight:600; color:var(--text); font-family:'DM Mono',monospace; }
+  .pkg-card .pc-arrow { position:absolute; top:14px; right:14px; opacity:0; font-size:13px; transition:var(--transition); color:var(--pkg-color); }
+  .pkg-card:hover .pc-arrow, .pkg-card.selected .pc-arrow { opacity:1; }
+
+  /* PACKAGES VIEW — mode toggle + compare matrix */
+  .pkg-mode-bar { display:flex; align-items:center; gap:14px; margin-bottom:18px; padding:6px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); }
+  .pkg-mode-toggles { display:flex; gap:4px; background:var(--surface2); padding:3px; border-radius:8px; }
+  .pkg-mode-toggle { border:none; background:transparent; padding:6px 14px; border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:500; color:var(--text-2); cursor:pointer; transition:var(--transition); }
+  .pkg-mode-toggle.active { background:var(--ns-navy); color:#fff; box-shadow:0 1px 2px rgba(0,43,73,0.15); }
+  .pkg-mode-help { font-size:11.5px; color:var(--text-3); margin-left:auto; }
+  .pkg-pick-row { display:flex; gap:6px; flex-wrap:wrap; padding:10px 14px; border-bottom:1px solid var(--border); background:var(--surface2); border-radius:var(--radius) var(--radius) 0 0; }
+  .pkg-pick-chip { font-size:11.5px; padding:5px 11px; border-radius:18px; cursor:pointer; transition:var(--transition); user-select:none; border:1px solid var(--border); background:var(--surface); color:var(--text-2); display:flex; align-items:center; gap:6px; }
+  .pkg-pick-chip.checked { background:var(--ns-navy); color:#fff; border-color:var(--ns-navy); }
+  .pkg-pick-chip.checked .pkg-pick-tier { color:rgba(255,255,255,0.55); }
+  .pkg-pick-tier { font-size:9.5px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-3); }
+  .compare-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:auto; }
+  .compare-table { width:100%; border-collapse:collapse; font-size:13px; min-width:600px; }
+  .compare-table thead th { position:sticky; top:0; background:var(--ns-navy); color:#fff; padding:14px 14px; text-align:left; font-size:12px; font-weight:600; letter-spacing:-0.01em; z-index:2; }
+  .compare-table thead th.cap-col { background:#001a2e; }
+  .compare-table thead th .ct-tier { display:block; font-size:9.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; opacity:0.65; margin-bottom:2px; }
+  .compare-table thead th .ct-sku  { display:block; font-family:'DM Mono',monospace; font-size:10px; opacity:0.6; margin-top:2px; font-weight:400; }
+  .compare-table tbody td { padding:11px 14px; border-bottom:1px solid var(--border); font-size:12.5px; vertical-align:top; }
+  .compare-table tbody tr:last-child td { border-bottom:none; }
+  .compare-table td.cap-name { font-weight:500; color:var(--text); background:var(--surface2); width:240px; position:sticky; left:0; z-index:1; border-right:1px solid var(--border); }
+  .compare-table tr:hover td:not(.cap-name) { background:var(--ns-teal-light); }
+  .ct-cell { display:flex; flex-direction:column; gap:4px; }
+  .ct-cell .ct-status { font-size:9px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:2px 6px; border-radius:3px; align-self:flex-start; }
+  .ct-status.included { background:rgba(0,167,206,0.12); color:var(--ns-teal); }
+  .ct-status.addon    { background:rgba(255,131,0,0.12); color:var(--ns-orange); }
+  .ct-status.excluded { background:var(--surface2); color:var(--text-3); }
+  .ct-cell .ct-value { color:var(--text); }
+  .ct-cell.excluded .ct-value { color:var(--text-3); }
+
+  /* CAPABILITY MATRIX (used by package detail and elsewhere) */
+  .cap-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .cap-table th { text-align:left; padding:8px 10px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-3); border-bottom:1px solid var(--border); }
+  .cap-table td { padding:10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .cap-table tr:last-child td { border-bottom:none; }
+  .cap-table .col-name { width:38%; color:var(--text); font-weight:500; }
+  .cap-row-included { background:transparent; }
+  .cap-row-addon td { background:rgba(255,131,0,0.04); }
+  .cap-row-excluded td { color:var(--text-3); }
+  .cap-status { font-size:10px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:2px 7px; border-radius:4px; display:inline-block; }
+  .cap-status.included { background:rgba(0,167,206,0.12); color:var(--ns-teal); }
+  .cap-status.addon { background:rgba(255,131,0,0.12); color:var(--ns-orange); }
+  .cap-status.excluded { background:var(--surface2); color:var(--text-3); }
+  .cap-level-link { color:var(--ns-teal); cursor:pointer; text-decoration:none; border-bottom:1px dotted var(--ns-teal); }
+  .cap-level-link:hover { color:var(--ns-navy); border-bottom-color:var(--ns-navy); }
+
+  /* DEFENSE LEVELS TABS */
+  .def-tabs { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:18px; padding:4px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); }
+  .def-tab { padding:8px 14px; font-size:13px; font-weight:500; color:var(--text-2); cursor:pointer; border-radius:var(--radius-sm); transition:var(--transition); border:none; background:transparent; font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:6px; }
+  .def-tab:hover { background:var(--surface2); }
+  .def-tab.active { background:var(--ns-teal); color:#fff; }
+  .def-tab .def-tab-emoji { font-size:14px; }
+  .def-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px 28px; }
+  .def-head { display:flex; gap:16px; align-items:flex-start; margin-bottom:18px; }
+  .def-head-icon { width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+  .def-head h3 { font-size:18px; font-weight:600; color:var(--text); letter-spacing:-0.01em; margin-bottom:4px; }
+  .def-head p { font-size:13.5px; color:var(--text-2); line-height:1.5; margin-bottom:8px; }
+  .def-skus { font-size:11px; color:var(--text-3); font-family:'DM Mono',monospace; }
+  .def-skus span { background:var(--surface2); padding:2px 7px; border-radius:4px; margin-right:4px; }
+  .level-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+  .level-table th { text-align:left; padding:8px 10px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-3); border-bottom:1px solid var(--border); }
+  .level-table th.level-col { text-align:center; min-width:90px; }
+  .level-table td { padding:10px; border-bottom:1px solid var(--border); }
+  .level-table td.feat-col { font-weight:500; color:var(--text); width:40%; }
+  .level-table td.lvl-cell { text-align:center; }
+  .level-table tr:last-child td { border-bottom:none; }
+  .lvl-yes { color:var(--ns-teal); font-size:16px; font-weight:700; }
+  .lvl-no  { color:var(--text-3); font-size:14px; }
+  .lvl-text { font-size:11.5px; color:var(--text-2); padding:2px 8px; background:var(--surface2); border-radius:4px; display:inline-block; }
+  .lvl-text.first { background:rgba(0,167,206,0.1); color:var(--ns-teal); font-weight:500; }
+  .def-solutions, .def-addons { margin-top:18px; padding-top:14px; border-top:1px solid var(--border); }
+  .def-solutions h4, .def-addons h4 { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-3); margin-bottom:8px; }
+  .def-solutions ul, .def-addons ul { list-style:none; display:flex; flex-wrap:wrap; gap:6px; }
+  .def-solutions li, .def-addons li { font-size:12px; color:var(--text-2); background:var(--surface2); padding:4px 10px; border-radius:4px; border:1px solid var(--border); }
+
+  /* ADD-ON CARDS */
+  .ao-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; }
+  .ao-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; cursor:pointer; transition:var(--transition); }
+  .ao-card:hover { border-color:var(--ns-teal); box-shadow:var(--shadow); transform:translateY(-1px); }
+  .ao-card.selected { border-color:var(--ns-teal); background:var(--ns-teal-light); }
+  .ao-card .ao-name { font-size:13px; font-weight:500; color:var(--text); margin-bottom:6px; line-height:1.35; }
+  .ao-card .ao-sku { font-family:'DM Mono',monospace; font-size:10.5px; color:var(--text-3); background:var(--surface2); padding:2px 6px; border-radius:3px; display:inline-block; margin-bottom:6px; }
+  .ao-card .ao-lic { font-size:11.5px; color:var(--text-2); }
+  .ao-card .ao-req { font-size:10.5px; color:var(--ns-orange); margin-top:4px; }
+
+  /* WHAT'S NEW BANNER */
+  .whatsnew { display:flex; align-items:center; gap:14px; padding:12px 18px; background:linear-gradient(90deg, rgba(0,167,206,0.08), rgba(255,131,0,0.06)); border:1px solid rgba(0,167,206,0.18); border-radius:var(--radius); margin-bottom:18px; }
+  .whatsnew-tag { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; padding:3px 8px; border-radius:4px; background:linear-gradient(135deg,#00A7CE,#0076a8); color:#fff; flex-shrink:0; }
+  .whatsnew-text { font-size:13px; color:var(--text-2); flex:1; line-height:1.5; }
+  .whatsnew-text strong { color:var(--text); font-weight:600; }
+  .whatsnew-chips { display:flex; gap:6px; flex-wrap:wrap; }
+  .whatsnew-chip { font-size:11.5px; padding:4px 10px; border-radius:14px; background:#fff; border:1px solid var(--border); color:var(--ns-navy); cursor:pointer; transition:var(--transition); display:inline-flex; align-items:center; gap:4px; }
+  .whatsnew-chip:hover { border-color:var(--ns-teal); color:var(--ns-teal); }
+  .whatsnew-close { background:transparent; border:none; color:var(--text-3); cursor:pointer; padding:4px 6px; font-size:14px; transition:var(--transition); border-radius:4px; }
+  .whatsnew-close:hover { background:var(--surface2); color:var(--text); }
+
+  /* TRUST STRIP — Netskope at-a-Glance */
+  .trust { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; margin-bottom:24px; }
+  .trust-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; transition:var(--transition); }
+  .trust-card:hover { border-color:var(--ns-teal); box-shadow:0 2px 6px rgba(0,43,73,0.04); }
+  .trust-num { font-family:'DM Mono',monospace; font-size:22px; font-weight:600; color:var(--ns-teal); letter-spacing:-0.02em; line-height:1; margin-bottom:4px; }
+  .trust-num small { font-size:14px; color:var(--text-3); margin-left:1px; }
+  .trust-label { font-size:11.5px; color:var(--text); font-weight:500; line-height:1.4; }
+  .trust-sub { font-size:10.5px; color:var(--text-3); margin-top:2px; line-height:1.4; }
+  .trust-foot { font-size:10.5px; color:var(--text-3); margin-top:6px; text-align:right; font-style:italic; }
+
+  /* SCENARIOS */
+  .scn-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; margin-bottom:24px; }
+  .scn-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden; border-left:3px solid var(--scn-color, var(--ns-teal)); }
+  .scn-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-2px); border-color:var(--border-strong); }
+  .scn-card.selected { border:2px solid var(--scn-color); border-left-width:3px; box-shadow:0 0 0 3px rgba(0,167,206,0.1); }
+  .scn-icon { font-size:22px; margin-bottom:10px; display:block; }
+  .scn-title { font-size:15px; font-weight:600; color:var(--text); letter-spacing:-0.01em; margin-bottom:4px; }
+  .scn-tagline { font-size:12.5px; color:var(--text-2); line-height:1.5; margin-bottom:12px; }
+  .scn-stats { display:flex; gap:12px; font-size:10.5px; color:var(--text-3); }
+  .scn-stats span strong { color:var(--text); font-family:'DM Mono',monospace; font-weight:600; }
+  .scn-arrow { position:absolute; top:18px; right:18px; opacity:0; transition:var(--transition); color:var(--scn-color); font-size:14px; }
+  .scn-card:hover .scn-arrow, .scn-card.selected .scn-arrow { opacity:1; }
+  .scn-detail { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; overflow:hidden; border-top:3px solid var(--scn-color, var(--ns-teal)); }
+  .scn-det-head { padding:24px 28px; border-bottom:1px solid var(--border); display:flex; gap:18px; align-items:flex-start; }
+  .scn-det-icon { font-size:32px; flex-shrink:0; }
+  .scn-det-info { flex:1; }
+  .scn-det-info h2 { font-size:20px; font-weight:600; color:var(--text); letter-spacing:-0.02em; margin-bottom:6px; }
+  .scn-det-info p { font-size:14px; color:var(--text-2); line-height:1.6; margin-bottom:8px; }
+  .scn-outcome { font-size:13px; padding:10px 14px; background:rgba(0,167,206,0.08); border-left:3px solid var(--ns-teal); border-radius:0 6px 6px 0; color:var(--text); margin-top:10px; }
+  .scn-outcome strong { color:var(--ns-teal); font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; margin-right:6px; }
+  .scn-det-actions { display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
+  .scn-det-body { padding:20px 28px; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .scn-det-body section h3 { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-3); margin-bottom:10px; }
+  .scn-det-body section { display:flex; flex-direction:column; gap:6px; }
+  .scn-recs { display:flex; flex-direction:column; gap:6px; }
+  .scn-rec-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--surface2); border-radius:6px; cursor:pointer; font-size:13px; color:var(--text-2); border:1px solid transparent; transition:var(--transition); }
+  .scn-rec-item:hover { border-color:var(--ns-teal); background:var(--ns-teal-light); color:var(--ns-navy); }
+  .scn-rec-item .scn-rec-icon { font-size:14px; }
+  .scn-rec-item .scn-rec-meta { margin-left:auto; font-size:10.5px; color:var(--text-3); font-family:'DM Mono',monospace; }
+
+  /* COMMAND PALETTE (⌘K) */
+  .cmdk-backdrop { position:fixed; inset:0; background:rgba(0,43,73,0.45); z-index:300; opacity:0; pointer-events:none; transition:opacity 0.16s; backdrop-filter:blur(2px); }
+  .cmdk-backdrop.show { opacity:1; pointer-events:auto; }
+  .cmdk { position:fixed; top:14vh; left:50%; transform:translate(-50%, -8px) scale(0.98); z-index:301; width:560px; max-width:92vw; background:var(--surface); border-radius:12px; box-shadow:0 24px 60px rgba(0,43,73,0.35); border:1px solid var(--border); overflow:hidden; opacity:0; pointer-events:none; transition:opacity 0.18s, transform 0.18s; }
+  .cmdk.show { opacity:1; transform:translate(-50%, 0) scale(1); pointer-events:auto; }
+  .cmdk-input-row { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border); }
+  .cmdk-input-row svg { width:16px; height:16px; color:var(--text-3); flex-shrink:0; }
+  .cmdk-input { flex:1; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:15px; color:var(--text); background:transparent; }
+  .cmdk-input::placeholder { color:var(--text-3); }
+  .cmdk-kbd { font-family:'DM Mono',monospace; font-size:11px; padding:2px 8px; background:var(--surface2); border:1px solid var(--border); border-radius:4px; color:var(--text-3); }
+  .cmdk-results { max-height:50vh; overflow-y:auto; padding:6px; }
+  .cmdk-results::-webkit-scrollbar { width:5px; }
+  .cmdk-results::-webkit-scrollbar-thumb { background:var(--border-strong); border-radius:3px; }
+  .cmdk-section-label { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); padding:10px 14px 4px; }
+  .cmdk-row { padding:10px 14px; display:flex; align-items:center; gap:12px; border-radius:8px; cursor:pointer; transition:background 0.1s; }
+  .cmdk-row.selected { background:var(--ns-teal-light); }
+  .cmdk-row:hover { background:var(--surface2); }
+  .cmdk-row.selected:hover { background:var(--ns-teal-light); }
+  .cmdk-icon { width:30px; height:30px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; font-family:'DM Mono',monospace; font-weight:600; }
+  .cmdk-icon.package { background:rgba(0,167,206,0.12); color:var(--ns-teal); }
+  .cmdk-icon.product { background:rgba(0,43,73,0.07); color:var(--ns-navy); }
+  .cmdk-icon.addon   { background:rgba(255,131,0,0.12); color:var(--ns-orange); }
+  .cmdk-icon.feature { background:rgba(123,79,212,0.1); color:#7B4FD4; }
+  .cmdk-icon.scenario{ background:rgba(15,122,90,0.1); color:#0F7A5A; }
+  .cmdk-text { flex:1; min-width:0; }
+  .cmdk-title { font-size:13.5px; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cmdk-subtitle { font-size:11.5px; color:var(--text-3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cmdk-type-badge { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:2px 7px; border-radius:3px; flex-shrink:0; }
+  .cmdk-type-badge.package { background:rgba(0,167,206,0.12); color:var(--ns-teal); }
+  .cmdk-type-badge.product { background:rgba(0,43,73,0.07); color:var(--ns-navy); }
+  .cmdk-type-badge.addon   { background:rgba(255,131,0,0.12); color:var(--ns-orange); }
+  .cmdk-type-badge.feature { background:rgba(123,79,212,0.1); color:#7B4FD4; }
+  .cmdk-type-badge.scenario{ background:rgba(15,122,90,0.1); color:#0F7A5A; }
+  .cmdk-empty { padding:32px 20px; text-align:center; color:var(--text-3); font-size:13px; }
+  .cmdk-foot { padding:8px 14px; border-top:1px solid var(--border); display:flex; gap:14px; font-size:11px; color:var(--text-3); background:var(--surface2); }
+  .cmdk-foot .cmdk-kbd { font-size:10px; padding:1px 6px; }
+  .cmdk-mark { background:rgba(255,131,0,0.18); color:var(--text); padding:0 1px; border-radius:2px; }
+
+  /* BOM PANEL (slide-out from left) */
+  .bom-panel { position:fixed; top:0; left:0; bottom:0; width:420px; max-width:92vw; background:var(--surface); box-shadow:6px 0 32px rgba(0,43,73,0.18); z-index:200; display:flex; flex-direction:column; transform:translateX(-105%); transition:transform 0.28s cubic-bezier(0.4,0,0.2,1); }
+  .bom-panel.open { transform:translateX(0); }
+  .bom-head { background:var(--ns-navy); color:#fff; padding:18px 20px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .bom-head h2 { font-size:15px; font-weight:600; letter-spacing:-0.01em; flex:1; }
+  .bom-head .close-x { background:rgba(255,255,255,0.1); border:none; color:#fff; width:28px; height:28px; border-radius:6px; cursor:pointer; font-size:14px; }
+  .bom-head .close-x:hover { background:rgba(255,255,255,0.2); }
+  .bom-meta { background:var(--surface2); padding:10px 20px; font-size:11.5px; color:var(--text-3); border-bottom:1px solid var(--border); display:flex; gap:14px; }
+  .bom-meta strong { color:var(--text); font-family:'DM Mono',monospace; font-weight:500; }
+  .bom-list { flex:1; overflow-y:auto; padding:14px 20px; }
+  .bom-list::-webkit-scrollbar { width:5px; }
+  .bom-list::-webkit-scrollbar-thumb { background:var(--border-strong); border-radius:3px; }
+  .bom-empty { text-align:center; padding:40px 20px; color:var(--text-3); font-size:13px; }
+  .bom-empty svg { width:48px; height:48px; margin-bottom:12px; opacity:0.3; }
+  .bom-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; }
+  .bom-item-top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; margin-bottom:6px; }
+  .bom-item-name { font-size:13px; font-weight:500; color:var(--text); line-height:1.35; }
+  .bom-item-type { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:2px 6px; border-radius:3px; flex-shrink:0; margin-left:6px; vertical-align:middle; }
+  .bom-item-type.package { background:rgba(0,167,206,0.12); color:var(--ns-teal); }
+  .bom-item-type.product { background:rgba(0,43,73,0.07); color:var(--ns-navy); }
+  .bom-item-type.addon   { background:rgba(255,131,0,0.12); color:var(--ns-orange); }
+  .bom-item-sku { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-3); background:var(--surface2); padding:2px 6px; border-radius:3px; display:inline-block; margin-bottom:8px; }
+  .bom-item-controls { display:flex; gap:8px; align-items:center; }
+  .bom-qty { display:flex; align-items:center; gap:4px; }
+  .bom-qty button { width:24px; height:24px; border:1px solid var(--border); background:var(--surface); border-radius:4px; cursor:pointer; color:var(--text-2); font-size:14px; line-height:1; transition:var(--transition); }
+  .bom-qty button:hover { border-color:var(--ns-teal); color:var(--ns-teal); }
+  .bom-qty input { width:50px; padding:3px 6px; border:1px solid var(--border); border-radius:4px; font-family:'DM Mono',monospace; font-size:12px; text-align:center; outline:none; }
+  .bom-qty input:focus { border-color:var(--ns-teal); }
+  .bom-notes { width:100%; margin-top:8px; padding:6px 8px; border:1px solid var(--border); border-radius:4px; font-family:'DM Sans',sans-serif; font-size:12px; color:var(--text); resize:vertical; min-height:30px; outline:none; transition:var(--transition); }
+  .bom-notes:focus { border-color:var(--ns-teal); }
+  .bom-remove { margin-left:auto; background:transparent; border:1px solid var(--border); color:var(--text-3); width:26px; height:26px; border-radius:4px; cursor:pointer; font-size:12px; transition:var(--transition); }
+  .bom-remove:hover { background:#fce8e8; border-color:#f5c0c0; color:#c0392b; }
+  .bom-foot { border-top:1px solid var(--border); padding:14px 20px; flex-shrink:0; background:var(--surface); }
+  .bom-export-row { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+  .bom-export-row button { flex:1; padding:8px 10px; border:1px solid var(--border); background:var(--surface2); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; transition:var(--transition); }
+  .bom-export-row button:hover { background:var(--ns-teal-light); border-color:var(--ns-teal); color:var(--ns-navy); }
+  .bom-export-row button.primary { background:var(--ns-teal); color:#fff; border-color:var(--ns-teal); }
+  .bom-export-row button.primary:hover { background:#008faf; }
+  .bom-export-row button.danger:hover { background:#fce8e8; border-color:#f5c0c0; color:#c0392b; }
+  .bom-export-output { width:100%; min-height:140px; max-height:240px; padding:10px 12px; border:1px solid var(--border); border-radius:6px; font-family:'DM Mono',monospace; font-size:11.5px; color:var(--text); background:var(--surface2); resize:vertical; outline:none; }
+  .bom-export-output:focus { border-color:var(--ns-teal); }
+  .bom-toast { position:fixed; bottom:80px; left:22px; background:var(--ns-navy); color:#fff; padding:10px 16px; border-radius:8px; font-size:12.5px; box-shadow:var(--shadow-hover); z-index:300; opacity:0; transform:translateY(8px); transition:opacity 0.2s, transform 0.2s; }
+  .bom-toast.show { opacity:1; transform:translateY(0); }
+  .bom-backdrop { position:fixed; inset:0; background:rgba(0,43,73,0.4); z-index:199; opacity:0; pointer-events:none; transition:opacity 0.2s; }
+  .bom-backdrop.show { opacity:1; pointer-events:auto; }
+
+  /* QUICK-ADD BUTTON (top-right of every card) */
+  .qa-btn {
+    position:absolute; top:10px; right:10px;
+    width:26px; height:26px; border-radius:50%;
+    background:var(--surface); border:1.5px solid var(--border);
+    color:var(--text-3);
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; line-height:1; padding:0;
+    cursor:pointer; transition:var(--transition);
+    z-index:3;
+  }
+  .qa-btn:hover {
+    background:var(--ns-teal-light); border-color:var(--ns-teal);
+    color:var(--ns-teal); transform:scale(1.1);
+  }
+  .qa-btn.in-bom {
+    background:var(--ns-orange); border-color:var(--ns-orange);
+    color:#fff;
+    box-shadow:0 0 0 0 rgba(255,131,0,0.4);
+  }
+  .qa-btn.in-bom:hover {
+    background:#cc6900; border-color:#cc6900;
+    transform:scale(1.1);
+  }
+  /* "In BOM" tint on card edge */
+  .product-card.in-bom, .pkg-card.in-bom, .ao-card.in-bom, .agent-card.in-bom { border-color:rgba(255,131,0,0.5); }
+  .bom-item-type.agent { background:rgba(219,39,119,0.12); color:#DB2777; }
+
+  /* AGENTSKOPE LAUNCH STYLING */
+  .si-badge-new { font-size:8.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:linear-gradient(135deg,var(--ns-orange),#cc6900); color:#fff; padding:2px 5px; border-radius:3px; margin-left:6px; vertical-align:middle; }
+  .sidebar-item.active .si-badge-new { background:#fff; color:var(--ns-orange); }
+  .as-hero { background:linear-gradient(135deg,#001a2e 0%,#002B49 55%,#0a4b78 100%); border-radius:var(--radius); padding:32px 36px; margin-bottom:28px; position:relative; overflow:hidden; color:#fff; }
+  .as-hero::before { content:''; position:absolute; right:-80px; top:-80px; width:320px; height:320px; background:radial-gradient(circle,rgba(0,167,206,0.22) 0%,transparent 65%); border-radius:50%; }
+  .as-hero::after { content:''; position:absolute; left:40%; bottom:-100px; width:260px; height:260px; background:radial-gradient(circle,rgba(255,131,0,0.18) 0%,transparent 65%); border-radius:50%; }
+  .as-hero-inner { position:relative; z-index:1; max-width:760px; }
+  .as-pill { display:inline-flex; align-items:center; gap:8px; padding:4px 12px 4px 4px; background:rgba(255,131,0,0.18); border:1px solid rgba(255,131,0,0.35); border-radius:20px; font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#FFAA4D; margin-bottom:14px; }
+  .as-pill .pulse { width:18px; height:18px; border-radius:50%; background:var(--ns-orange); display:inline-flex; align-items:center; justify-content:center; color:#fff; font-size:10px; box-shadow:0 0 0 0 rgba(255,131,0,0.6); animation:pulse 2.4s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(255,131,0,0.7)} 70%{box-shadow:0 0 0 10px rgba(255,131,0,0)} 100%{box-shadow:0 0 0 0 rgba(255,131,0,0)} }
+  .as-hero h1 { font-size:30px; font-weight:600; letter-spacing:-0.025em; margin-bottom:12px; }
+  .as-hero h1 .accent { color:var(--ns-teal); }
+  .as-hero p.lead { font-size:15px; color:rgba(255,255,255,0.78); line-height:1.55; max-width:680px; margin-bottom:18px; }
+  .as-stats { display:flex; gap:24px; flex-wrap:wrap; margin-top:6px; }
+  .as-stat { display:flex; gap:10px; align-items:center; }
+  .as-stat .num { font-family:'DM Mono',monospace; font-size:28px; font-weight:600; color:var(--ns-teal); letter-spacing:-0.02em; line-height:1; }
+  .as-stat .lbl { font-size:11.5px; color:rgba(255,255,255,0.6); line-height:1.3; max-width:140px; }
+  .as-stat .div { width:1px; height:32px; background:rgba(255,255,255,0.15); }
+
+  .agent-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+  .agent-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden; border-top:3px solid var(--agent-color, var(--ns-teal)); }
+  .agent-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-2px); }
+  .agent-card.selected { border:2px solid var(--agent-color); border-top-width:3px; box-shadow:0 0 0 3px rgba(0,167,206,0.1); }
+  .agent-card-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .agent-icon { width:44px; height:44px; border-radius:10px; background:var(--agent-tint, rgba(0,167,206,0.1)); color:var(--agent-color); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+  .agent-name { font-size:15px; font-weight:600; color:var(--text); letter-spacing:-0.01em; line-height:1.25; }
+  .agent-meta-row { display:flex; gap:6px; align-items:center; margin-top:4px; flex-wrap:wrap; }
+  .agent-status { font-size:9.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:2px 7px; border-radius:3px; }
+  .agent-status.ga      { background:rgba(0,167,206,0.12); color:var(--ns-teal); }
+  .agent-status.preview { background:rgba(255,131,0,0.14); color:var(--ns-orange); }
+  .agent-persona { font-size:9.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:2px 7px; border-radius:3px; background:var(--surface2); color:var(--text-3); }
+  .agent-fok { font-size:9.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:2px 7px; border-radius:3px; background:linear-gradient(135deg,#FF8300,#cc6900); color:#fff; }
+  .agent-purpose { font-size:13px; color:var(--text-2); line-height:1.5; }
+  .agent-card .pc-arrow { position:absolute; top:14px; right:14px; opacity:0; font-size:13px; transition:var(--transition); color:var(--agent-color); }
+  .agent-card:hover .pc-arrow, .agent-card.selected .pc-arrow { opacity:1; }
+
+  .as-quote { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--ns-teal); border-radius:var(--radius-sm); padding:18px 22px; margin-top:22px; font-size:14px; color:var(--text-2); line-height:1.6; font-style:italic; }
+  .as-quote .quote-attr { display:block; margin-top:10px; font-style:normal; font-size:12px; color:var(--text-3); }
+  .as-quote .quote-attr strong { color:var(--text); font-weight:600; }
+
+  /* In-package chips on product cards */
+  .pkg-chip { font-size:9.5px; font-weight:600; padding:2px 6px; border-radius:3px; letter-spacing:0.04em; text-transform:uppercase; }
+  .pkg-chip.in-prime { background:rgba(0,167,206,0.12); color:var(--ns-teal); }
+  .pkg-chip.in-max   { background:rgba(255,131,0,0.12); color:var(--ns-orange); }
+  .pkg-chip.in-api   { background:rgba(123,79,212,0.1); color:#7B4FD4; }
+
+  /* RESPONSIVE */
+  @media (max-width:900px) { .hero-stats{display:none;} .sidebar{width:220px;} .main{padding:20px;} }
+  @media (max-width:680px) {
+    .layout{flex-direction:column;}
+    .sidebar{width:100%;height:auto;position:static;border-right:none;border-bottom:1px solid var(--border);padding:12px 0;display:flex;flex-direction:row;overflow-x:auto;white-space:nowrap;}
+    .sidebar-label{display:none;}
+    .sidebar-section{display:flex;flex-direction:row;}
+    .sidebar-item{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;}
+    .sidebar-item.active{border-bottom-color:var(--ns-teal);border-left-color:transparent;}
+    .product-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+    .dp-bottom{grid-template-columns:1fr;}
+    .dp-top{flex-wrap:wrap;}
+    .dp-actions{flex-direction:row;flex-wrap:wrap;}
+    .search-box input{width:120px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">
+      <div class="gate-mark"></div>
+      <div class="gate-title">netskope <span>·</span> deal room</div>
+    </div>
+    <h2>Confidential</h2>
+    <p>This is a Netskope Company &amp; Partner Confidential reference, prepared for active deal conversations. Enter the access password to continue.</p>
+    <input type="password" class="gate-input" id="gate-input" placeholder="Access password" autocomplete="off" autofocus>
+    <button class="gate-btn" id="gate-btn">Unlock</button>
+    <div class="gate-foot">v3.0 · May 2026 · SHA-256 gated</div>
+  </div>
+</div>
+
+<!-- WATERMARK -->
+<div class="watermark" id="watermark"></div>
+
+<!-- TOP NAV -->
+<nav class="topbar">
+  <a class="logo" href="https://www.netskope.com/products" target="_blank">
+    <img src="https://cdn.brandfetch.io/id8gc0ILB0/theme/light/logo.svg?c=1dxbfHSJFAPEGdCLU4o5B" alt="Netskope" style="height:26px;width:auto">
+  </a>
+  <div class="topbar-divider"></div>
+  <span class="topbar-title">Deal Room · Packaging &amp; Products</span>
+  <div class="topbar-right">
+    <div class="search-box">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="m11 11 2.5 2.5" stroke-linecap="round"/></svg>
+      <input type="text" id="search-input" placeholder="Filter this view…  (⌘K for global)" autocomplete="off">
+      <span class="kbd-hint">⌘K</span>
+    </div>
+    <span class="topbar-badge" id="topbar-count">v3.0</span>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main" id="main"></main>
+</div>
+
+<!-- FLOATING BUTTONS -->
+<button class="fab fab-bom" id="fab-bom" title="Build BOM">
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 4h10M2 7h10M2 10h6" stroke-linecap="round"/></svg>
+  Build BOM <span class="count" id="bom-count">0</span>
+</button>
+<!-- vNext: AI assistant FAB will live here. Removed in v2.0 — see Anthropic API key handling note in script. -->
+
+<!-- COMMAND PALETTE (⌘K) -->
+<div class="cmdk-backdrop" id="cmdk-backdrop"></div>
+<div class="cmdk" id="cmdk" role="dialog" aria-label="Command palette">
+  <div class="cmdk-input-row">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="m11 11 2.5 2.5" stroke-linecap="round"/></svg>
+    <input type="text" class="cmdk-input" id="cmdk-input" placeholder="Search packages, products, SKUs, defenses, scenarios…" autocomplete="off">
+    <span class="cmdk-kbd">esc</span>
+  </div>
+  <div class="cmdk-results" id="cmdk-results"></div>
+  <div class="cmdk-foot">
+    <span><span class="cmdk-kbd">↑↓</span> navigate</span>
+    <span><span class="cmdk-kbd">↵</span> open</span>
+    <span style="margin-left:auto"><span class="cmdk-kbd">⌘K</span> anywhere</span>
+  </div>
+</div>
+
+<!-- BOM PANEL -->
+<div class="bom-backdrop" id="bom-backdrop"></div>
+<aside class="bom-panel" id="bom-panel">
+  <div class="bom-head">
+    <svg width="18" height="18" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 4h10M2 7h10M2 10h6" stroke-linecap="round"/></svg>
+    <h2>Bill of Materials</h2>
+    <button class="close-x" id="bom-close" title="Close">×</button>
+  </div>
+  <div class="bom-meta" id="bom-meta">0 line items · v3.0 packaging</div>
+  <div class="bom-list" id="bom-list"></div>
+  <div class="bom-foot">
+    <div class="bom-export-row">
+      <button id="bom-export-md" class="primary">Markdown</button>
+      <button id="bom-export-txt">Plain text</button>
+      <button id="bom-export-csv">CSV</button>
+      <button id="bom-clear" class="danger">Clear all</button>
+    </div>
+    <div class="bom-export-row" style="margin-bottom:10px">
+      <button id="bom-open-proposal" style="flex:1;background:var(--ns-navy);color:#fff;border-color:var(--ns-navy);font-weight:500">Open as printable proposal ↗</button>
+    </div>
+    <textarea class="bom-export-output" id="bom-export-output" placeholder="Click Markdown / Plain text / CSV to render the BOM here, then copy." readonly></textarea>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button id="bom-copy" class="primary" style="flex:1;padding:9px;border:1px solid var(--ns-teal);background:var(--ns-teal);color:#fff;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">Copy to clipboard</button>
+    </div>
+  </div>
+</aside>
+<div class="bom-toast" id="bom-toast"></div>
+
+<footer>
+  <span class="conf">CONFIDENTIAL</span> · Netskope Company &amp; Partner Confidential ·
+  Packaging Overview v3.0 (May 2026) ·
+  Created by John Saunders ·
+  <a href="https://www.netskope.com/products" target="_blank">netskope.com/products ↗</a>
+</footer>
+
+<!-- vNext: PDF grounding text for the AI assistant will be embedded here as
+     <script type="text/plain" id="pdf-grounding-text">…</script>. Source already
+     extracted from "Netskope Packages Overview-May 2026-v3.0.pdf" (~7,800 tokens). -->
+
+
+<script>
+/* ==============================================================
+   NETSKOPE DEAL ROOM v2.0
+   Single-file, password-gated packaging & product reference.
+   Built on the v1 Netskope Product Explorer; PDF source:
+     "Netskope Packages Overview – May 2026 v3.0"
+
+   Shipping in v2.0:
+   - SHA-256 password gate (sessionStorage, not durable)
+   - 5 views: Packages · Defense Levels · Products · Add-ons & Network · AI & Agentic
+   - 8 packages, 7 defense matrices, 50+ a-la-carte SKUs, 28 products
+   - BOM builder with Markdown / Plain text / CSV export + clipboard
+   - Diagonal CONFIDENTIAL watermark + footer disclaimer
+
+   vNext (deferred):
+   - AI assistant grounded in the PDF + structured data.
+     Plan = first-time user pastes own Anthropic API key (sessionStorage only,
+     never embedded), Sonnet 4.6 default with prompt caching on the static
+     grounding block, slide-out chat panel right side.
+   - Will need anthropic-dangerous-direct-browser-access header on the API call.
+   ============================================================== */
+
+// ——————————————————————
+// PASSWORD GATE
+// ——————————————————————
+const PW_HASH = 'b6855e378a6a250e6d0db7a4a967973640881293420e5817c81c50073a8cb5a8';
+
+// Don't lose this hashing function!
+async function sha256(str) {
+  const buf = new TextEncoder().encode(str);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function tryUnlock() {
+  const input = document.getElementById('gate-input');
+
+  // 👇 TEMPORARY BYPASS 👇
+  if (input.value === 'netskope') {
+    sessionStorage.setItem('ns_dr_unlocked','1');
+    document.getElementById('gate').style.display = 'none';
+    init();
+    return; // Stops here so local testing doesn't crash
+  }
+  // 👆 ---------------- 👆
+
+  const h = await sha256(input.value);
+  if (h === PW_HASH) {
+    sessionStorage.setItem('ns_dr_unlocked','1');
+    document.getElementById('gate').style.display = 'none';
+    init();
+  } else {
+    input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
+    input.value = '';
+  }
+}
+
+document.getElementById('gate-btn').onclick = tryUnlock;
+document.getElementById('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+if (sessionStorage.getItem('ns_dr_unlocked') === '1') {
+  document.getElementById('gate').style.display = 'none';
+  window.addEventListener('DOMContentLoaded', init);
+}
+// ——————————————————————
+// WATERMARK
+// ——————————————————————
+function buildWatermark() {
+  const wm = document.getElementById('watermark');
+  const text = 'CONFIDENTIAL · NETSKOPE · ';
+  let html = '';
+  for (let i = 0; i < 14; i++) html += `<div class="watermark-row">${text.repeat(8)}</div>`;
+  wm.innerHTML = html;
+}
+
+// ——————————————————————
+// CATEGORY METADATA + PRODUCTS (v1 dataset, extended in step 2)
+// ——————————————————————
+const CAT_META = {
+  "All":{color:"#002B49",bg:"rgba(0,43,73,0.07)"},
+  "Converged":{color:"#FF8300",bg:"rgba(255,131,0,0.1)"},
+  "AgentSkope":{color:"#DB2777",bg:"rgba(219,39,119,0.1)"},
+  "AI Security":{color:"#00A7CE",bg:"rgba(0,167,206,0.1)"},
+  "Web & Cloud":{color:"#1a6fbd",bg:"rgba(26,111,189,0.1)"},
+  "ZTNA & Private Access":{color:"#0E7490",bg:"rgba(14,116,144,0.1)"},
+  "Data Security":{color:"#7B4FD4",bg:"rgba(123,79,212,0.1)"},
+  "Networking":{color:"#0F7A5A",bg:"rgba(15,122,90,0.1)"},
+  "Analytics":{color:"#D97706",bg:"rgba(217,119,6,0.1)"}
+};
+
+const PRODUCTS = [
+  {name:"SASE",cat:"Converged",icon:"🔐",desc:"Netskope One SASE combines market-leading SSE and SD-WAN to protect users, apps, and data everywhere with AI-powered zero trust security — fast, reliable access from any location or device, including IoT, at scale.",features:["SSE + SD-WAN converged","AI-powered zero trust","Any device, any location","IoT at scale","Single policy engine"],related:["SSE","Converged Access","Secure SD-WAN"],url:"https://www.netskope.com/products/secure-access-service-edge"},
+  {name:"SSE",cat:"Converged",icon:"🛡️",desc:"Netskope One Security Service Edge (SSE) consolidates critical security services in one platform — securing access to web, cloud, and private apps from anywhere with a data-centric, AI-powered approach.",features:["Cloud-delivered","AI-powered enforcement","Data-centric approach","Hybrid workforce ready","Zero trust inline"],related:["SASE","Next Gen SWG","ZTNA / Private Access"],url:"https://www.netskope.com/products/security-service-edge"},
+  {name:"Converged Access",cat:"Converged",icon:"↔️",desc:"A 100% SaaS-based, converged remote connectivity platform built with one platform, one software, and one policy for multiple deployment scenarios — users, branches, and clouds.",features:["One platform, one policy","SaaS-based SD-WAN","Multi-deployment","Zero trust access","Cloud-managed"],related:["SASE","Secure SD-WAN","Endpoint SD-WAN"],url:"https://www.netskope.com/products/converged-access"},
+  {name:"Unified Data Security",cat:"Converged",icon:"🗄️",desc:"Re-imagine how you protect your organization's data in the AI era — the most comprehensive, unified data security in a single platform combining DLP, DSPM, CASB, and SSPM.",features:["Unified DLP","DSPM","CASB integration","SSPM","AI-era data protection"],related:["DLP","DSPM","CASB (API)"],url:"https://www.netskope.com/products/data-security"},
+  {name:"AgentSkope",cat:"AgentSkope",icon:"🧠",isNew:true,
+   desc:"Announced 5 May 2026. Netskope One AgentSkope is the architectural foundation for deploying Netskope AI agents that execute end-to-end SOC and NOC workflows — including first-of-kind agentic DLP analysis and insider-threat triage. Provides shared GRC, privacy and security controls plus agent-utilisation telemetry across the platform.",
+   features:["6 launch agents","First-of-kind agentic DLP","First-of-kind insider-threat triage","Unified GRC + privacy controls","Agent utilisation tracking","Natural-language ops"],
+   related:["AI Gateway","Agentic Broker","AI Guardrails","DLP","DSPM"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+  {name:"Netskope DLP AISecOps Agent",cat:"AgentSkope",icon:"🧪",isNew:true,
+   desc:"First-of-its-kind agentic DLP analysis (announced 5 May 2026). Mimics a security operations analyst to execute end-to-end data protection workflows — contextualised risk assessments (finding the needle in the haystack), intelligent triage and investigation, and agentic risk remediation. One global professional-services beta customer uses it to analyse millions of alerts, convert them into dozens of automatically-investigated cases, and free their team for critical work.",
+   features:["First-of-kind agentic DLP","Contextualised risk assessment","Intelligent triage & investigation","Agentic risk remediation","Eliminates low-value incident time"],
+   related:["AgentSkope","DLP","DSPM","Unified Data Security"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+  {name:"Netskope Insider Threat AISecOps Agent",cat:"AgentSkope",icon:"🕵️",isNew:true,
+   desc:"First-of-its-kind insider-threat triage (announced 5 May 2026, currently in private preview). Combines DLP alerts with user behaviour data to identify malicious activity and protect against insider threats — surfacing the patterns a tired analyst would miss.",
+   features:["First-of-kind insider-threat triage","Combines DLP + UEBA signal","Malicious-activity detection","User behaviour correlation","Private preview"],
+   related:["AgentSkope","Netskope DLP AISecOps Agent","DLP"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+  {name:"Netskope Private Access AIOps Agent",cat:"AgentSkope",icon:"🛠️",isNew:true,
+   desc:"Automatically audits configurations for Netskope One Private Access — removing dormant settings and helping ensure access privileges are not left open. Generates granular application segments and policies based on real user-consumption patterns. Included with NPA Level 3 (add-on for L1 / L2).",
+   features:["Auto-audit NPA configurations","Remove dormant settings","Granular app segments","Usage-driven policies","Cuts audit fatigue"],
+   related:["AgentSkope","ZTNA / Private Access","Universal ZTNA"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+  {name:"Netskope DEM Data Intelligence Agent",cat:"AgentSkope",icon:"💬",isNew:true,
+   desc:"Streamlines troubleshooting for user-experience issues by transforming granular DEM telemetry and raw metrics into actionable insights — through natural language in an easy-to-use conversational interface. Included with DEM L4 (with query limits); add-on for L3.",
+   features:["Conversational DEM analysis","Natural-language queries","Telemetry → insights","L4 included (query limits)","L3 add-on"],
+   related:["AgentSkope","Digital Experience Mgmt","Netskope DEM Insights Agent"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+  {name:"Netskope DEM Insights Agent",cat:"AgentSkope",icon:"📈",isNew:true,
+   desc:"Provides a high-level view of organisational digital health — correlating granular telemetry to surface critical incidents, macro-impacting trends and performance bottlenecks. Included with DEM Level 3 and Level 4 packages.",
+   features:["High-level digital health","Critical incident surfacing","Macro trend correlation","Performance bottleneck detection","DEM L3+ included"],
+   related:["AgentSkope","Digital Experience Mgmt","Netskope DEM Data Intelligence Agent"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+  {name:"Netskope CCI Insights Agent",cat:"AgentSkope",icon:"🔍",isNew:true,
+   desc:"Empowers SOC analysts to query complex risk attributes and compliance certifications across more than 85,000 cloud, AI and SaaS applications using natural language — enabling conversational interaction with app risk data.",
+   features:["Natural-language risk queries","85,000+ apps covered","Risk attribute exploration","Compliance certifications","Conversational app-risk data"],
+   related:["AgentSkope","Cloud Inline Security","CASB (API)","GenAI Security"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+  {name:"Agentic Broker",cat:"AI Security",icon:"🤖",isNew:true,desc:"Secure and govern AI agents operating across your enterprise — visibility, control, and policy enforcement for every agentic AI action, workflow, and data interaction.",features:["Agent visibility","Policy enforcement","Zero trust for AI","Risk detection","Agentic workflow control"],related:["AI Gateway","AI Guardrails","GenAI Security"],url:"https://www.netskope.com/products/agentic-broker"},
+  {name:"AI Gateway",cat:"AI Security",icon:"⚡",isNew:true,desc:"A gateway for all AI traffic that gives your organization visibility and control over how employees use AI tools — without sacrificing speed or user experience.",features:["AI traffic visibility","Access control","Data protection","Usage analytics","Shadow AI discovery"],related:["Agentic Broker","AI Guardrails","GenAI Security"],url:"https://www.netskope.com/products/ai-gateway"},
+  {name:"AI Red Teaming",cat:"AI Security",icon:"⚔️",isNew:true,desc:"Proactively test and harden your AI systems against adversarial attacks — automated red teaming to find vulnerabilities in LLMs and AI pipelines before attackers do.",features:["Adversarial testing","LLM vulnerability scanning","Risk scoring","Continuous testing","Prompt injection testing"],related:["AI Guardrails","AI Gateway","Agentic Broker"],url:"https://www.netskope.com/products/ai-red-teaming"},
+  {name:"AI Guardrails",cat:"AI Security",icon:"🚧",isNew:true,desc:"Enforce real-time policies on AI inputs and outputs — prevent data leakage, harmful content, and policy violations across all AI model interactions in your organization.",features:["Input/output filtering","Data leakage prevention","Harmful content blocking","Prompt injection defense","Policy-driven controls"],related:["AI Gateway","Agentic Broker","AI Red Teaming"],url:"https://www.netskope.com/products/ai-guardrails"},
+  {name:"GenAI Security",cat:"AI Security",icon:"✨",desc:"Comprehensive security for generative AI adoption — discover, analyze, and control all GenAI app usage across your organization with granular policy controls.",features:["GenAI app discovery","Usage controls","Data protection","Risk scoring","Policy enforcement"],related:["AI Gateway","AI Guardrails","Cloud Inline Security"],url:"https://www.netskope.com/products/securing-generative-ai"},
+  {name:"Next Gen SWG",cat:"Web & Cloud",icon:"🌐",desc:"The foundation for SSE web and cloud inline security — a next-generation secure web gateway providing real-time threat and data protection for all web and cloud traffic.",features:["Inline threat detection","DLP inline","Cloud app controls","SSL inspection","Zero-day protection"],related:["Cloud Inline Security","Threat Protection","Remote Browser Isolation"],url:"https://www.netskope.com/products/next-gen-swg"},
+  {name:"Cloud Inline Security",cat:"Web & Cloud",icon:"☁️",desc:"Netskope One CASB lets you confidently adopt cloud applications without sacrificing security — inline and out-of-band protection for managed and unmanaged cloud apps.",features:["Inline + API CASB","Shadow IT discovery","Policy enforcement","Managed/unmanaged apps","Real-time coaching"],related:["Next Gen SWG","CASB (API)","SSPM"],url:"https://www.netskope.com/products/casb"},
+  {name:"ZTNA / Private Access",cat:"ZTNA & Private Access",icon:"🔑",desc:"Netskope One Private Access ensures secure, optimized access to all private apps from anywhere — combining ZTNA with Endpoint SD-WAN for best-in-class zero trust private application access. The cornerstone of VPN replacement.",features:["App-level zero trust","Continuous trust verification","Endpoint SD-WAN built-in","Replace VPN","Any app, any location"],related:["Endpoint SD-WAN","Universal ZTNA","SASE"],url:"https://www.netskope.com/products/private-access"},
+  {name:"Universal ZTNA",cat:"ZTNA & Private Access",icon:"🛂",desc:"Extend zero trust access beyond remote workers to every user type — managed, unmanaged, contractors, IoT, and OT — with a single consistent policy framework that eliminates both VPN and NAC complexity.",features:["All user types covered","Managed + unmanaged","Replaces VPN & NAC","Consistent policy","IoT/OT support"],related:["ZTNA / Private Access","Device Intelligence","SASE"],url:"https://www.netskope.com/solutions/modernize-access-with-universal-ztna"},
+  {name:"Endpoint SD-WAN",cat:"ZTNA & Private Access",icon:"💻",desc:"Extend SD-WAN intelligence to every endpoint — give remote users the same optimized, secure connectivity experience as branch office users, with per-device policy and ZTNA integration.",features:["Per-device SD-WAN","Optimized routing","ZTNA integration","Unified policy","No extra agent"],related:["ZTNA / Private Access","Secure SD-WAN","Converged Access"],url:"https://www.netskope.com/products/endpoint-sd-wan"},
+  {name:"Firewall as a Service",cat:"Web & Cloud",icon:"🔥",desc:"Netskope One Cloud Firewall delivers FWaaS for egress traffic in a SASE architecture — cloud-delivered, policy-driven firewall for all users and locations, no hardware required.",features:["Cloud-delivered FWaaS","SASE-integrated","Egress control","DNS security","IPS/IDS"],related:["Next Gen SWG","SASE","SSE"],url:"https://www.netskope.com/products/firewall"},
+  {name:"Enterprise Browser",cat:"Web & Cloud",icon:"🖥️",desc:"Increase productivity and streamline secure access for unmanaged devices to websites, company applications, collaboration tools, and resources — no endpoint agent required.",features:["Unmanaged device access","Secure browsing","BYOD support","No agent required","Isolation built-in"],related:["Remote Browser Isolation","ZTNA / Private Access","Next Gen SWG"],url:"https://www.netskope.com/products/enterprise-browser"},
+  {name:"Remote Browser Isolation",cat:"Web & Cloud",icon:"🔒",desc:"Netskope One RBI isolates uncategorized and risky websites, executing all browser code remotely — protecting endpoints from web-borne threats without impacting user experience.",features:["Remote code execution","Risky site isolation","Transparent experience","Integrated with SWG","Zero endpoint risk"],related:["Next Gen SWG","Enterprise Browser","Threat Protection"],url:"https://www.netskope.com/products/remote-browser-isolation"},
+  {name:"Threat Protection",cat:"Web & Cloud",icon:"🛡️",desc:"High-efficacy threat detection and blocking for advanced malware (including ransomware) and phishing — inline, real-time, AI-powered protection built into the SSE platform.",features:["Anti-malware","Anti-phishing","Ransomware defense","AI threat detection","Zero-day protection"],related:["Next Gen SWG","Cloud Inline Security","Advanced Analytics"],url:"https://www.netskope.com/netskope-one/threat-protection"},
+  {name:"DLP",cat:"Data Security",icon:"📂",desc:"Unified, ML-enhanced data loss prevention for cloud, web, email, private apps, and devices — reduce the risk of data exfiltration across every channel from one policy engine.",features:["Multi-channel DLP","ML-enhanced detection","Cloud + endpoint","Policy automation","Exact Data Match"],related:["DSPM","Unified Data Security","Cloud Inline Security"],url:"https://www.netskope.com/products/data-loss-prevention"},
+  {name:"DSPM",cat:"Data Security",icon:"🗺️",desc:"Netskope One DSPM empowers security teams to discover, map, and protect sensitive data across cloud, on-premises, and hybrid environments — find data risk before it becomes a breach.",features:["Data discovery","Risk posture scoring","Cloud + on-prem","Compliance mapping","Auto-remediation"],related:["DLP","CASB (API)","Unified Data Security"],url:"https://www.netskope.com/products/data-security-posture-management"},
+  {name:"Data Lineage",cat:"Data Security",icon:"🧬",isNew:true,
+   desc:"New in v3.0 (May 2026). Netskope One Data Lineage monitors the provenance, lifecycle, and transformation of sensitive data across cloud, web, email, and AI environments — a verifiable 'digital breadcrumb trail' that helps security teams identify insider threats and track data exfiltration.",
+   features:["Provenance tracking","Data lifecycle visibility","Transformation history","Insider-threat evidence","Exfiltration tracing","3 or 12-month retention"],
+   related:["DLP","DSPM","Netskope Insider Threat AISecOps Agent","Unified Data Security"],
+   url:"https://www.netskope.com/products/data-security"},
+  {name:"CASB (API)",cat:"Data Security",icon:"🔗",desc:"Out-of-band CASB protection for sanctioned SaaS apps via API — visibility and control for data at rest in Microsoft 365, Salesforce, Google Workspace, and hundreds more.",features:["API-connected","Data at rest scanning","Compliance enforcement","SaaS app coverage","Misconfiguration detection"],related:["Cloud Inline Security","SSPM","DLP"],url:"https://www.netskope.com/products/casb"},
+  {name:"SSPM",cat:"Data Security",icon:"⚙️",desc:"Netskope One SSPM continuously enforces SaaS security policies and best practices — prevent configuration drift, ensure compliance, and prioritize risk across your entire SaaS estate.",features:["Continuous monitoring","Config drift prevention","Compliance benchmarks","Risk prioritization","Auto-remediation"],related:["CASB (API)","DSPM","Cloud Inline Security"],url:"https://www.netskope.com/products/saas-security-posture-management"},
+  {name:"Secure SD-WAN",cat:"Networking",icon:"🌐",desc:"Netskope One SD-WAN — a 100% SaaS-based converged connectivity platform for branches, remote users, and clouds — one platform, one software, one policy with full SASE integration.",features:["SaaS-based","SASE-native","High-performance","Zero trust integrated","Cloud-managed"],related:["SASE","Converged Access","Micro Branch"],url:"https://www.netskope.com/products/sase-branch"},
+  {name:"Micro Branch",cat:"Networking",icon:"📡",desc:"Bring secure SASE connectivity to small branch locations and remote sites — a lightweight, cloud-managed branch solution with zero-touch deployment.",features:["Small site SASE","Cloud-managed","Zero touch deploy","Inline security","Compact hardware"],related:["Secure SD-WAN","SASE","Device Intelligence"],url:"https://www.netskope.com/products/micro-branch"},
+  {name:"Device Intelligence",cat:"Networking",icon:"📱",desc:"Gain visibility into every device — IoT, unmanaged, and BYOD — and apply zero trust policies based on real device context, risk, and behavior.",features:["IoT discovery","Device profiling","Zero trust enforcement","Risk-based access","OT/IoT security"],related:["ZTNA / Private Access","Micro Branch","Advanced Analytics"],url:"https://www.netskope.com/products/device-intelligence"},
+  {name:"Advanced Analytics",cat:"Analytics",icon:"📊",desc:"Transform security operations with data-driven insights — identify trends, zero in on areas of risk, and use evidence to take action with powerful analytics built natively into the platform.",features:["Custom dashboards","Risk trending","Behavioral analytics","Policy impact analysis","Threat intelligence"],related:["Digital Experience Mgmt","Threat Protection","DSPM"],url:"https://www.netskope.com/products/advanced-analytics"},
+  {name:"Digital Experience Mgmt",cat:"Analytics",icon:"😊",desc:"Proactive Digital Experience Management (P-DEM) gives IT teams end-to-end visibility into user experience quality across apps, networks, and devices — resolve issues before users notice.",features:["End-to-end visibility","Proactive alerting","App performance scoring","Remote user insights","Network path analysis"],related:["Advanced Analytics","Secure SD-WAN","Device Intelligence"],url:"https://www.netskope.com/products/digital-experience-management"}
+];
+
+// ——————————————————————
+// PACKAGES (Inline + API) — pg 6, 28, 34, 35, 36
+// status: 'included' (Y), 'addon' (sold separately), 'excluded' (—)
+// ——————————————————————
+const PACKAGES = [
+  {
+    key:'prime-fund', tier:'inline', name:'Prime Fundamental', sku:'NK-P-PRIME-FUND',
+    tagline:'Entry inline package — for last-minute competitive pricing pressure',
+    description:'Strips CASB Inline, DLP, UEBA, Advanced Analytics and DEM from Prime Advantage. Use only when the deal needs an aggressive price response.',
+    notes:'Internal-only positioning. Cannot mix with Prime Light.',
+    capabilities:[
+      {name:'Web & SaaS Security', value:'SWG, TLS Inspection', status:'included'},
+      {name:'Data Loss Prevention (DLP)', value:'—', status:'excluded'},
+      {name:'Threat Protection', value:'L2 — Advanced Inline TP', status:'included', level:'TP-L2'},
+      {name:'Behavior Analytics (UEBA)', value:'—', status:'excluded'},
+      {name:'Log Streaming', value:'Add-on', status:'addon'},
+      {name:'Advanced Analytics', value:'—', status:'excluded'},
+      {name:'Digital Experience Management', value:'—', status:'excluded'},
+      {name:'FWaaS', value:'Add-on', status:'addon'},
+      {name:'Bandwidth Control', value:'Add-on', status:'addon'},
+      {name:'Remote Browser Isolation', value:'Add-on', status:'addon'},
+      {name:'Unauthenticated Traffic (1 GB)', value:'Add-on', status:'addon'}
+    ]
+  },
+  {
+    key:'prime-advt', tier:'inline', name:'Prime Advantage', sku:'NK-P-PRIME-ADVT',
+    tagline:'The mainstream Web/SaaS inline package',
+    description:'Web & SaaS-focused inline security with DLP L2, TP L2, UEBA L2, Advanced Analytics base, and DEM L1. FWaaS, RBI, Bandwidth Control and Unauthenticated Traffic are available as add-ons.',
+    capabilities:[
+      {name:'Web & SaaS Security', value:'CASB Inline, SWG, TLS Inspection', status:'included'},
+      {name:'Data Loss Prevention (DLP)', value:'L2 — DLP Custom Rules', status:'included', level:'DLP-L2'},
+      {name:'Threat Protection', value:'L2 — Premium Inline TP', status:'included', level:'TP-L2'},
+      {name:'Behavior Analytics (UEBA)', value:'L2 — Rule-based UEBA', status:'included', level:'UEBA-L2'},
+      {name:'Log Streaming', value:'Add-on', status:'addon'},
+      {name:'Advanced Analytics', value:'7-day Data Retention', status:'included'},
+      {name:'Digital Experience Management', value:'L1 — Essential Telemetry', status:'included', level:'DEM-L1'},
+      {name:'FWaaS', value:'Add-on', status:'addon'},
+      {name:'Bandwidth Control', value:'Add-on', status:'addon'},
+      {name:'Remote Browser Isolation', value:'Add-on', status:'addon'},
+      {name:'Unauthenticated Traffic (1 GB)', value:'Add-on', status:'addon'}
+    ]
+  },
+  {
+    key:'prime-light', tier:'inline', name:'Prime Light', sku:'NK-P-PRIME-LU',
+    tagline:'Lower-volume Prime for non-knowledge workers',
+    description:'Same defense levels as Prime Advantage, but with a 1 GB/user/month usage cap (subject to true-up).',
+    notes:'Cannot be quoted standalone — must accompany regular Prime users. Cannot be combined with Prime Fundamental.',
+    capabilities:[
+      {name:'Web & SaaS Security', value:'CASB Inline, SWG, TLS Inspection (1 GB/user/mo)', status:'included'},
+      {name:'Data Loss Prevention (DLP)', value:'L2 — DLP Custom Rules', status:'included', level:'DLP-L2'},
+      {name:'Threat Protection', value:'L2 — Premium Inline TP', status:'included', level:'TP-L2'},
+      {name:'Behavior Analytics (UEBA)', value:'L2 — Rule-based UEBA', status:'included', level:'UEBA-L2'},
+      {name:'Advanced Analytics', value:'7-day Data Retention', status:'included'},
+      {name:'Digital Experience Management', value:'L1 — Tenant Performance', status:'included', level:'DEM-L1'}
+    ]
+  },
+  {
+    key:'max-fund', tier:'inline', name:'Max Fundamental', sku:'NK-P-MAX-FUND',
+    tagline:'Network + Web/SaaS inline at L1 defenses',
+    description:'Removes Advanced Analytics and DEM from Max Advantage and drops DLP/TP/FWaaS to Level 1. Use under pricing pressure when buyer still wants network traffic coverage.',
+    notes:'Internal-only positioning.',
+    capabilities:[
+      {name:'Web & SaaS Security', value:'CASB Inline, SWG, TLS Inspection', status:'included'},
+      {name:'Data Loss Prevention (DLP)', value:'L1 — Predefined DLP', status:'included', level:'DLP-L1'},
+      {name:'Threat Protection', value:'L1 — Signature/Sandbox TP', status:'included', level:'TP-L1'},
+      {name:'Behavior Analytics (UEBA)', value:'L2 — Rule-based UEBA', status:'included', level:'UEBA-L2'},
+      {name:'Log Streaming', value:'Included', status:'included'},
+      {name:'Advanced Analytics', value:'—', status:'excluded'},
+      {name:'Digital Experience Management', value:'—', status:'excluded'},
+      {name:'FWaaS', value:'L1 — Network Firewall', status:'included', level:'FWAAS-L1'},
+      {name:'Bandwidth Control', value:'Included', status:'included'},
+      {name:'Remote Browser Isolation', value:'L1 — Miscellaneous RBI', status:'included', level:'RBI-L1'},
+      {name:'Unauthenticated Traffic (1 GB)', value:'Included', status:'included'}
+    ]
+  },
+  {
+    key:'max-advt', tier:'inline', name:'Max Advantage', sku:'NK-P-MAX-ADVT',
+    tagline:'Top-tier Web/SaaS + Network inline package',
+    description:'The full inline stack: CASB Inline, SWG, DLP L2, TP L2, UEBA L2, FWaaS L2 Application Firewall, RBI, Bandwidth Control, Log Streaming, Unauthenticated Traffic, plus Advanced Analytics and DEM L1.',
+    capabilities:[
+      {name:'Web & SaaS Security', value:'CASB Inline, SWG, TLS Inspection', status:'included'},
+      {name:'Data Loss Prevention (DLP)', value:'L2 — DLP Custom Rules', status:'included', level:'DLP-L2'},
+      {name:'Threat Protection', value:'L2 — Premium Inline TP', status:'included', level:'TP-L2'},
+      {name:'Behavior Analytics (UEBA)', value:'L2 — Rule-based UEBA', status:'included', level:'UEBA-L2'},
+      {name:'Log Streaming', value:'Included', status:'included'},
+      {name:'Advanced Analytics', value:'7-day Data Retention', status:'included'},
+      {name:'Digital Experience Management', value:'L1 — Essential Telemetry', status:'included', level:'DEM-L1'},
+      {name:'FWaaS', value:'L2 — Application Firewall', status:'included', level:'FWAAS-L2'},
+      {name:'Bandwidth Control', value:'Included', status:'included'},
+      {name:'Remote Browser Isolation', value:'L1 — Miscellaneous RBI', status:'included', level:'RBI-L1'},
+      {name:'Unauthenticated Traffic (1 GB)', value:'Included', status:'included'}
+    ]
+  },
+  {
+    key:'casb-api-fund', tier:'api', name:'CASB API Protection — Fundamental', sku:'NK-CASB-API-FUND',
+    tagline:'Out-of-band CASB API for managed SaaS',
+    description:'API-connected CASB protection for sanctioned SaaS apps. Per-seat or ALL-app licensing. CASB API seats can be moved between apps during a license term.',
+    capabilities:[
+      {name:'CASB API', value:'Managed SaaS (seat, ALL)', status:'included'},
+      {name:'Data Loss Prevention (DLP)', value:'—', status:'excluded'},
+      {name:'Threat Protection', value:'—', status:'excluded'},
+      {name:'Behavior Analytics (UEBA)', value:'—', status:'excluded'},
+      {name:'DSPM for SaaS', value:'Add-on (seat)', status:'addon'},
+      {name:'GenAI Apps', value:'Add-on (seat)', status:'addon'},
+      {name:'SSPM for SaaS', value:'Add-on (seat, ALL)', status:'addon'}
+    ]
+  },
+  {
+    key:'casb-api-advt', tier:'api', name:'CASB API Protection — Advantage', sku:'NK-CASB-API-ADVT',
+    tagline:'CASB API + DLP/TP/UEBA at L2',
+    description:'Advantage API package adds DLP L2, Premium TP and Rule-based UEBA on top of CASB API for managed SaaS.',
+    capabilities:[
+      {name:'CASB API', value:'Managed SaaS (seat, ALL)', status:'included'},
+      {name:'Data Loss Prevention (DLP)', value:'L2 — DLP Custom Rules', status:'included', level:'DLP-L2'},
+      {name:'Threat Protection', value:'L2 — Premium TP', status:'included', level:'TP-L2'},
+      {name:'Behavior Analytics (UEBA)', value:'L2 — Rule-based UEBA', status:'included', level:'UEBA-L2'},
+      {name:'DSPM for SaaS', value:'Add-on (seat)', status:'addon'},
+      {name:'GenAI Apps', value:'Add-on (seat)', status:'addon'},
+      {name:'SSPM for SaaS', value:'Add-on (seat, ALL)', status:'addon'}
+    ]
+  },
+  {
+    key:'dspm-advt', tier:'api', name:'DSPM Advantage', sku:'NK-DSPM-ADVT',
+    tagline:'CASB API + DSPM in one bundle',
+    description:'CASB API per-seat licensing combined with DSPM for managed SaaS, plus DLP L2, Premium TP and Rule-based UEBA.',
+    capabilities:[
+      {name:'CASB API', value:'Managed SaaS (per seat)', status:'included'},
+      {name:'Data Loss Prevention (DLP)', value:'L2 — DLP Custom Rules', status:'included', level:'DLP-L2'},
+      {name:'Threat Protection', value:'L2 — Premium TP', status:'included', level:'TP-L2'},
+      {name:'Behavior Analytics (UEBA)', value:'L2 — Rule-based UEBA', status:'included', level:'UEBA-L2'},
+      {name:'DSPM for SaaS', value:'Included', status:'included'},
+      {name:'GenAI Apps', value:'Add-on (seat)', status:'addon'},
+      {name:'SSPM for SaaS', value:'Add-on (seat, ALL)', status:'addon'}
+    ]
+  }
+];
+
+// ——————————————————————
+// DEFENSE_LEVELS — pg 39, 40, 42, 43, 45, 19, 20-21
+// Level membership inferred from PDF tables + slide 5 summary; review against latest source.
+// ——————————————————————
+const DEFENSE_LEVELS = {
+  dlp: {
+    name:'Data Loss Prevention', short:'DLP', icon:'📂', color:'#7B4FD4',
+    description:'Unified DLP across CASB Inline, CASB API, SWG, IaaS, Endpoint, Email/SMTP, ZTNA and on-demand appliance. FWaaS Non-Web DLP matches the SWG/CASB DLP level.',
+    sku_examples:['NK-DLP (level set per tenant)','NK-NON-WEB-DLP (FWaaS non-web DLP)'],
+    levels:['L1','L2','L3'],
+    features:[
+      {f:'Compliance Templates', L1:true, L2:true, L3:true},
+      {f:'3K+ Data Identifiers', L1:true, L2:true, L3:true},
+      {f:'DLP Profiles', L1:'5 only', L2:'Unlimited', L3:'Unlimited'},
+      {f:'Custom Rules', L1:false, L2:true, L3:true},
+      {f:'Data Labeling', L1:false, L2:'Read Only', L3:'Read & Write'},
+      {f:'Exact Data Match', L1:false, L2:false, L3:true},
+      {f:'Fingerprinting v2 (image, text)', L1:false, L2:false, L3:true},
+      {f:'OCR (Inline + API modules)', L1:false, L2:false, L3:true},
+      {f:'AI/ML Data Classifiers (Resumes, Source Code)', L1:false, L2:false, L3:true},
+      {f:'AI/ML Data Classifiers (ALL)', L1:false, L2:false, L3:true},
+      {f:'Stenographic Detection', L1:false, L2:false, L3:true}
+    ],
+    solutions:['CASB Inline DLP','CASB API DLP','SWG DLP','IaaS DLP','Endpoint DLP (standalone)','Email/SMTP DLP (standalone)','ZTNA DLP','DLP On-Demand Appliance (per GB/day, standalone)','Microsoft Purview DLP (new in v3.0)']
+  },
+  tp: {
+    name:'Threat Protection', short:'TP', icon:'🛡️', color:'#1a6fbd',
+    description:'Inline AI/ML, IPS, sandboxing and Patient Zero defenses. Level set per tenant — same level applies across SWG, CASB and FWaaS coverage.',
+    sku_examples:['NK-DSCAN-10 (Deepscan on Demand, requires L3)','NK-NETWORKHUNT (Network Threat Hunting, requires L3)'],
+    levels:['L1','L2','L3'],
+    features:[
+      {f:'Anti-malware (AV), File Type Detection', L1:true, L2:true, L3:true},
+      {f:'Threat intel feeds + IOCs + Cloud Threat Exchange', L1:true, L2:true, L3:true},
+      {f:'Standard Sandboxing (files up to 400 MB)', L1:true, L2:true, L3:true},
+      {f:'IPS for SaaS/IaaS Apps and Web Traffic', L1:false, L2:true, L3:true},
+      {f:'Inline AI/ML scanning (PE files, HTML smuggling, phishing, patient-zero)', L1:false, L2:true, L3:true},
+      {f:'Compromised Credentials Incidents (Dark Web)', L1:false, L2:true, L3:true},
+      {f:'De-obfuscation / Unpacking', L1:false, L2:true, L3:true},
+      {f:'Pre-execution Heuristics & ML for Office files', L1:false, L2:true, L3:true},
+      {f:'Cloud Sandboxing with MITRE analysis', L1:false, L2:false, L3:true},
+      {f:'Patient Zero Alerts and RetroHunt API', L1:false, L2:false, L3:true},
+      {f:'Patient Zero File Sandboxing & API Submission', L1:false, L2:false, L3:true},
+      {f:'Malware retention policy', L1:'Background', L2:'Background', L3:'Real-time'}
+    ]
+  },
+  ueba: {
+    name:'Behavior Analytics (UEBA)', short:'UEBA', icon:'📈', color:'#D97706',
+    description:'Rule-based UEBA at L2; ML-driven UCI risk scoring with peer groups and behavioral baselines at L3.',
+    sku_examples:['NK-U-ITC-SOC-PK (C2 Beacon Detection, requires L3)'],
+    levels:['L2','L3'],
+    features:[
+      {f:'Sequential Anomaly Rules (bulk delete/upload, failed logins, proximity, rare events…)', L2:true, L3:true},
+      {f:'Instance awareness for SaaS/IaaS', L2:true, L3:true},
+      {f:'AI/ML (65+ models, 180+ detectors)', L2:false, L3:true},
+      {f:'Behavior baselines', L2:false, L3:true},
+      {f:'Dynamic peer groups', L2:false, L3:true},
+      {f:'User Confidence Index (UCI) — usable in real-time adaptive access', L2:false, L3:true},
+      {f:'Cloud Risk Exchange', L2:false, L3:true},
+      {f:'Custom Sequential Rules', L2:false, L3:true}
+    ]
+  },
+  fwaas: {
+    name:'Firewall as a Service (FWaaS)', short:'FWaaS', icon:'🔥', color:'#c0392b',
+    description:'Cloud-delivered FWaaS for egress traffic. L1 is a network firewall; L2 adds the Application Firewall plus access to non-web add-ons.',
+    sku_examples:['NK-FWAAS-L2 (L2 base)','NK-U-FWAAS-IPS','NK-DNS / NK-DNS-SEC-FLTR / NK-DNS-FLTR','NK-NON-WEB-DLP','NK-SOCKS5 (per user) / NK-SOCKS5-GB (per GB)'],
+    levels:['L1','L2'],
+    features:[
+      {f:'5-Tuple Firewall Access Control', L1:true, L2:true},
+      {f:'User ID and FQDN-based policies', L1:true, L2:true},
+      {f:'Steering with Tunnels / Client', L1:true, L2:true},
+      {f:'Application Layer Gateway for FTP', L1:true, L2:true},
+      {f:'Event Logging', L1:'Limited', L2:'Full'},
+      {f:'Application Firewall', L1:false, L2:true}
+    ],
+    addons:['IPS for non-web traffic (NK-U-FWAAS-IPS)','DNS Security (NK-DNS)','DNS Security + Content Filtering (NK-DNS-SEC-FLTR)','DNS Content Filtering (NK-DNS-FLTR)','DLP for Non-Web Traffic (NK-NON-WEB-DLP)','SOCKS5 Proxy (NK-SOCKS5 / NK-SOCKS5-GB)']
+  },
+  rbi: {
+    name:'Remote Browser Isolation (RBI)', short:'RBI', icon:'🔒', color:'#0E7490',
+    description:'Miscellaneous-category isolation at L1, targeted policy isolation at L2, full predefined/custom apps and app suites at L3 (with CASB).',
+    sku_examples:['NK-RBI-L2','NK-RBI-L3','NK-U-RBI-L3 (upgrade from L2 to L3)'],
+    levels:['L1','L2','L3'],
+    features:[
+      {f:'Data Security/DLP and Threat Protection for file uploads/downloads', L1:'SWG enabled', L2:'SWG enabled', L3:'SWG & CASB enabled'},
+      {f:'Miscellaneous category', L1:true, L2:true, L3:true},
+      {f:'Security risk categories, uncategorized websites', L1:false, L2:true, L3:true},
+      {f:'Pre-defined / custom categories', L1:false, L2:true, L3:true},
+      {f:'Pre-defined / custom applications', L1:false, L2:false, L3:true},
+      {f:'App Suites', L1:false, L2:false, L3:true}
+    ]
+  },
+  ztna: {
+    name:'ZTNA & Private Access', short:'ZTNA', icon:'🔑', color:'#0E7490',
+    description:'Three product lines — Private Application Access (NK-NPA-APP, client-initiated ZTNA), Private Unified Access (NK-NPA-UNI, client & server-initiated, ZTNA + SD-WAN = full VPN replacement), Private Optimized Access (NK-NPA-OPT, optimized voice/video) — plus Enterprise Browser (NK-EB) and the clientless Universal Reverse Proxy (NK-URP). Levels dictate the number of private apps supported, helping you choose the right tier for the customer\'s deployment size.',
+    sku_examples:['NK-NPA-APP-nn (PAA)','NK-NPA-UNI-nn (PUA)','NK-NPA-OPT (POA)','NK-EB','NK-URP (clientless)','NK-NPA-BRK-PAIR (Local Broker)','NK-U-AIO-NPA (AIOps Agent add-on)'],
+    levels:['L1','L2','L3','Light'],
+    features:[
+      {f:'Target Deployment Size', L1:'Small estates (up to 50 apps)', L2:'Mid-size (up to 2,000 apps)', L3:'Enterprise (up to 10K apps)', Light:'Occasional users (up to 5 apps)'},
+      {f:'Private Application Access — apps included (NK-NPA-APP-nn)', L1:'50 Apps', L2:'2,000 Apps', L3:'10,000 Apps', Light:'5 Apps (100 MB/mo)'},
+      {f:'Private Unified Access — apps included (NK-NPA-UNI-nn)', L1:'50 Apps', L2:'2,000 Apps', L3:'10,000 Apps', Light:'5 Apps (100 MB/mo)'},
+      {f:'Private Optimized Access (NK-NPA-OPT) — voice/video, unlimited apps', L1:'All levels', L2:'All levels', L3:'All levels', Light:'—'},
+      {f:'Enterprise Browser (NK-EB) — per user/year license pool', L1:'All levels', L2:'All levels', L3:'All levels', Light:'—'},
+      {f:'Universal Reverse Proxy (NK-URP) — clientless', L1:'Add-on', L2:'Add-on', L3:'Add-on', Light:false},
+      {f:'Inline defenses for PAA & PUA (DLP L2/L3, TP L2/L3, web IPS)', L1:true, L2:true, L3:true, Light:true},
+      {f:'+500 Apps upgrade', L1:false, L2:true, L3:true, Light:false},
+      {f:'+1,000 Apps upgrade', L1:false, L2:true, L3:true, Light:false},
+      {f:'Local Broker Pair (NK-NPA-BRK-PAIR)', L1:true, L2:true, L3:true, Light:false},
+      {f:'Private Access AIOps Agent (NK-U-AIO-NPA)', L1:'Add-on', L2:'Add-on', L3:'Included', Light:false}
+    ]
+  },
+  dem: {
+    name:'Digital Experience Management', short:'DEM', icon:'😊', color:'#D97706',
+    description:'Restructured tiers in v3.0. L1 ships inside specific inline packages; L2–L4 are per-user/year upgrades. Site monitoring is a tier-specific add-on — L3/L4 Site each require a minimum of 1,000 same-level Users.',
+    sku_examples:['L2–L4 per user/year','Site add-ons require 1,000+ same-level Users'],
+    levels:['L1','L2','L3','L4'],
+    features:[
+      {f:'Positioning', L1:'In specific inline packages', L2:'Per user/year', L3:'Per user/year', L4:'Per user/year'},
+      {f:'Real User Monitoring', L1:'Essential inline RUM', L2:'Enhanced inline RUM (selected apps)', L3:'Enhanced inline RUM (selected apps)', L4:'Enhanced inline RUM (selected apps)'},
+      {f:'Synthetic User Monitoring', L1:false, L2:'Network', L3:'Network & app', L4:'Network & app'},
+      {f:'Site Monitoring', L1:false, L2:false, L3:'Tier add-on*', L4:'Tier add-on*'},
+      {f:'Monitoring Sources', L1:'—', L2:'NSClient', L3:'NSClient + Browser Ext + Ent. Station', L4:'NSClient + Browser Ext + Ent. Station'},
+      {f:'Proactively Monitored Apps', L1:'7 pre-selected', L2:'10 customer-selected', L3:'15 customer-selected', L4:'50'},
+      {f:'Synthetically Monitored Apps', L1:false, L2:false, L3:'15', L4:'50'},
+      {f:'Private Application Support', L1:false, L2:true, L3:true, L4:true},
+      {f:'Custom Web-app Support', L1:false, L2:false, L3:true, L4:true},
+      {f:'Alerts', L1:'5', L2:'15', L3:'25', L4:'50'},
+      {f:'User Focused Views', L1:false, L2:true, L3:'Yes (+ data)', L4:'Yes (+ data)'},
+      {f:'Advanced Diagnostics: Sites & Applications', L1:false, L2:false, L3:true, L4:true},
+      {f:'DEM Insights Agent', L1:false, L2:false, L3:true, L4:true},
+      {f:'DEM Data Intelligence Agent', L1:false, L2:false, L3:'Add-on', L4:'Included'}
+    ]
+  },
+  aiso: {
+    name:'DLP AISecOps Agent', short:'AISecOps', icon:'🧪', color:'#7B4FD4',
+    description:'New SKUs in v3.0. Licensed per user/year with an enforced cap of 3 investigations per licensed user/year. NK-A-AISO-DLP-5K-INV adds 5,000 investigations (co-termed with the base SKU). PLUS extends Base with case automation, insights and integrations.',
+    sku_examples:['NK-AISO-DLP (Base)','NK-AISO-DLP-PLUS','NK-A-AISO-DLP-5K-INV (+5,000 investigations)'],
+    levels:['Base','PLUS'],
+    features:[
+      {f:'Case Management', Base:true, PLUS:true},
+      {f:'Out-of-the-Box Case Rules', Base:true, PLUS:true},
+      {f:'Custom Case Rules', Base:true, PLUS:true},
+      {f:'Agent-Assisted Re/Investigation', Base:true, PLUS:true},
+      {f:'Agent Context Memory', Base:true, PLUS:true},
+      {f:'Case Commenting & Collaboration', Base:true, PLUS:true},
+      {f:'Case Assignment', Base:true, PLUS:true},
+      {f:'PDF Report Export', Base:true, PLUS:true},
+      {f:'Bulk Case Operations', Base:true, PLUS:true},
+      {f:'Case Search and Filtering', Base:true, PLUS:true},
+      {f:'Similar Case Detection', Base:false, PLUS:true},
+      {f:'Automated Case Assignment', Base:false, PLUS:true},
+      {f:'Closure Recommendations', Base:false, PLUS:true},
+      {f:'DLP Policy and Profile Overview', Base:false, PLUS:true},
+      {f:'Manager Approval Workflow for Cases', Base:false, PLUS:true},
+      {f:'Views and Insights into DLP incidents', Base:false, PLUS:true},
+      {f:'Insight-to-Case Elevation', Base:false, PLUS:true},
+      {f:'Third-Party Integrations', Base:false, PLUS:true}
+    ]
+  },
+  airt: {
+    name:'AI Red Teaming', short:'AI RT', icon:'⚔️', color:'#c0392b',
+    description:'Service to stress-test AI systems with adversarial prompts, probes and scenario-based attacks. Maps detections to OWASP Top 10 LLM and MITRE ATLAS. v3.0 adds purchase limits per tier.',
+    sku_examples:['NK-AIRT-L2','NK-AIRT-L3'],
+    levels:['L2','L3'],
+    features:[
+      {f:'Prompt Library (category probes, multi-turn attacks, drift detection)', L2:true, L3:true},
+      {f:'Probes per month', L2:'100K', L3:'250K'},
+      {f:'Purchase Limit', L2:'1 unit', L3:'Unlimited'}
+    ]
+  },
+  lineage: {
+    name:'Data Lineage', short:'Lineage', icon:'🧬', color:'#0F7A5A',
+    description:'New in v3.0. Tracks the provenance, lifecycle and transformation of sensitive data across cloud, web, email and AI environments — a verifiable digital breadcrumb trail for insider-threat identification and exfiltration tracking. Requires Max or Prime Advantage.',
+    sku_examples:['NK-LINEAGE-3MR-L2 (L2)','NK-LINEAGE-12MR-L2 (L3)'],
+    levels:['L2','L3'],
+    features:[
+      {f:'Provenance, lifecycle & transformation tracking', L2:true, L3:true},
+      {f:'Cloud, web, email & AI coverage', L2:true, L3:true},
+      {f:'Data retention', L2:'3 months', L3:'12 months'},
+      {f:'SKU', L2:'NK-LINEAGE-3MR-L2', L3:'NK-LINEAGE-12MR-L2'}
+    ]
+  }
+};
+
+// ——————————————————————
+// ADD-ONS — pg 11–25, 31–32, 41–45
+// group: AI / Visibility / Networking / API / Branch / Defense
+// ——————————————————————
+const ADD_ONS = [
+  // AI & Agentic
+  {name:'GenAI App Inline Inspection', sku:'NK-U-INL-GENAI', group:'AI', licensing:'per user/year', requires:'Next Gen SWG', description:'Inline inspection of 1,800+ GenAI apps with policies by app risk, instance and activity. Required for AI Guardrails to decode gRPC/WebSocket traffic.'},
+  {name:'AI Guardrails — per User', sku:'NK-AIGUARD', group:'AI', licensing:'per user/year (1K txns/user/mo, pooled per tenant)', requires:'GenAI App Inline Inspection', description:'Inline categorization of AI prompts/responses, prompt injection and jailbreak detection, custom keyword/semantic matching.'},
+  {name:'AI Guardrails — per Transaction', sku:'NK-AIGUARD-TXN', group:'AI', licensing:'per 10K txns/tenant/month', requires:'GenAI App Inline Inspection', description:'Transaction-priced AI Guardrails for high-volume / mature AI utilization.'},
+  {name:'Agentic Broker — per User', sku:'NK-U-AB-USR', group:'AI', licensing:'per user/year (1K txns/user/mo) — matches user count', requires:'NG SWG / SSE', description:'Decodes MCP traffic between AI agents and tools/data sources. Prevents tool poisoning and assesses external server risk. Easy-start SKU.'},
+  {name:'Agentic Broker — per Transaction', sku:'NK-A-AB-TXN-10K', group:'AI', licensing:'per 10K txns/tenant/month (add-on)', requires:'NG SWG / SSE + NK-U-AB-USR', description:'Transaction-priced Agentic Broker add-on for high-volume / mature agentic workloads.'},
+  {name:'AI Gateway (Base)', sku:'NK-AIGW', group:'AI', licensing:'10K txns/gateway/month (no pooling)', description:'Customer-hosted gateway for private agentic communications. Includes AI Guardrails. Add-on DLP available.'},
+  {name:'AI Gateway — 10K txn add-on', sku:'NK-A-AIGW-10K', group:'AI', licensing:'per gateway/month', requires:'AI Gateway', description:'Adds 10K transactions/gateway/month.'},
+  {name:'AI Gateway — 100K txn add-on', sku:'NK-A-AIGW-100K', group:'AI', licensing:'per gateway/month', requires:'AI Gateway', description:'Adds 100K transactions/gateway/month.'},
+  {name:'AI Red Teaming — Level 2', sku:'NK-AIRT-L2', group:'AI', licensing:'100K probes/month · purchase limit 1 unit', description:'Service to stress-test AI systems with adversarial prompts and scenario-based attacks. Maps to OWASP Top 10 LLM and MITRE ATLAS.'},
+  {name:'AI Red Teaming — Level 3', sku:'NK-AIRT-L3', group:'AI', licensing:'250K probes/month · unlimited purchase', description:'Higher-volume AI Red Teaming with the same prompt library and detections.'},
+  {name:'DLP for Agentic Workloads — per User (L2/L3)', sku:'NK-U-AB-USR-DLP-L2 / -L3', group:'AI', licensing:'1K txns/user/month, matches DLP level', requires:'Agentic Broker (NK-U-AB-USR)', description:'Inline DLP applied to MCP/agentic traffic on per-user Agentic Broker.'},
+  {name:'DLP for Agentic Workloads — per Transaction (L2/L3)', sku:'NK-U-AB-TXN-DLP-L2 / -L3', group:'AI', licensing:'10K txns/tenant/month, matches DLP level', requires:'Agentic Broker (NK-A-AB-TXN-10K)', description:'Inline DLP applied to MCP/agentic traffic on transaction-priced Agentic Broker.'},
+  {name:'DLP for AI Gateway (L2/L3)', sku:'NK-U-AIGW-10K/100K-DLP-L2 / -L3', group:'AI', licensing:'matches gateway transaction pack (10K or 100K)', requires:'AI Gateway (NK-AIGW)', description:'DLP applied to AI Gateway transactions, sized to the 10K or 100K transaction pack.'},
+  {name:'Inline DLP Level 3 Upgrade', sku:'NK-U-INL-DLP-L3', group:'AI', licensing:'per user/year', requires:'Prime/Max Advantage + GenAI App Inspection', description:'Upgrades inline DLP to L3 (EDM, fingerprinting, OCR, full AI/ML classifiers) for GenAI traffic protection.'},
+  {name:'Inline TP Level 3 Upgrade', sku:'NK-U-INLTP-L3', group:'AI', licensing:'per user/year', requires:'Prime/Max Advantage', description:'Upgrades inline Threat Protection to L3 (cloud sandboxing, Patient Zero, RetroHunt API).'},
+  {name:'Inline UEBA Level 3 Upgrade', sku:'NK-U-INL-UEBA-L3', group:'AI', licensing:'per user/year', requires:'Prime/Max Advantage', description:'Upgrades UEBA to L3 (AI/ML models, UCI risk scoring, dynamic peer groups).'},
+  {name:'DLP AISecOps Agent — Base', sku:'NK-AISO-DLP', group:'AI', licensing:'per user/year · cap 3 investigations/licensed user/year', requires:'DLP', description:'Agentic DLP case management: OOTB and custom case rules, agent-assisted investigation, context memory, collaboration, PDF export, bulk operations, search.'},
+  {name:'DLP AISecOps Agent — PLUS', sku:'NK-AISO-DLP-PLUS', group:'AI', licensing:'per user/year · cap 3 investigations/licensed user/year', requires:'DLP', description:'Everything in Base plus similar-case detection, automated assignment, closure recommendations, policy overview, manager approval workflow, insight-to-case elevation, third-party integrations.'},
+  {name:'DLP AISecOps — 5K Investigations Add-on', sku:'NK-A-AISO-DLP-5K-INV', group:'AI', licensing:'co-termed with base SKU', requires:'NK-AISO-DLP or -PLUS', description:'Adds 5,000 investigations to the base investigation cap.'},
+
+  // Visibility & Inspect
+  {name:'Cert-pinned App Inline Inspection', sku:'NK-CERTPA', group:'Visibility', licensing:'per user/year', description:'Inline inspection of certificate-pinned applications.'},
+  {name:'E2E Encrypted App Inline Inspection', sku:'NK-RBI-L3', group:'Visibility', licensing:'per user/year', description:'Inline inspection of end-to-end encrypted apps via L3 RBI.'},
+  {name:'Unauthenticated Traffic — Max Advantage', sku:'NK-P-MAX-ADVT-UA', group:'Visibility', licensing:'per GB/month avg (IPsec/GRE only)', description:'Servers and machine traffic via Max Advantage.'},
+  {name:'Unauthenticated Traffic — Prime Advantage', sku:'NK-P-PRIME-ADVT-UA', group:'Visibility', licensing:'per GB/month avg (IPsec/GRE only)', description:'Servers and machine traffic via Prime Advantage.'},
+  {name:'Unauthenticated Traffic — Prime Fundamental', sku:'NK-P-PRIME-FUND-UA', group:'Visibility', licensing:'per GB/month avg (IPsec/GRE only)', description:'Servers and machine traffic via Prime Fundamental.'},
+  {name:'Cloud TAP — per TB', sku:'NK-CLOUDTAP', group:'Visibility', licensing:'per TB/year', description:'Traffic packet captures.'},
+  {name:'Cloud TAP — per User', sku:'NK-CLOUDTAP-USR', group:'Visibility', licensing:'per user/year', description:'Traffic packet captures, per-user pricing.'},
+  {name:'Data Lineage — Level 2 (3-month retention)', sku:'NK-LINEAGE-3MR-L2', group:'Visibility', licensing:'per user/year', requires:'Max or Prime Advantage', description:'Provenance, lifecycle and transformation tracking for sensitive data across cloud, web, email and AI — 3 months of lineage history.'},
+  {name:'Data Lineage — Level 3 (12-month retention)', sku:'NK-LINEAGE-12MR-L2', group:'Visibility', licensing:'per user/year', requires:'Max or Prime Advantage', description:'Data Lineage with 12 months of retained breadcrumb trail for long-tail insider-threat and exfiltration investigations.'},
+  {name:'Standard Reporting — 1-Year Retention', sku:'NK-XDR', group:'Visibility', licensing:'per user/year', description:'Extends standard reporting data retention to one year.'},
+  {name:'Custom Attributes', sku:'NK-CSTM-ATTR', group:'Visibility', licensing:'per user/year', description:'Custom attributes for Standard Reporting, SkopeIT and Advanced Analytics.'},
+  {name:'Log Streaming — Transaction Events', sku:'NK-LOG-STR', group:'Visibility', licensing:'per user/year · 400K events/user/month', description:'Streams transaction events to your SIEM/data lake.'},
+  {name:'Log Streaming — Events Add-on', sku:'NK-LOG-STR-ADD', group:'Visibility', licensing:'+200K events/user/month', requires:'NK-LOG-STR', description:'Additional transaction-event capacity.'},
+  {name:'Log Streaming — Alerts & Events', sku:'NK-LOG-STR-AE', group:'Visibility', licensing:'per user/year · 1M records/user/month', description:'Streams alerts and events at higher capacity.'},
+  {name:'Log Streaming — Alerts & Events Add-on', sku:'NK-A-LOG-STR-AE', group:'Visibility', licensing:'+500K records/user/month', requires:'NK-LOG-STR-AE', description:'Additional alerts-and-events capacity.'},
+  {name:'Advanced Analytics — 3-month retention', sku:'NK-AA-RET-3M', group:'Visibility', licensing:'per log type', requires:'Advanced Analytics base', description:'3-month retention add-on (Application Events / Firewall / Web Transaction).'},
+  {name:'Advanced Analytics — 6-month retention', sku:'NK-AA-RET-6M', group:'Visibility', licensing:'per log type', requires:'Advanced Analytics base'},
+  {name:'Advanced Analytics — 13-month retention', sku:'NK-AA-RET-13M', group:'Visibility', licensing:'per log type', requires:'Advanced Analytics base'},
+
+  // Networking & NewEdge
+  {name:'Express Connect 10 Gbps', sku:'NK-INF-NEEC-10G', group:'Networking', licensing:'per port pair/year', notes:'Requires PE and PM approval', description:'PNI to NewEdge.'},
+  {name:'IPsec 1 Gbps Tunnel', sku:'NK-IPSEC-TUN-1GB', group:'Networking', licensing:'per tunnel', description:'High-bandwidth 1 Gbps IPsec tunnel (new in v3.0).'},
+  {name:'IPsec 2 Gbps Tunnel', sku:'NK-IPSEC-TUN-2GB', group:'Networking', licensing:'per tunnel', description:'High-bandwidth 2 Gbps IPsec tunnel (new in v3.0).'},
+  {name:'IPsec 3 Gbps Tunnel', sku:'NK-IPSEC-TUN-3GB', group:'Networking', licensing:'per tunnel', description:'High-bandwidth 3 Gbps IPsec tunnel (new in v3.0).'},
+  {name:'Geo-Anchoring', sku:'NK-EGRESS-GEOA', group:'Networking', licensing:'500 MB/user/month per data plane', description:'Source-IP locality for configured data planes.'},
+  {name:'Bandwidth Control', sku:'NK-BW-CNTL', group:'Networking', licensing:'per user/year (IPsec/GRE)', description:'Per-app/category/domain bandwidth shaping.'},
+  {name:'Customer Signed CA', sku:'NK-SSLI', group:'Networking', licensing:'per tenant/year', description:'Customer CA for TLS inspection.'},
+  {name:'Regional Zone Dedicated Egress IPs', sku:'NK-EGRESS-DIP-REG', group:'Networking', licensing:'5,000 user minimum', description:'2 IPs per PoP, customer-specific.'},
+  {name:'Global Dedicated Egress IPs', sku:'NK-EGRESS-DIP', group:'Networking', licensing:'10,000 user minimum', description:'2 IPs per PoP, customer-specific.'},
+  {name:'China DEIPs', sku:'NK-EGRESS-DIP-CN', group:'Networking', licensing:'On request to PE team', description:'Dedicated egress IPs for China.'},
+
+  // China Access surcharge
+  {name:'China Access — Elite Max (cross-border)', sku:'NK-CN-ELT-MAX', group:'Networking', licensing:'5 GB/user/mo cross-border, CASB+SWG+FWaaS', description:'Elite cross-border China access for Max packages.'},
+  {name:'China Access — Elite NPA (cross-border)', sku:'NK-CN-ELT-NPA', group:'Networking', licensing:'500 MB/user/mo cross-border'},
+  {name:'China Access — Elite Ultimate SSE (cross-border)', sku:'NK-CN-ELT-ULT', group:'Networking', licensing:'6 GB/user/mo cross-border'},
+  {name:'China Access — Premium Max (in country)', sku:'NK-CN-PRM-MAX', group:'Networking', licensing:'5 GB/user/mo in country, CASB+SWG+FWaaS'},
+  {name:'China Access — Premium NPA (in country)', sku:'NK-CN-PRM-NPA', group:'Networking', licensing:'500 MB/user/mo in country'},
+  {name:'China Access — Premium Ultimate SSE (in country)', sku:'NK-CN-PRM-ULT', group:'Networking', licensing:'6 GB/user/mo in country'},
+
+  // DNSaaS
+  {name:'DNSaaS — Authenticated Users', sku:'NK-DNSAAS-AT', group:'Networking', licensing:'per user/year', requires:'FWaaS', description:'Recursive DNS Resolver, DNS Security and DNS Content Filtering for authenticated users.'},
+  {name:'DNSaaS — Unauthenticated Users/Devices', sku:'NK-DNSAAS-UA', group:'Networking', licensing:'per device/year', requires:'FWaaS'},
+  {name:'DNSaaS — Unauthenticated Light Users/Devices', sku:'NK-DNSAAS-UA-LU', group:'Networking', licensing:'per device/year', requires:'FWaaS'},
+  {name:'DNSaaS Upgrade — Authenticated Users (FWaaS+DNS Sec)', sku:'NK-U-DNS-DNSAAS-AT', group:'Networking', licensing:'per user/year', requires:'FWaaS + DNS Security'},
+  {name:'DNSaaS Upgrade — Unauthenticated (FWaaS+DNS Sec)', sku:'NK-U-DNS-DNSAAS-UA', group:'Networking', licensing:'per device/year', requires:'FWaaS + DNS Security'},
+
+  // Remote Access (SKUs explicit as of v3.0)
+  {name:'Private Application Access', sku:'NK-NPA-APP-nn', group:'Access', licensing:'per user/year · L1 50 / L2 2,000 / L3 10,000 apps', description:'Client-initiated ZTNA to private apps. Includes DLP L2/L3, TP L2/L3 and web IPS defenses.'},
+  {name:'Private Unified Access', sku:'NK-NPA-UNI-nn', group:'Access', licensing:'per user/year · L1 50 / L2 2,000 / L3 10,000 apps', description:'Client & server-initiated apps over ZTNA + SD-WAN — the full VPN replacement. Includes DLP L2/L3, TP L2/L3 and web IPS.'},
+  {name:'Private Optimized Access', sku:'NK-NPA-OPT', group:'Access', licensing:'per user/year', description:'Optimized voice/video with unlimited apps (SD-WAN client & server-initiated).'},
+  {name:'NPA Light User', sku:'NK-NPA (Light)', group:'Access', licensing:'per user/year · 5 apps, 100 MB/month', description:'Light remote-access tier for occasional users.'},
+  {name:'Enterprise Browser', sku:'NK-EB', group:'Access', licensing:'per user/year via license pool', requires:'SWG and/or ZTNA', description:'Secure browser for unmanaged devices and BYOD.'},
+  {name:'Universal Reverse Proxy', sku:'NK-URP', group:'Access', licensing:'per user/year', description:'Clientless access via reverse proxy (new SKU in v3.0).'},
+  {name:'NPA Local Broker Pair', sku:'NK-NPA-BRK-PAIR', group:'Access', licensing:'per broker pair', requires:'NPA', description:'On-premises broker pair for local private-app traffic.'},
+  {name:'NPA +500 Apps Upgrade', sku:'NK-NPA-APP/UNI +500', group:'Access', licensing:'per upgrade', requires:'PAA or PUA L2/L3', description:'Adds 500 private apps to the entitlement.'},
+  {name:'NPA +1,000 Apps Upgrade', sku:'NK-NPA-APP/UNI +1000', group:'Access', licensing:'per upgrade', requires:'PAA or PUA L2/L3', description:'Adds 1,000 private apps to the entitlement.'},
+  {name:'Private Access AIOps Agent', sku:'NK-U-AIO-NPA', group:'Access', licensing:'per user/year', requires:'NPA L1 / L2 (included in L3)', description:'Audits NPA configuration, removes dormant settings, generates segments and policies from usage patterns.'},
+
+  // Defense add-ons
+  {name:'IPS for Non-Web Traffic', sku:'NK-U-FWAAS-IPS', group:'Defense', licensing:'per user/year', requires:'FWaaS L2'},
+  {name:'DNS Security', sku:'NK-DNS', group:'Defense', licensing:'per user/year'},
+  {name:'DNS Security + Content Filtering', sku:'NK-DNS-SEC-FLTR', group:'Defense', licensing:'per user/year'},
+  {name:'DNS Content Filtering only', sku:'NK-DNS-FLTR', group:'Defense', licensing:'per user/year', requires:'FWaaS + DNS Security'},
+  {name:'DLP for Non-Web Traffic', sku:'NK-NON-WEB-DLP', group:'Defense', licensing:'per user/year', requires:'FWaaS L2'},
+  {name:'SOCKS5 Proxy — per User', sku:'NK-SOCKS5', group:'Defense', licensing:'per user/year', requires:'FWaaS L2'},
+  {name:'SOCKS5 Proxy — per GB', sku:'NK-SOCKS5-GB', group:'Defense', licensing:'per GB/year', requires:'FWaaS L2'},
+  {name:'Deepscan on Demand', sku:'NK-DSCAN-10', group:'Defense', licensing:'10 GB/day file submissions', requires:'TP L3', description:'RESTful API for verdict + analysis report on submitted files.'},
+  {name:'Network Threat Hunting', sku:'NK-NETWORKHUNT', group:'Defense', licensing:'per user/year', requires:'TP L3', description:'High-confidence IPS detections (next tier below auto-block) for SOC/IR teams. SWG traffic analysis.'},
+  {name:'C2 Beacon Detection — SOC Detections Pack', sku:'NK-U-ITC-SOC-PK', group:'Defense', licensing:'per user/year', requires:'UEBA L3', description:'AI/ML-based C2 beacon anomaly detection (Cobalt Strike, Mythic, etc.).'},
+
+  // API protection extras
+  {name:'DSPM per Object Store — 25 stores (40K objects)', sku:'NK-DSPM-OS-25', group:'API', licensing:'25 stores up to 40K objects', description:'SaaS, IaaS and on-prem structured/semi/unstructured data.'},
+  {name:'DSPM per Object Store — 100–250 stores', sku:'NK-DSPM-OS-250', group:'API', licensing:'min 4M objects'},
+  {name:'DSPM per Object Store — 251–500 stores', sku:'NK-DSPM-OS-500', group:'API', licensing:'min 10M objects'},
+  {name:'DSPM per Object Store — 501–1000 stores', sku:'NK-DSPM-OS-1000', group:'API', licensing:'min 20M objects'},
+  {name:'DSPM 4M Object Pack', sku:'NK-DSPM-OS-PACK-4M', group:'API', licensing:'1,000+ stores'},
+  {name:'DSPM Query Behavior Analysis', sku:'NK-DSPM-QBA', group:'API', licensing:'per data store'},
+  {name:'DSPM De-identification — Structured', sku:'NK-DSPM-DEID-STR', group:'API', licensing:'per data store'},
+  {name:'DSPM De-identification — Unstructured', sku:'NK-DSPM-DEID-UNS', group:'API', licensing:'per data store'},
+
+  // Branch / SD-WAN
+  {name:'Borderless WAN Enterprise — Hardware (NSG-101 Wi-Fi+LTE)', sku:'NK-ENT-<speed>-<year>', group:'Branch', licensing:'50M–5G, 3YR/5YR', description:'Compact branch SD-WAN with Wi-Fi and LTE. Hardware support 3YR/5YR.'},
+  {name:'Borderless WAN Enterprise — Hardware (NSG-1500 Wi-Fi)', sku:'NK-ENT-<speed>-<year>', group:'Branch', licensing:'50M–5G, 3YR/5YR'},
+  {name:'Borderless WAN Enterprise — Hardware (NSG-2000)', sku:'NK-ENT-<speed>-<year>', group:'Branch', licensing:'50M–5G, 3YR/5YR'},
+  {name:'Borderless WAN Enterprise — Hardware (NSG-2108CW)', sku:'NK-ENT-<speed>-<year>', group:'Branch', licensing:'50M–5G, 3YR/5YR'},
+  {name:'Borderless WAN Enterprise — Hardware (NSG-3000)', sku:'NK-ENT-<speed>-<year>', group:'Branch', licensing:'50M–5G, 3YR/5YR'},
+  {name:'Borderless WAN Enterprise — Software', sku:'NK-ENT-<speed>-<year>', group:'Branch', licensing:'50M–5G, 3YR/5YR'},
+  {name:'Borderless WAN Enterprise — Virtual Appliance', sku:'NK-NSGV-ENT-<speed>-<year>', group:'Branch', licensing:'50M–5G, 3YR/5YR'},
+  {name:'Device Intelligence — Per Site Package', sku:'NK-DI-SITE', group:'Branch', licensing:'per site', description:'Asset Management, Device Risk, Access Control.'},
+  {name:'Device Intelligence — Per User Package', sku:'NK-DI-USER', group:'Branch', licensing:'per user/year'},
+  {name:'Device Intelligence — Site Add-on (with SD-WAN)', sku:'NK-DI-SITE-AO', group:'Branch', licensing:'per site', requires:'SD-WAN'},
+  {name:'Device Intelligence — Appliance + Support', sku:'NK-DI-APPL', group:'Branch', licensing:'appliance + 3YR/5YR support'}
+];
+
+// ——————————————————————
+// AI AGENTS — Netskope One AgentSkope launch (5 May 2026) + existing assistants
+//   status: 'GA' | 'Private Preview' | 'Coming Soon'
+//   agentskope: true → part of the 5 May 2026 AgentSkope launch
+//   firstOfKind: true → first-of-kind callout in the press release
+// ——————————————————————
+const AI_AGENTS = [
+  // ── AgentSkope launch (5 May 2026) ──
+  {
+    name:'DLP AISecOps Agent', short:'DLP AISecOps',
+    purpose:'Agentic DLP analysis, triage, investigation, and remediation',
+    description:'A first-of-its-kind resource for agentic DLP analysis. Mimics the actions of a security operations analyst to execute end-to-end data protection workflows — contextualised risk assessments (finding the needle in the haystack), intelligent triage and investigation, and agentic risk remediation. One large beta customer, a global professional services organisation, uses it to analyse millions of alerts, convert them into dozens of cases that are automatically investigated in minutes, and free up team members to focus on critical work.',
+    persona:'SOC', status:'GA', firstOfKind:true, agentskope:true,
+    icon:'🛡️', color:'#7B4FD4',
+    inclusion:'addon', sku:'NK-AISO-DLP / NK-AISO-DLP-PLUS', defenseKey:'aiso',
+    includedIn:'Per user/year · cap 3 investigations per licensed user/year · +5K via NK-A-AISO-DLP-5K-INV'
+  },
+  {
+    name:'Insider Threat AISecOps Agent', short:'Insider Threat AISecOps',
+    purpose:'Triage and analysis of insider threats',
+    description:'First-of-its-kind insider-threat triage. Combines DLP alerts with user behaviour data to identify malicious activity and protect against insider threat — surfacing the patterns a tired analyst would miss.',
+    persona:'SOC', status:'Private Preview', firstOfKind:true, agentskope:true,
+    icon:'🕵️', color:'#c0392b',
+    inclusion:'preview'
+  },
+  {
+    name:'Private Access AIOps Agent', short:'Private Access AIOps',
+    purpose:'Audits NPA configuration; generates segments and policies from usage',
+    description:'Automatically audits configurations for Netskope One Private Access — removing dormant settings and helping ensure access privileges are not left open. Generates granular application segments and policies based on user consumption patterns.',
+    persona:'NOC', status:'GA', agentskope:true,
+    icon:'🔑', color:'#0E7490',
+    inclusion:'included', sku:'NK-U-AIO-NPA', includedIn:'NPA Level 3 (add-on for Levels 1 / 2)'
+  },
+  {
+    name:'DEM Data Intelligence Agent', short:'DEM Data Intelligence',
+    purpose:'Conversational analysis of DEM telemetry',
+    description:'Streamlines troubleshooting for user-experience issues by transforming granular telemetry and raw metrics from Digital Experience Management into actionable insights — via natural language in an easy-to-use conversational interface.',
+    persona:'NOC', status:'GA', agentskope:true,
+    icon:'📊', color:'#D97706',
+    inclusion:'included', includedIn:'DEM Level 4 (with query limits) — add-on for Level 3'
+  },
+  {
+    name:'DEM Insights Agent', short:'DEM Insights',
+    purpose:'High-level view of organisational digital health',
+    description:'Provides a high-level view of organisational digital health, correlating granular telemetry to surface critical incidents, macro-impacting trends, and performance bottlenecks.',
+    persona:'NOC', status:'GA', agentskope:true,
+    icon:'😊', color:'#D97706',
+    inclusion:'included', includedIn:'DEM Level 3 and Level 4 packages'
+  },
+  {
+    name:'CCI Insights Agent', short:'CCI Insights',
+    purpose:'Natural-language risk queries across 85K+ apps',
+    description:'Empowers SOC analysts to query complex risk attributes and compliance certifications across more than 85,000 cloud, AI, and SaaS applications using natural language — enabling conversational interaction with app risk data.',
+    persona:'SOC', status:'GA', agentskope:true,
+    icon:'☁️', color:'#1a6fbd',
+    inclusion:'included'
+  },
+
+  // ── Pre-existing assistants (kept for completeness) ──
+  {name:'NetOps Assistant', short:'NetOps Assistant', purpose:'Network operations assistant',
+   description:'Conversational network operations assistant included with applicable packages.',
+   persona:'NOC', status:'GA', icon:'🧰', color:'#0F7A5A', inclusion:'included'},
+  {name:'Policy Recommender', short:'Policy Recommender', purpose:'Policy authoring guidance',
+   description:'Recommends real-time adaptive policies based on tenant context.',
+   persona:'SOC', status:'GA', icon:'📝', color:'#7B4FD4', inclusion:'included'},
+  {name:'Insights Assistant', short:'Insights Assistant', purpose:'General insights across the tenant',
+   description:'Cross-tenant conversational insights, available across applicable packages.',
+   persona:'Both', status:'GA', icon:'💡', color:'#00A7CE', inclusion:'included'}
+];
+
+// ——————————————————————
+// SCENARIOS — start-with-an-outcome deal entry points
+// ——————————————————————
+const SCENARIOS = [
+  {
+    key:'replace-vpn', icon:'🔑', color:'#0E7490',
+    title:'Replace Legacy VPN',
+    tagline:'Retire the VPN concentrator stack. Modern zero-trust private access for managed and unmanaged users.',
+    outcome:'Full VPN replacement, contractor & BYOD coverage, and NAC modernization in one consistent policy framework.',
+    keywords:['vpn','remote access','contractor','byod','ztna','nac'],
+    products:['ZTNA / Private Access','Universal ZTNA','Endpoint SD-WAN','Enterprise Browser','Device Intelligence'],
+    packages:['max-advt'],
+    addons:['NK-DNSAAS-AT'],
+    note:'Pair with Private Unified Access L2/L3 for the full ZTNA + Endpoint SD-WAN combo. Add Universal ZTNA when contractors and IoT/OT need the same policy framework.'
+  },
+  {
+    key:'secure-ai', icon:'🤖', color:'#00A7CE',
+    title:'Secure AI Adoption',
+    tagline:'Govern ChatGPT, Cursor, Copilot, Claude. Inspect prompts, prevent IP leakage, harden your own LLMs.',
+    outcome:'Visibility across 1,800+ GenAI apps, real-time guardrails on prompts and responses, and adversarial testing for private LLMs.',
+    keywords:['ai','genai','chatgpt','cursor','copilot','llm','agentic','mcp','prompt','guardrails'],
+    products:['GenAI Security','AI Guardrails','Agentic Broker','AI Gateway','AI Red Teaming','Cloud Inline Security'],
+    packages:['prime-advt','max-advt'],
+    addons:['NK-U-INL-GENAI','NK-AIGUARD','NK-AB-USR','NK-AIRT-L2'],
+    note:'GenAI App Inline Inspection is a hard prerequisite for Guardrails — without it, gRPC/WebSocket traffic from modern AI tools is opaque.'
+  },
+  {
+    key:'stop-exfil', icon:'📂', color:'#7B4FD4',
+    title:'Stop Data Exfiltration',
+    tagline:'Unified DLP across web, SaaS, IaaS, email and endpoints. Find sensitive data before it walks.',
+    outcome:'ML-enhanced data classification, fingerprinting/EDM/OCR at L3, and DSPM-driven discovery of risky data postures.',
+    keywords:['dlp','exfiltration','data leak','data loss','classification','fingerprinting','ocr','dspm'],
+    products:['DLP','DSPM','Cloud Inline Security','CASB (API)','SSPM','Unified Data Security'],
+    packages:['max-advt','dspm-advt'],
+    addons:['NK-NON-WEB-DLP','NK-DSPM-OS-25'],
+    note:'For the full data picture, layer Max Advantage (inline) + DSPM Advantage (API/at-rest). DLP L3 unlocks Exact Data Match, Fingerprinting v2, OCR, and AI/ML classifiers.'
+  },
+  {
+    key:'modernize-branch', icon:'🏢', color:'#FF8300',
+    title:'Modernize Branch & SD-WAN',
+    tagline:'Collapse MPLS and box stacks. SASE-native SD-WAN for branches of every size, plus per-endpoint connectivity.',
+    outcome:'One platform, one policy from HQ to micro-branch to remote endpoint, with cloud-managed appliances and zero-touch deployment.',
+    keywords:['sd-wan','branch','mpls','sase','wan','networking','newedge','nsg'],
+    products:['SASE','Secure SD-WAN','Endpoint SD-WAN','Micro Branch','Converged Access'],
+    packages:['max-advt'],
+    addons:['NK-INF-NEEC-10G','NK-EGRESS-DIP','NK-DI-SITE'],
+    note:'Borderless WAN appliances ship in 5 form factors (NSG-101 → NSG-3000) at speeds 50 Mbps to 5 Gbps. Pair with Express Connect for direct PNI to NewEdge.'
+  },
+  {
+    key:'compliance-scale', icon:'⚖️', color:'#1a6fbd',
+    title:'Compliance & DLP at Scale',
+    tagline:'Long-retention analytics, SaaS posture, and data-at-rest discovery for audit-driven environments.',
+    outcome:'13-month retention of all log types, DSPM across cloud and on-prem, SSPM continuous compliance enforcement.',
+    keywords:['compliance','audit','retention','sspm','dspm','gdpr','hipaa','pci'],
+    products:['Advanced Analytics','DSPM','SSPM','CASB (API)','DLP'],
+    packages:['max-advt','dspm-advt'],
+    addons:['NK-AA-RET-13M','NK-DSPM-OS-250','NK-CLOUDTAP'],
+    note:'Advanced Analytics base ships with 7-day retention; the 3/6/13-month retention add-ons are SKU\'d per log type (Application Events / Firewall / Web Transaction).'
+  },
+  {
+    key:'detect-respond', icon:'🛡️', color:'#c0392b',
+    title:'Detect & Respond to Threats',
+    tagline:'Patient-zero protection, ML-driven UEBA, and SOC-grade hunting telemetry — natively in the SSE platform.',
+    outcome:'L3 Threat Protection with cloud sandboxing and RetroHunt API, L3 UEBA with UCI risk scoring, plus C2 beacon detection for SOC teams.',
+    keywords:['threat','soc','ir','xdr','ueba','c2','beacon','patient zero','sandbox'],
+    products:['Threat Protection','Advanced Analytics','DLP'],
+    packages:['max-advt'],
+    addons:['NK-DSCAN-10','NK-NETWORKHUNT','NK-U-ITC-SOC-PK','NK-AA-RET-6M'],
+    note:'Deepscan, Network Threat Hunting, and C2 Beacon Detection all require their underlying defense at Level 3 (TP L3 or UEBA L3).'
+  }
+];
+
+// ——————————————————————
+// PRODUCT-LEVEL SKU / PACKAGE METADATA
+// Map product names → SKU/licensing/inPackages info to enrich the v1 PRODUCTS array.
+// ——————————————————————
+const PRODUCT_META = {
+  'SASE':                    {licensing:'Bundle (SSE + SD-WAN)', inPackages:[]},
+  'SSE':                     {licensing:'Bundle (Inline + API)', inPackages:[]},
+  'Converged Access':        {licensing:'Bundle', inPackages:[]},
+  'Unified Data Security':   {licensing:'Bundle (DLP + DSPM + CASB + SSPM)', inPackages:[]},
+  'Next Gen SWG':            {licensing:'In all inline packages', inPackages:['prime-fund','prime-advt','prime-light','max-fund','max-advt']},
+  'Cloud Inline Security':   {sku:'CASB Inline (in package)', inPackages:['prime-advt','prime-light','max-fund','max-advt']},
+  'Threat Protection':       {licensing:'Level set per tenant (L1/L2/L3)', defenseKey:'tp', inPackages:['prime-fund','prime-advt','prime-light','max-fund','max-advt']},
+  'DLP':                     {licensing:'Level set per tenant (L1/L2/L3)', defenseKey:'dlp', inPackages:['prime-advt','prime-light','max-fund','max-advt','casb-api-advt','dspm-advt']},
+  'DSPM':                    {sku:'NK-DSPM-* (per object store / per seat)', inPackages:['dspm-advt']},
+  'CASB (API)':              {licensing:'Per app seat or ALL', inPackages:['casb-api-fund','casb-api-advt','dspm-advt']},
+  'SSPM':                    {licensing:'Add-on (seat or ALL)', inPackages:[]},
+  'Firewall as a Service':   {sku:'NK-FWAAS-L2', licensing:'L1 in Max Fund; L2 in Max Advt; add-on for Prime', defenseKey:'fwaas', inPackages:['max-fund','max-advt']},
+  'Remote Browser Isolation':{sku:'NK-RBI-L2 / NK-RBI-L3', licensing:'L1 included in Max; add-on for Prime', defenseKey:'rbi', inPackages:['max-fund','max-advt']},
+  'Enterprise Browser':      {sku:'NK-EB', licensing:'Per user/year via license pool', defenseKey:'ztna', inPackages:[]},
+  'ZTNA / Private Access':   {sku:'NK-NPA-APP-nn / NK-NPA-UNI-nn / NK-NPA-OPT', licensing:'Per user/year (PAA / PUA L1–L3 + Light)', defenseKey:'ztna', inPackages:[]},
+  'Universal ZTNA':          {licensing:'Per user/year', defenseKey:'ztna', inPackages:[]},
+  'Endpoint SD-WAN':         {licensing:'Bundled with PUA', inPackages:[]},
+  'Secure SD-WAN':           {licensing:'Per appliance/speed/term (NSG-101…3000)', inPackages:[]},
+  'Micro Branch':            {licensing:'Per site', inPackages:[]},
+  'Device Intelligence':     {licensing:'Per site or per user', inPackages:[]},
+  'Advanced Analytics':      {licensing:'Base (7-day) included in Prime/Max Advantage; 3/6/13-mo retention add-ons', inPackages:['prime-advt','prime-light','max-advt']},
+  'Digital Experience Mgmt': {licensing:'L1 in Prime/Max Advantage; L2/L3/L4 add-ons', defenseKey:'dem', inPackages:['prime-advt','prime-light','max-advt']},
+  'GenAI Security':          {sku:'NK-U-INL-GENAI', licensing:'Per user/year — NG SWG add-on', inPackages:[]},
+  'AI Guardrails':           {sku:'NK-AIGUARD / NK-AIGUARD-TXN', licensing:'Per user/year (1K txn) or per 10K txn/tenant', inPackages:[]},
+  'Agentic Broker':          {sku:'NK-U-AB-USR / NK-A-AB-TXN-10K', licensing:'Per user/year (1K txn, matches user count) or per 10K txn/tenant add-on', inPackages:[]},
+  'AI Gateway':              {sku:'NK-AIGW + NK-A-AIGW-10K/100K', licensing:'10K txn/gateway/mo + add-on packs · DLP via NK-U-AIGW-*-DLP-L2/L3', inPackages:[]},
+  'AI Red Teaming':          {sku:'NK-AIRT-L2 / NK-AIRT-L3', licensing:'100K (limit 1 unit) or 250K (unlimited) probes/month', defenseKey:'airt', inPackages:[]},
+  'AgentSkope':              {licensing:'Per-agent SKUs (see each agent) — announced 5 May 2026', inPackages:[]},
+  'Data Lineage':            {sku:'NK-LINEAGE-3MR-L2 / NK-LINEAGE-12MR-L2', licensing:'L2 = 3-month retention · L3 = 12-month retention', requires:'Max or Prime Advantage', defenseKey:'lineage', inPackages:[]},
+  'Netskope DLP AISecOps Agent':           {sku:'NK-AISO-DLP / NK-AISO-DLP-PLUS', licensing:'Per user/year · cap 3 investigations per licensed user/year · +5K investigations via NK-A-AISO-DLP-5K-INV', requires:'DLP', defenseKey:'aiso', inPackages:[]},
+  'Netskope Insider Threat AISecOps Agent':{licensing:'Private Preview · Pricing TBD', requires:'DLP + UEBA L2', inPackages:[]},
+  'Netskope Private Access AIOps Agent':   {sku:'NK-U-AIO-NPA', licensing:'Included in NPA L3 · add-on for L1 / L2', requires:'NPA', defenseKey:'ztna', inPackages:[]},
+  'Netskope DEM Data Intelligence Agent':  {licensing:'Included in DEM L4 (query limits) · add-on for L3', requires:'DEM L3+', defenseKey:'dem', inPackages:[]},
+  'Netskope DEM Insights Agent':           {licensing:'Included in DEM L3 and L4', requires:'DEM L3+', defenseKey:'dem', inPackages:[]},
+  'Netskope CCI Insights Agent':           {licensing:'Included (cross-package)', inPackages:[]}
+};
+PRODUCTS.forEach(p => { Object.assign(p, PRODUCT_META[p.name] || {}); });
+
+// BOM state — wired in step 4
+const BOM = JSON.parse(sessionStorage.getItem('ns_dr_bom') || '[]');
+function saveBOM() { sessionStorage.setItem('ns_dr_bom', JSON.stringify(BOM)); document.getElementById('bom-count').textContent = BOM.length; }
+
+// ——————————————————————
+// STATE
+// ——————————————————————
+let activeView = 'scenarios';    // 'scenarios' | 'packages' | 'defense' | 'products' | 'addons' | 'ai-agentic'
+let activeScenario = null;
+let activeCat  = 'All';
+let activeDefense = 'dlp';       // current Defense Levels tab
+let selectedProduct = null;
+let selectedPackage = null;      // package key
+let selectedAddon = null;        // add-on SKU
+let searchQuery = '';
+let pkgMode = 'cards';           // 'cards' | 'compare'
+let comparePicks = ['prime-advt','max-advt'];   // packages selected for compare
+
+// Helper for level deep-linking (e.g. clicking "DLP-L2" inside a package)
+function jumpToLevel(levelKey) {
+  // levelKey example: 'DLP-L2' → defense='dlp'
+  const def = (levelKey || '').split('-')[0].toLowerCase();
+  if (DEFENSE_LEVELS[def]) {
+    activeView = 'defense'; activeDefense = def;
+    selectedProduct = selectedPackage = selectedAddon = null;
+    render();
+    setTimeout(() => window.scrollTo({top:0, behavior:'smooth'}), 50);
+  }
+}
+function jumpToPackage(key) {
+  activeView = 'packages'; selectedPackage = key;
+  selectedProduct = selectedAddon = null;
+  render();
+  setTimeout(()=>{ const el=document.getElementById('detail-panel'); if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'}); }, 60);
+}
+window.jumpToLevel = jumpToLevel;
+window.jumpToPackage = jumpToPackage;
+
+// ——————————————————————
+// SIDEBAR
+// ——————————————————————
+function svgIcon(kind) {
+  const s = {
+    packages:    `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1 1 4v6l6 3 6-3V4L7 1z"/><path d="M1 4l6 3 6-3M7 7v6"/></svg>`,
+    defense:     `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1 2 3v4c0 3 2 5 5 6 3-1 5-3 5-6V3L7 1z"/><path d="m4.5 7 2 2 3.5-4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    products:    `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>`,
+    scenarios:   `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12 L7 3 L12 12 Z" stroke-linejoin="round"/><circle cx="7" cy="9" r="0.8" fill="currentColor"/></svg>`,
+    agent:       `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="5" r="2.5"/><path d="M3 12c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke-linecap="round"/><circle cx="4.5" cy="4" r="0.6" fill="currentColor"/><circle cx="9.5" cy="4" r="0.6" fill="currentColor"/></svg>`,
+    addons:      `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v6M4 7h6" stroke-linecap="round"/></svg>`,
+    ai:          `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1 2 4v3c0 2.8 2.1 5.4 5 6 2.9-.6 5-3.2 5-6V4L7 1z"/></svg>`,
+    ext:         `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h5v5M12 2 6 8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 4H2v8h8V9" stroke-linecap="round"/></svg>`,
+    cat:         `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M4 7h6M7 4v6" stroke-linecap="round"/></svg>`
+  };
+  return s[kind] || s.products;
+}
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+
+  // VIEW switcher
+  const v = document.createElement('div'); v.className='sidebar-section';
+  const vlbl = document.createElement('div'); vlbl.className='sidebar-label'; vlbl.textContent='View'; v.appendChild(vlbl);
+  const agentskopeCount = AI_AGENTS.filter(a => a.agentskope).length;
+  const views = [
+    {key:'scenarios', label:'Scenarios', icon:'scenarios', count: SCENARIOS.length},
+    {key:'agentskope', label:'AgentSkope', icon:'agent', count: agentskopeCount, badge:'NEW'},
+    {key:'packages', label:'Packages', icon:'packages', count: PACKAGES.length || '—'},
+    {key:'defense',  label:'Defense Levels', icon:'defense', count: Object.keys(DEFENSE_LEVELS).length || '—'},
+    {key:'products', label:'Products', icon:'products', count: PRODUCTS.length},
+    {key:'addons',   label:'Add-ons & Network', icon:'addons', count: ADD_ONS.length || '—'},
+    {key:'ai-agentic', label:'AI & Agentic', icon:'ai', count: PRODUCTS.filter(p=>p.cat==='AI Security' || p.cat==='AgentSkope').length}
+  ];
+  views.forEach(vw => {
+    const item = document.createElement('div');
+    item.className = 'sidebar-item' + (activeView===vw.key?' active':'');
+    const badgeHtml = vw.badge ? `<span class="si-badge-new">${vw.badge}</span>` : '';
+    item.innerHTML = `<div class="si-icon" style="background:var(--ns-teal-light);color:var(--ns-teal)">${svgIcon(vw.icon)}</div>${vw.label}${badgeHtml}<span class="si-count">${vw.count}</span>`;
+    item.onclick = () => { activeView = vw.key; activeCat='All'; selectedProduct=null; selectedPackage=null; selectedAddon=null; render(); };
+    v.appendChild(item);
+  });
+  sb.appendChild(v);
+
+  // Categories — only when in Products view
+  if (activeView === 'products') {
+    const c = document.createElement('div'); c.className='sidebar-section'; c.style.marginTop='16px';
+    const clbl = document.createElement('div'); clbl.className='sidebar-label'; clbl.textContent='Categories'; c.appendChild(clbl);
+    const cats = ['All', ...new Set(PRODUCTS.map(p=>p.cat))];
+    cats.forEach(cat => {
+      const count = cat==='All' ? PRODUCTS.length : PRODUCTS.filter(p=>p.cat===cat).length;
+      const m = CAT_META[cat] || CAT_META.All;
+      const item = document.createElement('div');
+      item.className = 'sidebar-item' + (activeCat===cat?' active':'');
+      item.innerHTML = `<div class="si-icon" style="background:${m.bg};color:${m.color}">${svgIcon('cat')}</div>${cat}<span class="si-count">${count}</span>`;
+      item.onclick = () => { activeCat = cat; selectedProduct=null; render(); };
+      c.appendChild(item);
+    });
+    sb.appendChild(c);
+  }
+
+  // Quick links
+  const q = document.createElement('div'); q.className='sidebar-section'; q.style.marginTop='16px';
+  const qlbl = document.createElement('div'); qlbl.className='sidebar-label'; qlbl.textContent='Quick Links'; q.appendChild(qlbl);
+  [["Netskope One Platform","https://www.netskope.com/netskope-one"],
+   ["Netskope AI Security","https://www.netskope.com/ai"],
+   ["NewEdge Network","https://www.netskope.com/netskope-one/newedge"],
+   ["Netskope Documentation","https://docs.netskope.com/"]
+  ].forEach(([label,url]) => {
+    const item = document.createElement('a');
+    item.href = url; item.target='_blank'; item.className='sidebar-item'; item.style.textDecoration='none';
+    item.innerHTML = `<div class="si-icon" style="background:var(--surface2);color:var(--text-3)">${svgIcon('ext')}</div>${label}`;
+    q.appendChild(item);
+  });
+  sb.appendChild(q);
+}
+
+// ——————————————————————
+// MAIN RENDER + ROUTER
+// ——————————————————————
+function render() {
+  renderSidebar();
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  if (activeView === 'scenarios')       renderScenarios(main);
+  else if (activeView === 'agentskope') renderAgentSkope(main);
+  else if (activeView === 'products')   renderProducts(main);
+  else if (activeView === 'ai-agentic') renderAIAgenticView(main);
+  else if (activeView === 'packages')   renderPackages(main);
+  else if (activeView === 'defense')    renderDefenseLevels(main);
+  else if (activeView === 'addons')     renderAddOns(main);
+  document.title = `Netskope Deal Room — ${ ({scenarios:'Scenarios',agentskope:'AgentSkope',packages:'Packages',defense:'Defense Levels',products:'Products',addons:'Add-ons',['ai-agentic']:'AI & Agentic'}[activeView]) }`;
+}
+
+// ——————————————————————
+// AGENTSKOPE VIEW — 5 May 2026 launch
+// ——————————————————————
+let selectedAgent = null; // agent index in AI_AGENTS
+
+function renderAgentSkope(main) {
+  const launchAgents = AI_AGENTS.filter(a => a.agentskope);
+  const ga = launchAgents.filter(a => a.status === 'GA').length;
+  const preview = launchAgents.filter(a => a.status === 'Private Preview').length;
+  const firstOfKind = launchAgents.filter(a => a.firstOfKind).length;
+
+  // Filter by search
+  const q = searchQuery.toLowerCase().trim();
+  const matches = a => !q || (a.name + (a.purpose||'') + (a.description||'') + (a.persona||'')).toLowerCase().includes(q);
+  const filtered = launchAgents.filter(matches);
+
+  // Hero
+  const hero = document.createElement('div'); hero.className = 'as-hero';
+  hero.innerHTML = `
+    <div class="as-hero-inner">
+      <div class="as-pill"><span class="pulse">★</span>Just announced · 5 May 2026</div>
+      <h1>Netskope One <span class="accent">AgentSkope</span></h1>
+      <p class="lead">An architectural foundation for deploying Netskope AI agents that execute end-to-end SOC and NOC workflows — including <strong style="color:#fff">first-of-kind agentic DLP analysis</strong> and <strong style="color:#fff">insider-threat triage</strong>. Shared GRC, privacy and security controls. Agent-utilisation telemetry across the platform. An autonomous force multiplier — addressing the <strong style="color:#fff">40% of alerts that go entirely uninvestigated</strong> due to capacity.</p>
+      <div class="as-stats">
+        <div class="as-stat"><div class="num">${launchAgents.length}</div><div class="lbl">launch agents</div></div>
+        <div class="as-stat"><div class="div"></div></div>
+        <div class="as-stat"><div class="num">${ga}</div><div class="lbl">GA today</div></div>
+        <div class="as-stat"><div class="div"></div></div>
+        <div class="as-stat"><div class="num">${preview}</div><div class="lbl">private preview</div></div>
+        <div class="as-stat"><div class="div"></div></div>
+        <div class="as-stat"><div class="num">${firstOfKind}</div><div class="lbl">first-of-kind</div></div>
+      </div>
+    </div>`;
+  main.appendChild(hero);
+
+  if (!filtered.length) {
+    const em = document.createElement('div'); em.className='empty-state';
+    em.innerHTML = `<p>No agents match <strong>"${escapeHtml(q)}"</strong></p>`;
+    main.appendChild(em);
+    return;
+  }
+
+  // Section header
+  const section = document.createElement('div'); section.className='product-section';
+  section.innerHTML = `
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--ns-teal)"></div>
+      <h2>Launch Agents</h2>
+      <div class="section-line"></div>
+      <span class="section-count">${filtered.length}</span>
+    </div>
+    <div class="agent-grid"></div>`;
+  main.appendChild(section);
+  const grid = section.querySelector('.agent-grid');
+
+  filtered.forEach((a, originalIdx) => {
+    const idx = AI_AGENTS.indexOf(a);
+    grid.appendChild(agentCard(a, idx));
+  });
+
+  // Detail panel
+  if (selectedAgent != null) {
+    const a = AI_AGENTS[selectedAgent];
+    if (a && a.agentskope) section.appendChild(buildAgentPanel(a));
+  }
+
+  // BDO + CEO quotes block (closer to bottom — under the agents)
+  const quotes = document.createElement('div');
+  quotes.style.marginTop = '8px';
+  quotes.innerHTML = `
+    <div class="as-quote">
+      "Security and network operations teams today are overwhelmed by an endless loop of manual triage… AgentSkope acts as an autonomous force multiplier… empowering security and network leaders to drastically reduce manual troubleshooting, free up their skilled staff for strategic initiatives, and adapt their defenses at the speed of business."
+      <span class="quote-attr"><strong>Sanjay Beri</strong> · Co-Founder &amp; CEO, Netskope</span>
+    </div>
+    <div class="as-quote" style="border-left-color:var(--ns-orange)">
+      "BDO is data-rich. Our security and access infrastructures are complex, and staffed by busy and experienced teams… we know the scale of the challenge is only going to grow as we encourage AI adoption — so too is the increased data movement that brings. Agentic operations that support our security and networking operations teams in handling their growing workflows will be very important for us moving forward."
+      <span class="quote-attr"><strong>Stuart Walters</strong> · Partner &amp; CIO, BDO UK</span>
+    </div>
+    <div style="margin-top:18px;text-align:center"><a href="https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage" target="_blank" style="font-size:12px;color:var(--text-3);text-decoration:none">Read the full press release ↗</a></div>`;
+  main.appendChild(quotes);
+}
+
+function agentCard(a, idx) {
+  const card = document.createElement('div');
+  const inBom = isInBOM('agent', a.name);
+  card.className = 'agent-card' + (selectedAgent === idx ? ' selected' : '') + (inBom ? ' in-bom' : '');
+  card.style.setProperty('--agent-color', a.color || 'var(--ns-teal)');
+  card.style.setProperty('--agent-tint', (a.color || '#00A7CE') + '1A');
+  const statusClass = a.status === 'GA' ? 'ga' : 'preview';
+  const fok = a.firstOfKind ? '<span class="agent-fok">First-of-kind</span>' : '';
+  card.innerHTML = `
+    ${quickAddBtn('agent', a.name)}
+    <div class="agent-card-head" style="padding-right:30px">
+      <div class="agent-icon">${a.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div class="agent-name">${escapeHtml(a.name)}</div>
+        <div class="agent-meta-row">
+          <span class="agent-status ${statusClass}">${a.status}</span>
+          <span class="agent-persona">${a.persona}</span>
+          ${fok}
+        </div>
+      </div>
+    </div>
+    <div class="agent-purpose">${escapeHtml(a.purpose || '')}</div>`;
+  card.onclick = () => { selectedAgent = (selectedAgent === idx ? null : idx); render(); };
+  return card;
+}
+
+function buildAgentPanel(a) {
+  const panel = document.createElement('div'); panel.className='detail-panel'; panel.id='detail-panel';
+  panel.style.setProperty('--dp-accent-color', a.color || 'var(--ns-teal)');
+  const statusClass = a.status === 'GA' ? 'ga' : 'preview';
+  const fok = a.firstOfKind ? '<span class="agent-fok" style="margin-left:6px">First-of-kind</span>' : '';
+  const includedRow = a.includedIn
+    ? `<div class="dp-meta-item"><span class="dp-meta-label">Availability</span><span class="dp-meta-value">${escapeHtml(a.includedIn)}</span></div>`
+    : `<div class="dp-meta-item"><span class="dp-meta-label">Availability</span><span class="dp-meta-value">${a.inclusion === 'addon' ? 'Add-on agent' : (a.inclusion === 'preview' ? 'Private preview' : 'Included')}</span></div>`;
+
+  panel.innerHTML = `
+    <div class="dp-top">
+      <div class="dp-icon" style="background:${(a.color||'#00A7CE')}1A;color:${a.color||'var(--ns-teal)'};font-size:26px">${a.icon}</div>
+      <div class="dp-info">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <h3 style="margin-bottom:0">${escapeHtml(a.name)}</h3>
+          <span class="agent-status ${statusClass}">${a.status}</span>
+          ${fok}
+        </div>
+        <div class="dp-cat" style="background:${(a.color||'#00A7CE')}1A;color:${a.color||'var(--ns-teal)'}">AGENTSKOPE · ${a.persona.toUpperCase()}</div>
+        <div class="dp-desc">${escapeHtml(a.description || a.purpose || '')}</div>
+        <div class="dp-meta">
+          <div class="dp-meta-item"><span class="dp-meta-label">Persona</span><span class="dp-meta-value">${a.persona}</span></div>
+          ${includedRow}
+          <div class="dp-meta-item"><span class="dp-meta-label">SKU</span><span class="dp-meta-value">${a.sku || 'Pricing TBD'}</span></div>
+        </div>
+      </div>
+      <div class="dp-actions">
+        <button class="btn-primary btn-bom" onclick="addAgentToBOM(${AI_AGENTS.indexOf(a)})">+ Add to BOM</button>
+      </div>
+      <button class="dp-close-btn" onclick="closeAgent()" title="Close">×</button>
+    </div>
+    ${a.defenseKey && DEFENSE_LEVELS[a.defenseKey] ? `
+    <div style="padding:18px 28px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <h4 style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);margin:0">Tiers &amp; what's included</h4>
+        <div class="section-line"></div>
+        <button class="btn-secondary" style="padding:5px 12px;font-size:12px" onclick="jumpToLevel('${a.defenseKey.toUpperCase()}-L1')">Full comparison →</button>
+      </div>
+      ${buildLevelTableHTML(DEFENSE_LEVELS[a.defenseKey])}
+    </div>` : ''}`;
+  return panel;
+}
+function closeAgent() { selectedAgent = null; render(); }
+window.closeAgent = closeAgent;
+
+function addAgentToBOM(idx) {
+  const a = AI_AGENTS[idx]; if (!a) return;
+  BOM.push({ id: bomNewId(), type:'agent', key:a.name, name:`AgentSkope — ${a.name}`, sku:a.sku || '(Pricing TBD)', qty:1, notes: a.status === 'Private Preview' ? 'Private Preview — confirm availability' : '', licensing: a.includedIn || '' });
+  saveBOM(); bomToast(`Added "${a.name}" to BOM`); openBOM();
+}
+window.addAgentToBOM = addAgentToBOM;
+
+// ——————————————————————
+// QUICK-ADD / QUICK-REMOVE helpers (used by card-level + button)
+// ——————————————————————
+function isInBOM(type, key) {
+  return BOM.some(it => it.type === type && it.key === key);
+}
+function quickAddBtn(type, key) {
+  const inBom = isInBOM(type, key);
+  const safeKey = String(key).replace(/'/g,"\\'");
+  const symbol = inBom ? '−' : '+';
+  const cls    = inBom ? 'qa-btn in-bom' : 'qa-btn';
+  const title  = inBom ? 'Remove from BOM' : 'Add to BOM';
+  return `<button class="${cls}" onclick="event.stopPropagation(); quickToggleBOM('${type}','${safeKey}');" title="${title}" aria-label="${title}">${symbol}</button>`;
+}
+function quickToggleBOM(type, key) {
+  const matches = BOM.filter(it => it.type === type && it.key === key);
+  if (matches.length) {
+    // Remove all matching line items
+    for (let i = BOM.length - 1; i >= 0; i--) {
+      if (BOM[i].type === type && BOM[i].key === key) BOM.splice(i, 1);
+    }
+    saveBOM();
+    bomToast(matches.length > 1 ? `Removed ${matches.length} line items` : 'Removed from BOM');
+  } else {
+    let item = null;
+    if (type === 'package') {
+      const p = PACKAGES.find(x => x.key === key); if (!p) return;
+      item = { id: bomNewId(), type, key:p.key, name:p.name, sku:p.sku, qty:1, notes:'' };
+    } else if (type === 'product') {
+      const p = PRODUCTS.find(x => x.name === key); if (!p) return;
+      item = { id: bomNewId(), type, key:p.name, name:p.name, sku:p.sku || '(no SKU — see package)', qty:1, notes:'', licensing:p.licensing||'' };
+    } else if (type === 'addon') {
+      const a = ADD_ONS.find(x => x.sku === key); if (!a) return;
+      item = { id: bomNewId(), type, key:a.sku, name:a.name, sku:a.sku, qty:1, notes:'', licensing:a.licensing };
+    } else if (type === 'agent') {
+      const a = AI_AGENTS.find(x => x.name === key); if (!a) return;
+      item = { id: bomNewId(), type, key:a.name, name:`AgentSkope — ${a.name}`, sku:a.sku || '(Pricing TBD)', qty:1, notes: a.status === 'Private Preview' ? 'Private Preview — confirm availability' : '', licensing: a.includedIn || '' };
+    }
+    if (item) {
+      BOM.push(item); saveBOM();
+      bomToast(`Added "${item.name.replace(/^AgentSkope — /,'')}"`);
+    }
+  }
+  render(); // re-render so all visible card buttons reflect new state
+}
+window.isInBOM = isInBOM;
+window.quickToggleBOM = quickToggleBOM;
+
+// ——————————————————————
+// PRODUCTS VIEW (v1 logic preserved)
+// ——————————————————————
+function renderProducts(main) {
+  // Hero
+  const hero = document.createElement('div'); hero.className='hero-strip';
+  hero.innerHTML = `
+    <div class="hero-text">
+      <h1>Netskope One Platform</h1>
+      <p>The industry's leading SSE and SASE platform — built natively on a single cloud for AI-powered, data-centric security everywhere. This deal-room reference adds full SKU and packaging context.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hs-num">${PRODUCTS.length}</div><div class="hs-label">Products</div></div>
+      <div class="hero-stat"><div class="hs-num">${new Set(PRODUCTS.map(p=>p.cat)).size}</div><div class="hs-label">Categories</div></div>
+      <div class="hero-stat"><div class="hs-num">1</div><div class="hs-label">Platform</div></div>
+    </div>`;
+  main.appendChild(hero);
+
+  // Filter
+  const q = searchQuery.toLowerCase().trim();
+  let filtered = activeCat === 'All' ? [...PRODUCTS] : PRODUCTS.filter(p=>p.cat===activeCat);
+  if (q) filtered = filtered.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.cat.toLowerCase().includes(q) ||
+    p.desc.toLowerCase().includes(q) ||
+    (p.features||[]).some(f => f.toLowerCase().includes(q)) ||
+    (p.sku||'').toLowerCase().includes(q));
+
+  if (!filtered.length) {
+    const em = document.createElement('div'); em.className='empty-state';
+    em.innerHTML = `<p>No products match <strong>"${q}"</strong></p>`;
+    main.appendChild(em); return;
+  }
+
+  // Group by category
+  const grouped = {};
+  filtered.forEach(p => { (grouped[p.cat] ||= []).push(p); });
+
+  Object.entries(grouped).forEach(([cat, prods]) => {
+    const m = CAT_META[cat] || CAT_META.All;
+    const section = document.createElement('div'); section.className='product-section';
+    section.innerHTML = `
+      <div class="section-header">
+        <div class="section-dot" style="background:${m.color}"></div>
+        <h2>${cat}</h2>
+        <div class="section-line"></div>
+        <span class="section-count">${prods.length}</span>
+      </div>
+      <div class="product-grid"></div>`;
+    main.appendChild(section);
+    const grid = section.querySelector('.product-grid');
+    prods.forEach(p => grid.appendChild(productCard(p, m)));
+
+    if (selectedProduct) {
+      const sel = PRODUCTS.find(x=>x.name===selectedProduct);
+      if (sel && sel.cat === cat) section.appendChild(buildDetailPanel(sel));
+    }
+  });
+}
+
+function productCard(p, m) {
+  const card = document.createElement('div');
+  const inBom = isInBOM('product', p.name);
+  card.className = 'product-card' + (selectedProduct===p.name?' selected':'') + (inBom?' in-bom':'');
+  // Build package chip row from inPackages metadata
+  const pkgs = p.inPackages || [];
+  const hasPrime = pkgs.some(k => k.startsWith('prime'));
+  const hasMax   = pkgs.some(k => k.startsWith('max'));
+  const hasApi   = pkgs.some(k => k.startsWith('casb-api') || k.startsWith('dspm'));
+  const chips = [];
+  if (hasPrime) chips.push('<span class="pkg-chip in-prime">Prime</span>');
+  if (hasMax)   chips.push('<span class="pkg-chip in-max">Max</span>');
+  if (hasApi)   chips.push('<span class="pkg-chip in-api">API</span>');
+  const chipRow = chips.length ? `<div class="pc-pkg-row">${chips.join('')}</div>` : '';
+
+  card.innerHTML = `
+    ${quickAddBtn('product', p.name)}
+    <div class="pc-icon" style="background:${m.bg};color:${m.color}">${p.icon}</div>
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;padding-right:30px">
+      <div class="pc-name" style="margin-bottom:0">${p.name}</div>
+      ${p.isNew ? '<span class="badge-new">New</span>' : ''}
+    </div>
+    <span class="pc-cat" style="background:${m.bg};color:${m.color}">${p.cat}</span>
+    ${chipRow}`;
+  card.onclick = () => { selectedProduct = p.name; render(); };
+  return card;
+}
+
+function buildDetailPanel(p) {
+  const m = CAT_META[p.cat] || CAT_META.All;
+  const panel = document.createElement('div');
+  panel.className = 'detail-panel'; panel.id = 'detail-panel';
+  panel.style.setProperty('--dp-accent-color', m.color);
+
+  const relatedProds = (p.related||[]).map(rn => {
+    const rp = PRODUCTS.find(x=>x.name===rn); if (!rp) return '';
+    const rm = CAT_META[rp.cat] || CAT_META.All;
+    return `<div class="related-item" onclick="selectProduct('${rp.name.replace(/'/g,"\\'")}')">
+      <span class="ri-icon">${rp.icon}</span><span>${rp.name}</span>
+      ${rp.isNew?'<span class="badge-new">New</span>':''}
+      <span style="margin-left:auto;font-size:11px;color:${rm.color};background:${rm.bg};padding:2px 7px;border-radius:4px;font-weight:500">${rp.cat}</span>
+    </div>`;
+  }).join('');
+
+  // Package membership chips (clickable → jump to package view)
+  const pkgChips = (p.inPackages || []).map(key => {
+    const pk = PACKAGES.find(x => x.key === key);
+    if (!pk) return '';
+    const c = pkgColors(key);
+    return `<span class="pkg-chip" style="background:${c.tint};color:${c.color};cursor:pointer;padding:4px 10px;font-size:11px" onclick="jumpToPackage('${key}')">${pk.name}</span>`;
+  }).join('');
+
+  // Meta row (SKU / licensing / requires)
+  const metaItems = [];
+  if (p.sku)       metaItems.push(`<div class="dp-meta-item"><span class="dp-meta-label">SKU</span><span class="dp-meta-value">${p.sku}</span></div>`);
+  if (p.licensing) metaItems.push(`<div class="dp-meta-item"><span class="dp-meta-label">Licensing</span><span class="dp-meta-value">${p.licensing}</span></div>`);
+  if (p.requires)  metaItems.push(`<div class="dp-meta-item"><span class="dp-meta-label">Requires</span><span class="dp-meta-value">${p.requires}</span></div>`);
+  const metaHtml = metaItems.length ? `<div class="dp-meta">${metaItems.join('')}</div>` : '';
+
+  // Embedded level/tier matrix for tiered products (the "why pick L2 over L1" answer, inline)
+  const dk = p.defenseKey ? DEFENSE_LEVELS[p.defenseKey] : null;
+  const levelsSection = dk ? `
+    <div style="padding:18px 28px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <h4 style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);margin:0">Levels &amp; what's included — ${dk.name}</h4>
+        <div class="section-line"></div>
+        <button class="btn-secondary" style="padding:5px 12px;font-size:12px" onclick="jumpToLevel('${p.defenseKey.toUpperCase()}-L1')">Full comparison →</button>
+      </div>
+      ${buildLevelTableHTML(dk)}
+    </div>` : '';
+
+  panel.innerHTML = `
+    <div class="dp-top">
+      <div class="dp-icon" style="background:${m.bg};color:${m.color};font-size:26px">${p.icon}</div>
+      <div class="dp-info">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <h3 style="margin-bottom:0">${p.name}</h3>
+          ${p.isNew?'<span class="badge-new">New</span>':''}
+        </div>
+        <div class="dp-cat" style="background:${m.bg};color:${m.color}">${p.cat}</div>
+        <div class="dp-desc">${p.desc}</div>
+        ${metaHtml}
+        ${pkgChips ? `<div style="margin-top:12px"><h4 style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);margin-bottom:6px">Included in packages</h4><div style="display:flex;flex-wrap:wrap;gap:6px">${pkgChips}</div></div>` : ''}
+      </div>
+      <div class="dp-actions">
+        <a class="btn-primary" href="${p.url}" target="_blank">Learn more ↗</a>
+        <button class="btn-secondary btn-bom" onclick="event.stopPropagation();addProductToBOM('${p.name.replace(/'/g,"\\'")}');">+ Add to BOM</button>
+      </div>
+      <button class="dp-close-btn" onclick="closeDetail()" title="Close">×</button>
+    </div>
+    ${levelsSection}
+    <div class="dp-bottom">
+      <div class="dp-features">
+        <h4>Key capabilities</h4>
+        <div class="feat-list">
+          ${(p.features||[]).map(f=>`<span class="feat-chip">
+            <svg viewBox="0 0 11 11" fill="none" stroke="${m.color}" stroke-width="2"><path d="M1.5 5.5l2.5 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            ${f}</span>`).join('')}
+        </div>
+      </div>
+      <div class="dp-related">
+        <h4>Related products</h4>
+        <div class="related-list">${relatedProds || '<p style="font-size:13px;color:var(--text-3)">—</p>'}</div>
+      </div>
+    </div>`;
+  return panel;
+}
+function closeDetail() { selectedProduct = null; render(); }
+function selectProduct(name) { selectedProduct = name; render(); }
+
+// AI & Agentic curated cross-cut
+function renderAIAgenticView(main) {
+  const hero = document.createElement('div'); hero.className='hero-strip';
+  hero.innerHTML = `
+    <div class="hero-text">
+      <h1>AI &amp; Agentic Security</h1>
+      <p>Netskope's AI portfolio — securing how users access AI tools, how agents interact with MCP servers, how custom LLMs are operated and tested, <em>and</em> how SOC/NOC teams use AI agents to do their own work. The AgentSkope launch (5 May 2026) sits alongside the inline AI inspection products.</p>
+    </div>`;
+  main.appendChild(hero);
+
+  const renderSection = (cat, label) => {
+    const prods = PRODUCTS.filter(p => p.cat === cat);
+    if (!prods.length) return;
+    const m = CAT_META[cat];
+    const section = document.createElement('div'); section.className='product-section';
+    section.innerHTML = `
+      <div class="section-header"><div class="section-dot" style="background:${m.color}"></div><h2>${label}</h2><div class="section-line"></div><span class="section-count">${prods.length}</span></div>
+      <div class="product-grid"></div>`;
+    main.appendChild(section);
+    const grid = section.querySelector('.product-grid');
+    prods.forEach(p => grid.appendChild(productCard(p, m)));
+    if (selectedProduct) {
+      const sel = prods.find(x => x.name === selectedProduct);
+      if (sel) section.appendChild(buildDetailPanel(sel));
+    }
+  };
+
+  renderSection('AgentSkope', 'AgentSkope — Platform & launch agents');
+  renderSection('AI Security', 'AI Security — Inline inspection & gateways');
+}
+
+// ——————————————————————
+// SCENARIOS VIEW
+// ——————————————————————
+function renderScenarios(main) {
+  // Hero
+  const hero = document.createElement('div'); hero.className='hero-strip';
+  hero.innerHTML = `
+    <div class="hero-text">
+      <h1>Start with the outcome</h1>
+      <p>Six common deal entry-points, each pre-mapped to the Netskope products, packages and add-ons that fit. Click a scenario to see the recommended configuration — then add it to your BOM in one click.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hs-num">${SCENARIOS.length}</div><div class="hs-label">Scenarios</div></div>
+    </div>`;
+  main.appendChild(hero);
+
+  // What's New banner — shows once per session, dismissible
+  if (sessionStorage.getItem('ns_dr_whatsnew_dismissed') !== '1') {
+    const wn = document.createElement('div'); wn.className='whatsnew';
+    wn.innerHTML = `
+      <span class="whatsnew-tag">v3.0 · NEW</span>
+      <span class="whatsnew-text"><strong>UPDATES</strong> May 2026</span>
+      <div class="whatsnew-chips">
+        ${PRODUCTS.filter(p=>p.isNew).map(p => `<span class="whatsnew-chip" onclick="activeView='products'; activeCat='${p.cat}'; selectedProduct='${p.name.replace(/'/g,"\\'")}'; render();">${p.icon} ${p.name}</span>`).join('')}
+      </div>
+      <button class="whatsnew-close" onclick="sessionStorage.setItem('ns_dr_whatsnew_dismissed','1'); this.parentElement.remove();" title="Dismiss for this session">×</button>`;
+    main.appendChild(wn);
+  }
+
+  // Trust strip — Netskope at-a-Glance (PDF page 47)
+  const trust = document.createElement('div'); trust.className='trust';
+  trust.innerHTML = `
+    <div class="trust-card">
+      <div class="trust-num">9<small> yrs</small></div>
+      <div class="trust-label">Gartner MQ Leader</div>
+      <div class="trust-sub">SSE category, consecutive</div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-num">$811<small>M</small></div>
+      <div class="trust-label">Annual Recurring Revenue</div>
+      <div class="trust-sub">NASDAQ: NTSK</div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-num">4,500<small>+</small></div>
+      <div class="trust-label">Customers</div>
+      <div class="trust-sub">incl. 30+ of the Fortune 100</div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-num">79</div>
+      <div class="trust-label">NewEdge Regions</div>
+      <div class="trust-sub">200+ localization zones</div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-num">300<small>+</small></div>
+      <div class="trust-label">Patents Issued / Pending</div>
+      <div class="trust-sub">50+ in AI/ML</div>
+    </div>`;
+  main.appendChild(trust);
+  const tfoot = document.createElement('div'); tfoot.className='trust-foot';
+  tfoot.textContent = 'All proof points as of January 31, 2026 — Netskope at-a-Glance';
+  main.appendChild(tfoot);
+
+  // Detail panel (when one is selected) renders ABOVE the grid for prominence
+  if (activeScenario) {
+    const s = SCENARIOS.find(x => x.key === activeScenario);
+    if (s) main.appendChild(buildScenarioDetail(s));
+  }
+
+  // Grid
+  const grid = document.createElement('div'); grid.className='scn-grid';
+  SCENARIOS.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'scn-card' + (activeScenario === s.key ? ' selected' : '');
+    card.style.setProperty('--scn-color', s.color);
+    card.innerHTML = `
+      <span class="scn-icon">${s.icon}</span>
+      <div class="scn-title">${s.title}</div>
+      <div class="scn-tagline">${s.tagline}</div>
+      <div class="scn-stats">
+        <span><strong>${s.packages.length}</strong> pkg</span>
+        <span><strong>${s.products.length}</strong> products</span>
+        <span><strong>${s.addons.length}</strong> add-ons</span>
+      </div>
+      <span class="scn-arrow">→</span>`;
+    card.onclick = () => { activeScenario = (activeScenario === s.key ? null : s.key); render(); setTimeout(()=>{ const el=document.querySelector('.scn-detail'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }, 60); };
+    grid.appendChild(card);
+  });
+  main.appendChild(grid);
+}
+
+function buildScenarioDetail(s) {
+  const panel = document.createElement('div'); panel.className='scn-detail';
+  panel.style.setProperty('--scn-color', s.color);
+
+  // Recommended packages
+  const pkgItems = s.packages.map(key => {
+    const p = PACKAGES.find(x => x.key === key); if (!p) return '';
+    const c = pkgColors(key);
+    return `<div class="scn-rec-item" onclick="jumpToPackage('${key}')">
+      <span class="scn-rec-icon">${c.tier === 'API' ? '◧' : (c.tier === 'PRIME' ? '◆' : '◈')}</span>
+      <span>${p.name}</span>
+      <span class="scn-rec-meta">${p.sku}</span>
+    </div>`;
+  }).join('');
+
+  // Core products
+  const prodItems = s.products.map(name => {
+    const p = PRODUCTS.find(x => x.name === name); if (!p) return '';
+    return `<div class="scn-rec-item" onclick="activeView='products'; selectedProduct='${name.replace(/'/g,"\\'")}'; render();">
+      <span class="scn-rec-icon">${p.icon}</span>
+      <span>${p.name}</span>
+      <span class="scn-rec-meta">${p.cat}</span>
+    </div>`;
+  }).join('');
+
+  // Recommended add-ons
+  const aoItems = s.addons.map(sku => {
+    const a = ADD_ONS.find(x => x.sku === sku); if (!a) return '';
+    return `<div class="scn-rec-item" onclick="activeView='addons'; selectedAddon='${sku.replace(/'/g,"\\'")}'; render();">
+      <span class="scn-rec-icon">＋</span>
+      <span>${a.name}</span>
+      <span class="scn-rec-meta">${a.sku}</span>
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="scn-det-head">
+      <span class="scn-det-icon">${s.icon}</span>
+      <div class="scn-det-info">
+        <h2>${s.title}</h2>
+        <p>${s.tagline}</p>
+        <div class="scn-outcome"><strong>Outcome</strong>${s.outcome}</div>
+        ${s.note ? `<div style="margin-top:10px;font-size:12px;color:var(--text-3)"><strong style="color:var(--ns-orange);text-transform:uppercase;letter-spacing:0.06em;font-size:10px;margin-right:6px">Note</strong>${s.note}</div>` : ''}
+      </div>
+      <div class="scn-det-actions">
+        <button class="btn-primary btn-bom" onclick="addScenarioToBOM('${s.key}')">+ Add scenario to BOM</button>
+        <button class="btn-secondary" onclick="activeScenario=null;render();">Close</button>
+      </div>
+    </div>
+    <div class="scn-det-body">
+      <section>
+        <h3>Recommended packages</h3>
+        <div class="scn-recs">${pkgItems || '<p style="font-size:12.5px;color:var(--text-3)">—</p>'}</div>
+      </section>
+      <section>
+        <h3>Core products</h3>
+        <div class="scn-recs">${prodItems || '<p style="font-size:12.5px;color:var(--text-3)">—</p>'}</div>
+      </section>
+    </div>
+    ${aoItems ? `
+    <div class="scn-det-body" style="padding-top:0">
+      <section style="grid-column:1 / -1">
+        <h3>Recommended add-ons</h3>
+        <div class="scn-recs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px">${aoItems}</div>
+      </section>
+    </div>` : ''}`;
+  return panel;
+}
+
+function addScenarioToBOM(key) {
+  const s = SCENARIOS.find(x => x.key === key); if (!s) return;
+  let added = 0;
+  s.packages.forEach(k => { addPackageToBOM(k); added++; });
+  s.products.forEach(n => { addProductToBOM(n); added++; });
+  s.addons.forEach(sku => { addAddonToBOM(sku); added++; });
+  bomToast(`Added ${added} items from "${s.title}" to BOM`);
+}
+function runScenario(key) { activeView='scenarios'; activeScenario=key; render(); }
+window.addScenarioToBOM = addScenarioToBOM;
+window.runScenario = runScenario;
+
+// ——————————————————————
+// PACKAGES VIEW
+// ——————————————————————
+function pkgColors(key) {
+  if (key.startsWith('prime')) return {color:'var(--ns-teal)', tint:'rgba(0,167,206,0.1)', tier:'PRIME'};
+  if (key.startsWith('max'))   return {color:'var(--ns-orange)', tint:'rgba(255,131,0,0.1)', tier:'MAX'};
+  return {color:'#7B4FD4', tint:'rgba(123,79,212,0.1)', tier:'API'};
+}
+
+function renderPackages(main) {
+  const q = searchQuery.toLowerCase().trim();
+  const matchPkg = p => !q || (p.name+p.sku+p.tagline+(p.description||'')+(p.notes||'')+p.capabilities.map(c=>c.name+c.value).join(' ')).toLowerCase().includes(q);
+  const inline = PACKAGES.filter(p => p.tier === 'inline').filter(matchPkg);
+  const api    = PACKAGES.filter(p => p.tier === 'api').filter(matchPkg);
+
+  // Hero
+  const hero = document.createElement('div'); hero.className='hero-strip';
+  hero.innerHTML = `
+    <div class="hero-text">
+      <h1>Packages</h1>
+      <p>Inline packages cover Web/SaaS and Network traffic at varying defense levels. API packages handle data-at-rest in managed SaaS via CASB API + DSPM. Click any package to expand its full capability matrix — or switch to Compare to see the differences side-by-side.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hs-num">${inline.length}</div><div class="hs-label">Inline</div></div>
+      <div class="hero-stat"><div class="hs-num">${api.length}</div><div class="hs-label">API</div></div>
+    </div>`;
+  main.appendChild(hero);
+
+  // Mode toggle
+  const bar = document.createElement('div'); bar.className='pkg-mode-bar';
+  bar.innerHTML = `
+    <div class="pkg-mode-toggles">
+      <button class="pkg-mode-toggle ${pkgMode==='cards'?'active':''}" data-mode="cards">Cards</button>
+      <button class="pkg-mode-toggle ${pkgMode==='compare'?'active':''}" data-mode="compare">Compare</button>
+    </div>
+    <div class="pkg-mode-help">${pkgMode === 'compare' ? 'Pick up to 4 packages — chips toggle in/out.' : 'Click any card for the full capability matrix.'}</div>`;
+  bar.querySelectorAll('.pkg-mode-toggle').forEach(b => b.onclick = () => { pkgMode = b.dataset.mode; render(); });
+  main.appendChild(bar);
+
+  // COMPARE MODE — render the matrix and return early
+  if (pkgMode === 'compare') {
+    renderPackageCompare(main);
+    return;
+  }
+
+  // Inline section
+  const s1 = document.createElement('div'); s1.className='product-section';
+  s1.innerHTML = `<div class="section-header"><div class="section-dot" style="background:var(--ns-teal)"></div><h2>Inline Packages</h2><div class="section-line"></div><span class="section-count">${inline.length}</span></div><div class="pkg-grid"></div>`;
+  main.appendChild(s1);
+  const g1 = s1.querySelector('.pkg-grid');
+  inline.forEach(p => g1.appendChild(packageCard(p)));
+  // Detail panel for inline if a package is selected
+  if (selectedPackage) {
+    const sel = inline.find(x => x.key === selectedPackage);
+    if (sel) s1.appendChild(buildPackagePanel(sel));
+  }
+
+  // API section
+  const s2 = document.createElement('div'); s2.className='product-section';
+  s2.innerHTML = `<div class="section-header"><div class="section-dot" style="background:#7B4FD4"></div><h2>API Protection Packages</h2><div class="section-line"></div><span class="section-count">${api.length}</span></div><div class="pkg-grid"></div>`;
+  main.appendChild(s2);
+  const g2 = s2.querySelector('.pkg-grid');
+  api.forEach(p => g2.appendChild(packageCard(p)));
+  if (selectedPackage) {
+    const sel = api.find(x => x.key === selectedPackage);
+    if (sel) s2.appendChild(buildPackagePanel(sel));
+  }
+}
+
+function renderPackageCompare(main) {
+  // Picker chips: all 8 packages, max 4 checked
+  const picker = document.createElement('div');
+  picker.className = 'compare-wrap';
+  let pickerHtml = '<div class="pkg-pick-row">';
+  PACKAGES.forEach(p => {
+    const c = pkgColors(p.key);
+    const checked = comparePicks.includes(p.key);
+    pickerHtml += `<div class="pkg-pick-chip ${checked?'checked':''}" data-key="${p.key}"><span class="pkg-pick-tier">${c.tier}</span> ${p.name}</div>`;
+  });
+  pickerHtml += '</div>';
+  picker.innerHTML = pickerHtml;
+  picker.querySelectorAll('.pkg-pick-chip').forEach(chip => {
+    chip.onclick = () => {
+      const k = chip.dataset.key;
+      const i = comparePicks.indexOf(k);
+      if (i >= 0) comparePicks.splice(i, 1);
+      else if (comparePicks.length < 4) comparePicks.push(k);
+      render();
+    };
+  });
+  main.appendChild(picker);
+
+  if (!comparePicks.length) {
+    const em = document.createElement('div'); em.className='empty-state';
+    em.innerHTML = '<p>Pick at least one package to start comparing.</p>';
+    main.appendChild(em);
+    return;
+  }
+
+  // Selected package objects, ordered by canonical PACKAGES order
+  const selected = PACKAGES.filter(p => comparePicks.includes(p.key));
+
+  // Union of all capability names across selected packages, preserving first-seen order
+  const seen = new Set(); const capNames = [];
+  selected.forEach(pkg => pkg.capabilities.forEach(c => { if (!seen.has(c.name)) { seen.add(c.name); capNames.push(c.name); } }));
+
+  // Build the comparison table
+  const wrap = document.createElement('div'); wrap.className='compare-wrap'; wrap.style.marginTop='-1px'; wrap.style.borderTopLeftRadius='0'; wrap.style.borderTopRightRadius='0';
+  const headerCols = selected.map(p => {
+    const c = pkgColors(p.key);
+    return `<th><span class="ct-tier" style="color:${c.tint.replace('0.1','0.7')};color:${c.color}">${c.tier} · ${p.tier === 'inline' ? 'INLINE' : 'API'}</span>${p.name}<span class="ct-sku">${p.sku}</span></th>`;
+  }).join('');
+
+  const rows = capNames.map(name => {
+    const cells = selected.map(p => {
+      const cap = p.capabilities.find(c => c.name === name);
+      if (!cap) return `<td><div class="ct-cell excluded"><span class="ct-status excluded">Not in pkg</span><span class="ct-value">—</span></div></td>`;
+      const valHtml = cap.level
+        ? cap.value.replace(/L([0-9])/, m => `<span class="cap-level-link" onclick="jumpToLevel('${cap.level}')">${m}</span>`)
+        : cap.value;
+      const label = cap.status === 'included' ? 'Included' : (cap.status === 'addon' ? 'Add-on' : '—');
+      return `<td><div class="ct-cell ${cap.status}"><span class="ct-status ${cap.status}">${label}</span><span class="ct-value">${valHtml}</span></div></td>`;
+    }).join('');
+    return `<tr><td class="cap-name">${name}</td>${cells}</tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <table class="compare-table">
+      <thead><tr><th class="cap-col">Capability</th>${headerCols}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  main.appendChild(wrap);
+
+  // Quick-action footer below compare table
+  const footer = document.createElement('div');
+  footer.style.cssText = 'margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; font-size:12.5px; color:var(--text-3);';
+  footer.innerHTML = `
+    <span>Tip: click any <span class="cap-level-link" style="cursor:default;border-bottom:none">L2</span> / <span class="cap-level-link" style="cursor:default;border-bottom:none">L3</span> reference to jump into Defense Levels.</span>
+    <button class="btn-secondary" style="margin-left:auto" onclick="comparePicks=['prime-advt','max-advt']; render();">Reset to Prime vs Max</button>`;
+  main.appendChild(footer);
+}
+
+function packageCard(p) {
+  const c = pkgColors(p.key);
+  const card = document.createElement('div');
+  const inBom = isInBOM('package', p.key);
+  card.className = 'pkg-card' + (selectedPackage === p.key ? ' selected' : '') + (inBom ? ' in-bom' : '');
+  card.style.setProperty('--pkg-color', c.color);
+  card.style.setProperty('--pkg-tint', c.tint);
+  const includedCount = p.capabilities.filter(x => x.status === 'included').length;
+  const addonCount    = p.capabilities.filter(x => x.status === 'addon').length;
+  card.innerHTML = `
+    ${quickAddBtn('package', p.key)}
+    <div class="pkg-tier" style="padding-right:30px">${c.tier} · ${p.tier === 'inline' ? 'Inline' : 'API'}</div>
+    <div class="pkg-name">${p.name}</div>
+    <div class="pkg-sku">${p.sku}</div>
+    <div class="pkg-tagline">${p.tagline}</div>
+    <div class="pkg-stats">
+      <div><span class="pkg-stat-num">${includedCount}</span> included</div>
+      ${addonCount ? `<div><span class="pkg-stat-num">${addonCount}</span> add-on</div>` : ''}
+    </div>`;
+  card.onclick = () => { selectedPackage = (selectedPackage === p.key ? null : p.key); render(); };
+  return card;
+}
+
+function buildPackagePanel(p) {
+  const c = pkgColors(p.key);
+  const panel = document.createElement('div'); panel.className='detail-panel'; panel.id='detail-panel';
+  panel.style.setProperty('--dp-accent-color', c.color);
+
+  const noteHtml = p.notes ? `<div style="margin-top:10px;padding:8px 12px;background:rgba(255,131,0,0.08);border-left:3px solid var(--ns-orange);border-radius:4px;font-size:12.5px;color:var(--text-2)"><strong style="color:var(--ns-orange);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;margin-right:6px">Note</strong>${p.notes}</div>` : '';
+
+  const rows = p.capabilities.map(cap => {
+    const valHtml = cap.level
+      ? cap.value.replace(/L([0-9])/, m => `<span class="cap-level-link" onclick="jumpToLevel('${cap.level}')">${m}</span>`)
+      : cap.value;
+    return `
+      <tr class="cap-row-${cap.status}">
+        <td class="col-name">${cap.name}</td>
+        <td>${valHtml}</td>
+        <td><span class="cap-status ${cap.status}">${cap.status === 'included' ? 'Included' : (cap.status === 'addon' ? 'Add-on' : '—')}</span></td>
+      </tr>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="dp-top">
+      <div class="dp-icon" style="background:${c.tint};color:${c.color};font-size:22px">${c.tier === 'API' ? '◧' : (c.tier === 'PRIME' ? '◆' : '◈')}</div>
+      <div class="dp-info">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <h3 style="margin-bottom:0">${p.name}</h3>
+        </div>
+        <div class="dp-cat" style="background:${c.tint};color:${c.color}">${c.tier} · ${p.tier === 'inline' ? 'INLINE PACKAGE' : 'API PACKAGE'}</div>
+        <div class="dp-desc">${p.description}</div>
+        <div class="dp-meta">
+          <div class="dp-meta-item"><span class="dp-meta-label">SKU</span><span class="dp-meta-value">${p.sku}</span></div>
+          <div class="dp-meta-item"><span class="dp-meta-label">Capabilities</span><span class="dp-meta-value">${p.capabilities.length}</span></div>
+        </div>
+        ${noteHtml}
+      </div>
+      <div class="dp-actions">
+        <button class="btn-primary btn-bom" onclick="addPackageToBOM('${p.key}')">+ Add to BOM</button>
+      </div>
+      <button class="dp-close-btn" onclick="closePackage()" title="Close">×</button>
+    </div>
+    <div style="padding:18px 28px">
+      <table class="cap-table">
+        <thead><tr><th>Capability</th><th>What's in this package</th><th>Status</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  return panel;
+}
+function closePackage() { selectedPackage = null; render(); }
+window.closePackage = closePackage;
+
+// ——————————————————————
+// DEFENSE LEVELS VIEW
+// ——————————————————————
+function renderDefenseLevels(main) {
+  const def = DEFENSE_LEVELS[activeDefense] || DEFENSE_LEVELS.dlp;
+  const keys = Object.keys(DEFENSE_LEVELS);
+
+  const hero = document.createElement('div'); hero.className='hero-strip';
+  hero.innerHTML = `
+    <div class="hero-text">
+      <h1>Defense Levels</h1>
+      <p>Defense levels are inclusive — Level 2 contains Level 1, Level 3 contains Level 2. The same level applies per defense across the tenant. Each defense is upgradable independently.</p>
+    </div>`;
+  main.appendChild(hero);
+
+  // Tabs
+  const tabs = document.createElement('div'); tabs.className='def-tabs';
+  keys.forEach(k => {
+    const d = DEFENSE_LEVELS[k];
+    const t = document.createElement('button');
+    t.className = 'def-tab' + (activeDefense === k ? ' active' : '');
+    t.innerHTML = `<span class="def-tab-emoji">${d.icon}</span>${d.short}`;
+    t.onclick = () => { activeDefense = k; render(); };
+    tabs.appendChild(t);
+  });
+  main.appendChild(tabs);
+
+  // Panel
+  const panel = document.createElement('div'); panel.className='def-panel';
+  const skuPills = (def.sku_examples || []).map(s => `<span>${s}</span>`).join('');
+  const solutions = def.solutions ? `<div class="def-solutions"><h4>DLP solutions covered (L2 / L3 unless noted)</h4><ul>${def.solutions.map(s=>`<li>${s}</li>`).join('')}</ul></div>` : '';
+  const addons = def.addons ? `<div class="def-addons"><h4>Add-ons (level requirements apply)</h4><ul>${def.addons.map(s=>`<li>${s}</li>`).join('')}</ul></div>` : '';
+
+  panel.innerHTML = `
+    <div class="def-head">
+      <div class="def-head-icon" style="background:${def.color}1A;color:${def.color}">${def.icon}</div>
+      <div style="flex:1">
+        <h3>${def.name}</h3>
+        <p>${def.description}</p>
+        <div class="def-skus">${skuPills}</div>
+      </div>
+    </div>
+    ${buildLevelTableHTML(def)}
+    ${solutions}
+    ${addons}`;
+  main.appendChild(panel);
+}
+
+// Shared level-matrix table builder — used by the Defense Levels view AND
+// embedded inside product detail panels (via PRODUCT_META defenseKey).
+function buildLevelTableHTML(def) {
+  const levelCols = def.levels.map(l => `<th class="level-col">${l}</th>`).join('');
+  const rows = def.features.map(f => {
+    // identify lowest level where the feature first becomes truthy
+    let firstLevel = null;
+    for (const l of def.levels) {
+      const v = f[l];
+      if (v && v !== false && v !== '—') { firstLevel = l; break; }
+    }
+    const cells = def.levels.map(l => {
+      const v = f[l];
+      if (v === true)               return `<td class="lvl-cell"><span class="lvl-yes">✓</span></td>`;
+      if (v === false || v === '—') return `<td class="lvl-cell"><span class="lvl-no">—</span></td>`;
+      const cls = (l === firstLevel) ? 'lvl-text first' : 'lvl-text';
+      return `<td class="lvl-cell"><span class="${cls}">${v}</span></td>`;
+    }).join('');
+    return `<tr><td class="feat-col">${f.f}</td>${cells}</tr>`;
+  }).join('');
+  return `<table class="level-table">
+      <thead><tr><th>Feature</th>${levelCols}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ——————————————————————
+// ADD-ONS VIEW
+// ——————————————————————
+const ADDON_GROUP_META = {
+  'AI':         {label:'AI & Agentic',          color:'#00A7CE'},
+  'Access':     {label:'Remote Access',         color:'#0E7490'},
+  'Visibility': {label:'Visibility & Inspect',  color:'#1a6fbd'},
+  'Networking': {label:'Networking & NewEdge',  color:'#0F7A5A'},
+  'Defense':    {label:'Defense Add-ons',       color:'#c0392b'},
+  'API':        {label:'API Protection Extras', color:'#7B4FD4'},
+  'Branch':     {label:'Branch & SD-WAN',       color:'#FF8300'}
+};
+
+function renderAddOns(main) {
+  const hero = document.createElement('div'); hero.className='hero-strip';
+  hero.innerHTML = `
+    <div class="hero-text">
+      <h1>Add-ons &amp; Network</h1>
+      <p>A-la-carte SKUs that extend the inline and API packages — AI/Agentic, NewEdge networking services, branch SD-WAN, defense upgrades, and DSPM scaling. Click any item for licensing detail.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hs-num">${ADD_ONS.length}</div><div class="hs-label">SKUs</div></div>
+      <div class="hero-stat"><div class="hs-num">${Object.keys(ADDON_GROUP_META).length}</div><div class="hs-label">Groups</div></div>
+    </div>`;
+  main.appendChild(hero);
+
+  const q = searchQuery.toLowerCase().trim();
+  const filtered = q
+    ? ADD_ONS.filter(a => (a.name+a.sku+(a.licensing||'')+(a.requires||'')+(a.description||'')).toLowerCase().includes(q))
+    : ADD_ONS;
+
+  if (!filtered.length) {
+    const em = document.createElement('div'); em.className='empty-state';
+    em.innerHTML = `<p>No add-ons match <strong>"${q}"</strong></p>`;
+    main.appendChild(em); return;
+  }
+
+  // Group
+  const grouped = {};
+  filtered.forEach(a => { (grouped[a.group] ||= []).push(a); });
+
+  Object.entries(grouped).forEach(([group, items]) => {
+    const meta = ADDON_GROUP_META[group] || {label:group, color:'#666'};
+    const section = document.createElement('div'); section.className='product-section';
+    section.innerHTML = `
+      <div class="section-header">
+        <div class="section-dot" style="background:${meta.color}"></div>
+        <h2>${meta.label}</h2>
+        <div class="section-line"></div>
+        <span class="section-count">${items.length}</span>
+      </div>
+      <div class="ao-grid"></div>`;
+    main.appendChild(section);
+    const grid = section.querySelector('.ao-grid');
+
+    items.forEach(a => {
+      const card = document.createElement('div');
+      const inBom = isInBOM('addon', a.sku);
+      card.className = 'ao-card' + (selectedAddon === a.sku ? ' selected' : '') + (inBom ? ' in-bom' : '');
+      card.style.position = 'relative';
+      card.innerHTML = `
+        ${quickAddBtn('addon', a.sku)}
+        <div class="ao-name" style="padding-right:30px">${a.name}</div>
+        <div class="ao-sku">${a.sku}</div>
+        <div class="ao-lic">${a.licensing || ''}</div>
+        ${a.requires ? `<div class="ao-req">Requires ${a.requires}</div>` : ''}`;
+      card.onclick = () => { selectedAddon = (selectedAddon === a.sku ? null : a.sku); render(); };
+      grid.appendChild(card);
+    });
+
+    if (selectedAddon) {
+      const sel = items.find(x => x.sku === selectedAddon);
+      if (sel) section.appendChild(buildAddOnPanel(sel, meta));
+    }
+  });
+}
+
+function buildAddOnPanel(a, meta) {
+  const panel = document.createElement('div'); panel.className='detail-panel'; panel.id='detail-panel';
+  panelSorry, something went wrong. Please try your request again.
