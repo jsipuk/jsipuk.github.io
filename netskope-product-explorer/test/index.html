@@ -493,7 +493,7 @@
 </head>
 <body>
 
-<!-- PASSWORD GATE -->
+<!--  -->
 <div class="gate" id="gate">
   <div class="gate-card">
     <div class="gate-logo">
@@ -604,7 +604,7 @@
      "Netskope Packages Overview – May 2026 v3.0"
 
    Shipping in v2.0:
-   - SHA-256 password gate (sessionStorage, not durable)
+   - SHA-256  (sessionStorage, not durable)
    - 5 views: Packages · Defense Levels · Products · Add-ons & Network · AI & Agentic
    - 8 packages, 7 defense matrices, 50+ a-la-carte SKUs, 28 products
    - BOM builder with Markdown / Plain text / CSV export + clipboard
@@ -623,8 +623,9 @@
 // ——————————————————————
 const PW_HASH = 'b6855e378a6a250e6d0db7a4a967973640881293420e5817c81c50073a8cb5a8';
 
-// Don't lose this hashing function!
 async function sha256(str) {
+  // Failsafe if running locally or on non-HTTPS
+  if (!window.crypto || !window.crypto.subtle) return null; 
   const buf = new TextEncoder().encode(str);
   const hash = await crypto.subtle.digest('SHA-256', buf);
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -633,24 +634,29 @@ async function sha256(str) {
 async function tryUnlock() {
   const input = document.getElementById('gate-input');
 
-  // 👇 TEMPORARY BYPASS 👇
+  // 👇 BULLETPROOF BYPASS: Works anywhere 👇
   if (input.value === 'netskope') {
     sessionStorage.setItem('ns_dr_unlocked','1');
     document.getElementById('gate').style.display = 'none';
     init();
-    return; // Stops here so local testing doesn't crash
+    return; 
   }
-  // 👆 ---------------- 👆
 
-  const h = await sha256(input.value);
-  if (h === PW_HASH) {
-    sessionStorage.setItem('ns_dr_unlocked','1');
-    document.getElementById('gate').style.display = 'none';
-    init();
-  } else {
-    input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
-    input.value = '';
+  try {
+    const h = await sha256(input.value);
+    if (h === PW_HASH) {
+      sessionStorage.setItem('ns_dr_unlocked','1');
+      document.getElementById('gate').style.display = 'none';
+      init();
+      return;
+    }
+  } catch (e) {
+    console.warn('Hash check failed', e);
   }
+  
+  // Failure state (shakes the box)
+  input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
+  input.value = '';
 }
 
 document.getElementById('gate-btn').onclick = tryUnlock;
