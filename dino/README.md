@@ -70,3 +70,12 @@ Add an object to the `DINOS` array in `data.js` (copy an existing one and edit
 the fields). Include a `source` and use cautious wording in `scientistsThink`
 for anything uncertain. It automatically appears in the explorer, quiz, dig and
 habitat games.
+
+## Adding artwork
+
+Each dinosaur shows its `emoji` as a placeholder until artwork is added. To use
+real pictures, drop properly-licensed images into `images/silhouettes/` (small
+cards) and `images/art/` (detail pages) and point each creature at its file in
+`data.js`. Credits appear automatically on the in-app **Image credits** page.
+See **[`images/SOURCES.md`](images/SOURCES.md)** for a full drop-in guide with
+recommended CC0/CC-BY sources per species.

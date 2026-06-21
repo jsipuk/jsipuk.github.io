@@ -28,6 +28,13 @@ data.ALL_CREATURES.forEach((d) => {
   ok(validDiet.has(d.diet), d.id + ' has a valid diet');
   ok(periodIds.has(d.period), d.id + ' has a valid period');
   ok(d.compare && !!d.compare.icon && !!d.compare.text, d.id + ' has a size comparison');
+  // Optional artwork: if present it must have a file, and CC images must be credited.
+  ['silhouette', 'art'].forEach((kind) => {
+    const m = d[kind];
+    if (!m) return;
+    ok(!!m.file, d.id + ' ' + kind + ' has a file');
+    ok(!m.license || /cc0|public domain/i.test(m.license) || !!m.credit, d.id + ' ' + kind + ' is credited');
+  });
   ok(Array.isArray(d.habitat) && d.habitat.length > 0, d.id + ' has at least one habitat');
   (d.habitat || []).forEach((h) => ok(habitatIds.has(h), d.id + ' habitat "' + h + '" is known'));
 });

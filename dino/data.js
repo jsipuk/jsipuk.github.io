@@ -36,6 +36,25 @@ const PERIODS = {
 
 /* diet: 'herbivore' | 'carnivore' | 'omnivore' */
 
+/* OPTIONAL ARTWORK (see images/SOURCES.md for a drop-in guide)
+   Each creature can carry two optional image fields. Until they are added the
+   app shows the `emoji` as a friendly placeholder, so nothing breaks.
+
+     silhouette: {                      // shown on the small cards & tokens
+       file: 'tyrannosaurus.svg',       // lives in images/silhouettes/
+       alt: 'Tyrannosaurus rex shape',  // optional; sensible default if omitted
+       credit: 'Artist name', license: 'CC0', sourceUrl: 'https://…',
+     },
+     art: {                             // shown big on the detail & dig pages
+       file: 'tyrannosaurus.jpg',       // lives in images/art/
+       alt: 'A Tyrannosaurus rex walking through a forest',
+       credit: 'Artist name', license: 'CC BY 4.0', sourceUrl: 'https://…',
+     },
+
+   `credit` + `license` are required for CC-BY images and appear automatically
+   on the in-app "Image credits" page. Use only CC0 / CC-BY / public-domain
+   images and keep `art` files small (~800px wide, under ~200 KB). */
+
 const DINOS = [
   {
     id: 'tyrannosaurus',

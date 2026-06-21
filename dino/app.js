@@ -118,6 +118,25 @@
     return el('button', { class: 'back-link', onclick: () => go(route) }, ['← ', label]);
   }
 
+  /* Visual for a creature. kind: 'silhouette' (small cards) or 'art' (detail).
+     Returns an <img> when the dataset provides a file, otherwise the emoji.
+     If a referenced file fails to load, it falls back to the emoji too, so the
+     site never shows a broken image while artwork is being added. */
+  function creatureImage(d, kind, cls) {
+    const meta = kind === 'art' ? d.art : d.silhouette;
+    const emoji = () => el('span', { class: cls + ' vis-emoji', 'aria-hidden': 'true', text: d.emoji });
+    if (!meta || !meta.file) return emoji();
+    const folder = kind === 'art' ? 'images/art/' : 'images/silhouettes/';
+    const img = el('img', {
+      class: cls + ' vis-img',
+      src: folder + meta.file,
+      alt: meta.alt || (d.name + (kind === 'art' ? ' illustration' : ' shape')),
+      loading: 'lazy', decoding: 'async',
+    });
+    img.addEventListener('error', () => img.replaceWith(emoji()));
+    return img;
+  }
+
   function dinoCard(d) {
     const found = !!state.discovered[d.id];
     const card = el('button', {
@@ -125,7 +144,7 @@
       onclick: () => go('dino/' + d.id),
       'aria-label': d.name + (found ? ', discovered' : ', not yet discovered') + '. Open field guide.',
     }, [
-      el('span', { class: 'dc-art', 'aria-hidden': 'true', text: d.emoji }),
+      el('span', { class: 'dc-art' }, [creatureImage(d, 'silhouette', 'dc-vis')]),
       el('span', { class: 'dc-body' }, [
         el('h3', { text: d.name }),
         el('span', { class: 'dc-say', text: 'say: ' + d.say }),
@@ -147,6 +166,7 @@
     collection: renderCollection,
     guide: renderGuide,
     grownups: renderGrownups,
+    credits: renderCredits,
     dino: renderDetail,
   };
 
@@ -290,8 +310,14 @@
     s.appendChild(backButton('Back to explorer', 'explorer'));
 
     s.appendChild(el('div', { class: 'detail-art' }, [
-      el('span', { class: 'da-emoji', 'aria-hidden': 'true', text: d.emoji }),
+      creatureImage(d, 'art', 'da-emoji'),
     ]));
+    if (d.art && d.art.file && d.art.credit) {
+      s.appendChild(el('p', { class: 'art-credit' }, [
+        'Image: ' + d.art.credit + (d.art.license ? ' · ' + d.art.license : ''),
+        d.art.sourceUrl ? el('a', { href: d.art.sourceUrl, target: '_blank', rel: 'noopener', text: ' (source)' }) : null,
+      ]));
+    }
 
     if (d.notADino) {
       s.appendChild(el('div', { class: 'notdino-banner' }, [
@@ -403,7 +429,7 @@
       grantBadge('digger');
       discover(target.id);
       const panel = el('div', { class: 'dig-reveal' }, [
-        el('div', { class: 'dr-emoji', 'aria-hidden': 'true', text: target.emoji }),
+        el('div', { class: 'dr-art' }, [creatureImage(target, 'art', 'dr-emoji')]),
         el('h2', { text: 'You uncovered ' + target.name + '!' }),
         el('p', { class: 'say', text: 'Say it: ' + target.say }),
         el('p', { style: 'font-weight:700;margin:8px 0', text: target.funFact }),
@@ -587,7 +613,7 @@
         'aria-label': 'Choose ' + d.name,
         onclick: () => selectToken(d.id),
       }, [
-        el('span', { class: 'tk-emoji', 'aria-hidden': 'true', text: d.emoji }),
+        creatureImage(d, 'silhouette', 'tk-emoji'),
         el('span', { class: 'tk-name', text: d.name }),
       ]);
       tokens[d.id] = tk;
@@ -748,6 +774,38 @@
     stage.appendChild(s);
   }
 
+  /* ── Screen: Image credits ──────────────────────────────────────────── */
+  function renderCredits() {
+    const s = el('div', { class: 'screen' });
+    s.appendChild(backButton('Back to grown-ups', 'grownups'));
+    s.appendChild(el('h1', { class: 'screen-title', text: '🎨 Image credits' }));
+
+    const credited = ALL_CREATURES.filter((d) => (d.art && d.art.credit) || (d.silhouette && d.silhouette.credit));
+
+    if (!credited.length) {
+      s.appendChild(el('div', { class: 'prose' }, [
+        el('p', { text: 'Illustrations are on their way! Until then, friendly placeholder symbols stand in for each dinosaur. When artwork is added, full credits and licences will appear here automatically.' }),
+      ]));
+      stage.appendChild(s);
+      return;
+    }
+
+    s.appendChild(el('p', { class: 'screen-sub', text: 'Thank you to the artists and museums whose work brings these dinosaurs to life.' }));
+    const list = el('ul', { class: 'source-list' });
+    credited.forEach((d) => {
+      [d.silhouette, d.art].forEach((meta, i) => {
+        if (!meta || !meta.credit) return;
+        list.appendChild(el('li', {}, [
+          el('strong', { text: d.name + ' ' + (i === 0 ? '(shape)' : '(illustration)') + ': ' }),
+          meta.credit + (meta.license ? ' — ' + meta.license : ''),
+          meta.sourceUrl ? el('a', { href: meta.sourceUrl, target: '_blank', rel: 'noopener', text: ' (source)' }) : null,
+        ]));
+      });
+    });
+    s.appendChild(el('div', { class: 'prose' }, [list]));
+    stage.appendChild(s);
+  }
+
   /* ── Screen: Grown-ups ──────────────────────────────────────────────── */
   function renderGrownups() {
     const s = el('div', { class: 'screen' });
@@ -787,6 +845,12 @@
       el('ul', { class: 'source-list' }, SOURCES.map((src) =>
         el('li', {}, [el('a', { href: src.url, target: '_blank', rel: 'noopener', text: src.name })]))),
       el('p', { class: 'source-note', text: 'Dates follow the geologic time scale used by these museums and are rounded for young readers.' }),
+    ]));
+
+    s.appendChild(el('div', { class: 'prose' }, [
+      el('h2', { text: 'Image credits' }),
+      el('p', { text: 'Dinosaur artwork is openly licensed and fully credited. See the credits page for every image, its artist and its licence.' }),
+      el('button', { class: 'btn btn-ghost', onclick: () => go('credits') }, ['🎨 View image credits']),
     ]));
 
     stage.appendChild(s);

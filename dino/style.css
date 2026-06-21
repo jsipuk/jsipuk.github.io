@@ -225,6 +225,8 @@ button { font-family: var(--font-body); cursor: pointer; }
   text-align: center;
 }
 .dino-card.locked .dc-art { filter: grayscale(1) opacity(.55); }
+.dc-art .vis-img { display: block; width: 100%; height: 88px; object-fit: contain; }
+.dino-card.locked .dc-art .vis-img { filter: grayscale(1); }
 .dino-card .dc-body { padding: 12px 14px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .dino-card h3 { font-size: 1.12rem; }
 .dino-card .dc-say { font-size: .8rem; color: var(--ink-soft); font-weight: 700; }
@@ -258,7 +260,10 @@ button { font-family: var(--font-body); cursor: pointer; }
   border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 14px;
   position: relative;
 }
-.detail-art .da-emoji { animation: bob 3.4s ease-in-out infinite; display: inline-block; }
+.detail-art .vis-emoji { animation: bob 3.4s ease-in-out infinite; display: inline-block; }
+.detail-art .vis-img { display: block; margin: 0 auto; max-width: 100%; max-height: 240px; object-fit: contain; border-radius: 14px; }
+.art-credit { text-align: center; font-size: .78rem; font-weight: 600; color: var(--ink-soft); margin: -6px 0 8px; }
+.art-credit a { color: var(--jungle-deep); font-weight: 700; }
 .detail h1 { font-size: clamp(1.7rem, 7vw, 2.4rem); }
 .detail .say { color: var(--ink-soft); font-weight: 700; margin-bottom: 12px; }
 /* Size comparison ("How big is it?") */
@@ -329,6 +334,7 @@ button { font-family: var(--font-body); cursor: pointer; }
   box-shadow: var(--shadow-sm); padding: 18px; animation: pop .35s ease;
 }
 .dig-reveal .dr-emoji { font-size: 3.4rem; }
+.dig-reveal .dr-art .vis-img { display: block; margin: 0 auto; max-height: 150px; max-width: 100%; object-fit: contain; border-radius: 12px; }
 
 /* ── Quiz ───────────────────────────────────────────────────────────────── */
 .quiz-card { background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 18px; }
@@ -385,6 +391,7 @@ button { font-family: var(--font-body); cursor: pointer; }
 .token:active { transform: scale(.95); }
 .token.placed-ok { background: #e2f3e4; }
 .token .tk-emoji { font-size: 1.8rem; }
+.token .tk-emoji.vis-img { width: 40px; height: 32px; object-fit: contain; }
 .token .tk-name { font-size: .72rem; color: var(--bark); }
 .token[aria-disabled="true"] { cursor: default; }
 
