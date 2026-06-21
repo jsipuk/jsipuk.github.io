@@ -11,14 +11,21 @@ images — and where the visitor's browser will expect each file.
 
 ## How it works
 
-- Silhouettes go in `dino/images/silhouettes/` and show on cards + habitat tokens.
-- Illustrations/photos go in `dino/images/art/` and show big on the detail and
-  fossil-dig pages.
-- You then point each creature at its file in `dino/data.js` (see the comment
-  block above `DINOS`). Until you do, the emoji placeholder is used, so the live
-  site is never broken.
-- `credit` + `license` are shown automatically on the in-app **Image credits**
-  page (Grown-ups → View image credits). This satisfies CC-BY attribution.
+Every creature in `dino/data.js` is **already pre-filled** with `silhouette`
+and `art` blocks — the target filename, written alt text, and a `find` search
+link are done for you. They are switched off with `ready: false`, so the emoji
+placeholder shows and the live site is never broken.
+
+**To turn a real picture on, edit that creature in `data.js`:**
+
+1. Open its `find` link and pick a CC0 / CC-BY / public-domain image.
+2. Save the file into `images/silhouettes/` or `images/art/` using the `file`
+   name already listed.
+3. Change `ready: false` → `ready: true`.
+4. Fill in `credit`, `license` and `sourceUrl` from the image's own page.
+
+`credit` + `license` then appear automatically on the in-app **Image credits**
+page (Grown-ups → View image credits), satisfying CC-BY attribution.
 
 ## Licences to use (free, no accounts, child-safe)
 
@@ -56,28 +63,33 @@ filename shown, then paste the matching snippet into `data.js`.
 > Prefer modern, scientifically-current reconstructions: feathered Velociraptor,
 > a semi-aquatic Spinosaurus, and feathers/quills where evidence supports them.
 
-## Example: adding artwork for Parasaurolophus
+## Example: turning on Parasaurolophus
 
-1. Save a silhouette to `dino/images/silhouettes/parasaurolophus.svg`.
-2. Save an illustration to `dino/images/art/parasaurolophus.jpg`
-   (~800px wide, optimised to under ~200 KB).
-3. In `dino/data.js`, add to the Parasaurolophus object:
+The Parasaurolophus entry in `data.js` already looks like this:
 
 ```js
-silhouette: {
-  file: 'parasaurolophus.svg',
-  credit: 'PhyloPic contributor', license: 'CC0',
-  sourceUrl: 'https://www.phylopic.org/…',
-},
-art: {
-  file: 'parasaurolophus.jpg',
-  alt: 'A Parasaurolophus with a long curved head crest among ferns',
-  credit: 'Artist Name', license: 'CC BY 4.0',
-  sourceUrl: 'https://commons.wikimedia.org/wiki/File:…',
-},
+silhouette: { ready: false, file: 'parasaurolophus.svg',
+  find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?...',
+  credit: '', license: '', sourceUrl: '' },
+art: { ready: false, file: 'parasaurolophus.jpg',
+  alt: 'A Parasaurolophus with a long, curved tube-shaped crest on its head, among ferns',
+  find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?...',
+  credit: '', license: '', sourceUrl: '' },
 ```
 
-That's it — the card, detail page and credits list update automatically.
+Save your chosen image to `images/art/parasaurolophus.jpg` (~800px wide, under
+~200 KB), then change the `art` block to:
+
+```js
+art: { ready: true, file: 'parasaurolophus.jpg',
+  alt: 'A Parasaurolophus with a long, curved tube-shaped crest on its head, among ferns',
+  credit: 'Artist Name', license: 'CC BY 4.0',
+  sourceUrl: 'https://commons.wikimedia.org/wiki/File:…' },
+```
+
+That's it — the card, detail page and credits list update automatically. (For a
+silhouette, [PhyloPic](https://www.phylopic.org/) usually gives the cleanest
+CC0 shapes; swap the `find` link's results for one of those.)
 
 ## Tips
 

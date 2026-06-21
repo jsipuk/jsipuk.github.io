@@ -125,7 +125,7 @@
   function creatureImage(d, kind, cls) {
     const meta = kind === 'art' ? d.art : d.silhouette;
     const emoji = () => el('span', { class: cls + ' vis-emoji', 'aria-hidden': 'true', text: d.emoji });
-    if (!meta || !meta.file) return emoji();
+    if (!meta || !meta.file || !meta.ready) return emoji();
     const folder = kind === 'art' ? 'images/art/' : 'images/silhouettes/';
     const img = el('img', {
       class: cls + ' vis-img',

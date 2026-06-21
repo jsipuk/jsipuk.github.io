@@ -36,28 +36,32 @@ const PERIODS = {
 
 /* diet: 'herbivore' | 'carnivore' | 'omnivore' */
 
-/* OPTIONAL ARTWORK (see images/SOURCES.md for a drop-in guide)
-   Each creature can carry two optional image fields. Until they are added the
-   app shows the `emoji` as a friendly placeholder, so nothing breaks.
+/* OPTIONAL ARTWORK (see images/SOURCES.md for the full drop-in guide)
+   Every creature below is PRE-FILLED with `silhouette` and `art` blocks
+   containing the target filename, written alt text, and a `find` search link
+   to a properly-licensed image. They are switched OFF with `ready: false`, so
+   the friendly `emoji` placeholder is shown and no image is requested yet.
 
-     silhouette: {                      // shown on the small cards & tokens
-       file: 'tyrannosaurus.svg',       // lives in images/silhouettes/
-       alt: 'Tyrannosaurus rex shape',  // optional; sensible default if omitted
-       credit: 'Artist name', license: 'CC0', sourceUrl: 'https://…',
-     },
-     art: {                             // shown big on the detail & dig pages
-       file: 'tyrannosaurus.jpg',       // lives in images/art/
-       alt: 'A Tyrannosaurus rex walking through a forest',
-       credit: 'Artist name', license: 'CC BY 4.0', sourceUrl: 'https://…',
-     },
+   TO TURN ON A REAL PICTURE:
+     1. Open the `find` link, choose a CC0 / CC-BY / public-domain image.
+     2. Save it into images/silhouettes/ or images/art/ using the given `file`.
+     3. Set `ready: true`.
+     4. Fill in `credit`, `license` and `sourceUrl` from the image's page
+        (CC0 / public-domain images need no credit, but it's kind to add one).
 
-   `credit` + `license` are required for CC-BY images and appear automatically
-   on the in-app "Image credits" page. Use only CC0 / CC-BY / public-domain
-   images and keep `art` files small (~800px wide, under ~200 KB). */
+   `credit` + `license` then appear automatically on the in-app "Image credits"
+   page. Keep `art` files small (~800px wide, under ~200 KB). */
 
 const DINOS = [
   {
     id: 'tyrannosaurus',
+    silhouette: { ready: false, file: 'tyrannosaurus.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Tyrannosaurus%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'tyrannosaurus.jpg',
+      alt: 'A large Tyrannosaurus rex walking on two legs, with a big head, tiny arms and a long tail',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Tyrannosaurus%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🚌', text: 'As long as a school bus' },
     name: 'Tyrannosaurus rex',
     nick: 'T. rex',
@@ -77,6 +81,13 @@ const DINOS = [
   },
   {
     id: 'triceratops',
+    silhouette: { ready: false, file: 'triceratops.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Triceratops%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'triceratops.jpg',
+      alt: 'A four-legged Triceratops with three horns and a wide bony neck frill',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Triceratops%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🚗', text: 'As long as two family cars in a row' },
     name: 'Triceratops',
     say: 'try-SERRA-tops',
@@ -95,6 +106,13 @@ const DINOS = [
   },
   {
     id: 'stegosaurus',
+    silhouette: { ready: false, file: 'stegosaurus.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Stegosaurus%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'stegosaurus.jpg',
+      alt: 'A Stegosaurus with two rows of tall bony plates along its back and spikes on its tail',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Stegosaurus%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🚗', text: 'About as long as two family cars' },
     name: 'Stegosaurus',
     say: 'STEG-oh-SOR-us',
@@ -113,6 +131,13 @@ const DINOS = [
   },
   {
     id: 'velociraptor',
+    silhouette: { ready: false, file: 'velociraptor.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Velociraptor%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'velociraptor.jpg',
+      alt: 'A small, feathered Velociraptor about the size of a turkey, running on two legs',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Velociraptor%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🐕', text: 'About the size of a pet dog' },
     name: 'Velociraptor',
     say: 'vel-OSS-i-rap-tor',
@@ -131,6 +156,13 @@ const DINOS = [
   },
   {
     id: 'brachiosaurus',
+    silhouette: { ready: false, file: 'brachiosaurus.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Brachiosaurus%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'brachiosaurus.jpg',
+      alt: 'A huge Brachiosaurus reaching its very long neck up to the tops of tall trees',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Brachiosaurus%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🏠', text: 'Tall enough to peek over a two-storey house' },
     name: 'Brachiosaurus',
     say: 'BRACK-ee-oh-SOR-us',
@@ -149,6 +181,13 @@ const DINOS = [
   },
   {
     id: 'diplodocus',
+    silhouette: { ready: false, file: 'diplodocus.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Diplodocus%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'diplodocus.jpg',
+      alt: 'A very long Diplodocus with an extremely long neck and whip-like tail, on four legs',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Diplodocus%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🚌', text: 'As long as two school buses end to end' },
     name: 'Diplodocus',
     say: 'dip-LOD-oh-kus',
@@ -167,6 +206,13 @@ const DINOS = [
   },
   {
     id: 'spinosaurus',
+    silhouette: { ready: false, file: 'spinosaurus.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Spinosaurus%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'spinosaurus.jpg',
+      alt: 'A Spinosaurus with a tall sail on its back and a long crocodile-like snout, near water',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Spinosaurus%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🚌', text: 'Even longer than a school bus' },
     name: 'Spinosaurus',
     say: 'SPINE-oh-SOR-us',
@@ -185,6 +231,13 @@ const DINOS = [
   },
   {
     id: 'ankylosaurus',
+    silhouette: { ready: false, file: 'ankylosaurus.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Ankylosaurus%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'ankylosaurus.jpg',
+      alt: 'A heavily armoured Ankylosaurus covered in bony plates with a club on the end of its tail',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Ankylosaurus%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🦛', text: 'About as big and heavy as a hippopotamus' },
     name: 'Ankylosaurus',
     say: 'an-KIE-loh-SOR-us',
@@ -203,6 +256,13 @@ const DINOS = [
   },
   {
     id: 'parasaurolophus',
+    silhouette: { ready: false, file: 'parasaurolophus.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Parasaurolophus%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'parasaurolophus.jpg',
+      alt: 'A Parasaurolophus with a long, curved tube-shaped crest on its head, among ferns',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Parasaurolophus%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🚗', text: 'As long as two family cars' },
     name: 'Parasaurolophus',
     say: 'pa-ra-SOR-OL-off-us',
@@ -221,6 +281,13 @@ const DINOS = [
   },
   {
     id: 'allosaurus',
+    silhouette: { ready: false, file: 'allosaurus.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Allosaurus%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'allosaurus.jpg',
+      alt: 'An Allosaurus walking on two legs, with small bumpy crests above its eyes',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Allosaurus%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🚌', text: 'Nearly as long as a small bus' },
     name: 'Allosaurus',
     say: 'AL-oh-SOR-us',
@@ -239,6 +306,13 @@ const DINOS = [
   },
   {
     id: 'iguanodon',
+    silhouette: { ready: false, file: 'iguanodon.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Iguanodon%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'iguanodon.jpg',
+      alt: 'An Iguanodon with a spiked thumb, standing on two legs',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Iguanodon%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🚗', text: 'As long as two family cars' },
     name: 'Iguanodon',
     say: 'ig-WA-no-don',
@@ -257,6 +331,13 @@ const DINOS = [
   },
   {
     id: 'compsognathus',
+    silhouette: { ready: false, file: 'compsognathus.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Compsognathus%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'compsognathus.jpg',
+      alt: 'A tiny chicken-sized Compsognathus running quickly on two slender legs',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Compsognathus%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🐔', text: 'About the size of a pet chicken' },
     name: 'Compsognathus',
     say: 'komp-SOG-na-thus',
@@ -280,6 +361,13 @@ const DINOS = [
 const NOT_DINOS = [
   {
     id: 'pteranodon',
+    silhouette: { ready: false, file: 'pteranodon.svg',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Pteranodon%20silhouette',
+      credit: '', license: '', sourceUrl: '' },
+    art: { ready: false, file: 'pteranodon.jpg',
+      alt: 'A Pteranodon flying with wide wings, a long backward head crest and a toothless beak',
+      find: 'https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search=Pteranodon%20restoration',
+      credit: '', license: '', sourceUrl: '' },
     compare: { icon: '🧒', text: 'Wings as wide as four children lying head to toe' },
     name: 'Pteranodon',
     say: 'teh-RAN-oh-don',
