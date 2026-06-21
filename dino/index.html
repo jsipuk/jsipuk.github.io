@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2f7d54" />
+  <meta name="description" content="Dino Expedition — a fun, fact-based dinosaur learning game for children aged 5–10. Explore dinosaurs, dig up fossils, take quizzes and build habitats." />
+  <title>Dino Expedition · A dinosaur learning game for kids</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦕</text></svg>" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="brand" data-go="home" aria-label="Dino Expedition home">
+      <span class="brand-badge" aria-hidden="true">🦕</span>
+      <span class="brand-name">Dino Expedition</span>
+    </button>
+    <div class="topbar-right">
+      <span class="badge-count" id="badgeCount" title="Discovery badges earned">
+        <span aria-hidden="true">⭐</span>
+        <span id="badgeNum">0</span>
+      </span>
+      <button class="icon-btn" data-go="grownups" title="For grown-ups">
+        <span aria-hidden="true">👋</span><span class="icon-btn-label">Grown-ups</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="stage" tabindex="-1">
+    <!-- Screens are rendered here by app.js -->
+  </main>
+
+  <!-- Bottom navigation (mobile-first, also used on desktop) -->
+  <nav class="tabbar" aria-label="Main menu">
+    <button class="tab" data-go="home"><span class="tab-ico" aria-hidden="true">🏕️</span><span class="tab-label">Camp</span></button>
+    <button class="tab" data-go="explorer"><span class="tab-ico" aria-hidden="true">🔎</span><span class="tab-label">Explore</span></button>
+    <button class="tab" data-go="dig"><span class="tab-ico" aria-hidden="true">⛏️</span><span class="tab-label">Dig</span></button>
+    <button class="tab" data-go="quiz"><span class="tab-ico" aria-hidden="true">🕵️</span><span class="tab-label">Quiz</span></button>
+    <button class="tab" data-go="habitat"><span class="tab-ico" aria-hidden="true">🗺️</span><span class="tab-label">Habitat</span></button>
+    <button class="tab" data-go="collection"><span class="tab-ico" aria-hidden="true">⭐</span><span class="tab-label">Badges</span></button>
+  </nav>
+
+  <!-- Friendly toast for short encouraging feedback -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
