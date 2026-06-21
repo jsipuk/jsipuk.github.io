@@ -27,6 +27,7 @@ data.ALL_CREATURES.forEach((d) => {
     .forEach((f) => ok(!!d[f], d.id + ' has "' + f + '"'));
   ok(validDiet.has(d.diet), d.id + ' has a valid diet');
   ok(periodIds.has(d.period), d.id + ' has a valid period');
+  ok(d.compare && !!d.compare.icon && !!d.compare.text, d.id + ' has a size comparison');
   ok(Array.isArray(d.habitat) && d.habitat.length > 0, d.id + ' has at least one habitat');
   (d.habitat || []).forEach((h) => ok(habitatIds.has(h), d.id + ' habitat "' + h + '" is known'));
 });

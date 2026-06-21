@@ -101,6 +101,7 @@ button { font-family: var(--font-body); cursor: pointer; }
   min-height: 44px;
 }
 .icon-btn:hover { background: rgba(255,255,255,.28); }
+@media (max-width: 540px) { .icon-btn-label { display: none; } .icon-btn { padding: 8px 12px; } }
 
 /* ── Stage / screens ────────────────────────────────────────────────────── */
 .stage { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px 28px; }
@@ -260,6 +261,20 @@ button { font-family: var(--font-body); cursor: pointer; }
 .detail-art .da-emoji { animation: bob 3.4s ease-in-out infinite; display: inline-block; }
 .detail h1 { font-size: clamp(1.7rem, 7vw, 2.4rem); }
 .detail .say { color: var(--ink-soft); font-weight: 700; margin-bottom: 12px; }
+/* Size comparison ("How big is it?") */
+.size-compare {
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(160deg, #fff3d6, #ffe6b8);
+  border: 2px solid var(--amber); border-radius: var(--radius);
+  padding: 14px 16px; margin: 14px 0; box-shadow: var(--shadow-sm);
+}
+.size-compare .sc-ico { font-size: 2.6rem; line-height: 1; }
+.size-compare .sc-body { display: flex; flex-direction: column; flex: 1; }
+.size-compare .sc-k { font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--amber-deep); }
+.size-compare .sc-v { font-family: var(--font-head); font-weight: 700; font-size: 1.15rem; color: var(--bark); }
+.size-compare .sc-sub { font-size: .88rem; font-weight: 700; color: var(--ink-soft); }
+.size-compare .sc-kid { font-size: 1.6rem; align-self: flex-end; }
+
 .fact-list { display: grid; gap: 10px; grid-template-columns: 1fr; margin: 14px 0; }
 @media (min-width: 560px) { .fact-list { grid-template-columns: 1fr 1fr; } }
 .fact {
@@ -415,6 +430,25 @@ button { font-family: var(--font-body); cursor: pointer; }
 .dots { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
 .dots > i { width: 9px; height: 9px; border-radius: 50%; background: var(--sand-deep); }
 .dots > i.on { background: var(--jungle); }
+
+/* ── How to Play guide ──────────────────────────────────────────────────── */
+.guide-list { display: grid; gap: 12px; }
+.guide-step {
+  display: flex; align-items: center; gap: 14px; text-align: left;
+  background: var(--paper); border: 0; border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); padding: 16px; border: 2px solid transparent;
+  transition: transform .14s, box-shadow .14s, border-color .14s;
+}
+.guide-step:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--sand-deep); }
+.guide-step .gs-ico {
+  font-size: 2.2rem; line-height: 1; flex-shrink: 0;
+  width: 56px; height: 56px; display: grid; place-items: center;
+  background: linear-gradient(160deg, var(--sky), #e9f3e9); border-radius: 16px;
+}
+.guide-step .gs-body { flex: 1; }
+.guide-step .gs-body h3 { font-size: 1.15rem; }
+.guide-step .gs-body p { font-weight: 600; color: var(--ink-soft); font-size: .92rem; }
+.guide-step .gs-go { font-family: var(--font-head); font-weight: 800; font-size: 1.4rem; color: var(--jungle); flex-shrink: 0; }
 
 /* ── Grown-ups ──────────────────────────────────────────────────────────── */
 .prose { background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 20px; margin-bottom: 14px; }

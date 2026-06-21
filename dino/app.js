@@ -145,6 +145,7 @@
     quiz: renderQuiz,
     habitat: renderHabitat,
     collection: renderCollection,
+    guide: renderGuide,
     grownups: renderGrownups,
     dino: renderDetail,
   };
@@ -179,6 +180,7 @@
     ]);
 
     const activities = [
+      { go: 'guide', ico: '📖', tag: 'Start here', t: 'How to Play', p: 'New here? See how every game and activity works.' },
       { go: 'explorer', ico: '🔎', tag: 'Field guide', t: 'Dino Explorer', p: 'Meet the dinosaurs and sort them by time, food and home.' },
       { go: 'dig', ico: '⛏️', tag: 'Mini-game', t: 'Fossil Dig', p: 'Brush away the dirt to uncover hidden fossils.' },
       { go: 'quiz', ico: '🕵️', tag: 'Challenge', t: 'Dino Detective', p: 'Answer fun questions and test what you know.' },
@@ -301,10 +303,22 @@
     s.appendChild(el('h1', { text: d.name }));
     s.appendChild(el('p', { class: 'say', text: 'Say it: ' + d.say + (d.nick ? '  ·  also called ' + d.nick : '') }));
 
+    // How big is it? — a relatable size comparison for young children
+    if (d.compare) {
+      s.appendChild(el('div', { class: 'size-compare' }, [
+        el('span', { class: 'sc-ico', 'aria-hidden': 'true', text: d.compare.icon }),
+        el('span', { class: 'sc-body' }, [
+          el('span', { class: 'sc-k', text: '📏 How big is it?' }),
+          el('span', { class: 'sc-v', text: d.compare.text }),
+          el('span', { class: 'sc-sub', text: d.length }),
+        ]),
+        el('span', { class: 'sc-kid', 'aria-hidden': 'true', title: 'a child, for size', text: '🧒' }),
+      ]));
+    }
+
     const facts = [
       { ico: '⏳', k: 'When', v: d.when },
       { ico: d.diet === 'carnivore' ? '🍖' : '🌿', k: 'Food', v: dietWord(d.diet) },
-      { ico: '📏', k: 'Size', v: d.length },
       { ico: '🌍', k: 'Found in', v: d.region },
       { ico: '🏞️', k: 'Home', v: (d.habitat || []).map((h) => HABITATS[h].name).join(' · ') },
       { ico: '🦴', k: 'Discovery', v: d.discovery },
@@ -694,6 +708,44 @@
     refreshChrome();
     toast('All cleared — ready for a new adventure! 🌱');
     go('home');
+  }
+
+  /* ── Screen: How to Play guide ──────────────────────────────────────── */
+  function renderGuide() {
+    const s = el('div', { class: 'screen' });
+    s.appendChild(backButton('Back to camp', 'home'));
+    s.appendChild(el('div', { class: 'screen-head' }, [
+      el('h1', { class: 'screen-title', text: '📖 How to Play' }),
+      el('p', { class: 'screen-sub', text: 'Here is everything you can do on your expedition. Tap any one to jump straight in!' }),
+    ]));
+
+    const steps = [
+      { go: 'explorer', ico: '🔎', t: 'Dino Explorer', p: 'Tap a dinosaur card to open its field guide. Use the buttons at the top to sort them by when they lived, what they ate, or where they lived — and see how big each one really was!' },
+      { go: 'dig', ico: '⛏️', t: 'Fossil Dig', p: 'Tap the squares of dirt to brush them away. Find all the hidden fossil bones to uncover a mystery dinosaur.' },
+      { go: 'quiz', ico: '🕵️', t: 'Dino Detective', p: 'Read each question and tap your answer. Green means correct! There is no timer, so take your time and learn as you go.' },
+      { go: 'habitat', ico: '🗺️', t: 'Build a Habitat', p: 'Tap a dinosaur to pick it up, then tap the home where it belongs. Match them all to win!' },
+      { go: 'collection', ico: '⭐', t: 'My Badges', p: 'See every creature you have discovered and the badges you have earned. The more you explore, the more you collect!' },
+    ];
+
+    s.appendChild(el('div', { class: 'guide-list' }, steps.map((st) =>
+      el('button', { class: 'guide-step', onclick: () => go(st.go), 'aria-label': st.t + '. ' + st.p }, [
+        el('span', { class: 'gs-ico', 'aria-hidden': 'true', text: st.ico }),
+        el('span', { class: 'gs-body' }, [el('h3', { text: st.t }), el('p', { text: st.p })]),
+        el('span', { class: 'gs-go', 'aria-hidden': 'true', text: '→' }),
+      ])
+    )));
+
+    s.appendChild(el('div', { class: 'fact-strip' }, [
+      el('span', { class: 'fs-ico', 'aria-hidden': 'true', text: '⭐' }),
+      el('p', { html: '<strong>Collect badges!</strong> Discover dinosaurs, dig up fossils, win the quiz and build a habitat to earn special explorer badges. Your progress is saved on this device.' }),
+    ]));
+
+    s.appendChild(el('div', { class: 'hero-actions', style: 'margin-top:16px' }, [
+      el('button', { class: 'btn btn-jungle', onclick: () => runOnboarding() }, ['👋 Watch the welcome again']),
+      el('button', { class: 'btn btn-ghost', onclick: () => go('grownups') }, ['🧑‍🏫 For grown-ups']),
+    ]));
+
+    stage.appendChild(s);
   }
 
   /* ── Screen: Grown-ups ──────────────────────────────────────────────── */

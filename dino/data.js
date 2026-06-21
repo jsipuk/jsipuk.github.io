@@ -39,6 +39,7 @@ const PERIODS = {
 const DINOS = [
   {
     id: 'tyrannosaurus',
+    compare: { icon: '🚌', text: 'As long as a school bus' },
     name: 'Tyrannosaurus rex',
     nick: 'T. rex',
     say: 'tie-RAN-oh-SOR-us',
@@ -57,6 +58,7 @@ const DINOS = [
   },
   {
     id: 'triceratops',
+    compare: { icon: '🚗', text: 'As long as two family cars in a row' },
     name: 'Triceratops',
     say: 'try-SERRA-tops',
     emoji: '🦏',
@@ -74,6 +76,7 @@ const DINOS = [
   },
   {
     id: 'stegosaurus',
+    compare: { icon: '🚗', text: 'About as long as two family cars' },
     name: 'Stegosaurus',
     say: 'STEG-oh-SOR-us',
     emoji: '🦕',
@@ -91,6 +94,7 @@ const DINOS = [
   },
   {
     id: 'velociraptor',
+    compare: { icon: '🐕', text: 'About the size of a pet dog' },
     name: 'Velociraptor',
     say: 'vel-OSS-i-rap-tor',
     emoji: '🦃',
@@ -108,6 +112,7 @@ const DINOS = [
   },
   {
     id: 'brachiosaurus',
+    compare: { icon: '🏠', text: 'Tall enough to peek over a two-storey house' },
     name: 'Brachiosaurus',
     say: 'BRACK-ee-oh-SOR-us',
     emoji: '🦕',
@@ -125,6 +130,7 @@ const DINOS = [
   },
   {
     id: 'diplodocus',
+    compare: { icon: '🚌', text: 'As long as two school buses end to end' },
     name: 'Diplodocus',
     say: 'dip-LOD-oh-kus',
     emoji: '🦕',
@@ -142,6 +148,7 @@ const DINOS = [
   },
   {
     id: 'spinosaurus',
+    compare: { icon: '🚌', text: 'Even longer than a school bus' },
     name: 'Spinosaurus',
     say: 'SPINE-oh-SOR-us',
     emoji: '🐊',
@@ -159,6 +166,7 @@ const DINOS = [
   },
   {
     id: 'ankylosaurus',
+    compare: { icon: '🦛', text: 'About as big and heavy as a hippopotamus' },
     name: 'Ankylosaurus',
     say: 'an-KIE-loh-SOR-us',
     emoji: '🐢',
@@ -176,6 +184,7 @@ const DINOS = [
   },
   {
     id: 'parasaurolophus',
+    compare: { icon: '🚗', text: 'As long as two family cars' },
     name: 'Parasaurolophus',
     say: 'pa-ra-SOR-OL-off-us',
     emoji: '🦆',
@@ -193,6 +202,7 @@ const DINOS = [
   },
   {
     id: 'allosaurus',
+    compare: { icon: '🚌', text: 'Nearly as long as a small bus' },
     name: 'Allosaurus',
     say: 'AL-oh-SOR-us',
     emoji: '🦖',
@@ -210,6 +220,7 @@ const DINOS = [
   },
   {
     id: 'iguanodon',
+    compare: { icon: '🚗', text: 'As long as two family cars' },
     name: 'Iguanodon',
     say: 'ig-WA-no-don',
     emoji: '🦎',
@@ -227,6 +238,7 @@ const DINOS = [
   },
   {
     id: 'compsognathus',
+    compare: { icon: '🐔', text: 'About the size of a pet chicken' },
     name: 'Compsognathus',
     say: 'komp-SOG-na-thus',
     emoji: '🐔',
@@ -249,6 +261,7 @@ const DINOS = [
 const NOT_DINOS = [
   {
     id: 'pteranodon',
+    compare: { icon: '🧒', text: 'Wings as wide as four children lying head to toe' },
     name: 'Pteranodon',
     say: 'teh-RAN-oh-don',
     emoji: '🦅',
