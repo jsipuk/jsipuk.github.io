@@ -44,7 +44,8 @@ body {
   font-family: var(--body);
   color: var(--pencil);
   background-color: var(--paper);
-  /* Feint exercise-book ruling, drawn with a repeating gradient */
+  /* Feint exercise-book ruling, drawn with a repeating gradient.
+     NB: no background-attachment:fixed — it janks/misrenders on iOS Safari. */
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0,
@@ -52,9 +53,10 @@ body {
     var(--rule) 33px,
     var(--rule) 34px
   );
-  background-attachment: fixed;
   line-height: 1.55;
   font-size: 17px;
+  overflow-x: hidden; /* belt-and-braces against the tilted cards/tape */
+  -webkit-tap-highlight-color: rgba(36, 58, 122, .12);
 }
 
 /* The red margin line runs down the left on roomy screens */
@@ -111,6 +113,8 @@ a { color: var(--ink); }
   max-width: 1040px;
   margin: 0 auto;
   padding: 28px 22px 8px;
+  padding-left: max(22px, env(safe-area-inset-left));
+  padding-right: max(22px, env(safe-area-inset-right));
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -174,6 +178,8 @@ a { color: var(--ink); }
   max-width: 1040px;
   margin: 0 auto;
   padding: 16px 22px 64px;
+  padding-left: max(22px, env(safe-area-inset-left));
+  padding-right: max(22px, env(safe-area-inset-right));
 }
 .page:focus { outline: none; }
 
@@ -201,8 +207,6 @@ a { color: var(--ink); }
   margin: 0;
   max-width: 56ch;
 }
-/* yellow highlighter swipe under a couple of words in the lede */
-.hero-lede { background: linear-gradient(transparent 62%, rgba(255,242,122,.0) 62%); }
 
 /* ── Controls ─────────────────────────────────────────────────────────── */
 .controls {
@@ -243,7 +247,10 @@ a { color: var(--ink); }
   border: 2px solid var(--ink);
   background: var(--paper-2);
   color: var(--ink);
-  padding: 6px 14px;
+  padding: 8px 16px;
+  min-height: 44px; /* comfortable thumb target */
+  display: inline-flex;
+  align-items: center;
   border-radius: 999px;
   box-shadow: 0 2px 0 rgba(36,58,122,.18);
   transition: transform .08s ease, background .12s ease;
@@ -259,7 +266,8 @@ a { color: var(--ink); }
 .select-wrap select {
   font-family: var(--hand);
   font-size: 1.05rem;
-  padding: 8px 14px;
+  padding: 10px 16px;
+  min-height: 44px;
   border: 2px solid var(--ink);
   border-radius: 999px;
   background: var(--paper-2);
@@ -381,7 +389,8 @@ a { color: var(--ink); }
   border: 2px solid var(--ink);
   background: var(--highlighter);
   color: var(--ink);
-  padding: 8px 20px;
+  padding: 10px 22px;
+  min-height: 44px;
   border-radius: 999px;
   box-shadow: 0 2px 0 rgba(36,58,122,.2);
 }
@@ -396,7 +405,12 @@ a { color: var(--ink); }
   font-size: 1.1rem;
   padding: 10px 0 6px;
 }
-.crumbs a { text-decoration: none; }
+.crumbs a {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
 .crumbs a:hover { text-decoration: underline wavy; }
 
 /* ── Activity page ────────────────────────────────────────────────────── */
@@ -564,6 +578,7 @@ a { color: var(--ink); }
   max-width: 1040px;
   margin: 0 auto;
   padding: 20px 22px 48px;
+  padding-bottom: max(48px, env(safe-area-inset-bottom));
   font-family: var(--hand);
   font-size: 1.05rem;
   color: var(--ink-soft);
@@ -583,6 +598,20 @@ a { color: var(--ink); }
   border-radius: 999px;
   box-shadow: 0 8px 24px rgba(0,0,0,.25);
   z-index: 40;
+}
+
+/* ── Small screens (phones) ───────────────────────────────────────────── */
+@media (max-width: 559px) {
+  body { font-size: 16px; }
+  /* The decorative "Name / Class" box just eats space on a phone */
+  .namebox { display: none; }
+  .masthead { padding-top: 20px; align-items: flex-start; }
+  .brand-sub { font-size: 1.1rem; }
+  .activity { padding: 20px 16px; }
+  .activity-head { gap: 12px; }
+  .callout { padding: 14px 15px; }
+  /* Give each category tab a bit more room so the row of chips is tappable */
+  .tabs { gap: 8px 8px; }
 }
 
 /* ── Motion preferences ───────────────────────────────────────────────── */
