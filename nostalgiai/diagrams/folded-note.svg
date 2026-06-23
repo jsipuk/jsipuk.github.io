@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 540" role="img" aria-label="Four steps to fold a secret note: write the note, fold it into a long thin strip, flip it into triangles down the strip, then tuck the last flap into the pocket so it locks shut.">
+  <defs>
+    <marker id="nah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .paper{fill:#fbf6e8;stroke:#243a7a;stroke-width:3;stroke-linejoin:round}
+      .ink{stroke:#243a7a;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .crease{stroke:#9aa6c0;stroke-width:2;fill:none;stroke-dasharray:7 5;stroke-linecap:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 15px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+      .scribble{stroke:#9aa6c0;stroke-width:2;fill:none;stroke-linecap:round}
+      .fold{fill:#f0e7cc;stroke:#243a7a;stroke-width:2.5;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <!-- 1: written note -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <rect class="paper" x="100" y="70" width="100" height="120" rx="2"/>
+    <path class="scribble" d="M114,92 H186 M114,108 H186 M114,124 H170 M114,140 H186 M114,156 H150"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Write your note</text>
+  </g>
+
+  <!-- 2: thin strip -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <rect class="paper" x="132" y="62" width="36" height="136" rx="2"/>
+    <path class="crease" d="M150,62 L150,198"/>
+    <path class="red" d="M118,80 q-6,50 0,100" marker-end="url(#nah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fold into a long thin strip</text>
+  </g>
+
+  <!-- 3: flag-fold triangles -->
+  <g transform="translate(10,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <rect class="paper" x="132" y="120" width="36" height="78" rx="2"/>
+    <path class="fold" d="M132,62 L168,62 L168,98 L132,98 Z"/>
+    <path class="ink" d="M132,62 L168,98 M132,98 L168,62 M132,98 L168,120 M168,98 L132,120"/>
+    <path class="red" d="M150,110 L150,84" marker-end="url(#nah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Flip into triangles down it</text>
+  </g>
+
+  <!-- 4: tuck flap -->
+  <g transform="translate(330,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <path class="paper" d="M120,90 L180,90 L180,150 L150,170 L120,150 Z"/>
+    <path class="ink" d="M120,90 L150,118 L180,90 M120,150 L150,118 L180,150"/>
+    <path class="fold" d="M133,78 L167,78 L150,98 Z"/>
+    <path class="red" d="M150,72 L150,96" marker-end="url(#nah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Tuck the flap in — locked!</text>
+  </g>
+</svg>

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 810" role="img" aria-label="Six steps to fold a classic dart paper aeroplane: crease down the middle, fold the top corners to the centre, fold the slanted edges in again, fold the whole plane in half, fold each wing down, then open the wings to fly.">
+  <defs>
+    <marker id="pah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .paper{fill:#fbf6e8;stroke:#243a7a;stroke-width:3;stroke-linejoin:round}
+      .ink{stroke:#243a7a;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .crease{stroke:#9aa6c0;stroke-width:2;fill:none;stroke-dasharray:7 5;stroke-linecap:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 14px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+      .fold{fill:#f0e7cc;stroke:#243a7a;stroke-width:2.5;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <!-- 1: centre crease -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <rect class="paper" x="110" y="55" width="80" height="135" rx="2"/>
+    <path class="crease" d="M150,55 L150,190"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Crease down the middle, open</text>
+  </g>
+
+  <!-- 2: fold top corners in -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <rect class="paper" x="110" y="55" width="80" height="135" rx="2"/>
+    <path class="crease" d="M150,55 L150,190"/>
+    <path class="fold" d="M110,55 L150,55 L150,95 Z"/>
+    <path class="fold" d="M190,55 L150,55 L150,95 Z"/>
+    <path class="red" d="M120,60 q22,4 28,28" marker-end="url(#pah)"/>
+    <path class="red" d="M180,60 q-22,4 -28,28" marker-end="url(#pah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Top corners to the centre line</text>
+  </g>
+
+  <!-- 3: fold slanted edges in again -->
+  <g transform="translate(10,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <path class="paper" d="M110,90 L150,50 L190,90 L190,190 L110,190 Z"/>
+    <path class="crease" d="M150,50 L150,190"/>
+    <path class="fold" d="M110,90 L150,50 L150,120 Z"/>
+    <path class="fold" d="M190,90 L150,50 L150,120 Z"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Slanted edges in to the centre</text>
+  </g>
+
+  <!-- 4: fold in half -->
+  <g transform="translate(330,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <path class="paper" d="M110,100 L150,50 L190,100 L190,190 L110,190 Z"/>
+    <path class="red" d="M95,70 q-16,60 0,120" marker-end="url(#pah)"/>
+    <path class="crease" d="M150,50 L150,190"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fold the whole plane in half</text>
+  </g>
+
+  <!-- 5: fold wings down -->
+  <g transform="translate(10,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">5</text>
+    <path class="paper" d="M150,55 L170,80 L170,185 L150,185 Z"/>
+    <path class="fold" d="M150,90 L170,80 L170,185 L150,185 Z"/>
+    <path class="red" d="M150,95 q-30,0 -40,30" marker-end="url(#pah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fold each wing down to the body</text>
+  </g>
+
+  <!-- 6: finished, wings open -->
+  <g transform="translate(330,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">6</text>
+    <path class="paper" d="M150,55 L100,175 L150,150 L200,175 Z"/>
+    <path class="ink" d="M150,55 L150,150"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Open the wings — and fly!</text>
+  </g>
+</svg>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 540" role="img" aria-label="Four steps for French knitting on a reel: thread wool down through the reel, loop it once around each of the four pins, lay the wool above a loop and lift the old loop over and off the pin, and a woollen tube grows out of the bottom.">
+  <defs>
+    <marker id="fkah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .reel{fill:#e7ddbe;stroke:#243a7a;stroke-width:3;stroke-linejoin:round}
+      .hole{fill:#cdbf98}
+      .pin{fill:#9aa6c0;stroke:#243a7a;stroke-width:2}
+      .ink{stroke:#243a7a;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .wool{stroke:#e8559b;stroke-width:4;fill:none;stroke-linecap:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 14px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+    </style>
+  </defs>
+
+  <!-- 1: reel + wool down hole -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <rect class="reel" x="118" y="80" width="64" height="100" rx="6"/>
+    <ellipse class="hole" cx="150" cy="84" rx="22" ry="7"/>
+    <ellipse class="pin" cx="128" cy="78" rx="5" ry="6"/>
+    <ellipse class="pin" cx="172" cy="78" rx="5" ry="6"/>
+    <path class="wool" d="M150,84 C150,130 150,150 150,200"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Thread wool down the hole</text>
+  </g>
+
+  <!-- 2: loop around 4 pins -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <ellipse class="reel" cx="150" cy="125" rx="60" ry="44"/>
+    <ellipse class="hole" cx="150" cy="125" rx="20" ry="14"/>
+    <circle class="pin" cx="150" cy="78" r="7"/>
+    <circle class="pin" cx="197" cy="125" r="7"/>
+    <circle class="pin" cx="150" cy="172" r="7"/>
+    <circle class="pin" cx="103" cy="125" r="7"/>
+    <circle class="wool" cx="150" cy="78" r="13" fill="none"/>
+    <circle class="wool" cx="197" cy="125" r="13" fill="none"/>
+    <circle class="wool" cx="150" cy="172" r="13" fill="none"/>
+    <circle class="wool" cx="103" cy="125" r="13" fill="none"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Loop around each of 4 pins</text>
+  </g>
+
+  <!-- 3: lift loop over -->
+  <g transform="translate(10,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <rect x="125" y="120" width="50" height="14" fill="#9aa6c0" stroke="#243a7a" stroke-width="2"/>
+    <line x1="150" y1="60" x2="150" y2="120" stroke="#243a7a" stroke-width="6"/>
+    <circle class="wool" cx="150" cy="110" r="16" fill="none"/>
+    <path class="wool" d="M150,86 C176,86 176,70 150,70"/>
+    <path class="red" d="M150,124 C176,124 178,96 158,86" marker-end="url(#fkah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Lift the old loop over the top</text>
+  </g>
+
+  <!-- 4: tube grows -->
+  <g transform="translate(330,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <rect class="reel" x="118" y="70" width="64" height="90" rx="6"/>
+    <ellipse class="hole" cx="150" cy="74" rx="22" ry="7"/>
+    <path d="M134,160 q-4,20 0,40 q16,8 32,0 q4,-20 0,-40 Z" fill="#e8559b" stroke="#243a7a" stroke-width="2.5"/>
+    <path class="ink" d="M138,168 q12,6 24,0 M138,182 q12,6 24,0 M138,196 q12,6 24,0" stroke="#c23b78"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">A woollen tube grows below</text>
+  </g>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 540" role="img" aria-label="Four steps to make a flick paper football: start with a long paper strip, fold one corner up into a triangle, keep flipping the triangle along the strip, then tuck the last flap in and flick it through finger goalposts.">
+  <defs>
+    <marker id="ftah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .paper{fill:#fbf6e8;stroke:#243a7a;stroke-width:3;stroke-linejoin:round}
+      .ink{stroke:#243a7a;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 15px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+      .fold{fill:#f0e7cc;stroke:#243a7a;stroke-width:2.5;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <!-- 1: strip -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <rect class="paper" x="60" y="110" width="180" height="44" rx="2"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Start with a long strip</text>
+  </g>
+
+  <!-- 2: fold corner into triangle -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <rect class="paper" x="60" y="110" width="180" height="44" rx="2"/>
+    <path class="fold" d="M60,154 L104,110 L104,154 Z"/>
+    <path class="red" d="M70,150 q6,-30 30,-36" marker-end="url(#ftah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fold a corner into a triangle</text>
+  </g>
+
+  <!-- 3: keep flipping -->
+  <g transform="translate(10,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <rect class="paper" x="150" y="110" width="90" height="44" rx="2"/>
+    <path class="fold" d="M100,110 L150,110 L150,154 L100,154 Z"/>
+    <path class="ink" d="M100,110 L150,154 M100,154 L150,110"/>
+    <path class="red" d="M160,132 L120,132" marker-end="url(#ftah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Keep flipping it along</text>
+  </g>
+
+  <!-- 4: finished + goalposts -->
+  <g transform="translate(330,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <path class="paper" d="M150,75 L120,127 L180,127 Z"/>
+    <path class="ink" d="M150,75 L135,101 L165,101 Z"/>
+    <path class="ink" d="M110,185 L110,150 M190,185 L190,150 M96,150 L124,150 M176,150 L204,150"/>
+    <path class="red" d="M150,127 q0,8 0,16" marker-end="url(#ftah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Tuck in, flick through the posts</text>
+  </g>
+</svg>

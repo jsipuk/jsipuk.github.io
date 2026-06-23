@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 810" role="img" aria-label="Six steps for the Suzanne world-record glider: make diagonal guide creases at the top of a landscape sheet, fold the top corners to the centre, fold the nose point down twice into a small thick nose, mountain-fold the plane in half, fold the wings down, then fold up small wing tips and set a shallow dihedral.">
+  <defs>
+    <marker id="aah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .paper{fill:#fbf6e8;stroke:#243a7a;stroke-width:3;stroke-linejoin:round}
+      .ink{stroke:#243a7a;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .crease{stroke:#9aa6c0;stroke-width:2;fill:none;stroke-dasharray:7 5;stroke-linecap:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 13px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+      .fold{fill:#f0e7cc;stroke:#243a7a;stroke-width:2.5;stroke-linejoin:round}
+      .nose{fill:#e7ddbe;stroke:#243a7a;stroke-width:2.5;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <!-- 1: diagonal guide creases (landscape) -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <rect class="paper" x="70" y="80" width="160" height="110" rx="2"/>
+    <path class="crease" d="M70,80 L180,190 M230,80 L120,190"/>
+    <text class="cap" x="150" y="230" text-anchor="middle">Landscape sheet: crease both diagonals on top</text>
+  </g>
+
+  <!-- 2: top corners to centre -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <path class="paper" d="M150,70 L95,120 L95,190 L205,190 L205,120 Z"/>
+    <path class="fold" d="M95,120 L150,70 L150,120 Z"/>
+    <path class="fold" d="M205,120 L150,70 L150,120 Z"/>
+    <path class="red" d="M105,95 q26,2 42,20" marker-end="url(#aah)"/>
+    <path class="red" d="M195,95 q-26,2 -42,20" marker-end="url(#aah)"/>
+    <text class="cap" x="150" y="230" text-anchor="middle">Fold the top corners to the centre</text>
+  </g>
+
+  <!-- 3: nose folded down twice -->
+  <g transform="translate(10,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <path class="paper" d="M95,120 L205,120 L205,190 L95,190 Z"/>
+    <path class="nose" d="M120,120 L180,120 L150,150 Z"/>
+    <path class="nose" d="M132,135 L168,135 L150,150 Z"/>
+    <path class="red" d="M150,95 L150,128" marker-end="url(#aah)"/>
+    <text class="cap" x="150" y="230" text-anchor="middle">Fold the nose point down — twice</text>
+  </g>
+
+  <!-- 4: mountain fold in half -->
+  <g transform="translate(330,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <path class="paper" d="M100,90 L150,90 L150,200 L100,200 Z"/>
+    <path class="paper" d="M150,90 L200,90 L200,200 L150,200 Z" fill="#efe7cf"/>
+    <path class="crease" d="M150,90 L150,200"/>
+    <path class="red" d="M125,75 q25,-12 50,0" marker-end="url(#aah)"/>
+    <text class="cap" x="150" y="230" text-anchor="middle">Turn over, fold the plane in half</text>
+  </g>
+
+  <!-- 5: fold the wings down -->
+  <g transform="translate(10,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">5</text>
+    <path class="paper" d="M120,70 L120,200 L185,200 L185,120 Z"/>
+    <path class="fold" d="M120,120 L185,120 L185,200 L120,200 Z"/>
+    <path class="red" d="M150,110 q-26,2 -34,28" marker-end="url(#aah)"/>
+    <text class="cap" x="150" y="230" text-anchor="middle">Fold both wings down, even</text>
+  </g>
+
+  <!-- 6: winglets + dihedral (front view) -->
+  <g transform="translate(330,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">6</text>
+    <path class="paper" d="M150,150 L80,128 L82,110" />
+    <path class="paper" d="M150,150 L220,128 L218,110" />
+    <path class="ink" d="M150,120 L150,150"/>
+    <path class="red" d="M82,118 L82,98" marker-end="url(#aah)"/>
+    <path class="red" d="M218,118 L218,98" marker-end="url(#aah)"/>
+    <text class="cap" x="150" y="230" text-anchor="middle">Tip up the ends, shallow dihedral</text>
+  </g>
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 540" role="img" aria-label="Four steps for bubble writing: pencil the letter thinly, draw a fat balloon outline around every stroke, round off all the corners, then colour it in with a white shine spot.">
+  <defs>
+    <style>
+      .ink{stroke:#243a7a;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .thin{stroke:#9aa6c0;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 15px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+    </style>
+  </defs>
+
+  <!-- 1: thin skeleton 'a' (circle + bar) -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <circle class="thin" cx="145" cy="135" r="32"/>
+    <path class="thin" d="M177,100 L177,170"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Pencil it thin</text>
+  </g>
+
+  <!-- 2: fat outline around (ghost skeleton inside) -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <circle class="thin" cx="145" cy="135" r="32"/>
+    <path class="thin" d="M177,100 L177,170"/>
+    <circle class="ink" cx="145" cy="135" r="48"/>
+    <rect class="ink" x="163" y="88" width="30" height="94" rx="15" fill="#fbf6e8"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fat outline around it</text>
+  </g>
+
+  <!-- 3: rounded bubble outline -->
+  <g transform="translate(10,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <circle class="ink" cx="145" cy="135" r="48" fill="#fbf6e8"/>
+    <rect class="ink" x="163" y="88" width="30" height="94" rx="15" fill="#fbf6e8"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Round off the corners</text>
+  </g>
+
+  <!-- 4: coloured + shine -->
+  <g transform="translate(330,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <rect x="163" y="88" width="30" height="94" rx="15" fill="#e8559b" stroke="#243a7a" stroke-width="3"/>
+    <circle cx="145" cy="135" r="48" fill="#e8559b" stroke="#243a7a" stroke-width="3"/>
+    <ellipse cx="128" cy="118" rx="12" ry="8" fill="#fff" opacity="0.85"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Colour in, add a shine</text>
+  </g>
+</svg>

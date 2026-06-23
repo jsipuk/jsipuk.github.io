@@ -25,6 +25,7 @@
   --gel-purple: #7a52c9;
   --gel-orange: #ef8a2b;
   --highlighter:#fff27a;
+  --postit:     #ffe14d;   /* sticky-note yellow */
 
   --shadow:     0 2px 0 rgba(36,58,122,.12), 0 10px 24px rgba(60,50,30,.10);
   --radius:     14px;
@@ -137,6 +138,21 @@ a { color: var(--ink); }
   font-size: clamp(1.8rem, 6vw, 2.6rem);
   color: var(--ink);
   letter-spacing: .5px;
+}
+/* The "AI" is a little yellow sticky note stuck on the end of the word */
+.brand-sticky {
+  display: inline-block;
+  background: var(--postit);
+  color: var(--ink);
+  font-size: .82em;
+  line-height: 1;
+  padding: .12em .32em .18em;
+  margin-left: .12em;
+  border-radius: 2px;
+  transform: rotate(5deg);
+  transform-origin: bottom left;
+  /* lifted-corner shadow so it reads as a Post-it, not a highlight */
+  box-shadow: 1px 2px 3px rgba(60, 50, 30, .28);
 }
 /* a strip of sticky tape across the corner of the logo */
 .brand-tape {
@@ -472,6 +488,73 @@ a { color: var(--ink); }
 .callout-safety {
   background: rgba(47, 163, 107, .12);
   border-color: var(--gel-green);
+}
+
+/* Step-by-step diagram (an SVG "worksheet" pinned to the page) */
+.diagram {
+  margin: 22px 0;
+  padding: 14px;
+  background: var(--paper);
+  border: 2px solid var(--rule);
+  border-radius: 12px;
+}
+.diagram img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* keep big multi-row sheets from dominating the page on wide screens */
+  max-width: 520px;
+  margin: 0 auto;
+}
+.diagram figcaption {
+  font-family: var(--hand);
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Skill levels (e.g. the three paper aeroplanes) */
+.variants { margin-top: 8px; }
+.variant {
+  background: var(--paper);
+  border: 2px solid var(--rule);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.variant-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.variant-badge {
+  font-family: var(--hand);
+  font-size: 1rem;
+  color: #fff;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: var(--ink-soft);
+}
+.variant-badge.level-beginner     { background: var(--gel-green); }
+.variant-badge.level-intermediate { background: var(--gel-orange); }
+.variant-badge.level-advanced     { background: var(--gel-pink); }
+.variant-name {
+  font-family: var(--marker);
+  font-weight: 400;
+  color: var(--ink);
+  font-size: 1.3rem;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+.variant-blurb {
+  margin: 10px 0 0;
+  color: var(--pencil);
+}
+.variant .diagram {
+  background: var(--paper-2);
 }
 
 .activity-body {

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 810" role="img" aria-label="Six steps to fold a paper water bomb: crease a square both ways, collapse it into a triangle base, fold the bottom points up to the top, fold the side corners to the middle, tuck the top points into the pockets, then blow into the hole to inflate a cube.">
+  <defs>
+    <marker id="wah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .paper{fill:#fbf6e8;stroke:#243a7a;stroke-width:3;stroke-linejoin:round}
+      .ink{stroke:#243a7a;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .crease{stroke:#9aa6c0;stroke-width:2;fill:none;stroke-dasharray:7 5;stroke-linecap:round}
+      .mtn{stroke:#9aa6c0;stroke-width:2;fill:none;stroke-dasharray:10 4 2 4;stroke-linecap:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 14px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+      .fold{fill:#f0e7cc;stroke:#243a7a;stroke-width:2.5;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <!-- 1: creased square -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <rect class="paper" x="92" y="65" width="116" height="116" rx="2"/>
+    <path class="crease" d="M150,65 L150,181 M92,123 L208,123"/>
+    <path class="mtn" d="M92,65 L208,181 M208,65 L92,181"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Crease both ways</text>
+  </g>
+
+  <!-- 2: triangle base -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <path class="paper" d="M150,70 L95,165 L205,165 Z"/>
+    <path class="ink" d="M150,70 L150,165 M122,118 L150,165 M178,118 L150,165"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Collapse into a triangle</text>
+  </g>
+
+  <!-- 3: fold bottom points up -->
+  <g transform="translate(10,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <path class="paper" d="M150,70 L95,165 L205,165 Z"/>
+    <path class="fold" d="M95,165 L150,118 L150,165 Z"/>
+    <path class="fold" d="M205,165 L150,118 L150,165 Z"/>
+    <path class="red" d="M100,158 q14,-30 46,-40" marker-end="url(#wah)"/>
+    <path class="red" d="M200,158 q-14,-30 -46,-40" marker-end="url(#wah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Bottom points up to the top</text>
+  </g>
+
+  <!-- 4: fold side corners in -->
+  <g transform="translate(330,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <rect class="paper" x="105" y="78" width="90" height="90"/>
+    <path class="ink" d="M105,123 L195,123"/>
+    <path class="red" d="M95,123 L138,123" marker-end="url(#wah)"/>
+    <path class="red" d="M205,123 L162,123" marker-end="url(#wah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Side corners to the middle</text>
+  </g>
+
+  <!-- 5: tuck top points -->
+  <g transform="translate(10,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">5</text>
+    <rect class="paper" x="105" y="78" width="90" height="90"/>
+    <path class="ink" d="M105,123 L195,123"/>
+    <path class="fold" d="M120,78 L150,78 L120,108 Z"/>
+    <path class="fold" d="M180,78 L150,78 L180,108 Z"/>
+    <path class="red" d="M133,92 L150,108" marker-end="url(#wah)"/>
+    <path class="red" d="M167,92 L150,108" marker-end="url(#wah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Tuck top points into pockets</text>
+  </g>
+
+  <!-- 6: inflate -->
+  <g transform="translate(330,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">6</text>
+    <path class="paper" d="M120,95 L185,95 L205,120 L205,170 L140,170 L120,145 Z"/>
+    <path class="ink" d="M120,95 L140,120 L205,120 M140,120 L140,170"/>
+    <circle cx="123" cy="148" r="4" fill="#243a7a"/>
+    <path class="red" d="M80,160 q18,-6 40,-10" marker-end="url(#wah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Blow into the hole — puff!</text>
+  </g>
+</svg>

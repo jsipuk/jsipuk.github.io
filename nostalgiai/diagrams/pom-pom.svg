@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 540" role="img" aria-label="Four steps for a cardboard-ring pom-pom: cut two cardboard rings, wind wool around them until the hole is full, snip all the wool around the outer edge, then tie tightly round the middle and fluff into a ball.">
+  <defs>
+    <marker id="pmah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .card{fill:#e7ddbe;stroke:#243a7a;stroke-width:3}
+      .hole{fill:#fffdf5}
+      .ink{stroke:#243a7a;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .wool{stroke:#e8559b;stroke-width:3;fill:none;stroke-linecap:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 15px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+    </style>
+  </defs>
+
+  <!-- 1: two rings -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <circle class="card" cx="125" cy="125" r="52"/><circle class="hole" cx="125" cy="125" r="22"/>
+    <circle class="card" cx="180" cy="120" r="52"/><circle class="hole" cx="180" cy="120" r="22"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Cut two cardboard rings</text>
+  </g>
+
+  <!-- 2: wind wool -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <circle class="card" cx="150" cy="120" r="54"/><circle class="hole" cx="150" cy="120" r="22"/>
+    <path class="wool" d="M150,98 A22,22 0 0 0 150,142 M150,98 A54,54 0 0 1 150,174 M138,99 A24,24 0 0 0 138,141 M138,99 A56,56 0 0 1 138,173 M162,99 A24,24 0 0 1 162,141 M162,99 A56,56 0 0 0 162,173"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Wind wool till the hole fills</text>
+  </g>
+
+  <!-- 3: cut around edge -->
+  <g transform="translate(10,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <circle cx="150" cy="120" r="54" fill="#f8b4d4" stroke="#243a7a" stroke-width="3"/>
+    <circle class="hole" cx="150" cy="120" r="20"/>
+    <path class="red" d="M150,66 a54,54 0 0 1 24,8" stroke-dasharray="4 4"/>
+    <path class="ink" d="M196,64 L210,52 M196,80 L212,78"/>
+    <path class="ink" d="M180,72 L208,58 M180,72 L210,72" stroke="#d6453d"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Snip all round the outer edge</text>
+  </g>
+
+  <!-- 4: tie + fluff -->
+  <g transform="translate(330,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <g stroke="#e8559b" stroke-width="5" stroke-linecap="round">
+      <path d="M150,120 L150,60 M150,120 L150,180 M150,120 L90,120 M150,120 L210,120 M150,120 L108,78 M150,120 L192,78 M150,120 L108,162 M150,120 L192,162 M150,120 L120,66 M150,120 L180,66 M150,120 L120,174 M150,120 L180,174 M150,120 L96,98 M150,120 L204,98 M150,120 L96,142 M150,120 L204,142"/>
+    </g>
+    <circle cx="150" cy="120" r="14" fill="#7a52c9"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Tie the middle, fluff it up</text>
+  </g>
+</svg>

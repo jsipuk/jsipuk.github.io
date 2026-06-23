@@ -197,6 +197,55 @@
         <div class="related-grid">${related.map(cardMarkup).join('')}</div>
       </section>` : '';
 
+    const stepList = (arr) => (arr || []).map((s, i) =>
+      `<li><span class="step-num" aria-hidden="true">${i + 1}</span><span class="step-text">${esc(s)}</span></li>`
+    ).join('');
+
+    const diagramFigure = (src, alt) => src ? `
+      <figure class="diagram">
+        <img src="${esc(src)}" alt="${esc(alt || ('Step-by-step diagram for ' + a.title))}" loading="lazy" decoding="async" />
+        <figcaption>How it goes, step by step — full instructions below.</figcaption>
+      </figure>` : '';
+
+    const materialsPanel = `
+      <section class="panel panel-materials">
+        <h2 class="block-title">You'll need</h2>
+        <ul class="materials">${materials || '<li>Just a pen and some paper.</li>'}</ul>
+      </section>`;
+
+    // Activities can either have one set of steps, or several skill "variants"
+    // (e.g. the paper aeroplanes: beginner / intermediate / advanced).
+    let howTo;
+    if (a.variants && a.variants.length) {
+      const variantsMarkup = a.variants.map((v) => `
+        <section class="variant">
+          <div class="variant-head">
+            <span class="variant-badge level-${esc(String(v.level).toLowerCase())}">${esc(v.level)}</span>
+            <h3 class="variant-name">${esc(v.name)}</h3>
+            ${v.time ? `<span class="chip chip-time">⏱ ${esc(v.time)}</span>` : ''}
+          </div>
+          ${v.blurb ? `<p class="variant-blurb">${esc(v.blurb)}</p>` : ''}
+          ${diagramFigure(v.diagram, v.diagramAlt)}
+          <ol class="steps">${stepList(v.steps)}</ol>
+        </section>`).join('');
+      howTo = `
+        ${materialsPanel}
+        <section class="variants">
+          <h2 class="block-title">Pick your level</h2>
+          ${variantsMarkup}
+        </section>`;
+    } else {
+      howTo = `
+        ${diagramFigure(a.diagram, a.diagramAlt)}
+        <div class="activity-body">
+          ${materialsPanel}
+          <section class="panel panel-steps">
+            <h2 class="block-title">How to make it</h2>
+            <ol class="steps">${steps}</ol>
+          </section>
+        </div>`;
+    }
+
     const safety = a.safetyNotes ? `
       <div class="callout callout-safety">
         <h2 class="callout-title">👀 Grown-up note</h2>
@@ -229,17 +278,7 @@
           <p>${esc(a.nostalgiaNote)}</p>
         </aside>` : ''}
 
-        <div class="activity-body">
-          <section class="panel panel-materials">
-            <h2 class="block-title">You'll need</h2>
-            <ul class="materials">${materials || '<li>Just a pen and some paper.</li>'}</ul>
-          </section>
-
-          <section class="panel panel-steps">
-            <h2 class="block-title">How to make it</h2>
-            <ol class="steps">${steps}</ol>
-          </section>
-        </div>
+        ${howTo}
 
         ${safety}
 

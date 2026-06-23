@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 540" role="img" aria-label="Four steps to draw the Cool S with six lines: draw three short lines on top and three below, add a pointed roof on the top and an upside-down point on the bottom, draw the diagonals that weave the rows together through the middle, then ink the finished S and add a shadow.">
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .ink{stroke:#243a7a;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .bold{stroke:#243a7a;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .red{stroke:#d6453d;stroke-width:3.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .ghost{stroke:#c9bfa0;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 15px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+    </style>
+  </defs>
+
+  <!-- Panel 1: six lines (3 top, 3 bottom) -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <path class="ink" d="M100,62 L100,104 M150,62 L150,104 M200,62 L200,104 M100,150 L100,192 M150,150 L150,192 M200,150 L200,192"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">3 lines on top, 3 below</text>
+  </g>
+
+  <!-- Panel 2: roofs top and bottom -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <path class="ink" d="M100,62 L100,104 M150,62 L150,104 M200,62 L200,104 M100,150 L100,192 M150,150 L150,192 M200,150 L200,192"/>
+    <path class="red" d="M100,62 L150,42 L200,62"/>
+    <path class="red" d="M100,192 L150,212 L200,192"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">A point on top &amp; bottom</text>
+  </g>
+
+  <!-- Panel 3: weaving diagonals -->
+  <g transform="translate(10,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <path class="ink" d="M100,62 L100,104 M150,62 L150,104 M200,62 L200,104 M100,150 L100,192 M150,150 L150,192 M200,150 L200,192"/>
+    <path class="ink" d="M100,62 L150,42 L200,62 M100,192 L150,212 L200,192"/>
+    <path class="red" d="M100,104 L150,150"/>
+    <path class="red" d="M200,104 L150,150"/>
+    <path class="red" d="M150,104 L100,150"/>
+    <path class="red" d="M150,104 L200,150"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Connect the rows — they cross</text>
+  </g>
+
+  <!-- Panel 4: finished S + shadow -->
+  <g transform="translate(330,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <path class="ghost" transform="translate(5,6)" d="M100,62 L150,42 L200,62 M100,62 L100,104 M150,62 L150,104 M200,62 L200,104 M100,104 L150,150 M200,104 L150,150 M150,104 L100,150 M150,104 L200,150 M100,150 L100,192 M150,150 L150,192 M200,150 L200,192 M100,192 L150,212 L200,192"/>
+    <path class="bold" d="M100,62 L150,42 L200,62 M100,62 L100,104 M150,62 L150,104 M200,62 L200,104 M100,104 L150,150 M200,104 L150,150 M150,104 L100,150 M150,104 L200,150 M100,150 L100,192 M150,150 L150,192 M200,150 L200,192 M100,192 L150,212 L200,192"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Ink it in, add a shadow</text>
+  </g>
+</svg>

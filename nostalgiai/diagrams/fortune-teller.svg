@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 810" role="img" aria-label="Six steps to fold a paper fortune teller: start with a square, crease both diagonals, fold all four corners to the centre, turn over and fold the corners in again, then slide your fingers under the four flaps to work it.">
+  <defs>
+    <marker id="fah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .paper{fill:#fbf6e8;stroke:#243a7a;stroke-width:3;stroke-linejoin:round}
+      .ink{stroke:#243a7a;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .crease{stroke:#9aa6c0;stroke-width:2;fill:none;stroke-dasharray:7 5;stroke-linecap:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 15px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+      .flap{fill:#f0e7cc}
+    </style>
+  </defs>
+
+  <!-- 1: square -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <rect class="paper" x="90" y="65" width="120" height="120" rx="3"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Start with a square</text>
+  </g>
+
+  <!-- 2: crease diagonals -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <rect class="paper" x="90" y="65" width="120" height="120" rx="3"/>
+    <path class="crease" d="M90,65 L210,185 M210,65 L90,185"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Crease both diagonals, open out</text>
+  </g>
+
+  <!-- 3: fold four corners to centre -->
+  <g transform="translate(10,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <rect class="paper" x="90" y="65" width="120" height="120" rx="3"/>
+    <path class="crease" d="M90,65 L210,65 L210,185 L90,185 Z"/>
+    <path class="red" d="M150,40 L150,118" marker-end="url(#fah)"/>
+    <path class="red" d="M235,125 L162,125" marker-end="url(#fah)"/>
+    <path class="red" d="M150,210 L150,132" marker-end="url(#fah)"/>
+    <path class="red" d="M65,125 L138,125" marker-end="url(#fah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fold all 4 corners to the middle</text>
+  </g>
+
+  <!-- 4: smaller square, turn over -->
+  <g transform="translate(330,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <rect class="paper" x="105" y="80" width="90" height="90" rx="3"/>
+    <path class="ink" d="M105,80 L195,170 M195,80 L105,170"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Turn over, fold corners in again</text>
+  </g>
+
+  <!-- 5: result with flaps -->
+  <g transform="translate(10,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">5</text>
+    <rect class="paper" x="100" y="75" width="100" height="100" rx="3"/>
+    <path class="ink" d="M100,75 L200,175 M200,75 L100,175 M150,75 L150,175 M100,125 L200,125"/>
+    <rect class="flap" x="103" y="78" width="44" height="44"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Four flaps to write under</text>
+  </g>
+
+  <!-- 6: fingers in -->
+  <g transform="translate(330,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">6</text>
+    <path class="paper" d="M150,70 L120,100 L120,150 L150,170 L180,150 L180,100 Z"/>
+    <path class="ink" d="M150,70 L150,170 M120,100 L180,100 M120,150 L180,150"/>
+    <path class="red" d="M120,135 q-22,-6 -22,-26" marker-end="url(#fah)"/>
+    <path class="red" d="M180,135 q22,-6 22,-26" marker-end="url(#fah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fingers under the flaps — play!</text>
+  </g>
+</svg>

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 540" role="img" aria-label="Four steps for a candy-stripe friendship bracelet: knot the threads and anchor them, make a number-four shape with the left thread over its neighbour, pull the double knot tight, and repeat to build diagonal stripes.">
+  <defs>
+    <marker id="brah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .ink{stroke:#243a7a;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 15px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+      .t1{stroke:#e8559b;stroke-width:6;fill:none;stroke-linecap:round}
+      .t2{stroke:#2fa36b;stroke-width:6;fill:none;stroke-linecap:round}
+      .t3{stroke:#ef8a2b;stroke-width:6;fill:none;stroke-linecap:round}
+      .t4{stroke:#7a52c9;stroke-width:6;fill:none;stroke-linecap:round}
+    </style>
+  </defs>
+
+  <!-- 1: knot + anchor -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <circle cx="150" cy="70" r="10" fill="#243a7a"/>
+    <path class="t1" d="M150,80 L120,190"/>
+    <path class="t2" d="M150,80 L140,190"/>
+    <path class="t3" d="M150,80 L160,190"/>
+    <path class="t4" d="M150,80 L180,190"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Knot &amp; anchor the threads</text>
+  </g>
+
+  <!-- 2: the "4" shape -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <path class="t2" d="M165,60 L165,190"/>
+    <path class="t1" d="M120,70 L120,110 L185,140"/>
+    <path class="red" d="M120,70 q40,-2 56,30" marker-end="url(#brah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Make a "4" over the next thread</text>
+  </g>
+
+  <!-- 3: pull tight -->
+  <g transform="translate(10,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <path class="t2" d="M150,60 L150,110"/>
+    <circle cx="150" cy="118" r="13" fill="none" stroke="#e8559b" stroke-width="6"/>
+    <path class="t1" d="M150,128 L150,190"/>
+    <path class="t2" d="M150,128 L150,190" opacity="0"/>
+    <path class="red" d="M150,150 L150,180" marker-end="url(#brah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Pull the knot tight (twice)</text>
+  </g>
+
+  <!-- 4: diagonal stripes -->
+  <g transform="translate(330,280)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <rect x="95" y="70" width="110" height="120" rx="8" fill="#fbf6e8" stroke="#243a7a" stroke-width="2"/>
+    <path class="t1" d="M100,90 L150,70 M100,120 L160,90"/>
+    <path class="t2" d="M100,120 L170,86 M100,150 L180,108"/>
+    <path class="t3" d="M100,150 L190,104 M100,180 L200,128"/>
+    <path class="t4" d="M120,188 L205,142 M160,190 L205,168"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Repeat — stripes build up</text>
+  </g>
+</svg>

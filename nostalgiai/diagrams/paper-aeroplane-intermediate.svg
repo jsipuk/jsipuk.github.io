@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 810" role="img" aria-label="Six steps for the Nakamura Lock glider: crease down the middle, fold the top corners to the centre, fold the nose triangle down, fold the new corners to the centre leaving the tip poking out, fold that tip up to lock the folds, then fold in half and fold the wings down flat.">
+  <defs>
+    <marker id="iah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d6453d"/></marker>
+    <style>
+      .paper{fill:#fbf6e8;stroke:#243a7a;stroke-width:3;stroke-linejoin:round}
+      .ink{stroke:#243a7a;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .crease{stroke:#9aa6c0;stroke-width:2;fill:none;stroke-dasharray:7 5;stroke-linecap:round}
+      .red{stroke:#d6453d;stroke-width:3;fill:none;stroke-linecap:round}
+      .cell{fill:#fffdf5;stroke:#d8cfb0;stroke-width:1.5;stroke-dasharray:2 6}
+      .cap{fill:#7c766a;font:600 14px sans-serif}
+      .num{fill:#fff;font:700 17px sans-serif}
+      .fold{fill:#f0e7cc;stroke:#243a7a;stroke-width:2.5;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <!-- 1: centre crease -->
+  <g transform="translate(10,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">1</text>
+    <rect class="paper" x="112" y="55" width="76" height="135" rx="2"/>
+    <path class="crease" d="M150,55 L150,190"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Crease down the middle, open</text>
+  </g>
+
+  <!-- 2: corners to centre -->
+  <g transform="translate(330,10)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">2</text>
+    <path class="paper" d="M112,95 L150,55 L188,95 L188,190 L112,190 Z"/>
+    <path class="fold" d="M112,95 L150,55 L150,95 Z"/>
+    <path class="fold" d="M188,95 L150,55 L150,95 Z"/>
+    <path class="crease" d="M150,55 L150,190"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Top corners to the centre</text>
+  </g>
+
+  <!-- 3: fold the nose triangle down -->
+  <g transform="translate(10,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">3</text>
+    <path class="paper" d="M112,95 L150,55 L188,95 L188,190 L112,190 Z"/>
+    <path class="fold" d="M112,95 L188,95 L150,140 Z"/>
+    <path class="red" d="M150,70 L150,120" marker-end="url(#iah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fold the nose triangle down</text>
+  </g>
+
+  <!-- 4: corners to centre, tip pokes out -->
+  <g transform="translate(330,290)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">4</text>
+    <path class="paper" d="M150,70 L120,100 L120,190 L180,190 L180,100 Z"/>
+    <path class="fold" d="M120,100 L150,70 L150,128 Z"/>
+    <path class="fold" d="M180,100 L150,70 L150,128 Z"/>
+    <path class="paper" d="M138,128 L162,128 L150,150 Z"/>
+    <path class="red" d="M125,95 q22,2 24,28" marker-end="url(#iah)"/>
+    <path class="red" d="M175,95 q-22,2 -24,28" marker-end="url(#iah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Corners in — tip pokes out</text>
+  </g>
+
+  <!-- 5: fold tip up to lock -->
+  <g transform="translate(10,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">5</text>
+    <path class="paper" d="M150,70 L120,100 L120,190 L180,190 L180,100 Z"/>
+    <path class="ink" d="M120,100 L150,70 L180,100"/>
+    <path class="fold" d="M138,128 L162,128 L150,106 Z"/>
+    <path class="red" d="M150,140 L150,112" marker-end="url(#iah)"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fold the tip up — it locks!</text>
+  </g>
+
+  <!-- 6: finished glider -->
+  <g transform="translate(330,570)">
+    <rect class="cell" x="3" y="3" width="294" height="244" rx="14"/>
+    <circle cx="28" cy="28" r="15" fill="#243a7a"/><text class="num" x="28" y="34" text-anchor="middle">6</text>
+    <path class="paper" d="M150,65 L92,180 L150,158 L208,180 Z"/>
+    <path class="ink" d="M150,65 L150,158"/>
+    <text class="cap" x="150" y="232" text-anchor="middle">Fold in half, big flat wings</text>
+  </g>
+</svg>
