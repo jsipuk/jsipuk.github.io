@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="A growing sprout">
+  <rect width="64" height="64" rx="14" fill="#6fa287"/>
+  <path d="M32 52 V30" stroke="#faf6ee" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M32 38 C23 38 16 31 16 21 C26 21 33 28 32 38 Z" fill="#faf6ee"/>
+  <path d="M32 33 C41 33 48 26 48 16 C38 16 31 23 32 33 Z" fill="#e7f0ea"/>
+</svg>

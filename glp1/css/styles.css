@@ -71,6 +71,21 @@ main.content { padding: 0 1.1rem 2rem; }
 
 a { color: var(--blue); }
 
+/* Keyboard skip link — hidden until focused */
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  z-index: 100;
+  background: var(--green);
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: top .15s ease;
+}
+.skip-link:focus { top: 0.5rem; }
+
 /* ---- 3. Top bar + navigation ------------------------------------------- */
 .topbar {
   position: sticky;
