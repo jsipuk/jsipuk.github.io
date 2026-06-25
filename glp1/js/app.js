@@ -39,17 +39,23 @@
     ask:     { icon: '🩺', label: 'Ask your prescriber' },
     track:   { icon: '📋', label: 'Track this' },
     calm:    { icon: '🌿', label: "Don't panic" },
-    redflag: { icon: '🚩', label: 'Red flag — seek help' }
+    redflag: { icon: '🚩', label: 'Red flag — seek help' },
+    story:   { icon: '✍️', label: 'My experience' }
   };
 
   function renderBox(b) {
     const meta = BOX_META[b.variant] || BOX_META.tip;
+    // 'story' boxes always carry the "My experience" label, with any specific
+    // title shown as a sub-heading beneath — so personal notes are unmistakable.
+    const isStory = b.variant === 'story';
+    const headLabel = isStory ? meta.label : (b.title || meta.label);
     const kids = [
       el('div', { class: 'box-head' }, [
         el('span', { class: 'box-icon', 'aria-hidden': 'true' }, [meta.icon]),
-        el('span', { class: 'box-label' }, [b.title || meta.label])
+        el('span', { class: 'box-label' }, [headLabel])
       ])
     ];
+    if (isStory && b.title) kids.push(el('p', { class: 'box-subtitle' }, [b.title]));
     if (b.text) kids.push(el('p', null, [b.text]));
     if (b.items) {
       kids.push(el('ul', null, b.items.map(function (it) { return el('li', null, [it]); })));

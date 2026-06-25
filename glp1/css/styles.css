@@ -30,6 +30,7 @@
   --track:   #8a6d3b;  --track-bg:   #f6eedd;
   --calm:    #5a8aa6;  --calm-bg:    #e8f1f5;
   --redflag: #b4452f;  --redflag-bg: #fbe9e4;
+  --story:   #7a5c8e;  --story-bg:   #f1ebf6;
 
   --radius: 14px;
   --radius-sm: 9px;
@@ -315,6 +316,10 @@ a { color: var(--blue); }
 .box-calm    { background: var(--calm-bg);    border-left-color: var(--calm); }
 .box-redflag { background: var(--redflag-bg); border-left-color: var(--redflag); }
 .box-redflag .box-label { color: var(--redflag); }
+.box-story   { background: var(--story-bg);   border-left-color: var(--story); }
+.box-story .box-label { color: var(--story); text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.8rem; }
+.box-story .box-subtitle { font-weight: 700; font-style: normal; margin: 0.1rem 0 0.3rem; }
+.box-story p { font-style: italic; }
 
 /* ---- 6b. Tables --------------------------------------------------------- */
 .table-wrap { overflow-x: auto; }

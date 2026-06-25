@@ -16,8 +16,9 @@
  *   { type: 'subhead',  text: '...' }
  *   { type: 'list',     items: ['...', '...'] }
  *   { type: 'checklist',items: ['...', '...'] }            // printable tick boxes
- *   { type: 'box', variant: 'tip'|'ask'|'track'|'calm'|'redflag',
+ *   { type: 'box', variant: 'tip'|'ask'|'track'|'calm'|'redflag'|'story',
  *                  title: '...(optional)', text: '...(optional)', items: [...] }
+ *                  // 'story' = "✍️ My experience" — J's first-person, lived experience
  *   { type: 'table',    headers: ['A','B'], rows: [['1','2'], ...] }
  *   { type: 'placeholder', title: '...', caption: '...' }  // grey "image goes here" card
  *   { type: 'image', src: 'img/file.jpg', alt: '...', title: '...', caption: '...' }
@@ -70,6 +71,9 @@ const BOOKLET = {
           'Built for the journey, not just day one.'
         ]},
         { type: 'box', variant: 'calm', title: 'A gentle reminder', text: 'You are not cheating. Medication is a tool. Using a tool to support your health is a sensible choice, not a shortcut.' },
+        { type: 'box', variant: 'story', title: 'Where I started', text: 'My weight had yo-yo\'d for years. I once hired a personal trainer, ate well and lost a stone — then work and family took my time back and it crept up again. Not from junk food, just big portions, finishing the kids\' dinners, boredom and procrastination snacking, and a desk job. I went from 17 to 19 stone over a few years. With our third baby on the way, I knew I couldn\'t let it get worse — so I gave Mounjaro a go to see what would happen.' },
+        { type: 'box', variant: 'story', text: 'Eighteen months on, I\'ve lost around six stone — roughly a pound a week, some weeks more, some less. I\'m now just over 13 stone, a weight I haven\'t been since university. It hasn\'t been magic, and it hasn\'t been effortless. But it\'s been worth it.' },
+        { type: 'box', variant: 'calm', title: 'The honest headline', text: 'It is not magic. Without some lifestyle changes you will have a harder time. But make small changes, learn your triggers, and you may find it quietens the constant "food noise" — that background chatter about food that, it turns out, not everyone has.' },
         { type: 'box', variant: 'redflag', title: 'This is not medical advice', text: 'Everything here is general and personal. Your prescriber knows your history; this booklet does not. When in doubt, ask them.' },
         { type: 'subhead', text: 'How to use this booklet' },
         { type: 'list', items: [
@@ -111,6 +115,9 @@ const BOOKLET = {
           'A few easy "fallback foods" in the cupboard',
           'A water bottle you actually like'
         ]},
+        { type: 'box', variant: 'story', title: 'What I\'d tell my past self', text: 'Two things. First: the wrong food, or simply too much of it, can make you genuinely unwell — I\'ve had a handful of rough nights that were entirely down to what I ate. Second, and I really mean this: track more than your weight from day one. I didn\'t take measurements or photos early on and I wish I had, because once the weeks have passed you can\'t go back and capture them.' },
+        { type: 'box', variant: 'story', title: 'The prep that helped me most', text: 'I told my wife, and I started with a simple plan of protein shakes and salads for the first couple of months. It sounds strict, but it quietly kept my portions small without me having to think about it — and I suspect it spared me some of the worse early side effects. After that I eased back to normal family food, just much less of it.' },
+        { type: 'box', variant: 'tip', title: 'Track from day one', text: 'Weight, waist and a few measurements, plus a monthly photo. The Progress Tracker page in this guide is built exactly for this — start it before your first jab so you have a true "before".' },
         { type: 'placeholder', title: 'Dose Ladder', caption: 'Diagram: the usual step-up of strengths over time, with your own dates filled in.' }
       ]
     },
@@ -139,6 +146,9 @@ const BOOKLET = {
           'You are not hungry for a couple of days — eat small, balanced things anyway.',
           'Your weight bounces around day to day — that is normal (see Plateaus).'
         ]},
+        { type: 'box', variant: 'story', title: 'My first jab', text: 'I was nervous about actually sticking the needle in — but it turned out to be completely straightforward. You become a bit of a pin cushion over the weeks, but it leaves no real marks. The only times I\'ve bruised are when I\'ve been a bit too hard and fast with it. I inject into my stomach every week, moving around the area near my belly button.' },
+        { type: 'box', variant: 'story', title: 'When the "food noise" went quiet', text: 'The biggest change for me wasn\'t in my stomach — it was in my head. I\'d never really known what it was like to not feel hungry. I could finish a large meal and still force myself into pudding. After starting, I\'d eat half of what was in front of me and simply not want the rest. I stopped drifting back to the fridge all day. I could work, play with the kids, and watch TV in the evening without food chattering away in the background. The noise just disappeared. I still enjoy a snack now and then — but it\'s one thing, sometimes, not all day.' },
+        { type: 'box', variant: 'story', title: 'My weekly routine', text: 'I jab every Monday, so if we\'ve had a treat or a drink over the weekend, it\'s behind me. I set a weekly reminder on my phone that I can either mark done or push back a day if life gets in the way. I never go under seven days between doses, but I\'ve stretched it to nine or ten around work trips and holidays without any trouble. Check your own leaflet, and your prescriber, on timing.' },
         { type: 'placeholder', title: 'Injection Site Rotation Map', caption: 'Diagram: tummy, thighs and upper arms, with a simple rotation pattern.' }
       ]
     },
@@ -150,14 +160,10 @@ const BOOKLET = {
       icon: '📈',
       blocks: [
         { type: 'para', text: 'Doses usually step up gradually so your body can adjust. The plan is between you and your prescriber.' },
-        { type: 'box', variant: 'ask', title: 'This is a prescriber decision', text: 'Moving up, staying put, or moving down is a clinical choice. Do not change timing or strength on your own.' },
-        { type: 'subhead', text: 'Honest notes from my journey' },
-        { type: 'list', items: [
-          'You do not have to move up every time. Higher is not automatically better.',
-          'I have worried about being on too high a dose for too long.',
-          'I moved from 12.5mg down towards 10mg — with advice, not on a whim.',
-          'I have delayed doses before when I was unwell or it felt sensible — again, something to discuss, not to copy.'
-        ]},
+        { type: 'box', variant: 'ask', title: 'This is a prescriber decision', text: 'Moving up, staying put, or moving down is a clinical choice. On the NHS your GP or team will guide your dose and timing — do not change them on your own.' },
+        { type: 'box', variant: 'story', title: 'How the doses felt for me', text: 'Each time I stepped up, the new dose hit harder for a week or two, then my body settled. For me, 7.5mg and 10mg were the sweet spots — steady, fewer side effects, losing without it being too fast. I only went up when the loss genuinely stalled, not just because I could. I eventually reached 12.5mg, which was good, but once I was lighter it felt like more than I needed, so I came back down to 10mg.' },
+        { type: 'box', variant: 'story', title: 'You don\'t have to rush up the ladder', text: 'Higher isn\'t automatically better. I never felt the need to push my body to a stronger dose until what I was on had clearly stopped working. Going at a pace I was comfortable with kept side effects manageable and the loss nice and steady.' },
+        { type: 'box', variant: 'story', title: 'Coming back down', text: 'I\'m now tapering down a level at a time, heading for a maintenance dose rather than stopping abruptly. I\'ll be honest — I\'m a bit anxious about the weight creeping back as I reduce, so I\'m leaning hard on the habits I\'ve built rather than relying on the dose alone.' },
         { type: 'box', variant: 'track', title: 'Track this', text: 'Keep a simple dose log: date, strength, site, and how you felt that week. It makes review appointments much easier.' },
         { type: 'placeholder', title: 'Dose Progression Tracker', caption: 'Diagram: a table of date, strength, and notes building up over time.' }
       ]
@@ -195,6 +201,9 @@ const BOOKLET = {
           'Fainting, chest pain, or difficulty breathing',
           'Any symptom that frightens you or feels wrong'
         ]},
+        { type: 'box', variant: 'story', title: 'The burps are real — and a useful warning', text: 'Nobody warned me about the burps. Eat the wrong thing, or simply too much, and you can burp for the rest of the day. I\'ve learned to treat them as an early-warning light: when they start, it usually means I\'ve overdone it or eaten something that doesn\'t agree with me, and it\'s a cue to ease off.' },
+        { type: 'box', variant: 'story', title: 'My pattern: it catches up at 2am', text: 'My handful of really rough episodes followed the same script, and almost always around two in the morning: heavy burping, then a churning stomach, then an urgent trip to the loo, sometimes being sick — and then fine again within about 24 hours. My theory is that digestion is so much slower now that a bad meal simply catches up with me in the small hours. Knowing the pattern makes it far less frightening when it happens.' },
+        { type: 'box', variant: 'story', title: 'Tiredness', text: 'I\'ve had stretches of feeling tired, and for me the answer has usually been more protein (and, honestly, drinking enough water — which I forget to do). It\'s worth checking the simple things before assuming the worst.' },
         { type: 'box', variant: 'ask', title: 'Always worth a word', text: 'If a side effect is strong, will not settle, or is new and odd, contact your pharmacist or prescriber. Use NHS 111 if you are unsure how urgent it is.' },
         { type: 'placeholder', title: 'Symptom Decision Tree', caption: 'Diagram: "Is it mild and settling? → self-care. Severe / red flag? → seek help."' }
       ]
@@ -232,6 +241,9 @@ const BOOKLET = {
           'Avoid your known triggers.',
           'Ask a pharmacist or prescriber if it keeps happening.'
         ]},
+        { type: 'box', variant: 'story', title: 'My trigger foods', text: 'Over time I\'ve learned which foods reliably cause me trouble: chocolate late in the day, anything garlicky (garlic bread, garlic sauce), and sausages and bacon — which give me burps that repeat on me all day. Fatty foods in general sit heavier and are harder to digest. I love a steak, but it\'s a special-occasion thing now rather than a casual dinner. For me the reaction usually shows up within a few hours.' },
+        { type: 'box', variant: 'story', title: 'What actually helped', text: 'Honestly, mostly riding it out — it passes. Rennie or indigestion tablets take the edge off. But the real win has been learning my triggers and just eating around them, rather than reaching for a remedy after the fact.' },
+        { type: 'box', variant: 'tip', title: 'Find your own trigger list', text: 'Everyone\'s triggers differ. Jot down what you ate before a rough patch — after a few weeks a pattern appears, and you can sidestep most of the bad nights.' },
         { type: 'para', text: 'Constipation and diarrhoea can both be made worse by poor hydration or low fibre — the basics matter more than you think.' }
       ]
     },
@@ -251,6 +263,7 @@ const BOOKLET = {
           'A general "less robust" feeling'
         ]},
         { type: 'box', variant: 'calm', title: 'Why this can happen', text: 'Eating very little gives your body less fuel to make heat and keep energy up. Often the answer is not "eat nothing" — it is "eat enough of the right things".' },
+        { type: 'box', variant: 'story', title: 'I used to be the warm one', text: 'This one caught me off guard. I was always the warm one — now I wear socks to bed. Through the colder months my hands and feet were genuinely cold, I lived in jumpers far more than I ever used to, and I even got chilblains, which left my toes itchy and uncomfortable. It\'s a real and slightly random side effect that I\'d half-forgotten until it happened.' },
         { type: 'box', variant: 'tip', title: 'Gentle things that help', items: [
           'Make sure you are genuinely eating enough, not just a little.',
           'Warm layers, warm drinks, keep moving gently.',
@@ -284,6 +297,9 @@ const BOOKLET = {
           'Greek yoghurt', 'Eggs', 'Chicken', 'Rice', 'Oats',
           'Soup', 'Smoothies', 'Protein shakes (if they suit you)', 'Small balanced meals'
         ]},
+        { type: 'box', variant: 'story', title: 'A day on my plate now', text: 'Morning is a protein shake — oat milk, protein powder, a banana and a spoon of peanut butter. A tea or coffee through the day. Lunch is light and quick around work: a salad or a sandwich and some fruit. Dinner is some of whatever the family is having — pasta, fish and rice, burgers, a homemade fish pie, pie and mash — just a much smaller portion. (One sausage for me, not three.)' },
+        { type: 'box', variant: 'story', title: 'The portion truth', text: 'Here\'s the uncomfortable bit. I genuinely thought I ate fairly well and didn\'t overeat. Paying proper attention showed me that my portions had simply been too big for years — finishing the kids\' plates, going back for more out of habit. The medication quietened the urge, but seeing it written down is what actually changed my mind about how much I\'d been eating.' },
+        { type: 'box', variant: 'story', title: 'Water — I still forget', text: 'I swapped squash for water (squash was giving me headaches). I keep a big bottle with me, have a large glass the moment I wake up, and aim for a litre or two across the day. I still forget — but I get through far more than I used to, and I feel better for it.' },
         { type: 'box', variant: 'track', title: 'Track this', text: 'A loose note of protein and water each day is enough. Track it, do not obsess over it.' },
         { type: 'box', variant: 'ask', title: 'Ask a clinician or pharmacist', text: 'If you wonder about supplements, low intake, or ongoing tummy changes affecting how you eat.' },
         { type: 'placeholder', title: 'Hunger Scale', caption: 'Diagram: 1 (starving) to 10 (uncomfortably full) — aim to eat around the comfortable middle.' }
@@ -303,6 +319,8 @@ const BOOKLET = {
           'Walking counts. Stairs count. Carrying shopping counts.',
           'Build habits now, while appetite is quieter — they carry into maintenance.'
         ]},
+        { type: 'box', variant: 'story', title: 'My honest confession', text: 'I\'ll be straight with you: I haven\'t done proper exercise alongside this. My movement has been walking, stairs, and running around after the kids — and that\'s genuinely better than nothing. But if I could go back, I\'d start some gentle strength work early. I think I\'d have kept more muscle and have less loose skin now. The truth is that exercising properly at 19 stone, with young kids and a full-on job, just felt impossible at the time.' },
+        { type: 'box', variant: 'story', title: 'What I\'d say to you', text: 'You don\'t have to wait until you feel "ready" or until the weight is off. Even a little, early, pays off later. I\'ve got the home equipment sitting there — now the job is actually making the time and committing to it, which is its own challenge.' },
         { type: 'box', variant: 'calm', title: 'Go easy', text: 'If you feel weak, cold or light-headed, scale movement back and check you are eating and drinking enough. Rest is allowed.' },
         { type: 'box', variant: 'ask', title: 'Ask first if', text: 'You have a heart, joint or other condition, or you are unsure what is safe for you.' }
       ]
@@ -324,6 +342,7 @@ const BOOKLET = {
           'Smaller portions without feeling deprived', 'Progress photos showing change',
           'Measurements changing', 'Health markers improving (if confirmed by a clinician)'
         ]},
+        { type: 'box', variant: 'story', title: 'My favourite wins', text: 'The number on the scales is nice, but the wins I actually feel are different. Running up the stairs without getting out of breath. Properly playing and running around with my kids. Carrying myself better. And going from an XXL top to a medium, and from size 42 trousers to a 34 — that still genuinely blows my mind. The biggest one is quieter: I feel confident again, including standing up to present to clients and audiences at work, which I used to dread.' },
         { type: 'box', variant: 'tip', title: 'Try this', text: 'Pick three NSVs to watch this month. They keep you going through the boring weeks.' },
         { type: 'placeholder', title: 'NSV Checklist Card', caption: 'Diagram: a tick-box card to print and stick on the fridge.' }
       ]
@@ -345,6 +364,9 @@ const BOOKLET = {
           'Maintenance is success, not failure.',
           'The goal is a healthier life, not just a lower number.'
         ]},
+        { type: 'box', variant: 'story', title: 'How I think about "cheating"', text: 'I had the "is this cheating?" thought too. Where I landed: I paid for this, I take it properly, and yes it\'s a faster route — but the alternative was strict food control and exercise that, honestly, I know I wouldn\'t have stuck to long term. This gave me the push to actually change. That\'s not cheating; that\'s using the right tool.' },
+        { type: 'box', variant: 'story', title: 'What keeps me going', text: 'Consistency, mostly. And the weekly check on the scales — seeing "still going, another couple of pounds" is a genuine lift. I also keep one big reason in view: I didn\'t want a heart attack before 40 and to miss out on my kids. That matters more than any single wobble or off day.' },
+        { type: 'box', variant: 'story', title: 'Own it', text: 'I\'ve always been honest when people ask. I\'ve met others who downplay it — "oh, only the lowest dose, only every couple of weeks, and I\'m eating well too" — when they\'re on it just like everyone else, and seem a bit embarrassed. You don\'t need to be. You\'re making a huge, positive change to your whole life, and maybe your life expectancy. Own it.' },
         { type: 'box', variant: 'calm', title: 'On the harder days', text: 'One quieter week, one wobble, one off day — none of it undoes your progress. Be as kind to yourself as you would be to a friend.' }
       ]
     },
@@ -371,7 +393,9 @@ const BOOKLET = {
             ["You can copy someone else's dose plan", 'No. Doses are individual and clinical.']
           ]
         },
-        { type: 'box', variant: 'redflag', title: 'About the "golden 5th dose"', text: 'This is a rumour circulating online. Do not stretch, split, or extract extra from your pen. Use it exactly as prescribed.' }
+        { type: 'box', variant: 'redflag', title: 'About the "golden 5th dose"', text: 'This is a rumour circulating online. Do not stretch, split, or extract extra from your pen. Use it exactly as prescribed.' },
+        { type: 'box', variant: 'story', title: 'The "cheating" headline', text: 'You\'ll see the "cheating" angle pushed in the press — which always strikes me as odd, given how many of those readers probably need it or are quietly on it. The way I see it, it\'s no different from someone taking medication for ADHD. We understand now that some brains have a built-in "fullness" and "stop thinking about food" signal, and some don\'t. Mine clearly didn\'t.' },
+        { type: 'box', variant: 'story', title: 'What it actually did', text: 'It hasn\'t magically extracted the weight off me. It made me feel full for longer and stop thinking about food all the time — and that translated into eating less, which translated into losing weight. Not starvation; just enough to lose steadily and stay healthy and moving. That\'s the whole trick, and it\'s a lot less dramatic than the internet makes out.' }
       ]
     },
 
@@ -389,6 +413,9 @@ const BOOKLET = {
           'Holidays: plan storage and timing; keep it simple.',
           'Try not to make Mounjaro your whole identity.'
         ]},
+        { type: 'box', variant: 'story', title: 'How eating out changed', text: 'The old me went for value: a big burger, a couple of beers, a starter and a pudding. Work events meant grabbing every canapé and slice of pizza that drifted past. Now I\'ll happily order a Caesar salad or something lighter, have one beer or a glass of wine, and otherwise stick to water or a lime and soda. I almost always skip pudding (a cheeseboard is my weakness), and I only bother with a starter if it\'s something I really love.' },
+        { type: 'box', variant: 'story', title: 'The comments (all positive, so far)', text: 'Every comment I\'ve had has been kind — including a male colleague telling me I "look amazing", which made me laugh. One person guessed I\'d lost about 10kg; their face when I said it was 36kg was a picture. And genuinely, nobody comments on what you\'re eating when you\'re out — that worry is mostly in your own head.' },
+        { type: 'box', variant: 'story', title: 'Alcohol — what I changed', text: 'I\'ve more or less stopped drinking. I was never a big drinker — a glass or two on a Friday and Saturday — but slower digestion means it hits me harder, and I just don\'t enjoy the hangover anymore. Honestly, I feel better for not casually drinking.' },
         { type: 'box', variant: 'ask', title: 'Alcohol — general note', text: 'Alcohol can hit differently when you are eating less, and may upset your stomach. Be cautious, and check with your prescriber or pharmacist about what is sensible for you.' },
         { type: 'box', variant: 'tip', title: 'Simple lines that help', items: [
           '"I\'m just not very hungry today, thanks."',
@@ -438,6 +465,7 @@ const BOOKLET = {
           'A plateau can be your body recomposing (losing fat, holding muscle).',
           'Measurements and photos may show progress when the scales do not.'
         ]},
+        { type: 'box', variant: 'story', title: 'My stall', text: 'I had a stretch where the loss almost completely stopped. That, for me, was the signal that my body had adjusted to the dose — and it was the trigger for a conversation about moving up, rather than something to panic about. I tried not to fiddle: I treated a real stall as information, not failure.' },
         { type: 'box', variant: 'track', title: 'Plateau checklist', items: [
           'Protein — getting enough?', 'Hydration — drinking enough?',
           'Fibre — enough?', 'Sleep — okay?', 'Movement — regular?',
@@ -463,6 +491,9 @@ const BOOKLET = {
           'Compliments can feel strange. You are allowed to find it odd.',
           'The scales are not the whole story — keep an eye on the NSVs.'
         ]},
+        { type: 'box', variant: 'story', title: 'How it actually went for me', text: 'It showed in my face first — that\'s what people noticed. I never looked gaunt, except for a day or two after one of those sick nights. My clothes told the real story: XXL down to medium, size 42 trousers down to a 34. I do still have a bit of a tummy, and if I lean forward there\'s some loose skin — but losing slowly, over many months, kept that fairly mild.' },
+        { type: 'box', variant: 'tip', title: 'Don\'t buy a whole new wardrobe at once', text: 'I learned this the hard way. If you\'re still losing, anything you buy now may be too big in a few months. I sold the clothes I\'d outgrown and replaced them gradually rather than splurging — it saves a surprising amount of money and frustration.' },
+        { type: 'box', variant: 'tip', title: 'Photograph your face, not just your body', text: 'Comparing a photo of my face from 18 months ago to now is genuinely amazing — and it\'s the change other people see first. Don\'t only take body photos; the face tells the story too.' },
         { type: 'box', variant: 'ask', title: 'If loss feels too fast', text: 'Losing too much, too quickly can affect muscle, energy and how robust you feel. It is worth a conversation with your prescriber.' }
       ]
     },
@@ -474,6 +505,7 @@ const BOOKLET = {
       icon: '🛠️',
       blocks: [
         { type: 'para', text: 'Track lightly and consistently. The point is useful information for you and your prescriber — not another job to feel guilty about.' },
+        { type: 'box', variant: 'story', title: 'My one big regret', text: 'If there\'s a single thing I\'d do differently, it\'s this: I didn\'t track properly early on. Just weight, now and then. I really wish I\'d taken measurements and monthly photos (face included) from day one, and logged my dose alongside it. You can\'t go back and capture those early weeks once they\'re gone. I\'ve seen people keep every used pen, or plot dose against weight on a graph — I did none of it, and I wish I had.' },
         { type: 'cta', href: 'tracker.html', label: '📊 Open the Progress Tracker',
           note: 'A private page to log dose, weight and measurements. Saved only in your browser, and printable as a paper log.' },
         { type: 'subhead', text: 'Apps and tools people use' },
@@ -554,6 +586,9 @@ const BOOKLET = {
           'Aim for a stable weight range, not one magic number.',
           'Food confidence — eating normally without fear — is a real goal.'
         ]},
+        { type: 'box', variant: 'story', title: 'Where I\'m aiming', text: 'My original goal was 14 stone; I\'m now nearly 13. If I reach around 12 stone and can settle into a 12–13 stone range, I\'ll be more than happy — I\'m not chasing a perfect number. I\'d actually like to build some muscle, which might nudge the scales up a little, and that\'s completely fine by me.' },
+        { type: 'box', variant: 'story', title: 'The habits I\'m protecting', text: 'These are the ones I refuse to let slip: little or no alcohol; no boredom snacking (chocolate is my trap — the Christmas tubs, the Easter eggs… I had zero Easter eggs this year, which still surprises me); and not eating something just because it\'s there or easy. Reaching for the healthier option has to become the default, not the exception.' },
+        { type: 'box', variant: 'calm', title: 'My honest worry', text: 'I won\'t pretend I\'m not nervous about the weight creeping back as I reduce the dose. The plan is simple, even if it isn\'t easy: trust the habits I\'ve built over these months, not the medication alone, to hold the line.' },
         { type: 'box', variant: 'ask', title: 'Plan it together', text: 'Any change to your dose or stopping should be planned with your prescriber, with a follow-up plan in place.' },
         { type: 'placeholder', title: 'Maintenance Planning Page', caption: 'Diagram: target range, habits to keep, check-in dates, early-warning signs.' }
       ]
@@ -664,6 +699,36 @@ const BOOKLET = {
       ]
     },
 
+    /* ----------------------------------------------------------------------
+     * QUESTIONS & ANSWERS — a growing section.
+     * When readers ask something, add it here as a new 'story' (my answer)
+     * with a 'subhead' as the question. Newest can go at the top or bottom.
+     * -------------------------------------------------------------------- */
+    {
+      id: 'faq',
+      title: 'Questions & Answers',
+      icon: '❓',
+      blocks: [
+        { type: 'para', text: 'Real questions, answered honestly from my own experience. This section grows over time — if something here isn\'t covered, ask, and I\'ll add it.' },
+        { type: 'box', variant: 'redflag', title: 'Experience, not advice', text: 'These are my personal answers, not medical guidance. For anything about your dose, your health or your medicines, your GP, prescriber or pharmacist is the right person to ask.' },
+
+        { type: 'subhead', text: 'Did it hurt to inject?' },
+        { type: 'box', variant: 'story', text: 'Not really. I was nervous about the first one, but the needle is tiny and it was over before I knew it. I inject into my stomach and barely feel it most weeks. The only time I\'ve bruised is when I rushed it.' },
+
+        { type: 'subhead', text: 'How fast did you lose weight?' },
+        { type: 'box', variant: 'story', text: 'About a pound a week on average — some weeks more, some less — for around six stone over 18 months. Slow and steady, and it added up to more than I ever managed by dieting.' },
+
+        { type: 'subhead', text: 'Will I put it all back on when I stop?' },
+        { type: 'box', variant: 'story', text: 'It\'s my biggest worry too, which is exactly why I\'m tapering down slowly rather than stopping suddenly, and leaning on the habits I\'ve built. The medication quietened the food noise, but the habits are what I\'m trusting to hold the line.' },
+
+        { type: 'subhead', text: 'Do I have to give up eating out and treats?' },
+        { type: 'box', variant: 'story', text: 'No. I still go out and still have the odd treat — just less, and more chosen. A lighter main, one drink, skip the pudding most of the time. It\'s about portions and triggers, not banning things.' },
+
+        { type: 'subhead', text: 'Is it cheating?' },
+        { type: 'box', variant: 'story', text: 'I don\'t think so, and I\'ve made my peace with it. It\'s a tool that fixed something my body wasn\'t doing on its own — feeling full and not thinking about food constantly. It still needs you to make the changes. (There\'s more on this in the Mindset and Myths sections.)' }
+      ]
+    },
+
     /* ---------------------------------------------------------------------- */
     {
       id: 'final',
@@ -678,6 +743,12 @@ const BOOKLET = {
           'Ask questions. Good questions are a superpower.',
           'Be proud of showing up for yourself.'
         ]},
+        { type: 'box', variant: 'story', title: 'Three things I\'d tell you on day one', items: [
+          'Do your research — but stay well away from the horror stories and the myths.',
+          'Lean in and commit. Treat this as a lifestyle opportunity, not a quick fix.',
+          'Don\'t expect overnight miracles — but they do come, and faster than you\'d expect. You will get side effects, and they suck; learn from them, adapt, and they ease over time.'
+        ]},
+        { type: 'box', variant: 'story', title: 'Was it worth it?', text: 'For me, completely — with a few lessons learned along the way. It isn\'t magic, and it doesn\'t do the work for you. But it gave me a genuine push in the right direction at a point when I really needed one, and I\'d make the same choice again.' },
         { type: 'box', variant: 'calm', title: 'You\'ve got this', text: 'Take it one week at a time. Track it, don\'t obsess over it. And when in doubt, ask the people looking after you.' }
       ]
     }
