@@ -91,7 +91,53 @@ a { color: var(--blue); }
 .brand-title { font-weight: 700; font-size: 1rem; }
 .brand-edition { font-size: 0.72rem; color: var(--green); }
 
-.topbar-actions { display: flex; gap: 0.45rem; }
+.topbar-actions { display: flex; align-items: center; gap: 0.45rem; }
+
+/* ---- Search ------------------------------------------------------------- */
+.search { position: relative; display: flex; min-width: 0; }
+.search-input {
+  border: 1px solid var(--charcoal-2);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.42rem 0.85rem;
+  font-size: 0.85rem;
+  width: 9rem;
+  max-width: 42vw;
+  min-width: 0;
+  transition: width .15s ease;
+}
+.search-input:focus { width: 12rem; outline: 2px solid var(--blue-soft); }
+.search-results {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.35rem;
+  width: min(92vw, 340px);
+  max-height: 62vh;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--charcoal-2);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  z-index: 70;
+  padding: 0.3rem;
+}
+.search-results.open { display: block; }
+.search-item {
+  display: flex; flex-direction: column; gap: 0.15rem;
+  width: 100%; text-align: left;
+  background: none; border: none; cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.55rem;
+  font: inherit; color: var(--charcoal);
+}
+.search-item:hover, .search-item:focus { background: var(--green-soft); outline: none; }
+.search-item-title { display: flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; }
+.search-item-icon { font-size: 0.95rem; }
+.search-item-snippet { font-size: 0.78rem; color: #5b605c; line-height: 1.4; }
+.search-item-snippet mark { background: #fce9a8; color: inherit; padding: 0 1px; border-radius: 2px; }
+.search-empty { padding: 0.6rem 0.7rem; font-size: 0.82rem; color: #5b605c; }
 
 .icon-btn {
   border: 1px solid var(--charcoal-2);
@@ -115,30 +161,41 @@ a { color: var(--blue); }
 .pill-btn.primary { background: var(--green); color: #fff; border-color: var(--green); }
 .pill-btn[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); }
 
+/* Section menu: a drop-down panel opened by the ☰ button, on every screen. */
 .section-nav {
-  display: flex;
-  gap: 0.35rem;
-  overflow-x: auto;
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  flex-direction: column;
+  gap: 0.25rem;
   max-width: 980px;
   margin: 0 auto;
-  padding: 0.4rem 1rem 0.6rem;
-  scrollbar-width: thin;
+  padding: 0.5rem 1rem 0.7rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(250, 246, 238, 0.98);
+  backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--charcoal-2);
+  box-shadow: var(--shadow);
 }
+.section-nav.open { display: flex; }
 .section-nav a {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
-  flex: 0 0 auto;
+  gap: 0.5rem;
   text-decoration: none;
   color: var(--charcoal);
   background: #fff;
   border: 1px solid var(--charcoal-2);
-  border-radius: 999px;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.7rem;
+  font-size: 0.9rem;
 }
 .section-nav a.active { background: var(--green); color: #fff; border-color: var(--green); }
-.section-nav .nav-icon { font-size: 0.95rem; }
+.section-nav .nav-icon { font-size: 1rem; }
 
 /* ---- 4. Cover + safety banner ------------------------------------------ */
 .cover { padding: 1.6rem 1.1rem 0.4rem; }
@@ -334,6 +391,25 @@ figure.placeholder figcaption { display: flex; flex-direction: column; gap: 0.15
 figure.placeholder strong { font-size: 0.95rem; }
 figure.placeholder span { font-size: 0.82rem; color: #6a6a6a; }
 
+/* ---- 6g. Real images ---------------------------------------------------- */
+figure.image { margin: 0; }
+figure.image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--charcoal-2);
+}
+figure.image figcaption {
+  display: flex; flex-direction: column; gap: 0.15rem;
+  margin-top: 0.4rem;
+  font-size: 0.85rem; color: #5b605c;
+}
+figure.image strong { font-size: 0.92rem; color: var(--charcoal); }
+
+/* ---- 6h. Print-only lined notes pages ----------------------------------- */
+.notes-page { display: none; }  /* shown only in print (see section 9) */
+
 /* ---- Sources list ------------------------------------------------------- */
 ul.sources { padding-left: 1.2rem; }
 ul.sources li { margin: 0.3rem 0; }
@@ -348,26 +424,14 @@ ul.sources li { margin: 0.3rem 0; }
 .footer-small { font-size: 0.75rem; color: #8a8f8a; }
 .footer code { background: var(--cream-deep); padding: 0.05rem 0.35rem; border-radius: 4px; }
 
-/* ---- 7. Pocket mode ----------------------------------------------------- */
-body.pocket-mode { --maxw: 430px; --fs-base: 16px; }
-body.pocket-mode .section { padding: 1rem; }
-body.pocket-mode .cover h1 { font-size: 1.6rem; }
-
 /* ---- 8. Responsive (mobile) -------------------------------------------- */
 @media (max-width: 640px) {
   :root { --fs-base: 16px; }
   .cover h1 { font-size: 1.7rem; }
   .section { padding: 1rem; }
   .topbar-actions .pill-btn { padding: 0.4rem 0.6rem; font-size: 0.78rem; }
-
-  /* Collapse nav behind the ☰ button on small screens */
-  .section-nav {
-    display: none;
-    flex-direction: column;
-    max-height: 60vh;
-  }
-  .section-nav.open { display: flex; }
-  .section-nav a { width: 100%; }
+  .search-input { width: 6.5rem; }
+  .search-input:focus { width: 8.5rem; }
 }
 
 /* ---- 9. Print / A5 booklet --------------------------------------------- */
@@ -414,6 +478,32 @@ body.pocket-mode .cover h1 { font-size: 1.6rem; }
   }
   .section-head { border-bottom: 1.5pt solid #444; }
   .section-num { background: #444 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Lined notes page after each section: its own page, ruled for handwriting */
+  .notes-page {
+    display: block;
+    page-break-before: always;
+    page-break-inside: avoid;
+  }
+  .notes-head {
+    font-size: 11pt;
+    font-weight: 700;
+    border-bottom: 1.5pt solid #444;
+    padding-bottom: 4pt;
+    margin-bottom: 6pt;
+  }
+  .notes-lines {
+    height: 165mm;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 8mm,
+      #cfcfcf 8mm,
+      #cfcfcf calc(8mm + 0.3pt)
+    );
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
   /* Keep boxes, tables and figures from splitting awkwardly */
   .box, figure.placeholder, .tracker, .table-wrap { page-break-inside: avoid; }

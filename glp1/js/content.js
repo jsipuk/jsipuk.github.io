@@ -19,9 +19,16 @@
  *   { type: 'box', variant: 'tip'|'ask'|'track'|'calm'|'redflag',
  *                  title: '...(optional)', text: '...(optional)', items: [...] }
  *   { type: 'table',    headers: ['A','B'], rows: [['1','2'], ...] }
- *   { type: 'placeholder', title: '...', caption: '...' }  // diagram/image card
+ *   { type: 'placeholder', title: '...', caption: '...' }  // grey "image goes here" card
+ *   { type: 'image', src: 'img/file.jpg', alt: '...', title: '...', caption: '...' }
  *   { type: 'definitions', items: [{ term:'...', def:'...' }] }
  *   { type: 'tracker',  fields: ['Week', 'Date', ...] }    // blank-line template
+ *
+ * IMAGES
+ *   'placeholder' draws a grey "image goes here" card (a wish-list slot).
+ *   To use a real picture, put the file in glp1/img/ and switch the block to
+ *   type 'image' with src: 'img/your-file.jpg'. Keep personal progress photos
+ *   OFF this page — it is unlisted but still public to anyone with the link.
  *
  * SAFETY NOTE FOR EDITORS
  *   Keep the "not medical advice" tone. Use "ask your prescriber" boxes for
@@ -480,6 +487,39 @@ const BOOKLET = {
             ['Wearables', 'Smart watch tracking, if you have one']
           ]
         },
+        { type: 'box', variant: 'tip', title: 'On iPhone specifically', items: [
+          'Apple Health — the hub that ties weight, steps, sleep and heart rate together.',
+          'Apple Notes or Reminders — a free, private weekly log and jab-day reminder.',
+          'Medisafe or Apple Reminders — a repeating reminder for jab day.',
+          'Happy Scale — smooths the daily wobble into a clear weight trend.',
+          'MacroFactor, Cronometer or MyFitnessPal — for protein, if you count it.',
+          'Apple Photos — a dedicated, private album for progress pictures.'
+        ]},
+        { type: 'subhead', text: 'Recording dose and changes' },
+        { type: 'list', items: [
+          'Each jab: date, strength (mg), injection site, and how the week felt.',
+          'Note any dose change — up, down, paused — and the reason, agreed with your prescriber.',
+          'Jot the pen batch number in case of a recall or a faulty pen.',
+          'Bring this log to reviews — it makes the conversation much easier.'
+        ]},
+        { type: 'subhead', text: 'Measurements — which ones, and how' },
+        { type: 'list', items: [
+          'Weight: same day each week, same time (usually first thing), same scales.',
+          'Waist: around the narrowest point, or level with your tummy button.',
+          'Chest, hips (widest point), neck, thigh and upper arm if you like detail.',
+          'Use a soft tape, snug but not squeezing, and measure the same spots each time.',
+          'Monthly is plenty for tape measurements — bodies change slowly.'
+        ]},
+        { type: 'box', variant: 'track', title: 'Track this', text: 'A trend over weeks tells the truth; a single morning reading does not. See the printable Measurement log in Templates & Checklists.' },
+        { type: 'subhead', text: 'Progress photos that show real change' },
+        { type: 'list', items: [
+          'Same pose, same spot, same lighting, roughly the same time of day.',
+          'Front, side and back; phone at a fixed height (a small tripod or shelf helps).',
+          'Same or similar fitted clothing so the difference is the body, not the outfit.',
+          'Monthly, not daily — change is far clearer over weeks.',
+          'The scales can stall while photos and measurements quietly move.'
+        ]},
+        { type: 'box', variant: 'redflag', title: 'Keep photos private', text: 'Progress photos are personal. Keep them in a private album on your phone. This guide is unlisted but still public to anyone with the link, so do not post personal photos here.' },
         { type: 'subhead', text: 'Worth tracking' },
         { type: 'list', items: [
           'Jab date, dose strength, injection site, pen/batch notes',

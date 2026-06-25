@@ -104,6 +104,19 @@
     ]);
   }
 
+  // A real image. Drop a file in glp1/img/ and use:
+  //   { type: 'image', src: 'img/your-file.jpg', alt: '...', title: '...', caption: '...' }
+  function renderImage(b) {
+    const kids = [el('img', { src: b.src, alt: b.alt || b.title || '', loading: 'lazy' })];
+    if (b.title || b.caption) {
+      kids.push(el('figcaption', null, [
+        b.title ? el('strong', null, [b.title]) : null,
+        b.caption ? el('span', null, [b.caption]) : null
+      ]));
+    }
+    return el('figure', { class: 'image' }, kids);
+  }
+
   function renderSources() {
     const list = (data.meta.sources || []).map(function (s) {
       return el('li', null, [
@@ -122,6 +135,7 @@
       case 'box':         return renderBox(b);
       case 'table':       return renderTable(b);
       case 'placeholder': return renderPlaceholder(b);
+      case 'image':       return renderImage(b);
       case 'definitions': return renderDefinitions(b);
       case 'tracker':     return renderTracker(b);
       case 'sources':     return renderSources();
@@ -143,6 +157,15 @@
     return el('section', { class: 'section', id: section.id, 'aria-labelledby': section.id + '-h' }, [header, body]);
   }
 
+  // A lined "notes" page that only appears in print, after each section, so the
+  // printed booklet alternates information page → blank lined page for the reader.
+  function renderNotesPage(section) {
+    return el('div', { class: 'notes-page', 'aria-hidden': 'true' }, [
+      el('div', { class: 'notes-head' }, ['Notes — ' + section.title]),
+      el('div', { class: 'notes-lines' }, [])
+    ]);
+  }
+
   function buildNav() {
     const nav = document.getElementById('section-nav');
     data.sections.forEach(function (s, i) {
@@ -159,23 +182,27 @@
     const printBtn = document.getElementById('print-btn');
     if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
 
-    const pocketBtn = document.getElementById('pocket-btn');
-    if (pocketBtn) {
-      pocketBtn.addEventListener('click', function () {
-        const on = document.body.classList.toggle('pocket-mode');
-        pocketBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
-    }
-
     const menuBtn = document.getElementById('menu-btn');
     const nav = document.getElementById('section-nav');
     if (menuBtn && nav) {
-      menuBtn.addEventListener('click', function () {
+      function closeNav() {
+        nav.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      }
+      menuBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
         const open = nav.classList.toggle('open');
         menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
       });
+      // Close after picking a section, on outside click, or on Escape.
       nav.addEventListener('click', function (e) {
-        if (e.target.closest('a')) nav.classList.remove('open');
+        if (e.target.closest('a')) closeNav();
+      });
+      document.addEventListener('click', function (e) {
+        if (nav.classList.contains('open') && !nav.contains(e.target) && e.target !== menuBtn) closeNav();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeNav();
       });
     }
   }
@@ -199,6 +226,105 @@
     document.querySelectorAll('main .section').forEach(function (s) { obs.observe(s); });
   }
 
+  /* ---- search ------------------------------------------------------------ */
+  // Pull every human-readable string out of a block for indexing.
+  function blockText(b) {
+    const parts = [];
+    ['text', 'title', 'caption', 'alt'].forEach(function (k) { if (b[k]) parts.push(b[k]); });
+    if (b.headers) b.headers.forEach(function (h) { parts.push(h); });
+    if (b.rows) b.rows.forEach(function (r) { r.forEach(function (c) { if (c) parts.push(c); }); });
+    if (b.fields) b.fields.forEach(function (f) { parts.push(f); });
+    if (b.items) b.items.forEach(function (it) {
+      if (typeof it === 'string') parts.push(it);
+      else if (it && typeof it === 'object') parts.push([it.term, it.def].filter(Boolean).join(' — '));
+    });
+    return parts.join(' · ');
+  }
+
+  function buildSearchIndex() {
+    return data.sections.map(function (s) {
+      const raw = s.title + '. ' + s.blocks.map(blockText).join(' · ');
+      return { id: s.id, title: s.title, icon: s.icon || '•', raw: raw, hay: raw.toLowerCase() };
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  // Build a short snippet around the first match, with the query highlighted.
+  function snippet(raw, qLower) {
+    const i = raw.toLowerCase().indexOf(qLower);
+    if (i < 0) return '';
+    const start = Math.max(0, i - 40);
+    const end = Math.min(raw.length, i + qLower.length + 60);
+    let s = raw.slice(start, end);
+    const before = escapeHtml(s.slice(0, i - start));
+    const hit = escapeHtml(s.slice(i - start, i - start + qLower.length));
+    const after = escapeHtml(s.slice(i - start + qLower.length));
+    return (start > 0 ? '… ' : '') + before + '<mark>' + hit + '</mark>' + after + (end < raw.length ? ' …' : '');
+  }
+
+  function wireSearch() {
+    const input = document.getElementById('search-input');
+    const panel = document.getElementById('search-results');
+    if (!input || !panel) return;
+    const index = buildSearchIndex();
+
+    function close() {
+      panel.classList.remove('open');
+      panel.innerHTML = '';
+      input.setAttribute('aria-expanded', 'false');
+    }
+
+    function go(id) {
+      const target = document.getElementById(id);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      close();
+      input.blur();
+    }
+
+    function run() {
+      const q = input.value.trim().toLowerCase();
+      panel.innerHTML = '';
+      if (q.length < 2) { close(); return; }
+      const matches = index.filter(function (s) { return s.hay.indexOf(q) >= 0; }).slice(0, 8);
+      if (!matches.length) {
+        panel.appendChild(el('div', { class: 'search-empty' }, ['No matches for “' + input.value.trim() + '”']));
+      } else {
+        matches.forEach(function (s) {
+          const item = el('button', { type: 'button', class: 'search-item', role: 'option', 'data-id': s.id }, [
+            el('span', { class: 'search-item-title' }, [
+              el('span', { class: 'search-item-icon', 'aria-hidden': 'true' }, [s.icon]),
+              s.title
+            ]),
+            el('span', { class: 'search-item-snippet', html: snippet(s.raw, q) })
+          ]);
+          item.addEventListener('click', function () { go(s.id); });
+          panel.appendChild(item);
+        });
+      }
+      panel.classList.add('open');
+      input.setAttribute('aria-expanded', 'true');
+    }
+
+    input.addEventListener('input', run);
+    input.addEventListener('focus', function () { if (input.value.trim().length >= 2) run(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        const first = panel.querySelector('.search-item');
+        if (first) { e.preventDefault(); go(first.getAttribute('data-id')); }
+      } else if (e.key === 'Escape') {
+        close(); input.blur();
+      }
+    });
+    document.addEventListener('click', function (e) {
+      if (!panel.contains(e.target) && e.target !== input) close();
+    });
+  }
+
   /* ---- boot -------------------------------------------------------------- */
   function init() {
     // titles / meta
@@ -214,10 +340,14 @@
     buildNav();
 
     const main = document.getElementById('content');
-    data.sections.forEach(function (s, i) { main.appendChild(renderSection(s, i)); });
+    data.sections.forEach(function (s, i) {
+      main.appendChild(renderSection(s, i));
+      main.appendChild(renderNotesPage(s));
+    });
 
     wireControls();
     wireScrollSpy();
+    wireSearch();
   }
 
   function setText(id, text) {

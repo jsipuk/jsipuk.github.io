@@ -22,7 +22,12 @@
         <span class="brand-edition" id="booklet-edition"></span>
       </div>
       <div class="topbar-actions">
-        <button id="pocket-btn" class="pill-btn" aria-pressed="false" title="Toggle narrow pocket layout">📐 Pocket</button>
+        <div class="search" id="search">
+          <input id="search-input" class="search-input" type="search" autocomplete="off"
+                 placeholder="Search…" aria-label="Search the guide"
+                 role="combobox" aria-expanded="false" aria-controls="search-results" />
+          <div id="search-results" class="search-results" role="listbox" aria-label="Search results"></div>
+        </div>
         <button id="print-btn" class="pill-btn primary" title="Print or save as PDF (A5 booklet)">🖨️ Print</button>
       </div>
     </div>
