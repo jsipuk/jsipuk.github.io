@@ -1,0 +1,11 @@
+{
+  "name": "My Mounjaro Progress Tracker",
+  "short_name": "MJ Tracker",
+  "description": "A private progress tracker for dose, weight and measurements. Data stays on your device.",
+  "start_url": "tracker.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf6ee",
+  "theme_color": "#6fa287"
+}

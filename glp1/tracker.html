@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="A private, printable progress tracker for Mounjaro (tirzepatide): dose, weight, measurements and notes. Saved only in your browser." />
   <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#6fa287" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MJ Tracker" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <title>My Mounjaro Progress Tracker</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/tracker.css" />
@@ -37,6 +42,9 @@
   <input type="file" id="import-file" accept="application/json,.json" hidden />
 
   <main class="tracker-main">
+    <!-- Reminder / tip banners (built by tracker.js) -->
+    <div class="banners no-print" id="banners"></div>
+
     <!-- Print-only header (the top bar is hidden when printing) -->
     <div class="print-title" id="print-title" aria-hidden="true"></div>
 
@@ -48,6 +56,7 @@
          uploaded anywhere. Use <strong>Data → Save a backup</strong> now and then so you
          don't lose it, and <strong>Print</strong> to keep a paper copy (or print it blank to
          fill in by hand).</p>
+      <p class="muted small" id="storage-status"></p>
       <p class="muted">Tip: keep progress photos in a private album on your phone — not here.</p>
     </section>
 

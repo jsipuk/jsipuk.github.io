@@ -49,7 +49,9 @@
   function defaults() {
     return {
       settings: { name: '', medication: 'Mounjaro (tirzepatide)', weightUnit: 'kg', lengthUnit: 'cm' },
-      entries: []
+      entries: [],
+      // Bookkeeping for backup reminders + dismissed tips (not user data as such).
+      meta: { lastBackupAt: null, dirty: false, homeTipDismissed: false }
     };
   }
   function load() {
@@ -59,9 +61,12 @@
       var d = defaults();
       raw.settings = Object.assign(d.settings, raw.settings || {});
       raw.entries = Array.isArray(raw.entries) ? raw.entries : [];
+      raw.meta = Object.assign(d.meta, raw.meta || {});
       return raw;
     } catch (e) { return defaults(); }
   }
+  // Mark that user data changed since the last backup.
+  function markDirty() { state.meta.dirty = true; }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); }
     catch (e) { alert('Could not save — this browser may be blocking storage (private mode?).'); }
@@ -264,6 +269,7 @@
         state.entries.push(rec);
       }
       editingId = null;
+      markDirty();
       save();
       renderAll();
       document.getElementById('entry').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -309,7 +315,7 @@
           onclick: function () {
             if (confirm('Delete the entry for ' + (e.date || 'this row') + '?')) {
               state.entries = state.entries.filter(function (x) { return x.id !== e.id; });
-              save(); renderAll();
+              markDirty(); save(); renderAll();
             }
           } }, ['✕'])
       ]));
@@ -370,7 +376,11 @@
     download('mounjaro-tracker.csv', lines.join('\r\n'), 'text/csv');
   }
   function exportJSON() {
+    state.meta.lastBackupAt = new Date().toISOString();
+    state.meta.dirty = false;
+    save();
     download('mounjaro-tracker-backup.json', JSON.stringify(state, null, 2), 'application/json');
+    renderBanners();
   }
   function importJSON(file) {
     var reader = new FileReader();
@@ -383,6 +393,8 @@
         state = data;
         state.settings = Object.assign(defaults().settings, data.settings || {});
         state.entries = data.entries.map(function (e) { return Object.assign({ id: uid() }, e); });
+        state.meta = Object.assign(defaults().meta, data.meta || {});
+        state.meta.dirty = false; // a freshly restored backup is, by definition, backed up
         editingId = null; save(); renderAll();
         alert('Backup restored.');
       } catch (err) {
@@ -424,6 +436,74 @@
     document.getElementById('print-btn').addEventListener('click', function () { window.print(); });
   }
 
+  /* ---- durability: persistence + reminders -------------------------------- */
+  function isIOS() {
+    return /iP(hone|od|ad)/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS
+  }
+  function isStandalone() {
+    return window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  }
+  function daysSince(iso) {
+    if (!iso) return Infinity;
+    return (Date.now() - new Date(iso).getTime()) / 86400000;
+  }
+
+  // Ask the browser not to auto-evict our data; reflect the result in the intro.
+  function applyStorage() {
+    var line = document.getElementById('storage-status');
+    function set(txt) { if (line) line.textContent = txt; }
+    if (!navigator.storage || !navigator.storage.persist) {
+      set('Storage: standard — back up now and then so you don\'t lose anything.');
+      return;
+    }
+    navigator.storage.persisted().then(function (already) {
+      if (already) { set('Storage: persistent ✓ — your browser has been asked not to clear this automatically.'); return; }
+      navigator.storage.persist().then(function (granted) {
+        set(granted
+          ? 'Storage: persistent ✓ — your browser has been asked not to clear this automatically.'
+          : 'Storage: standard — back up now and then, and on iPhone add this to your Home Screen (see below).');
+      }).catch(function () { set('Storage: standard — back up now and then so you don\'t lose anything.'); });
+    }).catch(function () { set('Storage: standard — back up now and then so you don\'t lose anything.'); });
+  }
+
+  var backupDismissed = false; // per page-load
+  function renderBanners() {
+    var box = document.getElementById('banners');
+    if (!box) return;
+    clear(box);
+
+    // 1. Backup reminder: shown when there are unsaved-since-backup changes.
+    if (state.entries.length && state.meta.dirty && !backupDismissed) {
+      var never = !state.meta.lastBackupAt;
+      var d = Math.floor(daysSince(state.meta.lastBackupAt));
+      var msg = never
+        ? 'Your progress is saved on this device only. Save a backup so a browser clear-out can\'t wipe it.'
+        : 'You\'ve made changes since your last backup (' + d + ' day' + (d === 1 ? '' : 's') + ' ago). Save a fresh one?';
+      box.appendChild(el('div', { class: 'banner backup' }, [
+        el('span', { class: 'banner-ico', 'aria-hidden': 'true' }, ['💾']),
+        el('span', { class: 'banner-text' }, [msg]),
+        el('button', { class: 'pill-btn primary', type: 'button', onclick: exportJSON }, ['Save a backup']),
+        el('button', { class: 'banner-x', type: 'button', 'aria-label': 'Dismiss',
+          onclick: function () { backupDismissed = true; renderBanners(); } }, ['✕'])
+      ]));
+    }
+
+    // 2. iOS tip: Add to Home Screen exempts the site from Safari's ~7-day wipe.
+    if (isIOS() && !isStandalone() && !state.meta.homeTipDismissed) {
+      box.appendChild(el('div', { class: 'banner tip' }, [
+        el('span', { class: 'banner-ico', 'aria-hidden': 'true' }, ['📲']),
+        el('span', { class: 'banner-text' }, [
+          'On iPhone, tap Share then ', el('strong', null, ['Add to Home Screen']),
+          ', and open the tracker from there. It keeps your data safe — Safari can otherwise clear ordinary web data after about a week.'
+        ]),
+        el('button', { class: 'banner-x', type: 'button', 'aria-label': 'Dismiss',
+          onclick: function () { state.meta.homeTipDismissed = true; save(); renderBanners(); } }, ['✕'])
+      ]));
+    }
+  }
+
   /* ---- boot --------------------------------------------------------------- */
   function renderAll() {
     renderSettings();
@@ -432,10 +512,12 @@
     renderForm();
     renderTable();
     renderPrintTitle();
+    renderBanners();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     wireMenu();
     renderAll();
+    applyStorage();
   });
 })();

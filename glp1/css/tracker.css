@@ -38,6 +38,34 @@
   margin-bottom: 1.1rem;
 }
 
+/* ---- 1b. Reminder / tip banners ----------------------------------------- */
+.banners { display: flex; flex-direction: column; gap: 0.6rem; margin: 0 0 1rem; }
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+}
+.banner-ico { font-size: 1.15rem; line-height: 1; }
+.banner-text { flex: 1; min-width: 0; }
+.banner.backup { background: var(--track-bg); border: 1px solid #dcc899; }
+.banner.tip { background: var(--blue-soft); border: 1px solid #bcd2e2; }
+.banner .pill-btn { flex: 0 0 auto; }
+.banner-x {
+  flex: 0 0 auto;
+  background: none; border: none; cursor: pointer;
+  font-size: 0.95rem; color: #5b605c; padding: 0.2rem 0.35rem; border-radius: 6px;
+}
+.banner-x:hover { color: #222; background: rgba(0, 0, 0, 0.06); }
+@media (max-width: 560px) {
+  .banner { flex-wrap: wrap; }
+  .banner .pill-btn { order: 3; }
+  .banner-x { order: 2; margin-left: auto; }
+}
+
 /* ---- 2. Data menu ------------------------------------------------------- */
 .menu { position: relative; }
 .data-dropdown {
