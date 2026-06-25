@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A practical, friendly pocket guide for starting Mounjaro (tirzepatide). Lived experience, not medical advice." />
+  <!-- Personal guide: keep it out of search engines. Remove this line if you
+       ever want it publicly discoverable. (Note: on a public Pages site the
+       page is still reachable by anyone who has the URL.) -->
+  <meta name="robots" content="noindex, nofollow" />
+  <title>My Mounjaro Experience</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ===== Top bar (screen only) ===================================== -->
+  <header class="topbar no-print">
+    <div class="topbar-inner">
+      <button id="menu-btn" class="icon-btn" aria-label="Sections menu" aria-expanded="false" aria-controls="section-nav">☰</button>
+      <div class="brand">
+        <span class="brand-title" id="booklet-title">My Mounjaro Experience</span>
+        <span class="brand-edition" id="booklet-edition"></span>
+      </div>
+      <div class="topbar-actions">
+        <button id="pocket-btn" class="pill-btn" aria-pressed="false" title="Toggle narrow pocket layout">📐 Pocket</button>
+        <button id="print-btn" class="pill-btn primary" title="Print or save as PDF (A5 booklet)">🖨️ Print</button>
+      </div>
+    </div>
+    <!-- Section navigation (built by app.js) -->
+    <nav id="section-nav" class="section-nav" aria-label="Booklet sections"></nav>
+  </header>
+
+  <!-- ===== Cover (shown on screen + as print cover) ================== -->
+  <div class="cover">
+    <div class="cover-card">
+      <p class="cover-kicker">A pocket guide</p>
+      <h1 id="print-cover-title">My Mounjaro Experience</h1>
+      <p class="cover-sub" id="print-cover-subtitle"></p>
+      <p class="cover-safety" id="print-cover-safety"></p>
+    </div>
+  </div>
+
+  <!-- ===== Standing safety banner =================================== -->
+  <aside class="safety-banner" role="note">
+    <span class="safety-icon" aria-hidden="true">⚠️</span>
+    <p id="safety-banner-text"></p>
+  </aside>
+
+  <!-- Subtitle lives here for screen reading flow -->
+  <p class="lead-subtitle" id="booklet-subtitle"></p>
+
+  <!-- ===== Content (built by app.js) =============================== -->
+  <main id="content" class="content"></main>
+
+  <!-- ===== Footer ================================================== -->
+  <footer class="footer">
+    <p><strong>Remember:</strong> this booklet is lived experience, not medical advice. Always follow your prescriber's instructions and read the official patient information leaflet.</p>
+    <p class="footer-small">Made with care · Edit the words in <code>js/content.js</code></p>
+  </footer>
+
+  <!-- Content first, then the app that renders it -->
+  <script src="js/content.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
