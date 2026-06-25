@@ -104,6 +104,15 @@
     ]);
   }
 
+  // A call-to-action button linking elsewhere (e.g. the progress tracker page).
+  //   { type: 'cta', href: 'tracker.html', label: '...', note: '...' }
+  function renderCta(b) {
+    return el('div', { class: 'cta no-print' }, [
+      el('a', { class: 'cta-btn', href: b.href }, [b.label]),
+      b.note ? el('p', { class: 'cta-note' }, [b.note]) : null
+    ]);
+  }
+
   // A real image. Drop a file in glp1/img/ and use:
   //   { type: 'image', src: 'img/your-file.jpg', alt: '...', title: '...', caption: '...' }
   function renderImage(b) {
@@ -135,6 +144,7 @@
       case 'box':         return renderBox(b);
       case 'table':       return renderTable(b);
       case 'placeholder': return renderPlaceholder(b);
+      case 'cta':         return renderCta(b);
       case 'image':       return renderImage(b);
       case 'definitions': return renderDefinitions(b);
       case 'tracker':     return renderTracker(b);

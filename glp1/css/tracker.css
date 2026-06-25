@@ -1,0 +1,215 @@
+/* =============================================================================
+ * MY MOUNJARO PROGRESS TRACKER — tracker.css
+ * Builds on css/styles.css (design tokens, top bar, buttons).
+ * 1. Layout + cards            2. Data menu
+ * 3. Settings + summary stats  4. Chart
+ * 5. Entry form                6. History table
+ * 7. Print (A4 landscape)
+ * ========================================================================== */
+
+/* ---- 1. Layout + cards -------------------------------------------------- */
+.tracker-body { background: var(--cream); }
+
+.tracker-main {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 1.1rem 1.1rem 3rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--charcoal-2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.1rem;
+  margin: 0 0 1.1rem;
+}
+.card-h { margin: 0 0 0.7rem; font-size: 1.05rem; }
+.intro h1 { margin: 0 0 0.5rem; font-size: 1.5rem; }
+.intro p { margin: 0.3rem 0; }
+.muted { color: #5b605c; }
+.small { font-size: 0.85rem; }
+.empty {
+  background: var(--green-soft);
+  border: 1px dashed var(--green);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1rem;
+  color: #3f5a4c;
+  margin-bottom: 1.1rem;
+}
+
+/* ---- 2. Data menu ------------------------------------------------------- */
+.menu { position: relative; }
+.data-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.35rem;
+  min-width: 230px;
+  background: #fff;
+  border: 1px solid var(--charcoal-2);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 0.3rem;
+  z-index: 70;
+}
+.data-dropdown.open { display: block; }
+.data-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  color: var(--charcoal);
+  cursor: pointer;
+}
+.data-dropdown button:hover { background: var(--green-soft); }
+.data-dropdown button.danger { color: var(--redflag); }
+.data-dropdown button.danger:hover { background: var(--redflag-bg); }
+
+/* ---- 3. Settings + summary --------------------------------------------- */
+.set-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.7rem;
+}
+.set-field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; font-weight: 600; }
+.set-field input, .set-field select {
+  font: inherit; font-weight: 400;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--charcoal-2);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.7rem;
+  margin: 0 0 1.1rem;
+}
+.stat {
+  background: #fff;
+  border: 1px solid var(--charcoal-2);
+  border-left: 4px solid var(--blue);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 0.7rem 0.85rem;
+}
+.stat-val { font-size: 1.45rem; font-weight: 700; line-height: 1.1; }
+.stat-label { font-size: 0.8rem; color: #5b605c; margin-top: 0.15rem; }
+.stat-sub { font-size: 0.72rem; color: #8a8f8b; margin-top: 0.15rem; }
+.stat-down { border-left-color: var(--tip); }
+.stat-down .stat-val { color: var(--tip); }
+.stat-up { border-left-color: var(--track); }
+.stat-up .stat-val { color: var(--track); }
+
+/* ---- 4. Chart ----------------------------------------------------------- */
+.chart-card svg.trend { width: 100%; height: auto; display: block; }
+.trend .grid { stroke: #e7e3d8; stroke-width: 1; }
+.trend .axis { fill: #9a9a90; font-size: 10px; }
+.trend .line { fill: none; stroke: var(--green); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.trend .dot { fill: var(--green); }
+
+/* ---- 5. Entry form ------------------------------------------------------ */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.6rem 0.7rem;
+}
+.form-field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem; font-weight: 600; }
+.form-field.wide { grid-column: 1 / -1; }
+.form-field input {
+  font: inherit; font-weight: 400;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--charcoal-2);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  width: 100%;
+}
+.form-field input:focus { outline: 2px solid var(--blue-soft); border-color: var(--blue); }
+.form-actions { display: flex; gap: 0.5rem; margin-top: 0.9rem; }
+
+/* ---- 6. History table --------------------------------------------------- */
+.log-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius-sm); }
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  background: #fff;
+  min-width: 760px;
+}
+.log-table th, .log-table td {
+  border: 1px solid var(--charcoal-2);
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+.log-table thead th {
+  background: var(--green-soft);
+  position: sticky;
+  top: 0;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.log-table thead th small { font-weight: 400; color: #5b605c; }
+.log-table tbody tr:nth-child(even) td { background: #faf8f2; }
+.log-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.col-wide { min-width: 180px; white-space: normal; }
+.col-act { width: 1%; white-space: nowrap; text-align: center; }
+.mini {
+  background: none; border: 1px solid var(--charcoal-2);
+  border-radius: 6px; cursor: pointer;
+  padding: 0.15rem 0.4rem; margin: 0 1px; font-size: 0.8rem; line-height: 1;
+}
+.mini:hover { background: var(--green-soft); }
+.mini.danger { color: var(--redflag); }
+.mini.danger:hover { background: var(--redflag-bg); }
+
+.tracker-foot { margin-top: 1.5rem; font-size: 0.9rem; }
+.tracker-foot p { margin: 0.3rem 0; }
+
+/* Print-only bits hidden on screen */
+.print-only { display: none; }
+.print-title { display: none; }
+
+/* ---- 7. Print (A4 landscape — fits the wide table) ---------------------- */
+@page { size: A4 landscape; margin: 12mm 10mm; }
+
+@media print {
+  :root { --fs-base: 9.5pt; }
+  .tracker-body { background: #fff; color: #000; }
+  .no-print, .topbar, .chart-card, .intro, #settings, .entry, .tracker-foot { display: none !important; }
+  .tracker-main { max-width: 100%; padding: 0; margin: 0; }
+  .card { box-shadow: none; border: none; padding: 0; margin: 0; }
+
+  .print-title { display: block; margin-bottom: 6pt; }
+  .print-title h1 { margin: 0; font-size: 15pt; }
+  .print-title p { margin: 2pt 0 0; font-size: 9pt; color: #333; }
+
+  .summary {
+    display: flex; flex-wrap: wrap; gap: 6pt;
+    margin: 0 0 6pt;
+  }
+  .stat { box-shadow: none; border: 1pt solid #bbb; border-left: 3pt solid #777; padding: 3pt 6pt; }
+  .stat-val { font-size: 11pt; }
+  .stat-down .stat-val, .stat-up .stat-val { color: #000; }
+
+  .table-scroll { overflow: visible; }
+  .log-table { min-width: 0; width: 100%; font-size: 8.5pt; page-break-inside: auto; }
+  .log-table th, .log-table td { border: 0.5pt solid #999; padding: 2.5pt 3pt; }
+  .log-table thead th {
+    background: #e7f0ea !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    position: static;
+  }
+  .log-table tbody tr:nth-child(even) td { background: #fff; }
+  .log-table tbody tr { page-break-inside: avoid; }
+  tr.print-only { display: table-row; }
+  .log-table tr.print-only td { height: 9mm; }
+}

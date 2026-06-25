@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A private, printable progress tracker for Mounjaro (tirzepatide): dose, weight, measurements and notes. Saved only in your browser." />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>My Mounjaro Progress Tracker</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/tracker.css" />
+</head>
+<body class="tracker-body">
+
+  <!-- ===== Top bar (screen only) ===================================== -->
+  <header class="topbar no-print">
+    <div class="topbar-inner">
+      <a class="icon-btn" href="index.html" title="Back to the guide" aria-label="Back to the guide">←</a>
+      <div class="brand">
+        <span class="brand-title">My Mounjaro Progress Tracker</span>
+        <span class="brand-edition">Private · saved in this browser only</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="menu" id="data-menu">
+          <button id="data-btn" class="pill-btn" aria-haspopup="true" aria-expanded="false">⋯ Data</button>
+          <div id="data-dropdown" class="data-dropdown" role="menu" aria-label="Data options">
+            <button type="button" data-action="csv" role="menuitem">⬇︎ Export to CSV (spreadsheet)</button>
+            <button type="button" data-action="json" role="menuitem">⬇︎ Save a backup (JSON)</button>
+            <button type="button" data-action="import" role="menuitem">⬆︎ Restore a backup</button>
+            <button type="button" data-action="clear" role="menuitem" class="danger">🗑 Clear all data</button>
+          </div>
+        </div>
+        <button id="print-btn" class="pill-btn primary" title="Print or save as PDF (A4 landscape)">🖨️ Print</button>
+      </div>
+    </div>
+  </header>
+
+  <input type="file" id="import-file" accept="application/json,.json" hidden />
+
+  <main class="tracker-main">
+    <!-- Print-only header (the top bar is hidden when printing) -->
+    <div class="print-title" id="print-title" aria-hidden="true"></div>
+
+    <!-- Intro / privacy note -->
+    <section class="card intro no-print">
+      <h1>Progress tracker</h1>
+      <p>Log your dose, weight, measurements and notes week by week. Everything you
+         type is saved <strong>only in this browser on this device</strong> — nothing is
+         uploaded anywhere. Use <strong>Data → Save a backup</strong> now and then so you
+         don't lose it, and <strong>Print</strong> to keep a paper copy (or print it blank to
+         fill in by hand).</p>
+      <p class="muted">Tip: keep progress photos in a private album on your phone — not here.</p>
+    </section>
+
+    <!-- Settings (name / medication / units) -->
+    <section class="card" id="settings"></section>
+
+    <!-- Headline numbers -->
+    <section class="summary" id="summary"></section>
+
+    <!-- Weight trend chart -->
+    <section class="card chart-card no-print" id="chart"></section>
+
+    <!-- Add / edit entry -->
+    <section class="card entry no-print" id="entry"></section>
+
+    <!-- History table -->
+    <section class="log" id="log"></section>
+
+    <footer class="tracker-foot no-print">
+      <p><a href="index.html">← Back to the guide</a></p>
+      <p class="muted">This is lived-experience self-tracking, not medical advice. Always follow your prescriber's instructions.</p>
+    </footer>
+  </main>
+
+  <script src="js/tracker.js"></script>
+</body>
+</html>

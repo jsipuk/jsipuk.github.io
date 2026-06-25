@@ -23,6 +23,7 @@
  *   { type: 'image', src: 'img/file.jpg', alt: '...', title: '...', caption: '...' }
  *   { type: 'definitions', items: [{ term:'...', def:'...' }] }
  *   { type: 'tracker',  fields: ['Week', 'Date', ...] }    // blank-line template
+ *   { type: 'cta', href: 'tracker.html', label: '...', note: '...' }  // link button
  *
  * IMAGES
  *   'placeholder' draws a grey "image goes here" card (a wish-list slot).
@@ -473,6 +474,8 @@ const BOOKLET = {
       icon: '🛠️',
       blocks: [
         { type: 'para', text: 'Track lightly and consistently. The point is useful information for you and your prescriber — not another job to feel guilty about.' },
+        { type: 'cta', href: 'tracker.html', label: '📊 Open the Progress Tracker',
+          note: 'A private page to log dose, weight and measurements. Saved only in your browser, and printable as a paper log.' },
         { type: 'subhead', text: 'Apps and tools people use' },
         { type: 'table',
           headers: ['For', 'Examples'],
