@@ -1,0 +1,433 @@
+/* =============================================================================
+ * MY MOUNJARO EXPERIENCE — styles.css
+ * -----------------------------------------------------------------------------
+ * 1. Design tokens (colours, type, spacing)
+ * 2. Base + layout
+ * 3. Top bar + navigation
+ * 4. Cover + safety banner
+ * 5. Sections + content blocks
+ * 6. Coloured boxes, tables, checklists, trackers, placeholders
+ * 7. Pocket mode
+ * 8. Responsive (mobile)
+ * 9. Print / A5 booklet
+ * ========================================================================== */
+
+/* ---- 1. Design tokens --------------------------------------------------- */
+:root {
+  /* Soft, calm palette */
+  --green:       #6fa287;   /* soft green  */
+  --green-soft:  #e7f0ea;
+  --blue:        #5b86a8;   /* muted blue  */
+  --blue-soft:   #e6eef4;
+  --cream:       #faf6ee;   /* warm cream  */
+  --cream-deep:  #f3ecdd;
+  --charcoal:    #2c322f;   /* text        */
+  --charcoal-2:  #51585420; /* faint lines */
+
+  /* Accents for boxes */
+  --tip:     #4d8f6b;  --tip-bg:     #e8f3ec;
+  --ask:     #4773a8;  --ask-bg:     #e6eef6;
+  --track:   #8a6d3b;  --track-bg:   #f6eedd;
+  --calm:    #5a8aa6;  --calm-bg:    #e8f1f5;
+  --redflag: #b4452f;  --redflag-bg: #fbe9e4;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 2px 10px rgba(44, 50, 47, 0.07);
+  --maxw: 760px;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fs-base: 17px;
+  --lh: 1.6;
+}
+
+/* ---- 2. Base + layout --------------------------------------------------- */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: var(--fs-base);
+  line-height: var(--lh);
+  color: var(--charcoal);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+}
+
+main.content,
+.cover,
+.safety-banner,
+.lead-subtitle,
+.footer {
+  max-width: var(--maxw);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+main.content { padding: 0 1.1rem 2rem; }
+
+a { color: var(--blue); }
+
+/* ---- 3. Top bar + navigation ------------------------------------------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(250, 246, 238, 0.96);
+  backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--charcoal-2);
+}
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0.55rem 1rem;
+}
+.brand { display: flex; flex-direction: column; line-height: 1.15; margin-right: auto; }
+.brand-title { font-weight: 700; font-size: 1rem; }
+.brand-edition { font-size: 0.72rem; color: var(--green); }
+
+.topbar-actions { display: flex; gap: 0.45rem; }
+
+.icon-btn {
+  border: 1px solid var(--charcoal-2);
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.6rem;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+.pill-btn {
+  border: 1px solid var(--charcoal-2);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.42rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .06s ease, background .15s ease;
+}
+.pill-btn:hover { transform: translateY(-1px); }
+.pill-btn.primary { background: var(--green); color: #fff; border-color: var(--green); }
+.pill-btn[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); }
+
+.section-nav {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0.4rem 1rem 0.6rem;
+  scrollbar-width: thin;
+}
+.section-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: var(--charcoal);
+  background: #fff;
+  border: 1px solid var(--charcoal-2);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+}
+.section-nav a.active { background: var(--green); color: #fff; border-color: var(--green); }
+.section-nav .nav-icon { font-size: 0.95rem; }
+
+/* ---- 4. Cover + safety banner ------------------------------------------ */
+.cover { padding: 1.6rem 1.1rem 0.4rem; }
+.cover-card {
+  background: linear-gradient(135deg, var(--green-soft), var(--blue-soft));
+  border: 1px solid var(--charcoal-2);
+  border-radius: var(--radius);
+  padding: 1.8rem 1.5rem;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.cover-kicker {
+  margin: 0 0 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  color: var(--green);
+  font-weight: 700;
+}
+.cover h1 { margin: 0 0 0.5rem; font-size: 2rem; line-height: 1.15; }
+.cover-sub { margin: 0 auto 1rem; max-width: 34ch; color: #444; font-size: 1rem; }
+.cover-safety {
+  margin: 0 auto;
+  max-width: 50ch;
+  font-size: 0.82rem;
+  color: #555;
+  background: rgba(255,255,255,0.6);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.8rem;
+}
+
+.safety-banner {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--redflag-bg);
+  border: 1px solid #e7b9ad;
+  border-radius: var(--radius-sm);
+}
+.safety-banner p { margin: 0; font-size: 0.85rem; }
+.safety-icon { font-size: 1.1rem; line-height: 1.4; }
+
+.lead-subtitle {
+  text-align: center;
+  color: var(--green);
+  font-weight: 600;
+  margin: 0.6rem auto 0.2rem;
+  padding: 0 1.1rem;
+}
+
+/* ---- 5. Sections + content --------------------------------------------- */
+.section {
+  background: #fff;
+  border: 1px solid var(--charcoal-2);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.3rem 1.4rem;
+  margin: 1.1rem 0;
+  box-shadow: var(--shadow);
+  scroll-margin-top: 120px;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-bottom: 2px solid var(--green-soft);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+.section-num {
+  flex: 0 0 auto;
+  width: 1.8rem; height: 1.8rem;
+  display: grid; place-items: center;
+  background: var(--green); color: #fff;
+  border-radius: 50%;
+  font-size: 0.85rem; font-weight: 700;
+}
+.section-icon { font-size: 1.3rem; }
+.section-head h2 { margin: 0; font-size: 1.35rem; }
+
+.section-body > * { margin-top: 0.75rem; }
+.section-body > *:first-child { margin-top: 0; }
+.section-body h3 {
+  margin: 1.1rem 0 0.2rem;
+  font-size: 1.02rem;
+  color: var(--blue);
+}
+.section-body p { margin: 0.4rem 0; }
+.section-body ul { margin: 0.3rem 0; padding-left: 1.2rem; }
+.section-body li { margin: 0.22rem 0; }
+
+/* ---- 6a. Coloured boxes ------------------------------------------------- */
+.box {
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 0.95rem;
+  border-left: 5px solid var(--green);
+  background: var(--green-soft);
+}
+.box .box-head {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-weight: 700; margin-bottom: 0.35rem;
+}
+.box .box-icon { font-size: 1.05rem; }
+.box p { margin: 0.2rem 0; }
+.box ul { margin: 0.25rem 0 0; }
+
+.box-tip     { background: var(--tip-bg);     border-left-color: var(--tip); }
+.box-ask     { background: var(--ask-bg);     border-left-color: var(--ask); }
+.box-track   { background: var(--track-bg);   border-left-color: var(--track); }
+.box-calm    { background: var(--calm-bg);    border-left-color: var(--calm); }
+.box-redflag { background: var(--redflag-bg); border-left-color: var(--redflag); }
+.box-redflag .box-label { color: var(--redflag); }
+
+/* ---- 6b. Tables --------------------------------------------------------- */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+th, td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--charcoal-2);
+  vertical-align: top;
+}
+thead th {
+  background: var(--blue-soft);
+  color: var(--charcoal);
+  font-weight: 700;
+}
+tbody tr:nth-child(even) td { background: #fbfaf6; }
+td.fill { min-width: 70px; border-bottom: 1px solid #c9cfca; }
+
+/* ---- 6c. Checklists ----------------------------------------------------- */
+ul.checklist { list-style: none; padding-left: 0; }
+ul.checklist li {
+  display: flex; align-items: flex-start; gap: 0.55rem;
+  margin: 0.3rem 0;
+}
+ul.checklist .tick {
+  flex: 0 0 auto;
+  width: 1.05rem; height: 1.05rem;
+  margin-top: 0.18rem;
+  border: 2px solid var(--green);
+  border-radius: 4px;
+  background: #fff;
+}
+
+/* ---- 6d. Definitions ---------------------------------------------------- */
+dl.defs { margin: 0.4rem 0; }
+dl.defs dt { font-weight: 700; color: var(--blue); margin-top: 0.55rem; }
+dl.defs dd { margin: 0.1rem 0 0; padding-left: 0; }
+
+/* ---- 6e. Tracker templates ---------------------------------------------- */
+.tracker {
+  border: 1px dashed #c2c8c3;
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.85rem;
+  background: #fffdf8;
+}
+.tracker-row {
+  display: flex; align-items: baseline; gap: 0.6rem;
+  padding: 0.28rem 0;
+}
+.tracker-label { flex: 0 0 42%; font-size: 0.88rem; font-weight: 600; }
+.tracker-line {
+  flex: 1 1 auto;
+  border-bottom: 1px solid #b9bfba;
+  height: 1em;
+}
+
+/* ---- 6f. Placeholder diagram cards ------------------------------------- */
+figure.placeholder {
+  margin: 0;
+  display: flex; align-items: center; gap: 0.9rem;
+  background: repeating-linear-gradient(45deg, #f6f2e9, #f6f2e9 10px, #f1ecdf 10px, #f1ecdf 20px);
+  border: 1px dashed #c2b89e;
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+}
+figure.placeholder .placeholder-art {
+  font-size: 2rem;
+  width: 3rem; height: 3rem;
+  display: grid; place-items: center;
+  background: #fff; border-radius: var(--radius-sm);
+  border: 1px solid var(--charcoal-2);
+  flex: 0 0 auto;
+}
+figure.placeholder figcaption { display: flex; flex-direction: column; gap: 0.15rem; }
+figure.placeholder strong { font-size: 0.95rem; }
+figure.placeholder span { font-size: 0.82rem; color: #6a6a6a; }
+
+/* ---- Sources list ------------------------------------------------------- */
+ul.sources { padding-left: 1.2rem; }
+ul.sources li { margin: 0.3rem 0; }
+
+/* ---- Footer ------------------------------------------------------------- */
+.footer {
+  padding: 1.4rem 1.1rem 2.4rem;
+  text-align: center;
+  color: #5b605c;
+  font-size: 0.85rem;
+}
+.footer-small { font-size: 0.75rem; color: #8a8f8a; }
+.footer code { background: var(--cream-deep); padding: 0.05rem 0.35rem; border-radius: 4px; }
+
+/* ---- 7. Pocket mode ----------------------------------------------------- */
+body.pocket-mode { --maxw: 430px; --fs-base: 16px; }
+body.pocket-mode .section { padding: 1rem; }
+body.pocket-mode .cover h1 { font-size: 1.6rem; }
+
+/* ---- 8. Responsive (mobile) -------------------------------------------- */
+@media (max-width: 640px) {
+  :root { --fs-base: 16px; }
+  .cover h1 { font-size: 1.7rem; }
+  .section { padding: 1rem; }
+  .topbar-actions .pill-btn { padding: 0.4rem 0.6rem; font-size: 0.78rem; }
+
+  /* Collapse nav behind the ☰ button on small screens */
+  .section-nav {
+    display: none;
+    flex-direction: column;
+    max-height: 60vh;
+  }
+  .section-nav.open { display: flex; }
+  .section-nav a { width: 100%; }
+}
+
+/* ---- 9. Print / A5 booklet --------------------------------------------- */
+/* A5 = 148mm x 210mm. We set generous-but-tight margins and break between
+   major sections so each starts on a fresh page. */
+@page {
+  size: A5 portrait;
+  margin: 14mm 12mm;
+}
+
+@media print {
+  :root { --fs-base: 10.5pt; --lh: 1.4; }
+
+  body { background: #fff; color: #000; font-size: 10.5pt; }
+
+  /* Hide all the screen chrome */
+  .no-print,
+  .topbar,
+  .safety-banner,
+  .lead-subtitle { display: none !important; }
+
+  main.content, .cover, .footer { max-width: 100%; margin: 0; }
+
+  /* Cover = its own first page */
+  .cover { padding: 0; }
+  .cover-card {
+    box-shadow: none;
+    border: 2px solid #888;
+    min-height: 60vh;
+    display: flex; flex-direction: column; justify-content: center;
+    page-break-after: always;
+  }
+  .cover h1 { font-size: 22pt; }
+
+  /* Each section starts on a new page */
+  .section {
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    page-break-before: always;
+    page-break-inside: auto;
+  }
+  .section-head { border-bottom: 1.5pt solid #444; }
+  .section-num { background: #444 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Keep boxes, tables and figures from splitting awkwardly */
+  .box, figure.placeholder, .tracker, .table-wrap { page-break-inside: avoid; }
+  h2, h3 { page-break-after: avoid; }
+
+  /* Force background colours to print (boxes, headers) */
+  .box, thead th, tbody tr:nth-child(even) td, figure.placeholder {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  a { color: #000; text-decoration: underline; }
+  /* Show link URLs in print for the sources list */
+  ul.sources a::after { content: " (" attr(href) ")"; font-size: 8pt; color: #555; }
+
+  .footer { page-break-before: always; border-top: 1pt solid #ccc; padding-top: 8pt; }
+}
