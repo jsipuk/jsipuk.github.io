@@ -118,7 +118,7 @@ const BOOKLET = {
         { type: 'box', variant: 'story', title: 'What I\'d tell my past self', text: 'Two things. First: the wrong food, or simply too much of it, can make you genuinely unwell — I\'ve had a handful of rough nights that were entirely down to what I ate. Second, and I really mean this: track more than your weight from day one. I didn\'t take measurements or photos early on and I wish I had, because once the weeks have passed you can\'t go back and capture them.' },
         { type: 'box', variant: 'story', title: 'The prep that helped me most', text: 'I told my wife, and I started with a simple plan of protein shakes and salads for the first couple of months. It sounds strict, but it quietly kept my portions small without me having to think about it — and I suspect it spared me some of the worse early side effects. After that I eased back to normal family food, just much less of it.' },
         { type: 'box', variant: 'tip', title: 'Track from day one', text: 'Weight, waist and a few measurements, plus a monthly photo. The Progress Tracker page in this guide is built exactly for this — start it before your first jab so you have a true "before".' },
-        { type: 'image', src: 'img/dose-ladder.png', title: 'Dose Ladder', alt: 'Mounjaro dose ladder stepping up from a 2.5mg start through 5, 7.5, 10 and 12.5mg to a 15mg maintenance dose over the weeks.', caption: 'The usual step-up of strengths over time — your dose and pace are guided by your prescriber.' }
+        { type: 'image', src: 'img/dose_ladder.png', title: 'Dose Ladder', alt: 'Mounjaro dose ladder stepping up from a 2.5mg start through 5, 7.5, 10 and 12.5mg to a 15mg maintenance dose over the weeks.', caption: 'The usual step-up of strengths over time — your dose and pace are guided by your prescriber.' }
       ]
     },
 
@@ -149,7 +149,7 @@ const BOOKLET = {
         { type: 'box', variant: 'story', title: 'My first jab', text: 'I was nervous about actually sticking the needle in — but it turned out to be completely straightforward. You become a bit of a pin cushion over the weeks, but it leaves no real marks. The only times I\'ve bruised are when I\'ve been a bit too hard and fast with it. I inject into my stomach every week, moving around the area near my belly button.' },
         { type: 'box', variant: 'story', title: 'When the "food noise" went quiet', text: 'The biggest change for me wasn\'t in my stomach — it was in my head. I\'d never really known what it was like to not feel hungry. I could finish a large meal and still force myself into pudding. After starting, I\'d eat half of what was in front of me and simply not want the rest. I stopped drifting back to the fridge all day. I could work, play with the kids, and watch TV in the evening without food chattering away in the background. The noise just disappeared. I still enjoy a snack now and then — but it\'s one thing, sometimes, not all day.' },
         { type: 'box', variant: 'story', title: 'My weekly routine', text: 'I jab every Monday, so if we\'ve had a treat or a drink over the weekend, it\'s behind me. I set a weekly reminder on my phone that I can either mark done or push back a day if life gets in the way. I never go under seven days between doses, but I\'ve stretched it to nine or ten around work trips and holidays without any trouble. Check your own leaflet, and your prescriber, on timing.' },
-        { type: 'image', src: 'img/injection-site-rotation.png', title: 'Injection Site Rotation Map', alt: 'Injection site rotation map across the tummy, thighs and upper arms, with a simple weekly rotation pattern.', caption: 'Tummy, thighs and upper arms, with a simple weekly rotation.' }
+        { type: 'image', src: 'img/injection_site_rotation_map.png', title: 'Injection Site Rotation Map', alt: 'Injection site rotation map across the tummy, thighs and upper arms, with a simple weekly rotation pattern.', caption: 'Tummy, thighs and upper arms, with a simple weekly rotation.' }
       ]
     },
 
@@ -165,7 +165,7 @@ const BOOKLET = {
         { type: 'box', variant: 'story', title: 'You don\'t have to rush up the ladder', text: 'Higher isn\'t automatically better. I never felt the need to push my body to a stronger dose until what I was on had clearly stopped working. Going at a pace I was comfortable with kept side effects manageable and the loss nice and steady.' },
         { type: 'box', variant: 'story', title: 'Coming back down', text: 'I\'m now tapering down a level at a time, heading for a maintenance dose rather than stopping abruptly. I\'ll be honest — I\'m a bit anxious about the weight creeping back as I reduce, so I\'m leaning hard on the habits I\'ve built rather than relying on the dose alone.' },
         { type: 'box', variant: 'track', title: 'Track this', text: 'Keep a simple dose log: date, strength, site, and how you felt that week. It makes review appointments much easier.' },
-        { type: 'image', src: 'img/dose-progression-tracker.png', title: 'Dose Progression Tracker', alt: 'A weekly dose tracker table with columns for date, week, dose, weight, waist, injection site and notes.', caption: 'A simple weekly log of date, dose and how you felt.' }
+        { type: 'image', src: 'img/Dose_progression_tracker.png', title: 'Dose Progression Tracker', alt: 'A weekly dose tracker table with columns for date, week, dose, weight, waist, injection site and notes.', caption: 'A simple weekly log of date, dose and how you felt.' }
       ]
     },
 
@@ -205,7 +205,7 @@ const BOOKLET = {
         { type: 'box', variant: 'story', title: 'My pattern: it catches up at 2am', text: 'My handful of really rough episodes followed the same script, and almost always around two in the morning: heavy burping, then a churning stomach, then an urgent trip to the loo, sometimes being sick — and then fine again within about 24 hours. My theory is that digestion is so much slower now that a bad meal simply catches up with me in the small hours. Knowing the pattern makes it far less frightening when it happens.' },
         { type: 'box', variant: 'story', title: 'Tiredness', text: 'I\'ve had stretches of feeling tired, and for me the answer has usually been more protein (and, honestly, drinking enough water — which I forget to do). It\'s worth checking the simple things before assuming the worst.' },
         { type: 'box', variant: 'ask', title: 'Always worth a word', text: 'If a side effect is strong, will not settle, or is new and odd, contact your pharmacist or prescriber. Use NHS 111 if you are unsure how urgent it is.' },
-        { type: 'image', src: 'img/symptom-decision-tree.png', title: 'Symptom Decision Tree', alt: 'Side-effect decision tree: mild and settling symptoms versus severe or worsening red-flag symptoms, with what to do for each.', caption: 'Mild and settling, or a red flag? What to do either way.' }
+        { type: 'image', src: 'img/side_effects_tree.png', title: 'Symptom Decision Tree', alt: 'Side-effect decision tree: mild and settling symptoms versus severe or worsening red-flag symptoms, with what to do for each.', caption: 'Mild and settling, or a red flag? What to do either way.' }
       ]
     },
 
@@ -302,7 +302,7 @@ const BOOKLET = {
         { type: 'box', variant: 'story', title: 'Water — I still forget', text: 'I swapped squash for water (squash was giving me headaches). I keep a big bottle with me, have a large glass the moment I wake up, and aim for a litre or two across the day. I still forget — but I get through far more than I used to, and I feel better for it.' },
         { type: 'box', variant: 'track', title: 'Track this', text: 'A loose note of protein and water each day is enough. Track it, do not obsess over it.' },
         { type: 'box', variant: 'ask', title: 'Ask a clinician or pharmacist', text: 'If you wonder about supplements, low intake, or ongoing tummy changes affecting how you eat.' },
-        { type: 'image', src: 'img/hunger-scale.png', title: 'Hunger Scale', alt: 'A 1 to 10 hunger and fullness scale, aiming to eat and stop around the comfortable middle.', caption: 'From 1 (ravenous) to 10 (painfully full) — aim for the comfortable middle.' }
+        { type: 'image', src: 'img/Food_hunger_scale.png', title: 'Hunger Scale', alt: 'A 1 to 10 hunger and fullness scale, aiming to eat and stop around the comfortable middle.', caption: 'From 1 (ravenous) to 10 (painfully full) — aim for the comfortable middle.' }
       ]
     },
 
@@ -344,7 +344,7 @@ const BOOKLET = {
         ]},
         { type: 'box', variant: 'story', title: 'My favourite wins', text: 'The number on the scales is nice, but the wins I actually feel are different. Running up the stairs without getting out of breath. Properly playing and running around with my kids. Carrying myself better. And going from an XXL top to a medium, and from size 42 trousers to a 34 — that still genuinely blows my mind. The biggest one is quieter: I feel confident again, including standing up to present to clients and audiences at work, which I used to dread.' },
         { type: 'box', variant: 'tip', title: 'Try this', text: 'Pick three NSVs to watch this month. They keep you going through the boring weeks.' },
-        { type: 'image', src: 'img/nsv-checklist.png', title: 'NSV Checklist Card', alt: 'A non-scale victories checklist card with tick boxes for how you feel, what you notice and healthy habits.', caption: 'Print it and stick it on the fridge.' }
+        { type: 'image', src: 'img/nsv_checklist.png', title: 'NSV Checklist Card', alt: 'A non-scale victories checklist card with tick boxes for how you feel, what you notice and healthy habits.', caption: 'Print it and stick it on the fridge.' }
       ]
     },
 
@@ -472,7 +472,7 @@ const BOOKLET = {
           'Stress — high lately?'
         ]},
         { type: 'box', variant: 'calm', title: "Don't panic-adjust", text: 'A stall is not a reason to change your dose by yourself. Work the basics first; raise it at review if it persists.' },
-        { type: 'image', src: 'img/weight-trend-vs-fluctuation.png', title: 'Weight Trend vs Daily Fluctuation', alt: 'A weight chart showing jagged daily readings around a smooth downward trend line, including a short plateau.', caption: 'Daily readings bounce around; the trend over weeks is what matters.' }
+        { type: 'image', src: 'img/plateaus.png', title: 'Weight Trend vs Daily Fluctuation', alt: 'A weight chart showing jagged daily readings around a smooth downward trend line, including a short plateau.', caption: 'Daily readings bounce around; the trend over weeks is what matters.' }
       ]
     },
 
@@ -592,7 +592,7 @@ const BOOKLET = {
         { type: 'box', variant: 'story', title: 'The habits I\'m protecting', text: 'These are the ones I refuse to let slip: little or no alcohol; no boredom snacking (chocolate is my trap — the Christmas tubs, the Easter eggs… I had zero Easter eggs this year, which still surprises me); and not eating something just because it\'s there or easy. Reaching for the healthier option has to become the default, not the exception.' },
         { type: 'box', variant: 'calm', title: 'My honest worry', text: 'I won\'t pretend I\'m not nervous about the weight creeping back as I reduce the dose. The plan is simple, even if it isn\'t easy: trust the habits I\'ve built over these months, not the medication alone, to hold the line.' },
         { type: 'box', variant: 'ask', title: 'Plan it together', text: 'Any change to your dose or stopping should be planned with your prescriber, with a follow-up plan in place.' },
-        { type: 'image', src: 'img/maintenance-planning.png', title: 'Maintenance Planning Page', alt: 'A maintenance planning page covering target range, habits to keep, check-ins and early-warning signs.', caption: 'Target range, habits to keep, check-ins and early-warning signs.' }
+        { type: 'image', src: 'img/maintenance.png', title: 'Maintenance Planning Page', alt: 'A maintenance planning page covering target range, habits to keep, check-ins and early-warning signs.', caption: 'Target range, habits to keep, check-ins and early-warning signs.' }
       ]
     },
 
