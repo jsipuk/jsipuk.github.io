@@ -108,6 +108,7 @@ a { color: var(--blue); }
 .brand-edition { font-size: 0.72rem; color: var(--green); }
 
 .topbar-actions { display: flex; align-items: center; gap: 0.45rem; }
+.action-buttons { display: flex; align-items: center; gap: 0.45rem; }
 
 /* ---- Search ------------------------------------------------------------- */
 .search { position: relative; display: flex; min-width: 0; }
@@ -469,9 +470,21 @@ ul.sources li { margin: 0.3rem 0; }
   :root { --fs-base: 16px; }
   .cover h1 { font-size: 1.7rem; }
   .section { padding: 1rem; }
-  .topbar-actions .pill-btn { padding: 0.4rem 0.6rem; font-size: 0.78rem; }
-  .search-input { width: 6.5rem; }
-  .search-input:focus { width: 8.5rem; }
+
+  /* Stack the top-bar controls so nothing is squeezed off-screen:
+     row 1 = ☰ + title, row 2 = full-width search, row 3 = Tracker + Print. */
+  .topbar-inner { flex-wrap: wrap; row-gap: 0.5rem; }
+  .brand { margin-right: auto; }
+  .topbar-actions {
+    order: 3;
+    flex: 1 1 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .search { width: 100%; }
+  .search-input, .search-input:focus { width: 100%; max-width: none; }
+  .action-buttons .pill-btn { flex: 1 1 0; justify-content: center; padding: 0.5rem 0.6rem; font-size: 0.82rem; }
 }
 
 /* ---- 9. Print / A5 booklet --------------------------------------------- */
