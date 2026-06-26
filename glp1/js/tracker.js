@@ -60,6 +60,7 @@
       if (!raw || typeof raw !== 'object') return defaults();
       var d = defaults();
       raw.settings = Object.assign(d.settings, raw.settings || {});
+      if (raw.settings.weightUnit !== 'kg' && raw.settings.weightUnit !== 'stlb') raw.settings.weightUnit = 'kg';
       raw.entries = Array.isArray(raw.entries) ? raw.entries : [];
       raw.meta = Object.assign(d.meta, raw.meta || {});
       return raw;
@@ -76,10 +77,44 @@
   var editingId = null;
 
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-  function wUnit() { return state.settings.weightUnit; }
+  function wUnit() { return state.settings.weightUnit; }   // 'kg' | 'stlb'
   function lUnit() { return state.settings.lengthUnit; }
-  function unitFor(f) { return f.unit === 'weight' ? wUnit() : f.unit === 'length' ? lUnit() : f.suffix || ''; }
+  function unitFor(f) {
+    if (f.k === 'weight') return wUnit() === 'kg' ? 'kg' : 'st + lb';
+    return f.unit === 'length' ? lUnit() : f.suffix || '';
+  }
   function num(v) { var n = parseFloat(v); return isFinite(n) ? n : null; }
+
+  /* ---- weight units (stored canonically as kg) --------------------------- */
+  var KG_PER_LB = 0.45359237;
+  function round1(n) { return Math.round(n * 10) / 10; }
+  function kgToLb(kg) { return kg / KG_PER_LB; }
+  function kgToStLb(kg) {
+    var lb = kgToLb(kg);
+    var st = Math.floor(lb / 14);
+    var r = round1(lb - st * 14);
+    if (r >= 14) { st += 1; r -= 14; } // rounding can tip pounds to a full stone
+    return { st: st, lb: r };
+  }
+  // Full display string for a stored kg value, e.g. "84.8 kg" or "13st 5lb".
+  function fmtWeight(kg) {
+    if (kg == null) return '';
+    if (wUnit() === 'kg') return round1(kg) + ' kg';
+    var o = kgToStLb(kg);
+    return o.st + 'st ' + round1(o.lb) + 'lb';
+  }
+  // Compact form for the chart axis, e.g. "84.8" or "13st5".
+  function fmtWeightShort(kg) {
+    if (wUnit() === 'kg') return String(round1(kg));
+    var o = kgToStLb(kg);
+    return o.st + 'st' + Math.round(o.lb);
+  }
+  // Magnitude of a change (no sign), e.g. "5.1 kg" or "2st 4lb".
+  function fmtWeightMag(kgAbs) {
+    if (wUnit() === 'kg') return round1(kgAbs) + ' kg';
+    var o = kgToStLb(kgAbs);
+    return (o.st ? o.st + 'st ' : '') + round1(o.lb) + 'lb';
+  }
 
   // Entries sorted oldest → newest (diary order; also drives the chart).
   function sorted() {
@@ -112,17 +147,19 @@
     var med = el('input', { type: 'text', value: state.settings.medication,
       oninput: function () { state.settings.medication = this.value; save(); renderPrintTitle(); } });
 
+    // opts: array of [value, label]. Current value is selected.
     function unitSelect(current, opts, onset) {
       var sel = el('select', { onchange: function () { onset(this.value); save(); renderAll(); } },
         opts.map(function (o) {
-          var op = el('option', { value: o }, [o]);
-          if (o === current) op.setAttribute('selected', 'selected');
+          var op = el('option', { value: o[0] }, [o[1]]);
+          if (o[0] === current) op.setAttribute('selected', 'selected');
           return op;
         }));
       return sel;
     }
-    var weightSel = unitSelect(wUnit(), ['kg', 'lb', 'st'], function (v) { state.settings.weightUnit = v; });
-    var lenSel = unitSelect(lUnit(), ['cm', 'in'], function (v) { state.settings.lengthUnit = v; });
+    var weightSel = unitSelect(wUnit(), [['kg', 'kilograms (kg)'], ['stlb', 'stone & pounds (st / lb)']],
+      function (v) { state.settings.weightUnit = v; });
+    var lenSel = unitSelect(lUnit(), [['cm', 'cm'], ['in', 'in']], function (v) { state.settings.lengthUnit = v; });
 
     box.appendChild(el('div', { class: 'set-grid' }, [
       field('Name', name),
@@ -130,7 +167,7 @@
       field('Weight in', weightSel),
       field('Measurements in', lenSel)
     ]));
-    box.appendChild(el('p', { class: 'muted small' }, ['Units only change the labels — they don\'t convert numbers you\'ve already entered.']));
+    box.appendChild(el('p', { class: 'muted small' }, ['Weight converts automatically between kg and stone & pounds (14 lb to the stone). Measurement units (cm/in) change the label only.']));
   }
 
   /* ---- summary ------------------------------------------------------------ */
@@ -145,9 +182,13 @@
     var a = firstWith(key), b = lastWith(key);
     if (!a || !b || a === b) return null;
     var d = num(b[key]) - num(a[key]);
-    var sign = d > 0 ? '+' : '';
     var arrow = d < 0 ? '▼' : d > 0 ? '▲' : '–';
-    return { text: sign + d.toFixed(1) + ' ' + unit, arrow: arrow, dir: d < 0 ? 'down' : d > 0 ? 'up' : 'flat' };
+    var dir = d < 0 ? 'down' : d > 0 ? 'up' : 'flat';
+    // Weight change is shown in the chosen unit (magnitude only; arrow shows direction).
+    var text = key === 'weight'
+      ? fmtWeightMag(Math.abs(d))
+      : (d > 0 ? '+' : '') + round1(d) + ' ' + unit;
+    return { text: text, arrow: arrow, dir: dir };
   }
   function renderSummary() {
     var box = document.getElementById('summary');
@@ -163,8 +204,8 @@
 
     box.appendChild(statCard('Entries', String(s.length)));
     box.appendChild(statCard('Weeks tracked', String(weeks)));
-    if (lastW) box.appendChild(statCard('Current weight', num(lastW.weight).toFixed(1) + ' ' + wUnit(),
-      firstW ? 'Started ' + num(firstW.weight).toFixed(1) + ' ' + wUnit() : null));
+    if (lastW) box.appendChild(statCard('Current weight', fmtWeight(num(lastW.weight)),
+      firstW ? 'Started ' + fmtWeight(num(firstW.weight)) : null));
     if (wd) {
       var c = statCard('Weight change', wd.arrow + ' ' + wd.text, 'since first entry');
       c.classList.add('stat-' + wd.dir);
@@ -212,14 +253,14 @@
       svg.appendChild(s('line', { x1: pad, x2: W - pad, y1: sy(v), y2: sy(v), class: 'grid' }));
       var t = document.createElementNS(svgNS, 'text');
       t.setAttribute('x', 4); t.setAttribute('y', sy(v) + 4); t.setAttribute('class', 'axis');
-      t.textContent = v.toFixed(1);
+      t.textContent = fmtWeightShort(v);
       svg.appendChild(t);
     });
     var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + sx(i) + ' ' + sy(p.y); }).join(' ');
     svg.appendChild(s('path', { d: d, class: 'line' }));
     pts.forEach(function (p, i) { svg.appendChild(s('circle', { cx: sx(i), cy: sy(p.y), r: 3.5, class: 'dot' })); });
     box.appendChild(svg);
-    box.appendChild(el('p', { class: 'muted small' }, ['Weight in ' + wUnit() + ', oldest to newest. A trend over weeks tells the truth; one morning does not.']));
+    box.appendChild(el('p', { class: 'muted small' }, ['Weight in ' + (wUnit() === 'kg' ? 'kilograms' : 'stone & pounds') + ', oldest to newest. A trend over weeks tells the truth; one morning does not.']));
   }
 
   /* ---- add / edit form ---------------------------------------------------- */
@@ -229,20 +270,44 @@
     box.appendChild(el('h2', { class: 'card-h' }, [editingId ? 'Edit entry' : 'Add an entry']));
 
     var inputs = {};
-    var grid = el('div', { class: 'form-grid' }, FIELDS.map(function (f) {
+    function fieldLabel(labelText, input, wide) {
+      return el('label', { class: 'form-field' + (wide ? ' wide' : '') }, [el('span', null, [labelText]), input]);
+    }
+    var gridChildren = [];
+    FIELDS.forEach(function (f) {
+      // Weight: a single kg box, or two boxes (stone + pounds), depending on unit.
+      if (f.k === 'weight') {
+        if (wUnit() === 'kg') {
+          inputs.weight_kg = el('input', { type: 'number', id: 'f-weight', step: '0.1', min: '0', inputmode: 'decimal' });
+          gridChildren.push(fieldLabel('Weight (kg)', inputs.weight_kg));
+        } else {
+          inputs.weight_st = el('input', { type: 'number', id: 'f-weight-st', step: '1', min: '0', inputmode: 'numeric' });
+          inputs.weight_lb = el('input', { type: 'number', id: 'f-weight-lb', step: '0.1', min: '0', max: '13.9', inputmode: 'decimal' });
+          gridChildren.push(fieldLabel('Weight (st)', inputs.weight_st));
+          gridChildren.push(fieldLabel('(lb)', inputs.weight_lb));
+        }
+        return;
+      }
       var u = unitFor(f);
       var attrs = { type: f.type, id: 'f-' + f.k };
       if (f.step) attrs.step = f.step;
       if (f.min != null) attrs.min = f.min;
       if (f.type === 'text') attrs.autocomplete = 'off';
-      var input = el('input', attrs);
-      inputs[f.k] = input;
-      var labelText = f.label + (u ? ' (' + u + ')' : '');
-      return el('label', { class: 'form-field' + (f.wide ? ' wide' : '') }, [
-        el('span', null, [labelText]), input
-      ]);
-    }));
-    box.appendChild(grid);
+      inputs[f.k] = el('input', attrs);
+      gridChildren.push(fieldLabel(f.label + (u ? ' (' + u + ')' : ''), inputs[f.k], f.wide));
+    });
+    box.appendChild(el('div', { class: 'form-grid' }, gridChildren));
+
+    // Read the weight inputs back into a canonical kg value (or '' if blank).
+    function readWeightKg() {
+      if (wUnit() === 'kg') {
+        var v = num(inputs.weight_kg.value);
+        return v == null ? '' : v;
+      }
+      var st = num(inputs.weight_st.value), lb = num(inputs.weight_lb.value);
+      if (st == null && lb == null) return '';
+      return Math.round(((st || 0) * 14 + (lb || 0)) * KG_PER_LB * 1000) / 1000;
+    }
 
     // sensible defaults for a fresh entry
     if (!editingId) {
@@ -253,14 +318,24 @@
       if (ld) inputs.dose.value = ld.dose;
     } else {
       var entry = state.entries.filter(function (e) { return e.id === editingId; })[0];
-      if (entry) FIELDS.forEach(function (f) { if (entry[f.k] != null) inputs[f.k].value = entry[f.k]; });
+      if (entry) {
+        FIELDS.forEach(function (f) {
+          if (f.k === 'weight') return; // handled below
+          if (entry[f.k] != null) inputs[f.k].value = entry[f.k];
+        });
+        var wkg = num(entry.weight);
+        if (wkg != null) {
+          if (wUnit() === 'kg') { inputs.weight_kg.value = round1(wkg); }
+          else { var o = kgToStLb(wkg); inputs.weight_st.value = o.st; inputs.weight_lb.value = round1(o.lb); }
+        }
+      }
     }
 
     function commit() {
       var rec = { id: editingId || uid() };
       FIELDS.forEach(function (f) {
-        var v = inputs[f.k].value.trim();
-        rec[f.k] = v;
+        if (f.k === 'weight') { rec.weight = readWeightKg(); return; }
+        rec[f.k] = inputs[f.k].value.trim();
       });
       if (!rec.date) { alert('Please add a date.'); inputs.date.focus(); return; }
       if (editingId) {
@@ -306,7 +381,8 @@
     var s = sorted();
     var rows = s.map(function (e) {
       var cells = FIELDS.map(function (f) {
-        return el('td', { class: (f.wide ? 'col-wide' : '') + (f.type === 'number' ? ' num' : '') }, [e[f.k] || '']);
+        var content = f.k === 'weight' ? fmtWeight(num(e.weight)) : (e[f.k] || '');
+        return el('td', { class: (f.wide ? 'col-wide' : '') + (f.type === 'number' ? ' num' : '') }, [content]);
       });
       cells.push(el('td', { class: 'no-print col-act' }, [
         el('button', { type: 'button', class: 'mini', title: 'Edit',
@@ -371,7 +447,9 @@
     var header = FIELDS.map(function (f) { var u = unitFor(f); return f.label + (u ? ' (' + u + ')' : ''); });
     var lines = [header.map(csvCell).join(',')];
     sorted().forEach(function (e) {
-      lines.push(FIELDS.map(function (f) { return csvCell(e[f.k]); }).join(','));
+      lines.push(FIELDS.map(function (f) {
+        return csvCell(f.k === 'weight' ? fmtWeight(num(e.weight)) : e[f.k]);
+      }).join(','));
     });
     download('mounjaro-tracker.csv', lines.join('\r\n'), 'text/csv');
   }

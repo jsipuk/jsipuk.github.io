@@ -532,17 +532,9 @@ ul.sources li { margin: 0.3rem 0; }
     padding-bottom: 4pt;
     margin-bottom: 6pt;
   }
-  .notes-lines {
-    height: 165mm;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent,
-      transparent 8mm,
-      #cfcfcf 8mm,
-      #cfcfcf calc(8mm + 0.3pt)
-    );
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  .notes-line {
+    height: 8mm;
+    border-bottom: 0.3mm solid #b8b8b8;
   }
 
   /* Keep boxes, tables and figures from splitting awkwardly */

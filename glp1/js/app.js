@@ -176,9 +176,13 @@
   // A lined "notes" page that only appears in print, after each section, so the
   // printed booklet alternates information page → blank lined page for the reader.
   function renderNotesPage(section) {
+    // Lines are real bordered rows (not a background gradient) so they print
+    // reliably even when the browser suppresses background graphics.
+    const lines = [];
+    for (let i = 0; i < 20; i++) lines.push(el('div', { class: 'notes-line' }, []));
     return el('div', { class: 'notes-page', 'aria-hidden': 'true' }, [
       el('div', { class: 'notes-head' }, ['Notes — ' + section.title]),
-      el('div', { class: 'notes-lines' }, [])
+      el('div', { class: 'notes-lines' }, lines)
     ]);
   }
 
