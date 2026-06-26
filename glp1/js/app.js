@@ -122,14 +122,24 @@
   // A real image. Drop a file in glp1/img/ and use:
   //   { type: 'image', src: 'img/your-file.jpg', alt: '...', title: '...', caption: '...' }
   function renderImage(b) {
-    const kids = [el('img', { src: b.src, alt: b.alt || b.title || '', loading: 'lazy' })];
-    if (b.title || b.caption) {
-      kids.push(el('figcaption', null, [
-        b.title ? el('strong', null, [b.title]) : null,
-        b.caption ? el('span', null, [b.caption]) : null
-      ]));
-    }
-    return el('figure', { class: 'image' }, kids);
+    // Show the placeholder first, then swap in the real image only once it has
+    // loaded successfully. A file that isn't uploaded yet simply stays a tidy
+    // placeholder — it never flashes as a broken image.
+    const placeholder = renderPlaceholder({ title: b.title, caption: b.caption });
+    const probe = new Image();
+    probe.onload = function () {
+      const img = el('img', { src: b.src, alt: b.alt || b.title || '', loading: 'lazy' });
+      const kids = [img];
+      if (b.title || b.caption) {
+        kids.push(el('figcaption', null, [
+          b.title ? el('strong', null, [b.title]) : null,
+          b.caption ? el('span', null, [b.caption]) : null
+        ]));
+      }
+      placeholder.replaceWith(el('figure', { class: 'image' }, kids));
+    };
+    probe.src = b.src;
+    return placeholder;
   }
 
   function renderSources() {
