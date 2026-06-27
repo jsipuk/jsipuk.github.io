@@ -278,6 +278,17 @@ a:hover { color: #fff; }
   gap: 1.5rem;
 }
 
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .project-card {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
@@ -287,7 +298,14 @@ a:hover { color: #fff; }
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  animation: card-enter 0.5s ease-out backwards;
 }
+
+.project-card:nth-child(1) { animation-delay: 0.05s; }
+.project-card:nth-child(2) { animation-delay: 0.1s; }
+.project-card:nth-child(3) { animation-delay: 0.15s; }
+.project-card:nth-child(4) { animation-delay: 0.2s; }
+.project-card:nth-child(n+5) { animation-delay: 0.25s; }
 
 .project-card:hover {
   transform: translateY(-4px);
