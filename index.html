@@ -13,7 +13,12 @@
   <header class="header">
     <nav class="nav">
       <span class="logo">John Saunders</span>
-      <ul class="nav-links">
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links" id="nav-links">
         <li><a href="#about">About</a></li>
         <li><a href="#tools">Tools</a></li>
         <li><a href="#games">Games</a></li>
@@ -78,7 +83,7 @@
               <span class="tag">SSE</span>
               <span class="tag">Netskope</span>
             </div>
-            <a href="/netskope-product-explorer" class="project-link">Open explorer &rarr;</a>
+            <a href="/netskope-product-explorer" class="project-link">Explore products &rarr;</a>
           </article>
           <article class="project-card">
             <div class="project-meta">Interactive report</div>
@@ -89,7 +94,7 @@
               <span class="tag">Presales</span>
               <span class="tag">Strategy</span>
             </div>
-            <a href="/the-future-se-stack" class="project-link">Read the analysis &rarr;</a>
+            <a href="/the-future-se-stack" class="project-link">Read analysis &rarr;</a>
           </article>
           <article class="project-card">
             <div class="project-meta">Interactive app</div>
@@ -100,7 +105,7 @@
               <span class="tag">iPad</span>
               <span class="tag">PWA</span>
             </div>
-            <a href="/piano/" class="project-link">Open Aria &rarr;</a>
+            <a href="/piano/" class="project-link">Learn piano &rarr;</a>
           </article>
           <article class="project-card">
             <div class="project-meta">Interactive app</div>
@@ -121,7 +126,7 @@
               <span class="tag">Music</span>
               <span class="tag">Practice</span>
             </div>
-            <a href="/encore" class="project-link">Step inside &rarr;</a>
+            <a href="/encore" class="project-link">Practice now &rarr;</a>
           </article>
         </div>
       </div>
@@ -140,7 +145,7 @@
               <span class="tag">Learning</span>
               <span class="tag">Dinosaurs</span>
             </div>
-            <a href="/dino/" class="project-link">Start the expedition &rarr;</a>
+            <a href="/dino/" class="project-link">Play now &rarr;</a>
           </article>
           <article class="project-card">
             <div class="project-meta">Game</div>
@@ -151,7 +156,7 @@
               <span class="tag">Space</span>
               <span class="tag">Strategy</span>
             </div>
-            <a href="/odyssey" class="project-link">Launch Odyssey &rarr;</a>
+            <a href="/odyssey" class="project-link">Play now &rarr;</a>
           </article>
           <article class="project-card">
             <div class="project-meta">Game</div>
@@ -162,7 +167,7 @@
               <span class="tag">Arcade</span>
               <span class="tag">Mobile</span>
             </div>
-            <a href="/pokemon-flappy" class="project-link">Start flapping &rarr;</a>
+            <a href="/pokemon-flappy" class="project-link">Play now &rarr;</a>
           </article>
           <article class="project-card">
             <div class="project-meta">Game</div>
@@ -173,7 +178,7 @@
               <span class="tag">Arcade</span>
               <span class="tag">Mobile</span>
             </div>
-            <a href="/m/void" class="project-link">Enter the VOID &rarr;</a>
+            <a href="/m/void" class="project-link">Play now &rarr;</a>
           </article>
           <article class="project-card">
             <div class="project-meta">Game &amp; nostalgia</div>
@@ -184,7 +189,7 @@
               <span class="tag">Craft</span>
               <span class="tag">Kids</span>
             </div>
-            <a href="/nostalgiai/" class="project-link">Rediscover &rarr;</a>
+            <a href="/nostalgiai/" class="project-link">Learn now &rarr;</a>
           </article>
         </div>
       </div>
@@ -197,5 +202,25 @@
       <a href="https://github.com/jsipuk" target="_blank" rel="noopener">GitHub</a>
     </p>
   </footer>
+
+  <script>
+    // Mobile navigation toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const navLinks = document.getElementById('nav-links');
+
+    navToggle.addEventListener('click', () => {
+      const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+      navToggle.setAttribute('aria-expanded', !isExpanded);
+      navLinks.setAttribute('aria-expanded', !isExpanded);
+    });
+
+    // Close menu when a link is clicked
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navToggle.setAttribute('aria-expanded', 'false');
+        navLinks.setAttribute('aria-expanded', 'false');
+      });
+    });
+  </script>
 </body>
 </html>
