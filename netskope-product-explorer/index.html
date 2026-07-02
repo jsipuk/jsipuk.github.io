@@ -494,6 +494,22 @@
     flex-shrink: 0;
   }
 
+  /* PACKAGE TIER BADGES */
+  .badge-tier {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    cursor: help;
+  }
+  .badge-tier.tier-prime { background: rgba(0,167,206,0.12); color: #0076a8; border: 1px solid rgba(0,167,206,0.3); }
+  .badge-tier.tier-max   { background: rgba(255,131,0,0.12); color: #c76600; border: 1px solid rgba(255,131,0,0.3); }
+  .badge-tier.tier-api   { background: rgba(123,79,212,0.12); color: #6339b5; border: 1px solid rgba(123,79,212,0.3); }
+  .pc-tiers { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+
   /* DETAIL PANEL ACCENT */
   .detail-panel { border-top: 3px solid var(--dp-accent-color, var(--ns-teal)); }
 
@@ -565,7 +581,7 @@
     <div class="hero-strip">
       <div class="hero-text">
         <h1>Netskope One Platform</h1>
-        <p>The industry's leading SSE and SASE platform — built natively on a single cloud for AI-powered, data-centric security everywhere.</p>
+        <p>The industry's leading SSE and SASE platform — now with AgentSkope agentic operations and a full AI security suite, built natively on a single cloud.</p>
       </div>
       <div class="hero-stats">
         <div class="hero-stat">
@@ -598,6 +614,7 @@
 const CAT_META = {
   "All":                    { color: "#002B49", bg: "rgba(0,43,73,0.07)", icon: "⊞" },
   "Converged":              { color: "#FF8300", bg: "rgba(255,131,0,0.1)", icon: "⬡" },
+  "AgentSkope":             { color: "#C2298A", bg: "rgba(194,41,138,0.1)", icon: "🧠" },
   "AI Security":            { color: "#00A7CE", bg: "rgba(0,167,206,0.1)", icon: "◈" },
   "Web & Cloud":            { color: "#1a6fbd", bg: "rgba(26,111,189,0.1)", icon: "☁" },
   "ZTNA & Private Access":  { color: "#0E7490", bg: "rgba(14,116,144,0.1)", icon: "🔑" },
@@ -625,11 +642,65 @@ const PRODUCTS = [
    related:["SASE","Secure SD-WAN","Endpoint SD-WAN"],
    url:"https://www.netskope.com/products/converged-access"},
 
+  {name:"Converged Gateway", cat:"Converged",     icon:"🚪", isNew:true,
+   desc:"A single converged gateway unifying security and networking enforcement in one place — simplifying architecture with one gateway for all traffic, users, and locations.",
+   features:["Unified enforcement point","Security + networking","Simplified architecture","One gateway, all traffic","SASE-native"],
+   related:["Converged Access","SASE","SSE"],
+   url:"https://www.netskope.com/products/converged-gateway"},
+
   {name:"Unified Data Security",cat:"Converged",  icon:"🗄️",
    desc:"Re-imagine how you protect your organization's data in the AI era — the most comprehensive, unified data security in a single platform combining DLP, DSPM, CASB, and SSPM.",
    features:["Unified DLP","DSPM","CASB integration","SSPM","AI-era data protection"],
    related:["DLP","DSPM","CASB (API)"],
    url:"https://www.netskope.com/products/data-security"},
+
+  {name:"AgentSkope",        cat:"AgentSkope",    icon:"🧠", isNew:true,
+   desc:"Netskope One AgentSkope enables agentic operation of Netskope One — automating onerous processes for policy admins, NetOps, and SecOps teams, freeing skilled staff to focus on what matters. A unified foundation with consistent security, privacy, and GRC controls for every agent.",
+   features:["Agentic operations platform","Persona automation","Unified GRC controls","SIEM ingestion cost reduction","Agent Library catalog"],
+   related:["Netskope DLP AISecOps Agent","Netskope DEM Insights Agent","AI Command Center"],
+   url:"https://www.netskope.com/netskope-one/agentskope"},
+
+  {name:"Netskope DLP AISecOps Agent", cat:"AgentSkope", icon:"🧪", isNew:true,
+   desc:"Mimics the actions of a security operations analyst to execute end-to-end data protection workflows — applying contextualized risk assessments, intelligent triage and investigation, and agentic risk remediation.",
+   features:["End-to-end DLP workflows","Contextual risk assessment","Intelligent triage","Agentic remediation","Add-on license"],
+   related:["AgentSkope","DLP","Netskope Insider Threat AISecOps Agent"],
+   url:"https://www.netskope.com/netskope-one/agentskope/dlp-aisecops-agent"},
+
+  {name:"Netskope Insider Threat AISecOps Agent", cat:"AgentSkope", icon:"🕵️", isNew:true,
+   desc:"Automates insider threat detection and investigation workflows — correlating user behaviour, data movement, and risk signals to surface and triage insider risk like a dedicated analyst.",
+   features:["Insider risk detection","Behavioural correlation","Automated investigation","Analyst persona automation","Add-on license"],
+   related:["AgentSkope","Netskope DLP AISecOps Agent","Advanced Analytics"],
+   url:"https://www.netskope.com/netskope-one/agentskope"},
+
+  {name:"Netskope Private Access AIOps Agent", cat:"AgentSkope", icon:"🛠️", isNew:true,
+   desc:"Automatically audits configurations for Netskope One Private Access — removing dormant settings and helping ensure access privileges are never left open.",
+   features:["Automated config audits","Dormant setting cleanup","Access privilege hygiene","ZTNA operations","Add-on license"],
+   related:["AgentSkope","ZTNA / Private Access","Universal ZTNA"],
+   url:"https://www.netskope.com/netskope-one/agentskope/npa-aiops-agent"},
+
+  {name:"Netskope DEM Data Intelligence Agent", cat:"AgentSkope", icon:"💬", isNew:true,
+   desc:"Streamlines troubleshooting for user experience issues — transforming granular DEM telemetry and raw metrics into actionable insights via a natural language conversational interface.",
+   features:["Natural language queries","Telemetry to insights","UX troubleshooting","Conversational interface","Add-on license"],
+   related:["AgentSkope","Digital Experience Mgmt","Netskope DEM Insights Agent"],
+   url:"https://www.netskope.com/netskope-one/agentskope/dem-data-intel-agent"},
+
+  {name:"Netskope DEM Insights Agent", cat:"AgentSkope", icon:"📈", isNew:true,
+   desc:"Provides a high-level view of organizational digital health — correlating granular telemetry to surface critical incidents, macro-impacting trends, and performance bottlenecks. Included in DEM Level 3/4.",
+   features:["Org-wide digital health","Incident surfacing","Trend correlation","Performance bottlenecks","Included in DEM L3/4"],
+   related:["AgentSkope","Digital Experience Mgmt","Netskope DEM Data Intelligence Agent"],
+   url:"https://www.netskope.com/netskope-one/agentskope"},
+
+  {name:"Netskope CCI Insights Agent", cat:"AgentSkope", icon:"🔍", isNew:true,
+   desc:"Empowers SOC analysts to query complex risk attributes and compliance certifications across more than 85,000 cloud, AI, and SaaS applications using natural language — conversational interaction with app risk data. Included.",
+   features:["85,000+ apps covered","Natural language queries","Risk attribute lookup","Compliance certifications","Included"],
+   related:["AgentSkope","Cloud Inline Security","Advanced Analytics"],
+   url:"https://www.netskope.com/netskope-one/agentskope"},
+
+  {name:"AI Command Center", cat:"AI Security",   icon:"🎛️", isNew:true,
+   desc:"A single pane of glass for your entire AI security posture — unified visibility, governance, and control across all AI usage, agents, models, and data flows in your organization.",
+   features:["Unified AI visibility","AI governance hub","Posture management","Cross-product AI control","Single pane of glass"],
+   related:["AI Gateway","Agentic Broker","AI Guardrails"],
+   url:"https://www.netskope.com/products/ai-command-center"},
 
   {name:"Agentic Broker",    cat:"AI Security",   icon:"🤖", isNew:true,
    desc:"Secure and govern AI agents operating across your enterprise — visibility, control, and policy enforcement for every agentic AI action, workflow, and data interaction.",
@@ -661,13 +732,13 @@ const PRODUCTS = [
    related:["AI Gateway","AI Guardrails","Cloud Inline Security"],
    url:"https://www.netskope.com/products/securing-generative-ai"},
 
-  {name:"Next Gen SWG",      cat:"Web & Cloud",   icon:"🌐",
+  {name:"Next Gen SWG",      cat:"Web & Cloud",   icon:"🌐", tiers:["Prime","Max"], 
    desc:"The foundation for SSE web and cloud inline security — a next-generation secure web gateway providing real-time threat and data protection for all web and cloud traffic.",
    features:["Inline threat detection","DLP inline","Cloud app controls","SSL inspection","Zero-day protection"],
    related:["Cloud Inline Security","Threat Protection","Remote Browser Isolation"],
    url:"https://www.netskope.com/products/next-gen-swg"},
 
-  {name:"Cloud Inline Security",cat:"Web & Cloud",icon:"☁️",
+  {name:"Cloud Inline Security",cat:"Web & Cloud",icon:"☁️", tiers:["Prime","Max"], 
    desc:"Netskope One CASB lets you confidently adopt cloud applications without sacrificing security — inline and out-of-band protection for managed and unmanaged cloud apps.",
    features:["Inline + API CASB","Shadow IT discovery","Policy enforcement","Managed/unmanaged apps","Real-time coaching"],
    related:["Next Gen SWG","CASB (API)","SSPM"],
@@ -691,7 +762,7 @@ const PRODUCTS = [
    related:["ZTNA / Private Access","Secure SD-WAN","Converged Access"],
    url:"https://www.netskope.com/products/endpoint-sd-wan"},
 
-  {name:"Firewall as a Service",cat:"Web & Cloud",icon:"🔥",
+  {name:"Firewall as a Service",cat:"Web & Cloud",icon:"🔥", tiers:["Max"], 
    desc:"Netskope One Cloud Firewall delivers FWaaS for egress traffic in a SASE architecture — cloud-delivered, policy-driven firewall for all users and locations, no hardware required.",
    features:["Cloud-delivered FWaaS","SASE-integrated","Egress control","DNS security","IPS/IDS"],
    related:["Next Gen SWG","SASE","SSE"],
@@ -703,31 +774,37 @@ const PRODUCTS = [
    related:["Remote Browser Isolation","ZTNA","Next Gen SWG"],
    url:"https://www.netskope.com/products/enterprise-browser"},
 
-  {name:"Remote Browser Isolation",cat:"Web & Cloud",icon:"🔒",
+  {name:"Remote Browser Isolation",cat:"Web & Cloud",icon:"🔒", tiers:["Max"], 
    desc:"Netskope One RBI isolates uncategorized and risky websites, executing all browser code remotely — protecting endpoints from web-borne threats without impacting user experience.",
    features:["Remote code execution","Risky site isolation","Transparent experience","Integrated with SWG","Zero endpoint risk"],
    related:["Next Gen SWG","Enterprise Browser","Threat Protection"],
    url:"https://www.netskope.com/products/remote-browser-isolation"},
 
-  {name:"Threat Protection",  cat:"Web & Cloud",  icon:"🛡️",
+  {name:"Threat Protection",  cat:"Web & Cloud",  icon:"🛡️", tiers:["Prime","Max"], 
    desc:"High-efficacy threat detection and blocking for advanced malware (including ransomware) and phishing — inline, real-time, AI-powered protection built into the SSE platform.",
    features:["Anti-malware","Anti-phishing","Ransomware defense","AI threat detection","Zero-day protection"],
    related:["Next Gen SWG","Cloud Inline Security","Advanced Analytics"],
    url:"https://www.netskope.com/netskope-one/threat-protection"},
 
-  {name:"DLP",               cat:"Data Security", icon:"📂",
+  {name:"DLP",               cat:"Data Security", icon:"📂", tiers:["Prime","Max","API"], 
    desc:"Unified, ML-enhanced data loss prevention for cloud, web, email, private apps, and devices — reduce the risk of data exfiltration across every channel from one policy engine.",
    features:["Multi-channel DLP","ML-enhanced detection","Cloud + endpoint","Policy automation","Exact Data Match"],
    related:["DSPM","Unified Data Security","Cloud Inline Security"],
    url:"https://www.netskope.com/products/data-loss-prevention"},
 
-  {name:"DSPM",              cat:"Data Security", icon:"🗺️",
+  {name:"DSPM",              cat:"Data Security", icon:"🗺️", tiers:["API"], 
    desc:"Netskope One DSPM empowers security teams to discover, map, and protect sensitive data across cloud, on-premises, and hybrid environments — find data risk before it becomes a breach.",
    features:["Data discovery","Risk posture scoring","Cloud + on-prem","Compliance mapping","Auto-remediation"],
    related:["DLP","CASB (API)","Unified Data Security"],
    url:"https://www.netskope.com/products/data-security-posture-management"},
 
-  {name:"CASB (API)",        cat:"Data Security", icon:"🔗",
+  {name:"Data Lineage",      cat:"Data Security", icon:"🧬", isNew:true,
+   desc:"Track the complete journey of your sensitive data — where it originated, how it's transformed, where it moves, and who touches it — giving you full provenance and context for data risk decisions.",
+   features:["Data provenance tracking","Movement visibility","Transformation history","Risk context","AI-era data governance"],
+   related:["DSPM","DLP","Unified Data Security"],
+   url:"https://www.netskope.com/security-defined/what-is-data-lineage"},
+
+  {name:"CASB (API)",        cat:"Data Security", icon:"🔗", tiers:["API"], 
    desc:"Out-of-band CASB protection for sanctioned SaaS apps via API — visibility and control for data at rest in Microsoft 365, Salesforce, Google Workspace, and hundreds more.",
    features:["API-connected","Data at rest scanning","Compliance enforcement","SaaS app coverage","Misconfiguration detection"],
    related:["Cloud Inline Security","SSPM","DLP"],
@@ -757,13 +834,13 @@ const PRODUCTS = [
    related:["ZTNA","Micro Branch","Advanced Analytics"],
    url:"https://www.netskope.com/products/device-intelligence"},
 
-  {name:"Advanced Analytics", cat:"Analytics",    icon:"📊",
+  {name:"Advanced Analytics", cat:"Analytics",    icon:"📊", tiers:["Prime","Max"], 
    desc:"Transform security operations with data-driven insights — identify trends, zero in on areas of risk, and use evidence to take action with powerful analytics built natively into the platform.",
    features:["Custom dashboards","Risk trending","Behavioral analytics","Policy impact analysis","Threat intelligence"],
    related:["Digital Experience Mgmt","Threat Protection","DSPM"],
    url:"https://www.netskope.com/products/advanced-analytics"},
 
-  {name:"Digital Experience Mgmt",cat:"Analytics",icon:"😊",
+  {name:"Digital Experience Mgmt",cat:"Analytics",icon:"😊", tiers:["Prime","Max"], 
    desc:"Proactive Digital Experience Management (P-DEM) gives IT teams end-to-end visibility into user experience quality across apps, networks, and devices — resolve issues before users notice.",
    features:["End-to-end visibility","Proactive alerting","App performance scoring","Remote user insights","Network path analysis"],
    related:["Advanced Analytics","Secure SD-WAN","Device Intelligence"],
@@ -835,6 +912,7 @@ function catIcon(cat) {
   const icons = {
     "All": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>`,
     "Converged": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M4 7h6M7 4v6" stroke-linecap="round"/></svg>`,
+    "AgentSkope": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="5" r="3"/><path d="M7 8v2M4 12h6M5.5 5h.01M8.5 5h.01" stroke-linecap="round"/></svg>`,
     "AI Security": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1 2 4v3c0 2.8 2.1 5.4 5 6 2.9-.6 5-3.2 5-6V4L7 1z"/></svg>`,
     "Web & Cloud": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9.5A2.5 2.5 0 0 1 3 5a3 3 0 0 1 5.6-1.4A2 2 0 1 1 11 7.5H3z"/></svg>`,
     "ZTNA & Private Access": `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2" stroke-linecap="round"/></svg>`,
@@ -902,6 +980,7 @@ function renderMain() {
           ${p.isNew ? '<span class="badge-new">New</span>' : ''}
         </div>
         <span class="pc-cat" style="background:${m.bg};color:${m.color}">${p.cat}</span>
+        ${tierBadges(p)}
         <span class="pc-arrow" style="color:${m.color}">→</span>
       `;
       card.onclick = () => { selectedProduct = p.name; renderDetail(p); renderCards(); };
@@ -917,6 +996,19 @@ function renderMain() {
       }
     }
   });
+}
+
+const TIER_INFO = {
+  "Prime": "Included in the Netskope One Prime package",
+  "Max":   "Included in the Netskope One Max package",
+  "API":   "Available via API deployment"
+};
+function tierBadges(p, inline) {
+  if(!p.tiers || !p.tiers.length) return '';
+  const badges = p.tiers.map(t =>
+    `<span class="badge-tier tier-${t.toLowerCase()}" title="${TIER_INFO[t]||t}">${t}</span>`
+  ).join('');
+  return `<div class="pc-tiers"${inline?' style="margin-top:10px"':''}>${badges}</div>`;
 }
 
 function renderCards() {
@@ -956,6 +1048,7 @@ function buildDetailPanel(p) {
         </div>
         <div class="dp-cat" style="background:${m.bg};color:${m.color}">${p.cat}</div>
         <div class="dp-desc">${p.desc}</div>
+        ${tierBadges(p, true)}
       </div>
       <div class="dp-actions">
         <a class="btn-primary" href="${p.url}" target="_blank">
