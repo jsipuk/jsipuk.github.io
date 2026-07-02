@@ -18,12 +18,22 @@
   const resultGrossEl = document.getElementById('result-gross');
   const resultNetEl = document.getElementById('result-net');
   const breakdownListEl = document.getElementById('breakdown-list');
+  const dealTypeEl = document.getElementById('dealType');
+  const acvLabelEl = document.getElementById('acv-label');
+  const tcvFieldEl = document.getElementById('tcv-field');
+  const tcvInputEl = document.getElementById('tcv');
 
-  const currencyFmt = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-  const currencyFmt2 = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+  const currencyFmt = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
+  const currencyFmt2 = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 2 });
   const formatMoney = (n) => currencyFmt.format(n);
   const formatMoney2 = (n) => currencyFmt2.format(n);
-  const formatPct = (n) => `${n.toFixed(1)}%`;
+  const formatPct = (n) => `${n.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')}%`;
+
+  const ACV_LABELS = {
+    newBusiness: 'ACV — Annual Contract Value',
+    renewal: 'Renewal ACV',
+    oyNb: 'Out-year ACV',
+  };
 
   // ---------------------------------------------------------------- storage
 
@@ -101,6 +111,8 @@
     document.getElementById('baseCommissionRate').value = plan.baseCommissionRate;
     document.getElementById('tcvCreditPct').value = plan.tcvCreditPct;
     document.getElementById('deductionPct').value = plan.deductionPct;
+    document.getElementById('renewalRatePct').value = plan.renewalRatePct;
+    document.getElementById('oyNbMultiplier').value = plan.oyNbMultiplier;
     renderTiers(plan.tiers);
   }
 
@@ -111,6 +123,8 @@
       baseCommissionRate: parseFloat(document.getElementById('baseCommissionRate').value),
       tcvCreditPct: parseFloat(document.getElementById('tcvCreditPct').value),
       deductionPct: parseFloat(document.getElementById('deductionPct').value),
+      renewalRatePct: parseFloat(document.getElementById('renewalRatePct').value),
+      oyNbMultiplier: parseFloat(document.getElementById('oyNbMultiplier').value),
       tiers: readTiersFromForm(),
     };
   }
@@ -158,24 +172,64 @@
 
   // ------------------------------------------------------------ deal form
 
+  function updateDealFieldsForType() {
+    const dealType = dealTypeEl.value;
+    acvLabelEl.textContent = ACV_LABELS[dealType];
+    tcvFieldEl.hidden = dealType !== 'newBusiness';
+    tcvInputEl.required = dealType === 'newBusiness';
+  }
+
+  dealTypeEl.addEventListener('change', updateDealFieldsForType);
+
   function readDealFromForm() {
     return {
+      dealType: dealTypeEl.value,
       acv: parseFloat(document.getElementById('acv').value),
-      tcv: parseFloat(document.getElementById('tcv').value),
+      tcv: parseFloat(tcvInputEl.value),
     };
   }
 
   function renderBreakdown(plan, deal, r) {
-    const items = [
-      `TCV uplift beyond ACV: ${formatMoney(deal.tcv)} &minus; ${formatMoney(deal.acv)} = <span class="mono">${formatMoney(r.tcvUplift)}</span>`,
-      `TCV credited at ${formatPct(plan.tcvCreditPct)}: <span class="mono">${formatMoney2(r.tcvCredited)}</span>`,
-      `Commissionable value: ${formatMoney(deal.acv)} + ${formatMoney2(r.tcvCredited)} = <span class="mono">${formatMoney2(r.commissionableValue)}</span>`,
-      `Attainment after this deal: (${formatMoney(r.attainmentBefore)} + ${formatMoney2(r.commissionableValue)}) &divide; ${formatMoney(plan.quota)} quota = <span class="mono">${formatPct(r.attainmentPctAfter)}</span>`,
-      `Tier applied: from ${formatPct(r.tier.minAttainmentPct)} attainment &rarr; <span class="mono">${r.tier.multiplier}&times;</span> multiplier`,
-      `Gross commission: ${formatMoney2(r.commissionableValue)} &times; ${formatPct(plan.baseCommissionRate)} &times; ${r.tier.multiplier} = <span class="mono">${formatMoney2(r.grossCommission)}</span>`,
-      `Deductions: ${formatMoney2(r.grossCommission)} &times; ${formatPct(plan.deductionPct)} = <span class="mono">${formatMoney2(r.deductionAmount)}</span>`,
-      `Net commission: ${formatMoney2(r.grossCommission)} &minus; ${formatMoney2(r.deductionAmount)} = <span class="mono">${formatMoney2(r.netCommission)}</span>`,
-    ];
+    let items;
+
+    if (r.dealType === 'renewal') {
+      items = [
+        `Renewal ACV: <span class="mono">${formatMoney2(r.commissionableValue)}</span>`,
+        `Flat renewal rate: <span class="mono">${formatPct(r.ratePct)}</span> (no tiers or acceleration)`,
+        `Gross commission: ${formatMoney2(r.commissionableValue)} &times; ${formatPct(r.ratePct)} = <span class="mono">${formatMoney2(r.grossCommission)}</span>`,
+        `Deductions: ${formatMoney2(r.grossCommission)} &times; ${formatPct(plan.deductionPct)} = <span class="mono">${formatMoney2(r.deductionAmount)}</span>`,
+        `Net commission: ${formatMoney2(r.grossCommission)} &minus; ${formatMoney2(r.deductionAmount)} = <span class="mono">${formatMoney2(r.netCommission)}</span>`,
+      ];
+    } else if (r.dealType === 'oyNb') {
+      items = [
+        `Out-year ACV: <span class="mono">${formatMoney2(r.commissionableValue)}</span>`,
+        `Effective rate: BCR ${formatPct(plan.baseCommissionRate)} &times; ${r.multiplier}&times; OY multiplier = <span class="mono">${formatPct(r.ratePct)}</span> (no tiers or acceleration)`,
+        `Gross commission: ${formatMoney2(r.commissionableValue)} &times; ${formatPct(r.ratePct)} = <span class="mono">${formatMoney2(r.grossCommission)}</span>`,
+        `Deductions: ${formatMoney2(r.grossCommission)} &times; ${formatPct(plan.deductionPct)} = <span class="mono">${formatMoney2(r.deductionAmount)}</span>`,
+        `Net commission: ${formatMoney2(r.grossCommission)} &minus; ${formatMoney2(r.deductionAmount)} = <span class="mono">${formatMoney2(r.netCommission)}</span>`,
+      ];
+    } else {
+      items = [
+        `TCV uplift beyond ACV: ${formatMoney(deal.tcv)} &minus; ${formatMoney(deal.acv)} = <span class="mono">${formatMoney(r.tcvUplift)}</span>`,
+        `TCV credited at ${formatPct(plan.tcvCreditPct)}: <span class="mono">${formatMoney2(r.tcvCredited)}</span>`,
+        `Commissionable value: ${formatMoney(deal.acv)} + ${formatMoney2(r.tcvCredited)} = <span class="mono">${formatMoney2(r.commissionableValue)}</span>`,
+        `Attainment before this deal: ${formatMoney(r.attainmentBefore)} &divide; ${formatMoney(plan.quota)} quota = <span class="mono">${formatPct(r.attainmentPctBefore)}</span>`,
+        `Attainment after this deal: ${formatMoney(r.attainmentAfter)} &divide; ${formatMoney(plan.quota)} quota = <span class="mono">${formatPct(r.attainmentPctAfter)}</span>`,
+        `Graduated across ${r.segments.length} tier${r.segments.length === 1 ? '' : 's'} (each dollar taxed at the band it falls in):`,
+      ];
+      r.segments.forEach((seg) => {
+        const maxLabel = seg.maxAttainmentPct === Infinity ? '∞' : formatPct(seg.maxAttainmentPct);
+        items.push(
+          `&nbsp;&nbsp;${formatPct(seg.minAttainmentPct)}&ndash;${maxLabel} tier (${seg.multiplier}&times;, rate ${formatPct(seg.ratePct)}): ${formatMoney2(seg.width)} &times; ${formatPct(seg.ratePct)} = <span class="mono">${formatMoney2(seg.commission)}</span>`
+        );
+      });
+      items.push(
+        `Gross commission (sum of tiers): <span class="mono">${formatMoney2(r.grossCommission)}</span>`,
+        `Deductions: ${formatMoney2(r.grossCommission)} &times; ${formatPct(plan.deductionPct)} = <span class="mono">${formatMoney2(r.deductionAmount)}</span>`,
+        `Net commission: ${formatMoney2(r.grossCommission)} &minus; ${formatMoney2(r.deductionAmount)} = <span class="mono">${formatMoney2(r.netCommission)}</span>`
+      );
+    }
+
     breakdownListEl.innerHTML = items.map((i) => `<li>${i}</li>`).join('');
   }
 
@@ -205,4 +259,5 @@
   // ---------------------------------------------------------------- init
 
   renderPlan(loadPlan());
+  updateDealFieldsForType();
 })();
