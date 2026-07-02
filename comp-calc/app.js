@@ -42,6 +42,56 @@
   const formatGBP2 = (n) => gbpFmt2.format(n);
   const formatPct = (n) => `${n.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')}%`;
 
+  // Large dollar-amount fields (quota, attainment, ACV, out-year lines) get
+  // live thousands-separator formatting as you type. type="number" inputs
+  // can't display commas at all, so these fields are plain text inputs
+  // instead — formatThousands() re-renders on every keystroke and
+  // parseFormattedNumber() strips the commas back out before any maths runs.
+  function formatThousands(raw) {
+    if (typeof raw !== 'string') return '';
+    const [rawInt, ...rest] = raw.replace(/[^\d.]/g, '').split('.');
+    const intPart = rawInt.replace(/^0+(?=\d)/, '');
+    const decPart = rest.length > 0 ? '.' + rest.join('') : '';
+    const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return withCommas + decPart;
+  }
+
+  function parseFormattedNumber(raw) {
+    if (typeof raw !== 'string') return NaN;
+    const cleaned = raw.replace(/,/g, '').trim();
+    if (cleaned === '' || cleaned === '.') return NaN;
+    return parseFloat(cleaned);
+  }
+
+  function setThousandsValue(input, value) {
+    input.value = Number.isFinite(value) ? formatThousands(String(value)) : '';
+  }
+
+  function attachThousandsFormatting(input) {
+    input.addEventListener('input', () => {
+      const prevValue = input.value;
+      const prevCursor = input.selectionStart;
+      const digitsBeforeCursor = prevValue.slice(0, prevCursor).replace(/[^\d.]/g, '').length;
+
+      input.value = formatThousands(prevValue);
+
+      if (digitsBeforeCursor === 0) {
+        input.setSelectionRange(0, 0);
+        return;
+      }
+      let seen = 0;
+      let newCursor = input.value.length;
+      for (let i = 0; i < input.value.length; i++) {
+        if (/[\d.]/.test(input.value[i])) seen++;
+        if (seen === digitsBeforeCursor) {
+          newCursor = i + 1;
+          break;
+        }
+      }
+      input.setSelectionRange(newCursor, newCursor);
+    });
+  }
+
   const ACV_LABELS = {
     newBusiness: 'ACV — Annual Contract Value (USD $)',
     renewal: 'Renewal ACV (USD $)',
@@ -119,8 +169,8 @@
   // ------------------------------------------------------------ plan form
 
   function renderPlan(plan) {
-    document.getElementById('quota').value = plan.quota;
-    document.getElementById('priorAttainment').value = plan.priorAttainment;
+    setThousandsValue(document.getElementById('quota'), plan.quota);
+    setThousandsValue(document.getElementById('priorAttainment'), plan.priorAttainment);
     document.getElementById('baseCommissionRate').value = plan.baseCommissionRate;
     document.getElementById('tcvCreditPct').value = plan.tcvCreditPct;
     document.getElementById('deductionPct').value = plan.deductionPct;
@@ -131,8 +181,8 @@
 
   function readPlanFromForm() {
     return {
-      quota: parseFloat(document.getElementById('quota').value),
-      priorAttainment: parseFloat(document.getElementById('priorAttainment').value),
+      quota: parseFormattedNumber(document.getElementById('quota').value),
+      priorAttainment: parseFormattedNumber(document.getElementById('priorAttainment').value),
       baseCommissionRate: parseFloat(document.getElementById('baseCommissionRate').value),
       tcvCreditPct: parseFloat(document.getElementById('tcvCreditPct').value),
       deductionPct: parseFloat(document.getElementById('deductionPct').value),
@@ -201,11 +251,14 @@
     row.innerHTML = `
       <label>
         <span>Out-year value (USD $)</span>
-        <input type="number" class="tcv-line-value" min="0" step="any" inputmode="decimal" value="${value}" />
+        <input type="text" class="tcv-line-value" inputmode="decimal" autocomplete="off" />
       </label>
       <button type="button" class="tier-remove" title="Remove line" aria-label="Remove line">&times;</button>
     `;
-    row.querySelector('.tcv-line-value').addEventListener('input', updateTcvTotal);
+    const lineInput = row.querySelector('.tcv-line-value');
+    setThousandsValue(lineInput, value);
+    attachThousandsFormatting(lineInput);
+    lineInput.addEventListener('input', updateTcvTotal);
     row.querySelector('.tier-remove').addEventListener('click', () => {
       row.remove();
       updateTcvTotal();
@@ -214,18 +267,19 @@
   }
 
   addTcvLineBtn.addEventListener('click', () => {
-    tcvLinesListEl.appendChild(renderTcvLineRow(0));
+    tcvLinesListEl.appendChild(renderTcvLineRow(NaN));
     updateTcvTotal();
   });
 
+  attachThousandsFormatting(acvInputEl);
   acvInputEl.addEventListener('input', updateTcvTotal);
 
   function readTcvLines() {
-    return [...tcvLinesListEl.querySelectorAll('.tcv-line-value')].map((el) => parseFloat(el.value));
+    return [...tcvLinesListEl.querySelectorAll('.tcv-line-value')].map((el) => parseFormattedNumber(el.value));
   }
 
   function computeTotalTcv() {
-    const acv = parseFloat(acvInputEl.value);
+    const acv = parseFormattedNumber(acvInputEl.value);
     const lines = readTcvLines();
     const validAcv = Number.isFinite(acv) ? acv : 0;
     const linesSum = lines.reduce((sum, v) => sum + (Number.isFinite(v) ? v : 0), 0);
@@ -240,7 +294,7 @@
     const dealType = dealTypeEl.value;
     return {
       dealType,
-      acv: parseFloat(acvInputEl.value),
+      acv: parseFormattedNumber(acvInputEl.value),
       tcv: dealType === 'newBusiness' ? computeTotalTcv() : undefined,
     };
   }
@@ -370,6 +424,8 @@
 
   // ---------------------------------------------------------------- init
 
+  attachThousandsFormatting(document.getElementById('quota'));
+  attachThousandsFormatting(document.getElementById('priorAttainment'));
   renderPlan(loadPlan());
   updateDealFieldsForType();
   updateTcvTotal();
