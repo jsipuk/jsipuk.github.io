@@ -1,5 +1,5 @@
 /* Lightweight, dependency-free checks for the commission calculation logic.
-   Run with:  node commission-calculator/test/calc.test.js */
+   Run with:  node comp-calc/test/calc.test.js */
 const fs = require('fs');
 const path = require('path');
 
