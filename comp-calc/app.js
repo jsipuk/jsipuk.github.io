@@ -3,7 +3,7 @@
  * Keep calculation logic out of this file — it belongs in calc.js.
  */
 (() => {
-  const STORAGE_KEY = 'commission-calculator:plan';
+  const STORAGE_KEY = 'comp-calc:plan';
   const { defaultPlan, validatePlan, validateDeal, calculateCommission } = window.CommissionCalc;
 
   const planForm = document.getElementById('plan-form');

@@ -14,13 +14,13 @@ It's just static files — open `index.html` directly, or serve the folder:
 ```bash
 # from the repo root
 python3 -m http.server 8000
-# then visit http://localhost:8000/commission-calculator/
+# then visit http://localhost:8000/comp-calc/
 ```
 
 ## Updating your commission assumptions
 
 Everything under **Compensation plan** is editable and saved to this
-browser's `localStorage` (key `commission-calculator:plan`) when you click
+browser's `localStorage` (key `comp-calc:plan`) when you click
 **Save plan** — nothing is sent over the network. It survives refreshes and
 comes back next time you open the page on the same browser/device.
 
@@ -90,7 +90,7 @@ Dependency-free tests cover tier selection, ACV/TCV blending, deduction
 math, and validation of empty/negative/invalid inputs:
 
 ```bash
-node commission-calculator/test/calc.test.js
+node comp-calc/test/calc.test.js
 ```
 
 ## Privacy
