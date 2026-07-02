@@ -10,12 +10,12 @@
 </head>
 <body>
   <header class="page-header">
-    <a href="/" class="home-link" aria-label="jsipuk.github.io home">
+    <a href="/" class="home-link" aria-label="JSIP.UK home">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M3 11.5 12 4l9 7.5" />
         <path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9" />
       </svg>
-      <span>jsipuk.github.io</span>
+      <span>JSIP.UK</span>
     </a>
     <h1>Commission Calculator</h1>
     <p class="subtitle">Save your comp plan, size a deal, see gross &amp; net commission.</p>
@@ -131,13 +131,19 @@
       <div id="results" class="results" hidden>
         <div class="result-cards">
           <div class="result-card">
-            <span class="result-label">Gross commission (GBP £)</span>
+            <span class="result-label" id="result-gross-label">Gross commission (GBP £)</span>
             <span class="result-value" id="result-gross">&mdash;</span>
           </div>
           <div class="result-card result-card-accent">
-            <span class="result-label">Net commission (GBP £)</span>
+            <span class="result-label" id="result-net-label">Net commission (GBP £)</span>
             <span class="result-value" id="result-net">&mdash;</span>
           </div>
+        </div>
+
+        <div id="year-breakdown-section" class="year-breakdown" hidden>
+          <h3>Commission by year</h3>
+          <span class="panel-hint">Year 1 is this New Business ACV, paid now. Year 2+ is each out-year line, paid annually at the Out-Year New Business rate.</span>
+          <div id="year-breakdown-list" class="year-list"></div>
         </div>
 
         <details class="breakdown" open>

@@ -92,8 +92,14 @@ they're just a sensible, non-empty starting point.
    gives a **Total TCV** of `$300,000`, shown live as you type. Remove a
    line with its **×** button.
 3. Click **Calculate**.
-4. Read the **Gross commission** and **Net commission** cards, and expand
-   **Calculation breakdown** to see every step of the maths.
+4. Read the **Gross commission** and **Net commission** cards — this is
+   Year 1, the New Business ACV commission. If you added any out-year
+   lines, a **Commission by year** panel also appears: Year 1 is the same
+   ACV figure, and Year 2, Year 3, etc. are each out-year line priced at
+   the Out-Year New Business rate (BCR × OY multiplier) — the same
+   calculation as the standalone Out-Year New Business deal type, just
+   applied per line automatically, plus a total across all years.
+5. Expand **Calculation breakdown** to see every step of the Year 1 maths.
 
 The plan panel doesn't need to be re-saved before calculating — Calculate
 always uses whatever is currently in the plan fields, so you can try
