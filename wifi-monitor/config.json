@@ -2,10 +2,20 @@
   "check_interval_seconds": 30,
   "speed_test_interval_seconds": 1800,
   "signal_threshold_percent": 40,
-  "latency_threshold_ms": 100,
+  "router_ping_threshold_ms": 30,
+  "public_ping_threshold_ms": 100,
+  "dns_lookup_threshold_ms": 150,
   "download_threshold_mbps": 5,
-  "ping_host": "8.8.8.8",
+  "public_ping_host": "8.8.8.8",
+  "router_ping_host": null,
+  "dns_test_host": "www.google.com",
   "speedtest_url": "https://speed.hetzner.de/100MB.bin",
   "speedtest_max_bytes": 5000000,
-  "log_file": "wifi_quality_log.csv"
+  "recovery_confirm_readings": 2,
+  "history_before_readings": 6,
+  "congestion_lookback_days": 7,
+  "congestion_time_window_minutes": 30,
+  "congestion_min_occurrences": 2,
+  "readings_log_file": "readings_log.csv",
+  "events_log_file": "events.jsonl"
 }
