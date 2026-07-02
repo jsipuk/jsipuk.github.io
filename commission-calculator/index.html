@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commission Calculator</title>
+  <meta name="description" content="A personal commission calculator: save your compensation-plan assumptions and estimate gross and net commission for a deal." />
+  <meta name="robots" content="noindex" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="page-header">
+    <a href="/" class="back-link">&larr; jsipuk.github.io</a>
+    <h1>Commission Calculator</h1>
+    <p class="subtitle">Save your comp plan, size a deal, see gross &amp; net commission.</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel" aria-labelledby="plan-heading">
+      <div class="panel-header">
+        <h2 id="plan-heading">Compensation plan</h2>
+        <span class="panel-hint">Saved automatically in this browser</span>
+      </div>
+
+      <form id="plan-form" novalidate>
+        <div class="field-grid">
+          <label class="field">
+            <span>Annual quota</span>
+            <input type="number" id="quota" name="quota" min="0" step="any" inputmode="decimal" required />
+          </label>
+
+          <label class="field">
+            <span>Attainment already booked this period</span>
+            <input type="number" id="priorAttainment" name="priorAttainment" min="0" step="any" inputmode="decimal" required />
+          </label>
+
+          <label class="field">
+            <span>Base commission rate (%)</span>
+            <input type="number" id="baseCommissionRate" name="baseCommissionRate" min="0" step="any" inputmode="decimal" required />
+          </label>
+
+          <label class="field">
+            <span>TCV credit (%)</span>
+            <input type="number" id="tcvCreditPct" name="tcvCreditPct" min="0" max="100" step="any" inputmode="decimal" required />
+            <small>Share of (TCV &minus; ACV) counted toward commission &mdash; use 0 if only year-one value counts.</small>
+          </label>
+
+          <label class="field">
+            <span>Average deductions / tax (%)</span>
+            <input type="number" id="deductionPct" name="deductionPct" min="0" max="100" step="any" inputmode="decimal" required />
+            <small>Applied to gross commission to estimate net. Defaults to 49%, fully editable.</small>
+          </label>
+        </div>
+
+        <div class="tiers-block">
+          <div class="tiers-header">
+            <h3>Achievement tiers</h3>
+            <span class="panel-hint">Multiplier applied once quota attainment reaches each threshold</span>
+          </div>
+          <div id="tiers-list" class="tiers-list"></div>
+          <button type="button" id="add-tier" class="btn btn-secondary">+ Add tier</button>
+        </div>
+
+        <div id="plan-errors" class="errors" role="alert" aria-live="polite"></div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save plan</button>
+          <button type="button" id="reset-plan" class="btn btn-ghost">Reset to defaults</button>
+          <span id="save-status" class="save-status" aria-live="polite"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="deal-heading">
+      <div class="panel-header">
+        <h2 id="deal-heading">Deal</h2>
+      </div>
+
+      <form id="deal-form" novalidate>
+        <div class="field-grid">
+          <label class="field">
+            <span>ACV &mdash; Annual Contract Value</span>
+            <input type="number" id="acv" name="acv" min="0" step="any" inputmode="decimal" required />
+          </label>
+
+          <label class="field">
+            <span>TCV &mdash; Total Contract Value</span>
+            <input type="number" id="tcv" name="tcv" min="0" step="any" inputmode="decimal" required />
+          </label>
+        </div>
+
+        <div id="deal-errors" class="errors" role="alert" aria-live="polite"></div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Calculate</button>
+        </div>
+      </form>
+
+      <div id="results" class="results" hidden>
+        <div class="result-cards">
+          <div class="result-card">
+            <span class="result-label">Gross commission</span>
+            <span class="result-value" id="result-gross">&mdash;</span>
+          </div>
+          <div class="result-card result-card-accent">
+            <span class="result-label">Net commission</span>
+            <span class="result-value" id="result-net">&mdash;</span>
+          </div>
+        </div>
+
+        <details class="breakdown" open>
+          <summary>Calculation breakdown</summary>
+          <ol id="breakdown-list" class="breakdown-list"></ol>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p>Runs entirely in your browser. Nothing is sent anywhere &mdash; plan assumptions are stored in this browser's <code>localStorage</code> only.</p>
+  </footer>
+
+  <script src="calc.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
