@@ -18,6 +18,8 @@
   const resultGrossEl = document.getElementById('result-gross');
   const resultNetEl = document.getElementById('result-net');
   const breakdownListEl = document.getElementById('breakdown-list');
+  const yearBreakdownSectionEl = document.getElementById('year-breakdown-section');
+  const yearBreakdownListEl = document.getElementById('year-breakdown-list');
   const dealTypeEl = document.getElementById('dealType');
   const acvLabelEl = document.getElementById('acv-label');
   const acvInputEl = document.getElementById('acv');
@@ -295,6 +297,50 @@
     breakdownListEl.innerHTML = items.map((i) => `<li>${i}</li>`).join('');
   }
 
+  // Year 1 is this deal's New Business ACV commission (already computed as
+  // `r`). Year 2+ is each out-year TCV line, paid annually — each one priced
+  // via the same Out-Year New Business calculation as the standalone OY NB
+  // deal type, just reused per line instead of typed in one at a time.
+  function renderYearBreakdown(plan, deal, r, outYearLines) {
+    if (outYearLines.length === 0) {
+      yearBreakdownSectionEl.hidden = true;
+      yearBreakdownListEl.innerHTML = '';
+      return;
+    }
+
+    const rows = [
+      {
+        label: `Year 1 &mdash; New Business ACV (${formatUSD(deal.acv)})`,
+        gross: r.grossCommission,
+        net: r.netCommission,
+      },
+      ...outYearLines.map((value, i) => {
+        const oyResult = calculateCommission(plan, { dealType: 'oyNb', acv: value });
+        return {
+          label: `Year ${i + 2} &mdash; Out-Year New Business (${formatUSD(value)})`,
+          gross: oyResult.grossCommission,
+          net: oyResult.netCommission,
+        };
+      }),
+    ];
+
+    const totalGross = rows.reduce((sum, row) => sum + row.gross, 0);
+    const totalNet = rows.reduce((sum, row) => sum + row.net, 0);
+
+    const rowHtml = (row, extraClass = '') => `
+      <div class="year-row ${extraClass}">
+        <span class="year-label">${row.label}</span>
+        <span class="year-amounts">Gross ${formatGBP2(row.gross)} &middot; Net ${formatGBP2(row.net)}</span>
+      </div>
+    `;
+
+    yearBreakdownListEl.innerHTML =
+      rows.map((row) => rowHtml(row)).join('') +
+      rowHtml({ label: 'Total across all years', gross: totalGross, net: totalNet }, 'year-row-total');
+
+    yearBreakdownSectionEl.hidden = false;
+  }
+
   dealForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -315,6 +361,10 @@
     resultGrossEl.textContent = formatGBP2(r.grossCommission);
     resultNetEl.textContent = formatGBP2(r.netCommission);
     renderBreakdown(plan, deal, r);
+
+    const outYearLines = deal.dealType === 'newBusiness' ? readTcvLines().filter((v) => Number.isFinite(v) && v > 0) : [];
+    renderYearBreakdown(plan, deal, r, outYearLines);
+
     resultsEl.hidden = false;
   });
 
