@@ -10,9 +10,16 @@
 </head>
 <body>
   <header class="page-header">
-    <a href="/" class="back-link">&larr; jsipuk.github.io</a>
+    <a href="/" class="home-link" aria-label="jsipuk.github.io home">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 11.5 12 4l9 7.5" />
+        <path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9" />
+      </svg>
+      <span>jsipuk.github.io</span>
+    </a>
     <h1>Commission Calculator</h1>
     <p class="subtitle">Save your comp plan, size a deal, see gross &amp; net commission.</p>
+    <p class="currency-note">Deal values (ACV / TCV / quota) are entered in <strong>USD $</strong>. Commission is calculated and shown in <strong>GBP £</strong> &mdash; that's this plan's actual rate structure (a dollar deal value times a rate produces a pound commission figure), not a live currency conversion.</p>
   </header>
 
   <main class="layout">
@@ -25,12 +32,12 @@
       <form id="plan-form" novalidate>
         <div class="field-grid">
           <label class="field">
-            <span>Annual quota</span>
+            <span>Annual quota (USD $)</span>
             <input type="number" id="quota" name="quota" min="0" step="any" inputmode="decimal" required />
           </label>
 
           <label class="field">
-            <span>Attainment already booked this period</span>
+            <span>Attainment already booked this period (USD $)</span>
             <input type="number" id="priorAttainment" name="priorAttainment" min="0" step="any" inputmode="decimal" required />
           </label>
 
@@ -55,7 +62,7 @@
           <label class="field">
             <span>Renewal rate (%)</span>
             <input type="number" id="renewalRatePct" name="renewalRatePct" min="0" step="any" inputmode="decimal" required />
-            <small>Flat rate on Renewal ACV &mdash; no tiers or acceleration. Placeholder value: replace with your real renewal rate.</small>
+            <small>Flat rate on Renewal ACV &mdash; no tiers or acceleration.</small>
           </label>
 
           <label class="field">
@@ -99,16 +106,19 @@
           </select>
         </label>
 
-        <div class="field-grid">
-          <label class="field">
-            <span id="acv-label">ACV &mdash; Annual Contract Value</span>
-            <input type="number" id="acv" name="acv" min="0" step="any" inputmode="decimal" required />
-          </label>
+        <label class="field field-standalone">
+          <span id="acv-label">ACV &mdash; Annual Contract Value (USD $)</span>
+          <input type="number" id="acv" name="acv" min="0" step="any" inputmode="decimal" required />
+        </label>
 
-          <label class="field" id="tcv-field">
-            <span>TCV &mdash; Total Contract Value</span>
-            <input type="number" id="tcv" name="tcv" min="0" step="any" inputmode="decimal" required />
-          </label>
+        <div class="tcv-block" id="tcv-field">
+          <div class="tcv-header">
+            <h3>Out-year value, Y2+ (USD $)</h3>
+            <span class="panel-hint">Add a line per future contract year &mdash; summed with ACV into Total TCV below</span>
+          </div>
+          <div id="tcv-lines-list" class="tcv-lines-list"></div>
+          <button type="button" id="add-tcv-line" class="btn btn-secondary">+ Add line</button>
+          <p class="tcv-total">Total TCV: <span class="mono" id="tcv-total-value">$0</span></p>
         </div>
 
         <div id="deal-errors" class="errors" role="alert" aria-live="polite"></div>
@@ -121,11 +131,11 @@
       <div id="results" class="results" hidden>
         <div class="result-cards">
           <div class="result-card">
-            <span class="result-label">Gross commission</span>
+            <span class="result-label">Gross commission (GBP £)</span>
             <span class="result-value" id="result-gross">&mdash;</span>
           </div>
           <div class="result-card result-card-accent">
-            <span class="result-label">Net commission</span>
+            <span class="result-label">Net commission (GBP £)</span>
             <span class="result-value" id="result-net">&mdash;</span>
           </div>
         </div>

@@ -36,8 +36,7 @@ const DEAL_TYPES = ['newBusiness', 'renewal', 'oyNb'];
 // Starting defaults matching a real annual-New-Business-ACV comp plan:
 // £1.7M quota, six graduated achievement tiers, and a BCR of 2.2402% (which
 // reproduces the plan's own worked example: £38,083.40 New Business
-// commission at exactly 100% attainment). Renewal rate is a placeholder —
-// replace it with your actual renewal rate once you have it to hand.
+// commission at exactly 100% attainment), and a flat 0.4253% Renewal rate.
 function defaultPlan() {
   return {
     quota: 1700000,
@@ -53,7 +52,7 @@ function defaultPlan() {
       { minAttainmentPct: 200, multiplier: 1.25 },
       { minAttainmentPct: 300, multiplier: 1.0 },
     ],
-    renewalRatePct: 2.2402,
+    renewalRatePct: 0.4253,
     oyNbMultiplier: 0.25,
   };
 }
