@@ -2,9 +2,19 @@
 
 A small, personal calculator for estimating sales commission on a deal.
 Save your compensation-plan assumptions once, then enter a deal's value and
-see estimated gross and net commission (in GBP) with a full breakdown.
-Supports three deal types — New Business, Renewal, and Out-Year New
-Business — since they're commonly paid at different rates.
+see estimated gross and net commission with a full breakdown. Supports
+three deal types — New Business, Renewal, and Out-Year New Business —
+since they're commonly paid at different rates.
+
+**Currency:** deal values (ACV, TCV, quota, attainment) are entered and
+shown in **USD $** — that's the currency deals are quoted in. Commission
+payouts (gross, net, deductions) are calculated and shown in **GBP £** —
+that's this plan's actual rate structure (a dollar deal value times a
+percentage rate produces a pound commission figure), not a live currency
+conversion. No FX conversion happens anywhere in the code — see
+`formatUSD`/`formatGBP2` in [`app.js`](./app.js), which are kept
+deliberately separate so a dollar figure can never accidentally get a £
+sign or vice versa.
 
 It's a **static, no-build web app** (plain HTML + CSS + vanilla JavaScript),
 so it drops straight into this GitHub Pages site with zero tooling.
@@ -39,8 +49,7 @@ comes back next time you open the page on the same browser/device.
 - **Average deductions / tax (%)** — used to turn gross commission into an
   estimated net figure. Defaults to **49%**, fully editable.
 - **Renewal rate (%)** — a flat rate applied to Renewal ACV, no tiers or
-  acceleration. **Ships as a placeholder** (defaults to the same value as
-  BCR) — replace it with your actual renewal rate.
+  acceleration. Defaults to **0.4253%**.
 - **Out-Year New Business multiplier** — applied to BCR (not tiered) for
   Out-Year New Business ACV, representing commission paid annually in each
   year after the first on a multi-year deal.
@@ -68,15 +77,20 @@ immediately:
 | 5 | 200–300% | 1.25× |
 | 6 | 300%+ | 1.00× |
 
-...with a £1,700,000 quota and a 2.2402% BCR. Every one of these is
-editable — they're just a sensible, non-empty starting point.
+...with a $1,700,000 quota, a 2.2402% BCR, a 0.4253% Renewal rate, and a
+0.25× Out-Year New Business multiplier. Every one of these is editable —
+they're just a sensible, non-empty starting point.
 
 ## Calculating a deal
 
 1. Choose the **Deal type**: New Business, Renewal, or Out-Year New
-   Business. The ACV field's label and whether TCV is shown update
-   automatically.
-2. Enter the deal's ACV (and TCV, for New Business).
+   Business. The ACV field's label and whether the out-year section is
+   shown update automatically.
+2. Enter the deal's ACV. For New Business, optionally click **+ Add line**
+   once per future contract year to build up TCV instead of typing one
+   lump number — e.g. ACV `$100,000` + one out-year line of `$200,000`
+   gives a **Total TCV** of `$300,000`, shown live as you type. Remove a
+   line with its **×** button.
 3. Click **Calculate**.
 4. Read the **Gross commission** and **Net commission** cards, and expand
    **Calculation breakdown** to see every step of the maths.
@@ -143,7 +157,7 @@ years two-plus of a multi-year deal.
 ### Verified against a real plan
 
 The New Business formula is checked in the test suite against a real
-worked example: a £1,700,000 quota with the six tiers above and a 2.2402%
+worked example: a $1,700,000 quota with the six tiers above and a 2.2402%
 BCR produces exactly **£38,083.40** of New Business commission at 100%
 attainment from a standing start — which is 85% of that plan's total
 £44,804.27 OTE (the other 15% being Renewal).
