@@ -98,7 +98,11 @@ body {
   font-size: 0.9rem;
 }
 
+.field[hidden] { display: none; }
+
 .field span { color: var(--color-text); font-weight: 500; }
+
+.field-standalone { margin-bottom: 1rem; max-width: 320px; }
 
 .field small {
   color: var(--color-muted);
@@ -106,7 +110,8 @@ body {
   line-height: 1.35;
 }
 
-input[type='number'] {
+input[type='number'],
+select {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -117,7 +122,8 @@ input[type='number'] {
   width: 100%;
 }
 
-input[type='number']:focus {
+input[type='number']:focus,
+select:focus {
   outline: none;
   border-color: var(--color-accent-light);
 }
