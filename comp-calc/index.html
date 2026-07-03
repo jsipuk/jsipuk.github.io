@@ -33,12 +33,12 @@
         <div class="field-grid">
           <label class="field">
             <span>Annual quota (USD $)</span>
-            <input type="number" id="quota" name="quota" min="0" step="any" inputmode="decimal" required />
+            <input type="text" id="quota" name="quota" inputmode="decimal" autocomplete="off" data-thousands required />
           </label>
 
           <label class="field">
             <span>Attainment already booked this period (USD $)</span>
-            <input type="number" id="priorAttainment" name="priorAttainment" min="0" step="any" inputmode="decimal" required />
+            <input type="text" id="priorAttainment" name="priorAttainment" inputmode="decimal" autocomplete="off" data-thousands required />
           </label>
 
           <label class="field">
@@ -108,7 +108,7 @@
 
         <label class="field field-standalone">
           <span id="acv-label">ACV &mdash; Annual Contract Value (USD $)</span>
-          <input type="number" id="acv" name="acv" min="0" step="any" inputmode="decimal" required />
+          <input type="text" id="acv" name="acv" inputmode="decimal" autocomplete="off" data-thousands required />
         </label>
 
         <div class="tcv-block" id="tcv-field">

@@ -16,6 +16,11 @@ conversion. No FX conversion happens anywhere in the code — see
 deliberately separate so a dollar figure can never accidentally get a £
 sign or vice versa.
 
+The large dollar fields (quota, attainment, ACV, out-year lines) add
+thousands separators live as you type — e.g. typing `1000000` shows
+`1,000,000`. Commas are stripped back out before any maths runs
+(`parseFormattedNumber` in `app.js`); the underlying number is unaffected.
+
 It's a **static, no-build web app** (plain HTML + CSS + vanilla JavaScript),
 so it drops straight into this GitHub Pages site with zero tooling.
 
