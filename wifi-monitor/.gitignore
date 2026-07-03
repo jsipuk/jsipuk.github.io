@@ -1,0 +1,5 @@
+readings_log.csv
+events.jsonl
+wifi_quality_log.csv
+__pycache__/
+*.pyc
