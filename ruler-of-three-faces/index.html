@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Ruler of Three Faces</title>
+  <meta name="description" content="A text-first interactive fantasy RPG. A kingdom remembers every choice.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ============ WELCOME ============ -->
+  <section id="screen-welcome" class="screen screen-welcome" aria-label="Welcome">
+    <div class="welcome-backdrop" aria-hidden="true">
+      <div class="stars"></div>
+      <svg class="palace-silhouette" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <path class="mountains" d="M0 420 L0 300 L140 180 L260 290 L390 150 L520 280 L640 200 L780 300 L900 190 L1040 290 L1200 210 L1200 420 Z"/>
+        <g class="palace">
+          <rect x="480" y="235" width="240" height="185"/>
+          <rect x="452" y="205" width="34" height="215"/>
+          <rect x="714" y="205" width="34" height="215"/>
+          <rect x="583" y="170" width="34" height="250"/>
+          <path d="M452 205 L469 172 L486 205 Z"/>
+          <path d="M714 205 L731 172 L748 205 Z"/>
+          <path d="M583 170 L600 130 L617 170 Z"/>
+          <rect x="588" y="330" width="24" height="90" class="palace-door"/>
+        </g>
+      </svg>
+      <div class="mist mist-1"></div>
+      <div class="mist mist-2"></div>
+      <div class="crown-motif">♛</div>
+    </div>
+
+    <div class="welcome-content">
+      <p class="welcome-eyebrow">An interactive tale of choice and consequence</p>
+      <h1 class="game-title">The Ruler of<br>Three Faces</h1>
+      <p class="game-subtitle">A kingdom remembers every choice.</p>
+
+      <blockquote class="welcome-narration">
+        You arrive at the palace with no title, no army, and no claim to greatness.<br>
+        Before you stands a single gate.<br>
+        Behind it lies a kingdom that may one day speak your name.
+      </blockquote>
+
+      <div class="welcome-actions">
+        <button id="btn-new" class="btn btn-gold">Begin New Story</button>
+        <button id="btn-continue" class="btn btn-outline" hidden>Continue Story</button>
+        <button id="btn-load" class="btn btn-outline">Load Save</button>
+        <button id="btn-howto" class="btn btn-ghost">How to Play</button>
+        <button id="btn-settings-welcome" class="btn btn-ghost">Settings</button>
+      </div>
+      <p id="continue-meta" class="continue-meta" hidden></p>
+    </div>
+  </section>
+
+  <!-- ============ CHARACTER CREATION ============ -->
+  <section id="screen-create" class="screen screen-create" hidden aria-label="Character creation">
+    <div class="create-panel">
+      <h2 class="panel-title">Who arrives at the gate?</h2>
+      <p class="panel-sub">A few strokes of the quill. The rest, the road will write.</p>
+
+      <div class="create-grid">
+        <label class="field">
+          <span class="field-label">Name</span>
+          <input id="create-name" type="text" maxlength="40" placeholder="The Traveller" autocomplete="off">
+        </label>
+        <label class="field">
+          <span class="field-label">Pronouns</span>
+          <select id="create-pronouns">
+            <option value="they/them">they/them</option>
+            <option value="she/her">she/her</option>
+            <option value="he/him">he/him</option>
+            <option value="custom">custom…</option>
+          </select>
+          <input id="create-pronouns-custom" type="text" maxlength="30" placeholder="e.g. ze/zir" hidden>
+        </label>
+      </div>
+
+      <h3 class="create-heading">Background</h3>
+      <div id="create-backgrounds" class="card-grid" role="radiogroup" aria-label="Background"></div>
+
+      <h3 class="create-heading">Temperament</h3>
+      <div id="create-personalities" class="card-grid" role="radiogroup" aria-label="Personality tendency"></div>
+
+      <div class="create-actions">
+        <button id="btn-begin" class="btn btn-gold">Take the Road to the Gate</button>
+        <button id="btn-skip" class="btn btn-ghost">Skip — begin as The Traveller</button>
+        <button id="btn-create-back" class="btn btn-ghost">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section id="screen-game" class="screen screen-game" hidden aria-label="Game">
+    <header class="game-topbar">
+      <button id="btn-home" class="topbar-btn" title="Return to title">♛ <span class="topbar-label">Title</span></button>
+      <div class="topbar-location">
+        <span id="topbar-chapter" class="topbar-chapter"></span>
+        <span id="topbar-place" class="topbar-place"></span>
+      </div>
+      <div class="topbar-actions">
+        <button id="btn-saves" class="topbar-btn" title="Saves">💾 <span class="topbar-label">Saves</span></button>
+        <button id="btn-settings" class="topbar-btn" title="Settings">⚙ <span class="topbar-label">Settings</span></button>
+      </div>
+    </header>
+
+    <div class="game-layout">
+      <!-- Left: character -->
+      <aside id="panel-left" class="panel panel-left" aria-label="Character">
+        <div class="char-card">
+          <div id="char-portrait" class="char-portrait">🜍</div>
+          <div class="char-names">
+            <div id="char-name" class="char-name"></div>
+            <div id="char-title" class="char-title"></div>
+          </div>
+        </div>
+        <dl class="char-stats">
+          <div class="stat"><dt>Health</dt><dd><div class="bar"><div id="bar-health" class="bar-fill bar-health"></div></div></dd></div>
+          <div class="stat"><dt>Energy</dt><dd><div class="bar"><div id="bar-energy" class="bar-fill bar-energy"></div></div></dd></div>
+          <div class="stat stat-inline"><dt>Gold</dt><dd id="stat-gold"></dd></div>
+          <div class="stat stat-inline"><dt>Influence</dt><dd id="stat-influence"></dd></div>
+          <div class="stat stat-inline"><dt>Day</dt><dd id="stat-day"></dd></div>
+        </dl>
+        <details class="char-details">
+          <summary>Character</summary>
+          <div id="char-background" class="char-detail-body"></div>
+        </details>
+        <details class="char-details">
+          <summary>Skills</summary>
+          <div id="char-skills" class="char-detail-body"></div>
+        </details>
+      </aside>
+
+      <!-- Centre: narrative -->
+      <main class="panel panel-story" aria-label="Story">
+        <div id="scene-art" class="scene-art" aria-hidden="true"></div>
+        <div id="story-log" class="story-log" aria-live="polite"></div>
+        <div id="choices" class="choices"></div>
+        <form id="action-form" class="action-form" autocomplete="off">
+          <label for="action-input" class="action-label">What do you do?</label>
+          <div class="action-row">
+            <input id="action-input" type="text" maxlength="300" placeholder="Speak, act, or explore — type anything…">
+            <button type="submit" class="btn btn-gold btn-act">Act</button>
+          </div>
+        </form>
+      </main>
+
+      <!-- Right: tabs -->
+      <aside id="panel-right" class="panel panel-right" aria-label="Records">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="inventory" role="tab">Pack</button>
+          <button class="tab" data-tab="characters" role="tab">People</button>
+          <button class="tab" data-tab="quests" role="tab">Quests</button>
+          <button class="tab" data-tab="journal" role="tab">Journal</button>
+          <button class="tab" data-tab="codex" role="tab">Codex</button>
+          <button class="tab" data-tab="achievements" role="tab">Honours</button>
+          <button class="tab" data-tab="map" role="tab">Map</button>
+          <button class="tab" data-tab="kingdom" role="tab">Realm</button>
+        </div>
+        <div id="tab-content" class="tab-content"></div>
+      </aside>
+    </div>
+
+    <!-- Mobile bottom nav -->
+    <nav class="mobile-nav" aria-label="Panels">
+      <button data-drawer="left">🜍<span>Character</span></button>
+      <button data-drawer="story" class="active">✒<span>Story</span></button>
+      <button data-drawer="right">📜<span>Records</span></button>
+    </nav>
+  </section>
+
+  <!-- ============ MODALS ============ -->
+  <div id="modal-backdrop" class="modal-backdrop" hidden>
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <h2 id="modal-title"></h2>
+        <button id="modal-close" class="modal-close" aria-label="Close">✕</button>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
