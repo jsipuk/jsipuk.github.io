@@ -1,5 +1,6 @@
 /* =============================================================
    The Ruler of Three Faces — UI controller
+   Built by John Saunders — https://jsip.uk
    Screens, rendering, tabs, saves, settings, modals.
    All state changes flow through RulerEngine; the UI only renders
    the events the engine returns.

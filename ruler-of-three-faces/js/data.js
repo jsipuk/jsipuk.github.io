@@ -1,5 +1,6 @@
 /* =============================================================
    The Ruler of Three Faces — static game data
+   Built by John Saunders — https://jsip.uk
    Content only: items, characters, quests, achievements, codex,
    locations, backgrounds. Logic lives in engine.js.
    Works in the browser (window.RulerData) and Node (module.exports).

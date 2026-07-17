@@ -2,6 +2,8 @@
 
 *A kingdom remembers every choice.*
 
+Built by **John Saunders** — [jsip.uk](https://jsip.uk)
+
 A text-first interactive fantasy RPG, built as a polished vertical slice covering the
 first two chapters of a much larger design: **The Gate** (the password tutorial) and
 **Secrets of the Palace** (exploration, characters, items, and the first threads of the

@@ -1,5 +1,6 @@
 /* =============================================================
    The Ruler of Three Faces — narrative engine
+   Built by John Saunders — https://jsip.uk
    Pure game logic: state model, action interpretation, password
    recognition, quests, achievements, journal, codex.
    No DOM access — works in the browser (window.RulerEngine)
