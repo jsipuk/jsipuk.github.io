@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Ruler of Three Faces</title>
+  <meta name="description" content="An interactive narrative RPG. A kingdom remembers every choice.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='24' font-size='24' text-anchor='middle' fill='%23c9a24b'%3E%E2%99%9A%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-font="md">
+
+  <!-- ============ WELCOME ============ -->
+  <section id="screen-welcome" class="screen active welcome">
+    <div class="welcome-bg" aria-hidden="true">
+      <div class="mist mist-1"></div>
+      <div class="mist mist-2"></div>
+      <div class="palace-silhouette"></div>
+      <div class="crown-motif">&#9818;</div>
+    </div>
+    <div class="welcome-content">
+      <h1 class="game-title">The Ruler of<br>Three Faces</h1>
+      <p class="game-subtitle">A kingdom remembers every choice.</p>
+      <blockquote class="welcome-narration">
+        You arrive at the palace with no title, no army, and no claim to greatness.<br>
+        Before you stands a single gate.<br>
+        Behind it lies a kingdom that may one day speak your name.
+      </blockquote>
+      <nav class="welcome-buttons" aria-label="Main menu">
+        <button id="btn-new" class="btn btn-gold">Begin New Story</button>
+        <button id="btn-continue" class="btn">Continue Story</button>
+        <button id="btn-load" class="btn">Load Save</button>
+        <button id="btn-howto" class="btn btn-quiet">How to Play</button>
+        <button id="btn-settings" class="btn btn-quiet">Settings</button>
+      </nav>
+      <p class="welcome-footnote">Act I vertical slice &middot; your story is saved in this browser</p>
+    </div>
+  </section>
+
+  <!-- ============ CHARACTER CREATION ============ -->
+  <section id="screen-create" class="screen create">
+    <div class="create-inner">
+      <h1 class="create-title">Who arrives at the gate?</h1>
+      <p class="muted center">Nothing here locks your path. It shades how the palace first sees you.</p>
+
+      <div class="cc-grid">
+        <label class="cc-field">Name
+          <input id="cc-name" type="text" maxlength="30" placeholder="The Traveller" autocomplete="off">
+        </label>
+        <label class="cc-field">Pronouns
+          <select id="cc-pronouns"></select>
+        </label>
+        <label class="cc-field">Title <span class="muted">(optional)</span>
+          <input id="cc-title" type="text" maxlength="30" placeholder="e.g. of the Northern Road" autocomplete="off">
+        </label>
+      </div>
+
+      <h2 class="cc-heading">Background</h2>
+      <div id="cc-backgrounds" class="cc-cards"></div>
+
+      <h2 class="cc-heading">Personality tendency</h2>
+      <div id="cc-personalities" class="cc-cards"></div>
+
+      <div class="cc-actions">
+        <button id="cc-back" class="btn btn-quiet">Back</button>
+        <button id="cc-skip" class="btn">Skip — begin as The Traveller</button>
+        <button id="cc-begin" class="btn btn-gold">Approach the Gate</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section id="screen-game" class="screen game">
+    <header class="game-topbar">
+      <span class="topbar-title">The Ruler of Three Faces</span>
+      <span id="hud-chapter" class="topbar-chapter"></span>
+      <span class="topbar-actions">
+        <button id="btn-game-menu" class="icon-btn" title="Saves &amp; export">&#128190;</button>
+        <button id="btn-game-settings" class="icon-btn" title="Settings">&#9881;</button>
+        <button id="btn-game-home" class="icon-btn" title="Main menu">&#8962;</button>
+      </span>
+    </header>
+
+    <div class="game-layout">
+      <!-- left: character -->
+      <aside id="panel-left" class="panel panel-left" aria-label="Character">
+        <div class="hud-identity">
+          <div class="hud-avatar" aria-hidden="true">&#9818;</div>
+          <div>
+            <div id="hud-name" class="hud-name"></div>
+            <div id="hud-title" class="hud-sub"></div>
+          </div>
+        </div>
+        <div class="hud-block">
+          <div class="hud-row"><span>Location</span><span id="hud-location"></span></div>
+        </div>
+        <div class="hud-block">
+          <div class="meter-label">Health</div>
+          <div id="hud-health" class="meter"><div class="meter-fill health"></div><span class="meter-val"></span></div>
+          <div class="meter-label">Energy</div>
+          <div id="hud-energy" class="meter"><div class="meter-fill energy"></div><span class="meter-val"></span></div>
+        </div>
+        <div class="hud-block">
+          <div class="hud-row"><span>Gold</span><span id="hud-gold"></span></div>
+          <div class="hud-row"><span>Influence</span><span id="hud-influence"></span></div>
+        </div>
+        <div class="hud-block">
+          <div class="meter-label">Relationships</div>
+          <div id="hud-relationships"></div>
+        </div>
+      </aside>
+
+      <!-- centre: story -->
+      <main class="panel panel-centre" aria-label="Story">
+        <div id="story-scroll" class="story-scroll">
+          <div id="story-log" class="story-log" aria-live="polite"></div>
+        </div>
+        <div class="action-area">
+          <div id="choices" class="choices"></div>
+          <form id="action-form" class="action-form">
+            <label class="visually-hidden" for="action-input">What do you do?</label>
+            <input id="action-input" type="text" placeholder="What do you do?" autocomplete="off" maxlength="300">
+            <button type="submit" class="btn btn-gold btn-small">Act</button>
+          </form>
+        </div>
+      </main>
+
+      <!-- right: tabs -->
+      <aside id="panel-right" class="panel panel-right" aria-label="Records">
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab="inventory" title="Inventory">&#127890;</button>
+          <button class="tab-btn" data-tab="characters" title="Characters">&#128100;</button>
+          <button class="tab-btn" data-tab="quests" title="Quests">&#128220;</button>
+          <button class="tab-btn" data-tab="journal" title="Journal">&#128214;</button>
+          <button class="tab-btn" data-tab="codex" title="Codex">&#128218;</button>
+          <button class="tab-btn" data-tab="achievements" title="Achievements">&#10022;</button>
+        </div>
+        <div id="tab-content" class="tab-content"></div>
+      </aside>
+    </div>
+
+    <!-- mobile bottom nav -->
+    <nav class="mobile-nav" aria-label="Panels">
+      <button id="mob-character" class="mobile-nav-btn">&#9818; Character</button>
+      <button id="mob-panels" class="mobile-nav-btn">&#128214; Records</button>
+    </nav>
+  </section>
+
+  <!-- ============ MODALS ============ -->
+  <div id="modal-howto" class="modal" role="dialog" aria-modal="true" aria-labelledby="howto-title">
+    <div class="modal-box">
+      <h2 id="howto-title">How to Play</h2>
+      <p>The Ruler of Three Faces is a text-driven role-playing story. You read, you decide, and the kingdom remembers.</p>
+      <ul>
+        <li><strong>Suggested choices</strong> appear as buttons beneath the story. They are useful — never exhaustive.</li>
+        <li><strong>Free actions:</strong> type anything into <em>“What do you do?”</em> — question people, search things, try the unreasonable. The world answers in kind, and it will not simply agree with the impossible.</li>
+        <li><strong>People remember.</strong> Kindness, threats and cleverness all leave marks on how characters treat you.</li>
+        <li><strong>The panels</strong> hold your inventory, the people you have met, your quests, a chronicle-style journal, a codex of discovered lore, and your achievements — some hidden.</li>
+        <li><strong>Saving:</strong> the game autosaves every turn. Manual slots, JSON export/import and a full story transcript live behind the &#128190; button.</li>
+      </ul>
+      <p class="muted">One more thing: the gatekeeper will never reveal the password. That has never once stopped anyone worth admitting.</p>
+      <button class="btn" data-close="modal-howto">Close</button>
+    </div>
+  </div>
+
+  <div id="modal-settings" class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-box">
+      <h2 id="settings-title">Settings</h2>
+      <label class="setting-row">Text size
+        <select id="set-font">
+          <option value="sm">Small</option>
+          <option value="md" selected>Medium</option>
+          <option value="lg">Large</option>
+        </select>
+      </label>
+      <label class="setting-row"><span>High contrast</span><input type="checkbox" id="set-contrast"></label>
+      <label class="setting-row"><span>Reduce motion</span><input type="checkbox" id="set-motion"></label>
+      <label class="setting-row"><span>Dyslexia-friendly font</span><input type="checkbox" id="set-dyslexia"></label>
+      <button class="btn" data-close="modal-settings">Close</button>
+    </div>
+  </div>
+
+  <div id="modal-saves" class="modal" role="dialog" aria-modal="true" aria-labelledby="saves-title">
+    <div class="modal-box">
+      <h2 id="saves-title">Saves</h2>
+      <div id="save-slots"></div>
+      <div class="save-io">
+        <button id="btn-export-save" class="btn btn-small">Export save (JSON)</button>
+        <label class="btn btn-small file-btn">Import save<input id="import-save" type="file" accept=".json,application/json"></label>
+        <button id="btn-export-transcript" class="btn btn-small">Export transcript (Markdown)</button>
+      </div>
+      <p class="muted">The game also autosaves after every action.</p>
+      <button class="btn" data-close="modal-saves">Close</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

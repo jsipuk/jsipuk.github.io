@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Ruler of Three Faces — Tests</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #12141c; color: #e8e2d2; padding: 2rem; }
+    h1 { color: #c9a24b; }
+    .test { padding: 0.3rem 0.6rem; border-left: 3px solid transparent; margin: 2px 0; }
+    .test.pass { border-color: #7fae7a; }
+    .test.fail { border-color: #b25c5c; color: #e8a0a0; }
+    h2.pass { color: #7fae7a; }
+    h2.fail { color: #b25c5c; }
+    small { color: #8f8a7c; }
+    a { color: #c9a24b; }
+  </style>
+</head>
+<body>
+  <h1>The Ruler of Three Faces — Test Suite</h1>
+  <p>Headless tests against the state model and narrative engine. <a href="index.html">Back to the game</a></p>
+  <div id="test-output">Running…</div>
+  <script src="js/data.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/tests.js"></script>
+</body>
+</html>
