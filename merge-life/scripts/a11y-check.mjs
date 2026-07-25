@@ -1,12 +1,22 @@
+/**
+ * Accessibility spot-check: toggles high contrast and reduced motion, prints the
+ * keyboard tab order, and lists any touch target under 44px.
+ *
+ *   node scripts/a11y-check.mjs [baseUrl]
+ */
 import { chromium } from 'playwright';
+import { mkdirSync } from 'node:fs';
+
+const baseUrl = (process.argv[2] ?? 'http://localhost:3000').replace(/\/$/, '');
 const shots = process.env.SHOT_DIR ?? '/tmp/merge-life-shots';
+mkdirSync(shots, { recursive: true });
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const ctx = await b.newContext({ viewport: { width: 900, height: 1000 }, deviceScaleFactor: 2 });
 const p = await ctx.newPage();
 const problems = [];
 p.on('pageerror', (e) => problems.push(e.message));
 
-await p.goto('http://localhost:3210/settings', { waitUntil: 'networkidle' });
+await p.goto(`${baseUrl}/settings/`, { waitUntil: 'networkidle' });
 await p.getByRole('switch', { name: 'High contrast' }).click();
 await p.getByRole('switch', { name: 'Reduced motion' }).click();
 await p.waitForTimeout(500);
@@ -16,7 +26,7 @@ const root = await p.evaluate(() => ({
 }));
 console.log('root attributes:', JSON.stringify(root));
 
-await p.goto('http://localhost:3210/', { waitUntil: 'networkidle' });
+await p.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(600);
 await p.screenshot({ path: `${shots}/a11y-high-contrast-home.png`, fullPage: false });
 
@@ -32,7 +42,7 @@ for (let i = 0; i < 12; i += 1) {
 console.log('tab order:', reachable.join(' | '));
 
 // Every board cell must be at least 44px on its shortest side.
-await p.goto('http://localhost:3210/workshop', { waitUntil: 'networkidle' });
+await p.goto(`${baseUrl}/workshop/`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(600);
 const small = await p.evaluate(() =>
   Array.from(document.querySelectorAll('button, [role="switch"], a.ml-button-primary, a.ml-button-secondary'))
