@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Warm workshop palette. High-contrast mode swaps the same variables, so every
+ * component picks up the change without duplicating styles.
+ */
+:root {
+  --ml-surface: 245 240 232;
+  --ml-surface-raised: 255 252 246;
+  --ml-surface-sunken: 232 224 212;
+  --ml-ink: 43 35 28;
+  --ml-ink-soft: 92 79 66;
+  --ml-ink-faint: 138 124 109;
+  --ml-line: 214 203 188;
+  --ml-brass: 176 132 62;
+  --ml-sage: 106 132 105;
+  --ml-slate: 96 112 128;
+  --ml-clay: 176 96 74;
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+:root[data-contrast='high'] {
+  --ml-surface: 255 255 255;
+  --ml-surface-raised: 255 255 255;
+  --ml-surface-sunken: 238 238 238;
+  --ml-ink: 12 12 12;
+  --ml-ink-soft: 38 38 38;
+  --ml-ink-faint: 64 64 64;
+  --ml-line: 20 20 20;
+  --ml-brass: 122 78 8;
+  --ml-sage: 27 78 44;
+  --ml-slate: 25 55 90;
+  --ml-clay: 145 39 24;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: rgb(var(--ml-surface));
+  color: rgb(var(--ml-ink));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Prevents the pull-to-refresh gesture interrupting a drag on iOS. */
+  overscroll-behavior-y: contain;
+}
+
+/* Soft workshop backdrop: two very low-contrast washes, no movement. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 620px at 12% -8%, rgb(var(--ml-brass) / 0.1), transparent 62%),
+    radial-gradient(900px 560px at 96% 4%, rgb(var(--ml-sage) / 0.09), transparent 58%);
+  z-index: -1;
+}
+
+:root[data-contrast='high'] body::before {
+  display: none;
+}
+
+/* Focus states are always visible and never colour-only. */
+:where(a, button, [role='button'], input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid rgb(var(--ml-ink));
+  outline-offset: 2px;
+  border-radius: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:root[data-motion='reduced'] *,
+:root[data-motion='reduced'] *::before,
+:root[data-motion='reduced'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+@layer components {
+  .ml-card {
+    @apply rounded-card border border-line/70 bg-surface-raised shadow-card;
+  }
+
+  .ml-button {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-pill px-5 py-2.5
+      text-base font-semibold transition-colors duration-200 ease-calm
+      disabled:cursor-not-allowed disabled:opacity-55;
+  }
+
+  .ml-button-primary {
+    @apply ml-button bg-ink text-surface-raised hover:bg-ink-soft;
+  }
+
+  .ml-button-secondary {
+    @apply ml-button border border-line bg-surface-raised text-ink hover:bg-surface-sunken;
+  }
+
+  .ml-button-quiet {
+    @apply ml-button text-ink-soft hover:bg-surface-sunken;
+  }
+
+  .ml-chip {
+    @apply inline-flex items-center gap-1.5 rounded-pill border border-line/80 bg-surface-raised
+      px-3 py-1 text-sm text-ink-soft;
+  }
+
+  .ml-label {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-ink-faint;
+  }
+
+  /* Every interactive target is at least 44px in its smallest dimension. */
+  .ml-touch {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Board cells must not trigger browser text selection or scroll during a drag. */
+.ml-board-cell {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ml-scrollbar-none {
+  scrollbar-width: none;
+}
+
+.ml-scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
