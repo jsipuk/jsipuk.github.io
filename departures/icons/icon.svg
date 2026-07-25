@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Departures">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b2c52"/>
+      <stop offset="1" stop-color="#0d1526"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <circle cx="112" cy="96" r="6" fill="#ffffff" opacity="0.75"/>
+  <circle cx="392" cy="128" r="5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="330" cy="64" r="4" fill="#ffffff" opacity="0.5"/>
+  <circle cx="168" cy="176" r="4" fill="#ffffff" opacity="0.45"/>
+  <path d="M96 300 C136 268 196 264 232 292 C268 264 328 268 368 300 Z" fill="#6ea8ff" opacity="0.22"/>
+  <path d="M400 168 L150 268 L246 296 L268 392 Z" fill="#ffffff"/>
+  <path d="M400 168 L246 296 L268 392 Z" fill="#8fb6f0"/>
+</svg>
