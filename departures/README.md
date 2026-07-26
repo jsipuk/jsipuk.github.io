@@ -20,6 +20,10 @@ a parent who would quite like a turn too.
 
 A few decisions that are easy to undo by accident:
 
+- **Baggage Match has four card states**, and they are deliberately different
+  colours: slate face down, plain panel face up, green with a tick while a new
+  pair is held up to be seen, then a solid claimed back — green solo, blue or
+  amber for the player who won it.
 - **Cloud Hop pauses, it does not end.** Locking the phone, taking a call or
   switching apps pauses the run; there is also a pause button on the stage.
 - **Bingo cards A, B and C are dealt together**, preferring squares the other

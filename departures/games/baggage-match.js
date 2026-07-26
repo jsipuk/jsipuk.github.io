@@ -76,7 +76,7 @@
       var pairCount = size.cols * size.rows / 2;
       var icons = api.shuffle(data[setup.theme].icons).slice(0, pairCount);
       var deck = api.shuffle(icons.concat(icons)).map(function (icon, i) {
-        return { icon: icon, id: i, done: false, face: false };
+        return { icon: icon, id: i, done: false, face: false, owner: null };
       });
 
       var firstPick = null;
@@ -91,7 +91,7 @@
       var grid = h('div.match-grid', {
         style: { gridTemplateColumns: 'repeat(' + size.cols + ', 1fr)' }
       });
-      var banner = h('div.turn-banner', { hidden: setup.players === 1 });
+      var banner = h('div.turn-banner');
       var footer = h('div');
 
       var cells = deck.map(function (card, index) {
@@ -105,6 +105,17 @@
         return h('div.match-cell', null, btn);
       });
       api.append(grid, cells);
+
+      function setBanner(text, tone) {
+        banner.textContent = text;
+        banner.className = 'turn-banner' + (tone ? ' is-' + tone : '');
+      }
+
+      function idleBanner() {
+        setBanner(setup.players === 1
+          ? 'Turn over two cards'
+          : 'Player ' + (turn + 1) + '’s go', null);
+      }
 
       function renderScorebar() {
         scorebar.innerHTML = '';
@@ -120,7 +131,6 @@
             scoreBox('Player 2', String(scores[1]), turn === 1),
             scoreBox('Left', String(pairCount - matched))
           ]);
-          banner.textContent = 'Player ' + (turn + 1) + '\'s go';
         }
       }
 
@@ -135,6 +145,22 @@
         deck[index].face = faceUp;
         btn.classList.toggle('is-face', faceUp);
         btn.setAttribute('aria-label', faceUp ? deck[index].icon : 'Face down card ' + (index + 1));
+      }
+
+      // A won pair turns back over, but comes back in a colour: green when
+      // playing alone, and the winner's colour with two players — so the board
+      // shows at a glance what is gone and who took it.
+      function claimCard(index) {
+        var btn = cells[index].firstChild;
+        var owner = deck[index].owner;
+        setFace(index, false);
+        btn.classList.remove('is-matched');
+        btn.classList.add('is-claimed');
+        btn.classList.add(setup.players === 1 ? 'claim-solo' : owner === 0 ? 'claim-p1' : 'claim-p2');
+        btn.disabled = true;
+        btn.querySelector('.card-back').textContent = setup.players === 1 ? '✓' : 'P' + (owner + 1);
+        btn.setAttribute('aria-label', 'Matched pair ' + deck[index].icon +
+          (setup.players === 2 ? ', won by player ' + (owner + 1) : ''));
       }
 
       function onPick(index) {
@@ -153,33 +179,53 @@
         var a = firstPick;
         var b = index;
         firstPick = null;
+        busy = true;
 
         if (deck[a].icon === deck[b].icon) {
           deck[a].done = deck[b].done = true;
-          cells[a].firstChild.classList.add('is-done');
-          cells[b].firstChild.classList.add('is-done');
+          deck[a].owner = deck[b].owner = turn;
           matched++;
           scores[turn]++;
           api.sfx.good();
           api.buzz([10, 40, 14]);
+          cells[a].firstChild.classList.add('is-matched');
+          cells[b].firstChild.classList.add('is-matched');
           renderScorebar();
-          if (matched === pairCount) finish();
+          setBanner(setup.players === 1
+            ? '✓ A pair!'
+            : '✓ Player ' + (turn + 1) + ' takes it — another go', 'good');
+
+          // Hold both cards face up long enough to see what the pair was.
+          flipTimer = setTimeout(function () {
+            claimCard(a);
+            claimCard(b);
+            busy = false;
+            flipTimer = 0;
+            if (matched === pairCount) finish();
+            else idleBanner();
+          }, 950);
           return;
         }
 
-        busy = true;
+        cells[a].firstChild.classList.add('is-wrong');
+        cells[b].firstChild.classList.add('is-wrong');
+        api.sfx.bad();
+        setBanner(setup.players === 1
+          ? '✗ Not a match'
+          : '✗ No match — over to Player ' + (turn === 0 ? 2 : 1), 'bad');
         renderScorebar();
+
         flipTimer = setTimeout(function () {
+          cells[a].firstChild.classList.remove('is-wrong');
+          cells[b].firstChild.classList.remove('is-wrong');
           setFace(a, false);
           setFace(b, false);
           busy = false;
           flipTimer = 0;
-          if (setup.players === 2) {
-            turn = turn === 0 ? 1 : 0;
-            api.sfx.bad();
-            renderScorebar();
-          }
-        }, 850);
+          if (setup.players === 2) turn = turn === 0 ? 1 : 0;
+          renderScorebar();
+          idleBanner();
+        }, 950);
       }
 
       function startClock() {
@@ -229,6 +275,7 @@
       }
 
       renderScorebar();
+      idleBanner();
       api.append(root, [
         banner,
         scorebar,
@@ -258,6 +305,7 @@
     howTo: [
       'Tap a card to turn it over, then tap a second one. <strong>If they match they stay face up.</strong>',
       'Playing alone, the game counts your moves and your time — the best round for each board size is saved.',
+      'A matched pair <strong>stays face up for a moment</strong>, then turns back over in colour: green when you are playing alone, and the winner\'s colour with two players.',
       'With two players, <strong>a match earns another go</strong>; a miss passes the phone over.',
       'Small board is six pairs — about right for a three-year-old. Big is twelve.'
     ],
