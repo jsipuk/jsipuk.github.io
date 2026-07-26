@@ -6,6 +6,7 @@
 
   var STORE_SETUP = 'quiz:setup';
   var STORE_BEST = 'quiz:best';
+  var STORE_SEEN = 'quiz:seen';
   var ROUND = 10;
 
   function mount(root, api) {
@@ -16,24 +17,6 @@
 
     function saveSetup() { api.store.set(STORE_SETUP, setup); }
 
-    function segGroup(label, options, currentValue, onPick) {
-      return h('div.option-group', null,
-        h('span.option-label', { text: label }),
-        h('div.seg', null, options.map(function (opt) {
-          return h('button.seg-btn', {
-            'aria-pressed': opt.value === currentValue ? 'true' : 'false',
-            onclick: function (event) {
-              api.sfx.tap();
-              Array.prototype.forEach.call(event.currentTarget.parentNode.children, function (b) {
-                b.setAttribute('aria-pressed', 'false');
-              });
-              event.currentTarget.setAttribute('aria-pressed', 'true');
-              onPick(opt.value);
-            }
-          }, opt.label);
-        })));
-    }
-
     function renderSetup() {
       root.innerHTML = '';
       var best = api.store.get(STORE_BEST, {});
@@ -43,11 +26,11 @@
 
       api.append(root, [
         h('p.game-intro', { text: 'Read the question out loud and let whoever shouts first have a go. Every answer comes with something to say afterwards.' }),
-        segGroup('Level', Object.keys(bank).map(function (key) {
+        api.segGroup('Level', Object.keys(bank).map(function (key) {
           return { value: key, label: bank[key].label };
         }), setup.level, function (v) { setup.level = v; saveSetup(); renderSetup(); }),
         h('p.pill-note', { style: { marginTop: '-0.4rem', marginBottom: '1rem' }, text: bank[setup.level].hint }),
-        segGroup('Playing', [
+        api.segGroup('Playing', [
           { value: 'solo', label: 'On my own' },
           { value: 'teams', label: 'Two teams' }
         ], setup.mode, function (v) { setup.mode = v; saveSetup(); }),
@@ -59,10 +42,27 @@
       ]);
     }
 
+    // Keeps a short memory of what has been asked recently, so a second round
+    // on the same level does not repeat half of the first one.
+    function drawQuestions() {
+      var pool = bank[setup.level].questions;
+      var seen = api.store.get(STORE_SEEN, {})[setup.level] || [];
+      var fresh = pool.filter(function (item) { return seen.indexOf(item.q) === -1; });
+      if (fresh.length < ROUND) fresh = pool.slice();
+      var chosen = api.shuffle(fresh).slice(0, ROUND);
+
+      var memory = api.store.get(STORE_SEEN, {});
+      memory[setup.level] = chosen.map(function (item) { return item.q; })
+        .concat(seen)
+        .slice(0, Math.max(ROUND * 2, pool.length - ROUND));
+      api.store.set(STORE_SEEN, memory);
+      return chosen;
+    }
+
     function renderRound() {
       root.innerHTML = '';
 
-      var questions = api.shuffle(bank[setup.level].questions).slice(0, ROUND).map(function (item) {
+      var questions = drawQuestions().map(function (item) {
         var order = api.shuffle(item.a.map(function (text, i) { return { text: text, correct: i === item.c }; }));
         return { q: item.q, options: order, fact: item.f };
       });
@@ -159,9 +159,10 @@
         renderProgress();
         renderScores();
 
-        api.append(card, h('div.quiz-fact', null,
+        var fact = h('div.quiz-fact', { 'aria-live': 'polite' },
           h('strong', { text: option.correct ? 'Correct. ' : 'The answer was ' + item.options.filter(function (o) { return o.correct; })[0].text + '. ' }),
-          item.fact));
+          item.fact);
+        api.append(card, fact);
 
         var isLast = index === questions.length - 1;
         api.append(footer, h('button.btn.btn-primary', {
@@ -175,6 +176,13 @@
             card.scrollIntoView({ behavior: api.prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
           }
         }, isLast ? 'See the result' : 'Next question'));
+
+        if (fact.getBoundingClientRect().bottom > window.innerHeight) {
+          fact.scrollIntoView({
+            behavior: api.prefersReducedMotion() ? 'auto' : 'smooth',
+            block: 'center'
+          });
+        }
       }
 
       function finish() {

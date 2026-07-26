@@ -24,30 +24,29 @@
     var hud = h('div.hop-hud', null,
       h('span', { id: 'hop-score', text: '0' }),
       h('span', { id: 'hop-best', text: 'Best ' + best[modeKey] }));
+    var pauseBtn = h('button.hop-pause', {
+      type: 'button',
+      'aria-label': 'Pause',
+      onclick: function (event) { event.stopPropagation(); pause(); }
+    }, '⏸');
     var overlay = h('div.hop-overlay');
     stage.appendChild(canvas);
     stage.appendChild(hud);
+    stage.appendChild(pauseBtn);
     stage.appendChild(overlay);
 
-    var modeSeg = h('div.seg', null, Object.keys(MODES).map(function (key) {
-      return h('button.seg-btn', {
-        'aria-pressed': key === modeKey ? 'true' : 'false',
-        onclick: function () {
-          modeKey = key;
-          api.store.set(STORE_MODE, key);
-          api.sfx.tap();
-          Array.prototype.forEach.call(modeSeg.children, function (b, i) {
-            b.setAttribute('aria-pressed', Object.keys(MODES)[i] === key ? 'true' : 'false');
-          });
-          reset();
-        }
-      }, MODES[key].label);
-    }));
+    var modeSeg = api.segGroup('Difficulty', Object.keys(MODES).map(function (key) {
+      return { value: key, label: MODES[key].label };
+    }), modeKey, function (key) {
+      modeKey = key;
+      api.store.set(STORE_MODE, key);
+      reset();
+    });
+    modeSeg.style.marginTop = '0.9rem';
 
     api.append(root, [
       stage,
-      h('div.option-group', { style: { marginTop: '0.9rem' } },
-        h('span.option-label', { text: 'Difficulty' }), modeSeg),
+      modeSeg,
       h('p.pill-note', { text: 'Gentle has big gaps and a slow pace for small hands. Proper is the one to argue over.' })
     ]);
 
@@ -55,7 +54,13 @@
     var ctx = canvas.getContext('2d');
     var W = 0, H = 0, dpr = 1;
 
+    var lastWidth = 0;
+
     function resize() {
+      // Mobile browsers fire resize when the address bar slides away. Re-fitting
+      // the stage mid-run would move the clouds under the player, so only do it
+      // when the width actually changed (a rotation, or a desktop window).
+      if (state === 'playing' && stage.clientWidth === lastWidth) return;
       var available = window.innerHeight - stage.getBoundingClientRect().top - 190;
       var width = stage.clientWidth || root.clientWidth || 320;
       var height = api.clamp(available, 300, Math.min(width * 1.45, 620));
@@ -63,6 +68,7 @@
       dpr = Math.min(window.devicePixelRatio || 1, 2.5);
       W = stage.clientWidth;
       H = Math.round(height);
+      lastWidth = W;
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -70,7 +76,7 @@
     }
 
     // -------------------------------------------------------------- state
-    var state = 'ready'; // ready | playing | dead
+    var state = 'ready'; // ready | playing | paused | dead
     var plane, pillars, stars, puffs, score, elapsed, spawnTimer, raf = 0, lastTime = 0;
 
     function reset() {
@@ -100,11 +106,17 @@
     function showOverlay(kind) {
       overlay.innerHTML = '';
       overlay.hidden = false;
+      syncPauseButton();
       if (kind === 'ready') {
         api.append(overlay, h('div', null,
           h('h3', { text: '☁️ Cloud Hop' }),
           h('p', { text: 'Tap anywhere to flap. Fly through the gaps and collect the stars.' }),
           h('button.btn', { onclick: start }, 'Start flying')));
+      } else if (kind === 'paused') {
+        api.append(overlay, h('div', null,
+          h('h3', { text: '⏸ Paused' }),
+          h('p', { text: 'Your run is safe — you are on ' + score + '. Carry on when you are ready.' }),
+          h('button.btn', { onclick: resume }, 'Keep flying')));
       } else if (kind === 'dead') {
         var isBest = score > 0 && score >= (best[modeKey] || 0);
         api.append(overlay, h('div', null,
@@ -116,9 +128,12 @@
 
     function hideOverlay() { overlay.hidden = true; overlay.innerHTML = ''; }
 
+    function syncPauseButton() { pauseBtn.hidden = state !== 'playing'; }
+
     function start() {
       hideOverlay();
       state = 'playing';
+      syncPauseButton();
       plane.y = 0.45;
       plane.vy = 0;
       pillars = [];
@@ -332,6 +347,7 @@
       if (event.target.closest && event.target.closest('button')) return;
       event.preventDefault();
       if (state === 'playing') flap();
+      else if (state === 'paused') resume();
       else if (state === 'ready') start();
     }
 
@@ -339,19 +355,32 @@
       if (event.code !== 'Space' && event.key !== 'ArrowUp') return;
       if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
       event.preventDefault();
-      if (state === 'playing') flap(); else if (state !== 'dead') start();
+      if (state === 'playing') flap();
+      else if (state === 'paused') resume();
+      else if (state !== 'dead') start();
+    }
+
+    // Locking the phone, taking a call or switching apps pauses the run —
+    // losing a good score to an interruption is miserable, especially at six.
+    function pause() {
+      if (state !== 'playing') return;
+      state = 'paused';
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      showOverlay('paused');
+    }
+
+    function resume() {
+      if (state !== 'paused') return;
+      hideOverlay();
+      state = 'playing';
+      syncPauseButton();
+      plane.vy = Math.min(plane.vy, 0);
+      lastTime = 0;
+      loop(performance.now());
     }
 
     function onHide() {
-      if (document.hidden && state === 'playing') {
-        state = 'dead';
-        if (score > (best[modeKey] || 0)) {
-          best[modeKey] = score;
-          api.store.set(STORE_BEST, best);
-        }
-        updateHud();
-        showOverlay('dead');
-      }
+      if (document.hidden) pause();
     }
 
     stage.addEventListener('pointerdown', onPointer);

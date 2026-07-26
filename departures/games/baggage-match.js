@@ -31,25 +31,6 @@
 
     function saveSetup() { api.store.set(STORE_SETUP, setup); }
 
-    function segGroup(label, options, currentValue, onPick) {
-      var buttons = options.map(function (opt) {
-        return h('button.seg-btn', {
-          'aria-pressed': opt.value === currentValue ? 'true' : 'false',
-          onclick: function (event) {
-            api.sfx.tap();
-            Array.prototype.forEach.call(event.currentTarget.parentNode.children, function (b) {
-              b.setAttribute('aria-pressed', 'false');
-            });
-            event.currentTarget.setAttribute('aria-pressed', 'true');
-            onPick(opt.value);
-          }
-        }, opt.label);
-      });
-      return h('div.option-group', null,
-        h('span.option-label', { text: label }),
-        h('div.seg', null, buttons));
-    }
-
     // ---------------------------------------------------------------- setup
     function renderSetup() {
       clearTimers();
@@ -62,13 +43,13 @@
 
       api.append(root, [
         h('p.game-intro', { text: 'Turn over two cards at a time and remember where everything is. Play on your own against the clock, or hand the phone over after every miss.' }),
-        segGroup('Pictures', Object.keys(data).map(function (key) {
+        api.segGroup('Pictures', Object.keys(data).map(function (key) {
           return { value: key, label: data[key].label };
         }), setup.theme, function (v) { setup.theme = v; saveSetup(); }),
-        segGroup('Board size', Object.keys(SIZES).map(function (key) {
+        api.segGroup('Board size', Object.keys(SIZES).map(function (key) {
           return { value: key, label: SIZES[key].label + ' · ' + (SIZES[key].cols * SIZES[key].rows / 2) };
         }), setup.size, function (v) { setup.size = v; saveSetup(); }),
-        segGroup('Players', [
+        api.segGroup('Players', [
           { value: 1, label: 'Just me' },
           { value: 2, label: 'Two players' }
         ], setup.players, function (v) { setup.players = v; saveSetup(); }),
@@ -254,6 +235,7 @@
         grid,
         footer,
         h('button.btn.btn-quiet', {
+          type: 'button',
           style: { marginTop: '0.4rem' },
           onclick: function () { api.sfx.tap(); renderSetup(); }
         }, 'New game')

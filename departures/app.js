@@ -5,6 +5,7 @@
 (function () {
   'use strict';
 
+  var VERSION = '1.1';
   var STORE_PREFIX = 'departures:';
 
   // ---------------------------------------------------------------- storage
@@ -177,6 +178,27 @@
 
   function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  // A segmented picker. Every game setup screen wants one of these, so it
+  // lives here rather than being copied into each of them.
+  function segGroup(label, options, value, onPick) {
+    var seg = h('div.seg', { role: 'group' }, options.map(function (opt) {
+      return h('button.seg-btn', {
+        type: 'button',
+        'aria-pressed': opt.value === value ? 'true' : 'false',
+        onclick: function (event) {
+          sfx.tap();
+          Array.prototype.forEach.call(seg.children, function (button) {
+            button.setAttribute('aria-pressed', 'false');
+          });
+          event.currentTarget.setAttribute('aria-pressed', 'true');
+          onPick(opt.value);
+        }
+      }, opt.label);
+    }));
+    if (!label) return seg;
+    return h('div.option-group', null, h('span.option-label', { text: label }), seg);
   }
 
   // ------------------------------------------------------------------ sheet
@@ -388,28 +410,26 @@
         if (on) buzz(20);
       }));
 
-    var themeRow = h('div.seg-row', null,
+    append(wrap, h('div.seg-row', null,
       h('span.toggle-label', { text: 'Look' }),
-      h('div.seg', null, ['dark', 'light', 'auto'].map(function (mode) {
-        return h('button.seg-btn', {
-          'aria-pressed': settings.theme === mode ? 'true' : 'false',
-          onclick: function (event) {
-            settings.theme = mode;
-            saveSettings();
-            Array.prototype.forEach.call(event.currentTarget.parentNode.children, function (b) {
-              b.setAttribute('aria-pressed', 'false');
-            });
-            event.currentTarget.setAttribute('aria-pressed', 'true');
-          }
-        }, mode === 'dark' ? 'Night' : mode === 'light' ? 'Day' : 'Auto');
+      segGroup(null, [
+        { value: 'dark', label: 'Night' },
+        { value: 'light', label: 'Day' },
+        { value: 'auto', label: 'Auto' }
+      ], settings.theme, function (mode) {
+        settings.theme = mode;
+        saveSettings();
       })));
-    append(wrap, themeRow);
 
     append(wrap, h('div.sheet-note', null,
-      h('p', { text: 'Departures stores your scores on this phone only. Nothing is sent anywhere, and it never needs a connection once it has loaded.' }),
+      h('p', { text: 'Departures keeps your scores in this browser, on this device. Nothing is sent anywhere, and it never needs a connection once it has loaded.' }),
+      h('p.reset-explainer', { html: 'The button below is a <strong>fresh start for Departures only</strong>. It clears the high scores, saved word puzzle, bingo cards, quiz records and the settings on this page. It cannot touch anything else &mdash; not your photos, not other apps, not other websites, and not the copy of the games saved for offline play. You can carry on playing straight afterwards.' }),
       h('button.btn.btn-quiet', {
         onclick: function () {
-          if (!window.confirm('Erase all scores, saved games and bingo cards on this phone?')) return;
+          var message = 'Start Departures over?\n\n' +
+            'This clears the Departures high scores, saved puzzles, bingo cards and settings stored in this browser.\n\n' +
+            'It does not affect anything else on your device, and the games will still work offline afterwards.';
+          if (!window.confirm(message)) return;
           try {
             Object.keys(localStorage)
               .filter(function (k) { return k.indexOf(STORE_PREFIX) === 0; })
@@ -423,7 +443,8 @@
           go('#/');
           route();
         }
-      }, 'Erase everything on this phone')));
+      }, 'Clear Departures scores and start over'),
+      h('p.version-note', { text: 'Departures ' + VERSION + ' · plays with no signal' })));
 
     return wrap;
   }
@@ -443,6 +464,7 @@
     buzz: buzz,
     h: h,
     append: append,
+    segGroup: segGroup,
     shuffle: shuffle,
     pick: pick,
     clamp: clamp,
@@ -482,8 +504,30 @@
     document.getElementById('sheet-close').addEventListener('click', closeSheet);
     sheetBackdrop.addEventListener('click', closeSheet);
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && !sheetEl.hidden) closeSheet();
+      if (sheetEl.hidden) return;
+      if (event.key === 'Escape') {
+        closeSheet();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      // Keep tabbing inside the open sheet rather than wandering off behind it.
+      var focusable = sheetEl.querySelectorAll('button, [href], input, select, textarea');
+      if (!focusable.length) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     });
+
+    var darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    var onSchemeChange = function () { if (settings.theme === 'auto') applyTheme(); };
+    if (darkQuery.addEventListener) darkQuery.addEventListener('change', onSchemeChange);
+    else if (darkQuery.addListener) darkQuery.addListener(onSchemeChange);
 
     window.addEventListener('hashchange', route);
     route();

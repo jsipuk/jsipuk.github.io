@@ -5,9 +5,11 @@
 (function () {
   'use strict';
 
-  var STORE_CARDS = 'bingo:cards';
+  var STORE_CARDS = 'bingo:decks';
+  var LEGACY_CARDS = 'bingo:cards';
   var STORE_SETUP = 'bingo:setup';
   var SIDE = 4;
+  var CARD_IDS = ['A', 'B', 'C'];
 
   var LINES = (function () {
     var lines = [];
@@ -36,36 +38,66 @@
     var decks = window.DeparturesData.bingo;
     var setup = Object.assign({ deck: 'airport', card: 'A' }, api.store.get(STORE_SETUP, {}));
     if (!decks[setup.deck]) setup.deck = 'airport';
+    if (CARD_IDS.indexOf(setup.card) === -1) setup.card = 'A';
 
     var cards = api.store.get(STORE_CARDS, {});
     var state = null;
-
-    function key() { return setup.deck + ':' + setup.card; }
+    // Cards used to be stored one per deck-and-letter with no coordination
+    // between them; that layout is gone, so tidy it away rather than leave it
+    // sitting in storage forever.
+    api.store.remove(LEGACY_CARDS);
 
     function saveSetup() { api.store.set(STORE_SETUP, setup); }
     function saveCards() { api.store.set(STORE_CARDS, cards); }
 
-    function dealCard() {
+    // Deals sixteen squares, preferring the ones the other cards are not using.
+    // Three cards of sixteen need 48 squares from a deck of about thirty, so a
+    // little overlap is unavoidable — this keeps it to the minimum.
+    function dealCard(usage) {
       var deck = decks[setup.deck].items;
-      var picks = [];
-      var pool = [];
-      for (var i = 0; i < deck.length; i++) pool.push(i);
-      pool = api.shuffle(pool);
-      for (var j = 0; j < SIDE * SIDE; j++) picks.push(pool[j % pool.length]);
-      return { picks: picks, ticks: [] };
+      var order = api.shuffle(deck.map(function (item, index) { return index; }));
+      order.sort(function (a, b) { return (usage[a] || 0) - (usage[b] || 0); });
+      var picks = order.slice(0, SIDE * SIDE);
+      picks.forEach(function (index) { usage[index] = (usage[index] || 0) + 1; });
+      return { picks: api.shuffle(picks), ticks: [] };
+    }
+
+    // How often each square is already used by the *other* cards in this deck.
+    function usageExcluding(cardId) {
+      var usage = {};
+      var deckCards = cards[setup.deck] || {};
+      CARD_IDS.forEach(function (id) {
+        if (id === cardId) return;
+        var card = deckCards[id];
+        if (!card || !card.picks) return;
+        card.picks.forEach(function (index) { usage[index] = (usage[index] || 0) + 1; });
+      });
+      return usage;
+    }
+
+    function isValidCard(card) {
+      var deck = decks[setup.deck].items;
+      return card && card.picks && card.picks.length === SIDE * SIDE &&
+        card.picks.every(function (index) {
+          return typeof index === 'number' && index >= 0 && index < deck.length;
+        });
     }
 
     function loadCard() {
-      var existing = cards[key()];
-      var deck = decks[setup.deck].items;
-      var valid = existing && existing.picks && existing.picks.length === SIDE * SIDE &&
-        existing.picks.every(function (index) { return index < deck.length; });
-      if (!valid) {
-        existing = dealCard();
-        cards[key()] = existing;
-        saveCards();
-      }
-      state = existing;
+      if (!cards[setup.deck]) cards[setup.deck] = {};
+      var deckCards = cards[setup.deck];
+      var changed = false;
+
+      // Deal any card in this deck that is missing or was saved against an
+      // older, shorter version of the deck.
+      CARD_IDS.forEach(function (id) {
+        if (isValidCard(deckCards[id])) return;
+        deckCards[id] = dealCard(usageExcluding(id));
+        changed = true;
+      });
+
+      if (changed) saveCards();
+      state = deckCards[setup.card];
     }
 
     function completedLines() {
@@ -80,17 +112,6 @@
         line.forEach(function (cell) { set[cell] = true; });
       });
       return set;
-    }
-
-    function segGroup(label, options, currentValue, onPick) {
-      return h('div.option-group', null,
-        h('span.option-label', { text: label }),
-        h('div.seg', null, options.map(function (opt) {
-          return h('button.seg-btn', {
-            'aria-pressed': opt.value === currentValue ? 'true' : 'false',
-            onclick: function () { api.sfx.tap(); onPick(opt.value); }
-          }, opt.label);
-        })));
     }
 
     function render() {
@@ -130,12 +151,12 @@
               h('p.sub', { text: 'Every single square. That is the whole card.' }))
           : null,
         grid,
-        segGroup('Card', [
+        api.segGroup('Card', [
           { value: 'A', label: 'Card A' },
           { value: 'B', label: 'Card B' },
           { value: 'C', label: 'Card C' }
         ], setup.card, function (v) { setup.card = v; saveSetup(); loadCard(); render(); }),
-        segGroup('Where are you?', Object.keys(decks).map(function (k) {
+        api.segGroup('Where are you?', Object.keys(decks).map(function (k) {
           return { value: k, label: decks[k].emoji + ' ' + decks[k].short };
         }), setup.deck, function (v) { setup.deck = v; saveSetup(); loadCard(); render(); }),
         h('div.btn-row', null,
@@ -151,8 +172,8 @@
           h('button.btn.btn-quiet', {
             onclick: function () {
               if (state.ticks.length && !window.confirm('Deal a brand new card? The ticks on this one go too.')) return;
-              cards[key()] = dealCard();
-              state = cards[key()];
+              cards[setup.deck][setup.card] = dealCard(usageExcluding(setup.card));
+              state = cards[setup.deck][setup.card];
               saveCards();
               api.sfx.flip();
               render();
@@ -205,8 +226,11 @@
     ],
     summary: function (api) {
       var cards = api.store.get(STORE_CARDS, {});
-      var total = Object.keys(cards).reduce(function (sum, k) {
-        return sum + ((cards[k] && cards[k].ticks) ? cards[k].ticks.length : 0);
+      var total = Object.keys(cards).reduce(function (sum, deck) {
+        return sum + Object.keys(cards[deck] || {}).reduce(function (inner, id) {
+          var card = cards[deck][id];
+          return inner + (card && card.ticks ? card.ticks.length : 0);
+        }, 0);
       }, 0);
       return total ? total + ' spotted' : '';
     },
