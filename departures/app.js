@@ -5,8 +5,17 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.1';
   var STORE_PREFIX = 'departures:';
+
+  // Written by tools/stamp-build.js. Read lazily so script order cannot bite.
+  function build() {
+    return window.DeparturesBuild || { version: '?', released: '', fingerprint: 'unstamped' };
+  }
+
+  function buildLabel() {
+    var info = build();
+    return 'v' + info.version + ' · build ' + info.fingerprint;
+  }
 
   // ---------------------------------------------------------------- storage
   var store = {
@@ -344,19 +353,34 @@
 
     append(screen, [intro, offlineChip, grid, shuffleBtn, tips,
       h('p.foot-note', null, 'Made for two impatient kids and one long flight. ',
-        h('a', { href: '/', text: 'jsip.uk' }))]);
+        h('a', { href: '/', text: 'jsip.uk' })),
+      h('p.build-note', {
+        title: 'Compare this with the version.js file in the repository to confirm you are on the latest release.'
+      }, buildLabel(), build().released ? ' · ' + build().released : '')]);
 
     updateOfflineChip();
   }
 
   // ------------------------------------------------------- offline readiness
   var offlineReady = false;
+  var updateReady = false;
 
   function updateOfflineChip() {
     var chip = document.getElementById('offline-chip');
     var text = document.getElementById('offline-text');
     if (!chip || !text) return;
-    if (!('serviceWorker' in navigator)) {
+    if (updateReady) {
+      chip.classList.add('is-update');
+      chip.classList.remove('is-ready');
+      text.innerHTML = '';
+      append(text, [
+        'A newer build is downloaded. ',
+        h('button.chip-btn', {
+          type: 'button',
+          onclick: function () { window.location.reload(); }
+        }, 'Reload to use it')
+      ]);
+    } else if (!('serviceWorker' in navigator)) {
       chip.classList.add('is-warn');
       text.textContent = 'This browser cannot save the games offline — keep the tab open.';
     } else if (offlineReady) {
@@ -378,10 +402,12 @@
         var sw = reg.installing;
         if (!sw) return;
         sw.addEventListener('statechange', function () {
-          if (sw.state === 'installed') {
-            offlineReady = true;
-            updateOfflineChip();
-          }
+          if (sw.state !== 'installed') return;
+          offlineReady = true;
+          // An existing controller means this is an update, not a first visit:
+          // the page is still running the old build until it is reloaded.
+          if (navigator.serviceWorker.controller) updateReady = true;
+          updateOfflineChip();
         });
       });
     }).catch(function () { /* offline-first is a bonus, never a blocker */ });
@@ -444,7 +470,11 @@
           route();
         }
       }, 'Clear Departures scores and start over'),
-      h('p.version-note', { text: 'Departures ' + VERSION + ' · plays with no signal' })));
+      h('p.version-note', null,
+        'Departures ', buildLabel(),
+        build().released ? ', released ' + build().released : '',
+        h('br'),
+        'That build code is a fingerprint of the files this page is running.')));
 
     return wrap;
   }

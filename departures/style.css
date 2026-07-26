@@ -335,7 +335,35 @@ a { color: var(--accent); }
 .tip-list li { margin-bottom: 0.55rem; }
 .tip-list strong { color: var(--text); font-weight: 600; }
 
-.foot-note { margin-top: 1.6rem; text-align: center; color: var(--muted); font-size: 0.8rem; }
+.foot-note { margin-top: 1.6rem; text-align: center; color: var(--muted); font-size: 0.8rem; margin-bottom: 0.3rem; }
+
+/* The build stamp: small, but always on screen and selectable, so it can be
+   read off the phone and compared with the repository. */
+.build-note {
+  text-align: center;
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.offline-chip.is-update { border-color: color-mix(in srgb, var(--sun) 55%, transparent); color: var(--text); }
+.offline-chip.is-update .dot { background: var(--sun); }
+.chip-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
 
 /* --------------------------------------------------------------- buttons */
 .btn {

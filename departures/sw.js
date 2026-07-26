@@ -2,13 +2,14 @@
  * The whole point of this app is that it still works at 38,000 feet, so every
  * file is precached on install and served cache-first afterwards.
  */
-var CACHE = 'departures-v2';
+var CACHE = 'departures-1.2-13c4a2f';
 
 var ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './version.js',
   './data.js',
   './words.js',
   './boot.js',

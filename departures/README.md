@@ -70,11 +70,35 @@ shared `segGroup()` picker and a few utilities. Adding a seventh game means addi
 tag — plus its path in the `ASSETS` list in `sw.js`, or it will not be there
 when the wi-fi is.
 
-Bump `CACHE` in `sw.js` whenever a file changes, so returning devices pick up
-the new version. Page loads are network-first with a 2.5 second timeout —
+Page loads are network-first with a 2.5 second timeout —
 enough to pick up an update when there is a connection, and quick to fall back
 to the cache when the airport wi-fi accepts the connection and then says
 nothing.
+
+## Checking which build is live
+
+The footer of the hub — and the settings sheet, which is reachable from every
+screen — shows something like `v1.2 · build 13c4a2f · 2026-07-26`.
+
+That build code is a SHA-256 fingerprint of the files the page is actually
+running, written into `version.js` by `tools/stamp-build.js`. To confirm a
+device is on the release you expect, compare it with `version.js` in this
+repository. If they differ, the browser is still serving an older cached copy.
+
+```
+node tools/stamp-build.js                 # re-stamp after changing anything
+node tools/stamp-build.js --version 1.3   # stamp and bump the release number
+node tools/stamp-build.js --check         # exits 1 if the stamp is stale
+```
+
+**Run the stamp before committing any change to the shipped files.** The
+service worker cache is named after the fingerprint, so stamping is also what
+busts the cache — skip it and returning devices keep the old build. The
+`--check` mode is there to catch exactly that.
+
+When a new build has been downloaded but the page is still running the old one,
+the hub replaces the offline chip with "A newer build is downloaded — reload to
+use it", so nobody is left guessing.
 
 ### Regenerating the word list
 
