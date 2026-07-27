@@ -13,8 +13,30 @@ a parent who would quite like a turn too.
 | Baggage Match | 1–2 | 3+ | Pairs. Three picture packs, three board sizes, solo timer or pass-and-play. |
 | Dots & Boxes | 1–2 | 6+ | The paper classic, with a phone opponent that plays a sensible game. |
 | Sky Quiz | 1+ | 4+ | ~110 questions across three levels, solo or two teams. |
-| Word Wings | 1 | 9+ | Seven letters, every word hiding in them. No timer; saves as you play. |
+| Word Wings | 1 | 9+ | Seven letters, every word hiding in them. Hints, reveals, no timer; saves as you play. |
 | Airport Bingo | any | 3+ | Sixteen things to spot around you. Three decks, three different cards. |
+
+## Notes on how it behaves
+
+A few decisions that are easy to undo by accident:
+
+- **Baggage Match has four card states**, and they are deliberately different
+  colours: slate face down, plain panel face up, green with a tick while a new
+  pair is held up to be seen, then a solid claimed back — green solo, blue or
+  amber for the player who won it.
+- **Cloud Hop pauses, it does not end.** Locking the phone, taking a call or
+  switching apps pauses the run; there is also a pause button on the stage.
+- **Bingo cards A, B and C are dealt together**, preferring squares the other
+  cards are not using, so siblings genuinely get different cards.
+- **Sky Quiz remembers what it has asked** per level, so consecutive rounds do
+  not repeat.
+- **Dots & Boxes plays the nearest free line to wherever you tap**, rather than
+  needing a hit on a thin target — the 5 x 5 board is otherwise unusable on a
+  phone.
+- **Word Wings letters can only be used as often as they appear**, and revealed
+  words are listed but score nothing. Type one out yourself and you claim it.
+- **The reset in settings only clears this app's `localStorage` keys.** Say so
+  plainly in the UI: people are right to be wary of a button that says "erase".
 
 ## How it works offline
 
@@ -43,13 +65,40 @@ sw.js                      precache + cache-first service worker
 
 A game registers itself with `window.Departures.register({...})` and gets a
 `mount(root, api)` call when opened; whatever it returns is used as a teardown
-function. `api` carries storage, sound, haptics, a small `h()` DOM helper and a
-few utilities. Adding a seventh game means adding one file and one `<script>`
+function. `api` carries storage, sound, haptics, a small `h()` DOM helper, the
+shared `segGroup()` picker and a few utilities. Adding a seventh game means adding one file and one `<script>`
 tag — plus its path in the `ASSETS` list in `sw.js`, or it will not be there
 when the wi-fi is.
 
-Bump `CACHE` in `sw.js` whenever a file changes, so returning devices pick up
-the new version.
+Page loads are network-first with a 2.5 second timeout —
+enough to pick up an update when there is a connection, and quick to fall back
+to the cache when the airport wi-fi accepts the connection and then says
+nothing.
+
+## Checking which build is live
+
+The footer of the hub — and the settings sheet, which is reachable from every
+screen — shows something like `v1.2 · build 13c4a2f · 2026-07-26`.
+
+That build code is a SHA-256 fingerprint of the files the page is actually
+running, written into `version.js` by `tools/stamp-build.js`. To confirm a
+device is on the release you expect, compare it with `version.js` in this
+repository. If they differ, the browser is still serving an older cached copy.
+
+```
+node tools/stamp-build.js                 # re-stamp after changing anything
+node tools/stamp-build.js --version 1.3   # stamp and bump the release number
+node tools/stamp-build.js --check         # exits 1 if the stamp is stale
+```
+
+**Run the stamp before committing any change to the shipped files.** The
+service worker cache is named after the fingerprint, so stamping is also what
+busts the cache — skip it and returning devices keep the old build. The
+`--check` mode is there to catch exactly that.
+
+When a new build has been downloaded but the page is still running the old one,
+the hub replaces the offline chip with "A newer build is downloaded — reload to
+use it", so nobody is left guessing.
 
 ### Regenerating the word list
 

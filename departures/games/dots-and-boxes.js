@@ -24,28 +24,11 @@
     var h = api.h;
     var setup = Object.assign({ size: 'small', opponent: 'phone' }, api.store.get(STORE_SETUP, {}));
     if (!SIZES[setup.size]) setup.size = 'small';
+    if (['easy', 'phone', 'two'].indexOf(setup.opponent) === -1) setup.opponent = 'phone';
     var aiTimer = 0;
 
     function saveSetup() { api.store.set(STORE_SETUP, setup); }
     function clearTimers() { if (aiTimer) { clearTimeout(aiTimer); aiTimer = 0; } }
-
-    function segGroup(label, options, currentValue, onPick) {
-      return h('div.option-group', null,
-        h('span.option-label', { text: label }),
-        h('div.seg', null, options.map(function (opt) {
-          return h('button.seg-btn', {
-            'aria-pressed': opt.value === currentValue ? 'true' : 'false',
-            onclick: function (event) {
-              api.sfx.tap();
-              Array.prototype.forEach.call(event.currentTarget.parentNode.children, function (b) {
-                b.setAttribute('aria-pressed', 'false');
-              });
-              event.currentTarget.setAttribute('aria-pressed', 'true');
-              onPick(opt.value);
-            }
-          }, opt.label);
-        })));
-    }
 
     function renderSetup() {
       clearTimers();
@@ -53,17 +36,22 @@
       var record = api.store.get(STORE_RECORD, { won: 0, lost: 0, drawn: 0 });
       api.append(root, [
         h('p.game-intro', { text: 'Take turns drawing one line. Close the fourth side of a square and you claim it — and you go again. Most squares wins.' }),
-        segGroup('Board', [
+        api.segGroup('Board', [
           { value: 'small', label: '3 × 3' },
           { value: 'medium', label: '4 × 4' },
           { value: 'large', label: '5 × 5' }
         ], setup.size, function (v) { setup.size = v; saveSetup(); }),
-        segGroup('Playing', [
-          { value: 'phone', label: 'Me vs phone' },
+        api.segGroup('Playing', [
+          { value: 'easy', label: 'Easy phone' },
+          { value: 'phone', label: 'Clever phone' },
           { value: 'two', label: 'Two players' }
-        ], setup.opponent, function (v) { setup.opponent = v; saveSetup(); }),
+        ], setup.opponent, function (v) { setup.opponent = v; saveSetup(); renderSetup(); }),
         h('p.pill-note', {
-          text: 'Against the phone so far: ' + record.won + ' won, ' + record.lost + ' lost, ' + record.drawn + ' drawn.'
+          text: setup.opponent === 'two'
+            ? 'Pass the phone after each line. Claim a square and you go again.'
+            : 'Against the phone so far: ' + record.won + ' won, ' + record.lost +
+              ' lost, ' + record.drawn + ' drawn.' +
+              (setup.opponent === 'easy' ? ' Easy plays a friendly game — good for younger players.' : '')
         }),
         h('button.btn.btn-primary', {
           style: { width: '100%', marginTop: '1rem' },
@@ -77,7 +65,8 @@
       root.innerHTML = '';
 
       var n = SIZES[setup.size];
-      var vsPhone = setup.opponent === 'phone';
+      var vsPhone = setup.opponent !== 'two';
+      var cleverPhone = setup.opponent === 'phone';
       // hLines[r][c] is the horizontal line under dot row r, spanning column c
       var hLines = grid(n + 1, n, 0);
       var vLines = grid(n, n + 1, 0);
@@ -200,7 +189,12 @@
             return !boxes[box[0]][box[1]] && sidesOf(box[0], box[1]) === 3;
           });
         });
-        if (winning.length) return api.pick(winning);
+        if (winning.length && (cleverPhone || Math.random() < 0.65)) return api.pick(winning);
+
+        // The easy phone stops thinking here: it grabs squares it happens to
+        // see and otherwise plays at random, which is a game a six-year-old
+        // can win.
+        if (!cleverPhone) return api.pick(free);
 
         // 2. Anything that does not hand a box straight over.
         var safe = free.filter(function (edge) {
@@ -278,7 +272,6 @@
           }
         }
 
-        // lines and their tap targets
         var addLine = function (edge, x1, y1, x2, y2) {
           var owner = get(edge);
           var horizontal = edge.type === 'h';
@@ -290,16 +283,6 @@
             height: horizontal ? thickness : (y2 - y1 - 18),
             rx: thickness / 2,
             class: owner === 1 ? 'p1' : owner === 2 ? 'p2' : 'line-bg'
-          }));
-          if (owner || over) return;
-          if (vsPhone && turn === 1) return;
-          board.appendChild(svg('rect', {
-            x: horizontal ? x1 + 6 : x1 - 22,
-            y: horizontal ? y1 - 22 : y1 + 6,
-            width: horizontal ? cell - 12 : 44,
-            height: horizontal ? 44 : cell - 12,
-            class: 'slot',
-            onclick: function () { play(edge); }
           }));
         };
 
@@ -321,6 +304,30 @@
           }
         }
 
+        // Rather than a small hit box per line — which would be about 29px on a
+        // 5 x 5 board — a tap anywhere on the board plays the nearest free line.
+        // Fat fingers, small phone, moving aeroplane.
+        board.addEventListener('click', function (event) {
+          if (over || (vsPhone && turn === 1)) return;
+          var rect = board.getBoundingClientRect();
+          if (!rect.width) return;
+          var scale = span / rect.width;
+          var px = (event.clientX - rect.left) * scale;
+          var py = (event.clientY - rect.top) * scale;
+          var closest = null;
+          var closestDistance = Infinity;
+          freeEdges().forEach(function (edge) {
+            var mx = edge.type === 'h' ? x(edge.c) + cell / 2 : x(edge.c);
+            var my = edge.type === 'h' ? x(edge.r) : x(edge.r) + cell / 2;
+            var distance = Math.sqrt((mx - px) * (mx - px) + (my - py) * (my - py));
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closest = edge;
+            }
+          });
+          if (closest && closestDistance <= cell * 0.7) play(closest);
+        });
+
         if (lastMove && !over) {
           var e = lastMove;
           board.appendChild(svg('circle', {
@@ -336,7 +343,7 @@
       }
 
       function finish() {
-        api.sfx[scores[0] >= scores[1] ? 'win' : 'lose']();
+        api.sfx[!vsPhone || scores[0] >= scores[1] ? 'win' : 'lose']();
         var title, sub;
         if (scores[0] === scores[1]) {
           title = 'A draw';

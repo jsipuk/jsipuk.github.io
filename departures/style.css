@@ -77,6 +77,22 @@ body[data-accent="coral"] { --accent: var(--coral); }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 
+/* Games get tapped fast and repeatedly. Kill the double-tap zoom delay and the
+   long-press text selection so a child hammering a card gets a card, not a
+   selection handle and a magnifier. */
+button,
+.game-card,
+.bingo-cell,
+.card-btn,
+.letter-btn,
+.seg-btn,
+.dots-board {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -319,7 +335,35 @@ a { color: var(--accent); }
 .tip-list li { margin-bottom: 0.55rem; }
 .tip-list strong { color: var(--text); font-weight: 600; }
 
-.foot-note { margin-top: 1.6rem; text-align: center; color: var(--muted); font-size: 0.8rem; }
+.foot-note { margin-top: 1.6rem; text-align: center; color: var(--muted); font-size: 0.8rem; margin-bottom: 0.3rem; }
+
+/* The build stamp: small, but always on screen and selectable, so it can be
+   read off the phone and compared with the repository. */
+.build-note {
+  text-align: center;
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.offline-chip.is-update { border-color: color-mix(in srgb, var(--sun) 55%, transparent); color: var(--text); }
+.offline-chip.is-update .dot { background: var(--sun); }
+.chip-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
 
 /* --------------------------------------------------------------- buttons */
 .btn {
@@ -336,7 +380,9 @@ a { color: var(--accent); }
   transition: transform 0.12s ease, filter 0.12s ease;
 }
 .btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.45; cursor: default; transform: none; }
+.btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+.letter-btn:disabled { cursor: default; }
+.letter-btn:disabled:active { transform: none; }
 
 .btn-primary {
   background: var(--accent);
@@ -344,6 +390,13 @@ a { color: var(--accent); }
   color: var(--accent-ink);
 }
 .btn-primary:active { filter: brightness(0.94); }
+/* A dimmed accent colour reads as broken rather than unavailable. */
+.btn-primary:disabled {
+  background: var(--surface-2);
+  color: var(--muted);
+  border-color: var(--line);
+  opacity: 1;
+}
 
 .btn-ghost { background: transparent; }
 .btn-quiet {
@@ -494,6 +547,14 @@ a { color: var(--accent); }
 .sheet-close { width: 100%; margin-top: 0.9rem; }
 .sheet-note { margin-top: 1.1rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
 .sheet-note p { color: var(--muted); font-size: 0.83rem; }
+.sheet-note .reset-explainer { line-height: 1.5; }
+.sheet-note .reset-explainer strong { color: var(--text); }
+.version-note {
+  text-align: center;
+  margin: 0.9rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
 
 .toggle-row {
   display: flex;
@@ -565,6 +626,17 @@ a { color: var(--accent); }
 }
 .result-card .sub { color: var(--muted); margin: 0; }
 
+.turn-banner.is-good {
+  background: color-mix(in srgb, var(--mint) 20%, transparent);
+  border-color: color-mix(in srgb, var(--mint) 55%, transparent);
+  color: var(--text);
+}
+.turn-banner.is-bad {
+  background: color-mix(in srgb, var(--coral) 18%, transparent);
+  border-color: color-mix(in srgb, var(--coral) 50%, transparent);
+  color: var(--text);
+}
+
 .turn-banner {
   display: flex;
   align-items: center;
@@ -597,6 +669,24 @@ a { color: var(--accent); }
 }
 :root[data-theme="light"] .hop-stage { background: linear-gradient(180deg, #8fc4ff 0%, #b9dcff 60%, #dff0ff 100%); }
 .hop-stage canvas { display: block; width: 100%; height: 100%; }
+
+.hop-pause {
+  position: absolute;
+  top: 2.2rem;
+  right: 0.7rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(8, 16, 32, 0.42);
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.hop-pause:active { background: rgba(8, 16, 32, 0.62); }
 
 .hop-overlay {
   position: absolute;
@@ -657,24 +747,79 @@ a { color: var(--accent); }
   font-size: clamp(1.5rem, 8vw, 2.3rem);
 }
 .card-back {
-  background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 70%, #000 10%), color-mix(in srgb, var(--accent) 30%, transparent));
-  color: rgba(255, 255, 255, 0.65);
+  background: linear-gradient(150deg, #2c3a5c, #1b2740);
+  color: rgba(255, 255, 255, 0.55);
   font-size: 1.2rem;
 }
+:root[data-theme="light"] .card-back {
+  background: linear-gradient(150deg, #b9c6de, #93a4c4);
+  color: rgba(255, 255, 255, 0.9);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) .card-back {
+    background: linear-gradient(150deg, #b9c6de, #93a4c4);
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
 .card-front {
   transform: rotateY(180deg);
   background: var(--surface-2);
 }
-.card-btn.is-done .card-front {
-  background: color-mix(in srgb, var(--mint) 22%, transparent);
-  border-color: color-mix(in srgb, var(--mint) 55%, transparent);
+/* A pair, the moment it is found: hold it face up, give it a pop and a green
+   ring, then flip it back in the winner's colour. */
+.card-btn.is-matched .card-front {
+  background: color-mix(in srgb, var(--mint) 28%, transparent);
+  border-color: var(--mint);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--mint) 60%, transparent);
 }
-.card-btn.is-done { opacity: 0.75; }
+.card-btn.is-matched .card-front::after {
+  content: "✓";
+  position: absolute;
+  top: 4px;
+  right: 7px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--mint);
+}
+.card-btn.is-face.is-matched { animation: card-pop 0.5s ease; }
+
+@keyframes card-pop {
+  0% { transform: rotateY(180deg) scale(1); }
+  40% { transform: rotateY(180deg) scale(1.09); }
+  100% { transform: rotateY(180deg) scale(1); }
+}
+
+.card-btn.is-wrong .card-front {
+  background: color-mix(in srgb, var(--coral) 20%, transparent);
+  border-color: color-mix(in srgb, var(--coral) 60%, transparent);
+}
+.card-btn.is-face.is-wrong { animation: card-shake 0.4s ease; }
+
+@keyframes card-shake {
+  0%, 100% { transform: rotateY(180deg) translateX(0); }
+  25% { transform: rotateY(180deg) translateX(-5px); }
+  75% { transform: rotateY(180deg) translateX(5px); }
+}
+
+.card-btn.is-claimed { cursor: default; }
+.card-btn.is-claimed:active { transform: none; }
+.card-btn.is-claimed .card-back {
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--claim) 88%, transparent),
+    color-mix(in srgb, var(--claim) 52%, transparent));
+  border-color: color-mix(in srgb, var(--claim) 70%, transparent);
+  color: var(--accent-ink);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.card-btn.claim-solo { --claim: var(--mint); }
+.card-btn.claim-p1 { --claim: var(--sky); }
+.card-btn.claim-p2 { --claim: var(--sun); }
 
 /* Dots and Boxes ------------------------------------------------------ */
 .dots-wrap { display: grid; place-items: center; margin-bottom: 0.9rem; }
-.dots-board { width: 100%; max-width: 460px; touch-action: manipulation; }
-.dots-board .slot { fill: transparent; cursor: pointer; }
+.dots-board { width: 100%; max-width: 460px; touch-action: manipulation; cursor: pointer; }
 .dots-board .line-bg { fill: color-mix(in srgb, var(--muted) 22%, transparent); }
 .dots-board .dot { fill: var(--muted); }
 .dots-board .p1 { fill: var(--sky); }
@@ -776,6 +921,10 @@ a { color: var(--accent); }
 }
 .letter-btn:active { transform: scale(0.92); }
 .letter-btn.is-used { opacity: 0.28; }
+.helper-row .btn-quiet { font-size: 0.82rem; padding: 0.5rem 0.3rem; }
+
+.found-panel { max-height: 46vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
 .found-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
@@ -793,6 +942,12 @@ a { color: var(--accent); }
 }
 .found-word.is-blank { color: var(--muted); letter-spacing: 0.2em; }
 .found-word.is-full { background: color-mix(in srgb, var(--sun) 26%, transparent); font-weight: 700; }
+.found-word.is-revealed {
+  background: transparent;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-style: italic;
+}
 
 /* Airport Bingo -------------------------------------------------------- */
 .bingo-grid {
