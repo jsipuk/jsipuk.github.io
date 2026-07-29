@@ -40,8 +40,20 @@ body{
 #s-start{
   background:linear-gradient(160deg,rgba(135,206,235,.93) 0%,rgba(152,216,255,.93) 65%,rgba(144,238,144,.93) 100%);
 }
-#s-start h1{font-size:3rem;font-weight:900;color:#CC0000;text-shadow:3px 3px 0 #fff,5px 5px 0 #880000;line-height:1;}
-#s-start h2{font-size:1.2rem;color:#fff;text-shadow:1px 1px 3px #000;margin-bottom:8px;font-style:italic;}
+/* The real Pokémon wordmark palette: yellow fill, blue outline. paint-order
+   keeps the stroke behind the fill so the letterforms stay crisp. */
+#s-start h1{
+  font-size:2.9rem;font-weight:900;line-height:1.05;
+  color:#FFCB05;
+  -webkit-text-stroke:3px #2A75BB;
+  paint-order:stroke fill;
+  text-shadow:0 3px 0 rgba(0,0,0,.22);
+  letter-spacing:.5px;
+}
+#s-start h2{
+  font-size:1.15rem;font-weight:800;color:#fff;font-style:italic;
+  text-shadow:0 2px 4px rgba(0,0,0,.55);margin-bottom:6px;letter-spacing:.4px;
+}
 #preview-wrap{
   width:96px;height:96px;
   background:rgba(255,255,255,.25);border-radius:50%;
@@ -64,17 +76,33 @@ body{
   gap:9px;width:100%;
 }
 .cc{
+  position:relative;
   background:rgba(255,255,255,.75);
   border:3px solid rgba(200,200,200,.8);
   border-radius:10px;
-  padding:5px 3px;
+  padding:5px 3px 6px;
   cursor:pointer;text-align:center;
-  transition:all .12s;user-select:none;
+  transition:transform .12s,border-color .12s,background .12s;
+  user-select:none;
 }
 .cc:hover{transform:scale(1.07);border-color:#FFD700;}
 .cc.sel{border-color:#CC0000;background:rgba(255,215,215,.95);}
 .cc canvas{display:block;margin:0 auto;}
-.cc span{display:block;font-size:.68rem;font-weight:700;color:#333;margin-top:3px;line-height:1.3;}
+.cc span{display:block;font-size:.68rem;font-weight:700;color:#333;margin-top:2px;line-height:1.3;}
+.dexno{
+  position:absolute;top:3px;left:4px;z-index:2;
+  font-style:normal;font-size:.5rem;font-weight:800;
+  color:#6A6A7A;letter-spacing:.3px;
+  background:rgba(255,255,255,.78);
+  padding:0 3px;border-radius:5px;
+}
+.dextype{
+  display:block;margin:3px auto 0;width:fit-content;
+  font-style:normal;font-size:.46rem;font-weight:800;
+  color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35);
+  padding:1px 6px;border-radius:7px;letter-spacing:.4px;
+  text-transform:uppercase;
+}
 #s-select .brow{display:flex;gap:10px;margin-top:2px;}
 
 /* GAMEOVER */
@@ -118,7 +146,17 @@ body{
 #btn-mute:active{transform:scale(.9);}
 
 /* MEDAL / NEW BEST */
-#go-medal{font-size:2.6rem;line-height:1.1;}
+#go-plaque{
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  background:rgba(240,232,200,.85);
+  border:3px solid #C8A85A;border-radius:12px;
+  padding:10px 16px;margin:2px 0 8px;
+}
+#go-medal{display:block;width:60px;height:60px;flex-shrink:0;}
+#go-nums{text-align:right;}
+#go-nums p{display:flex;align-items:baseline;gap:10px;justify-content:flex-end;margin:2px 0;}
+#go-nums span{font-size:.62rem;font-weight:800;color:#9A7B3A;letter-spacing:.8px;}
+#go-nums strong{font-size:1.5rem;color:#5A4520;line-height:1.1;min-width:46px;text-align:right;}
 #go-medal.hide,#go-newbest.hide{display:none;}
 #go-newbest{
   display:inline-block;background:#FFD700;color:#7A4810;
@@ -166,10 +204,14 @@ body{
   <div id="s-gameover" class="ov hide">
     <div id="go-box">
       <h2>Oh no!</h2>
-      <div id="go-medal" class="hide"></div>
       <div class="sc">
-        <p>Score: <strong id="go-score">0</strong></p>
-        <p style="color:#888">Best: <strong id="go-best">0</strong></p>
+        <div id="go-plaque">
+          <canvas id="go-medal" width="76" height="76" class="hide"></canvas>
+          <div id="go-nums">
+            <p><span>SCORE</span><strong id="go-score">0</strong></p>
+            <p><span>BEST</span><strong id="go-best">0</strong></p>
+          </div>
+        </div>
         <div id="go-newbest" class="hide">★ NEW BEST! ★</div>
       </div>
       <div class="brow">
@@ -751,35 +793,64 @@ const CHARS = [
 
 const canvas = document.getElementById('gc');
 const ctx    = canvas.getContext('2d');
-const CW = 400;
 
-// Dynamic height: on portrait phones the screen is taller than 2:3, so we
-// compute CH from the real viewport so the game fills it completely.
-const CH = (() => {
+// ─── LAYOUT ───────────────────────────────────────────────────────────────────
+// The play field has a FIXED logical HEIGHT. Every physics constant (gravity,
+// flap impulse, pipe gap) and every piece of background art is tuned against
+// 600 units, so locking it guarantees the game feels the same everywhere.
+// The logical WIDTH flexes to match the device aspect instead — that's what
+// lets the canvas fill a tall phone screen edge-to-edge with no black bars.
+const CH = 600;
+
+function viewport() {
   const vp = window.visualViewport;
-  const vw = window.innerWidth  || 400;
-  const vh = (vp ? vp.height : window.innerHeight) || 600;
-  if (vw < 540 && vh > vw * 1.2) {
-    return Math.min(900, Math.round(vh * CW / Math.min(vw, CW)));
-  }
-  return 600;
+  return {
+    w: window.innerWidth || 400,
+    h: (vp ? vp.height : window.innerHeight) || 600,
+  };
+}
+
+const CW = (() => {
+  const { w, h } = viewport();
+  // Desktop / landscape keeps the classic 2:3 field.
+  if (w >= 560 || h <= w) return 400;
+  // Portrait phone: derive width from the real aspect, clamped so that
+  // freakishly narrow or wide devices still get a playable field.
+  return Math.round(Math.max(258, Math.min(400, CH * w / h)));
 })();
 
-// Size the wrapper element to fill the viewport — no black bars on any device.
-// Cap at 1:1 CSS px so the game never balloons on large monitors.
-(function sizeWrap() {
-  const vp  = window.visualViewport;
-  const vw  = window.innerWidth  || 400;
-  const vh  = (vp ? vp.height : window.innerHeight) || 600;
-  const s   = Math.min(vw / CW, vh / CH, 1);
-  const el  = document.getElementById('wrap');
-  if (el) { el.style.width = Math.round(CW * s) + 'px'; el.style.height = Math.round(CH * s) + 'px'; }
-})();
+// Pipes must cross a narrow field in the same number of SECONDS as a wide one,
+// otherwise phone players get less reaction time than desktop players.
+// Scaling horizontal speed by the width ratio makes time-to-cross constant.
+const WSCALE = CW / 400;
 
-// HiDPI: render at device resolution so the art is crisp on retina/mobile
+// Fit the canvas to the viewport and give it a backing store at device
+// resolution so the art stays crisp when scaled up on retina screens.
+function fitToScreen() {
+  const { w, h } = viewport();
+  const s  = Math.min(w / CW, h / CH);
+  const dw = Math.round(CW * s), dh = Math.round(CH * s);
+  const bs = Math.min(window.devicePixelRatio || 1, 2.5);
+
+  const wrap = document.getElementById('wrap');
+  if (wrap) { wrap.style.width = dw + 'px'; wrap.style.height = dh + 'px'; }
+
+  canvas.style.width = dw + 'px'; canvas.style.height = dh + 'px';
+  canvas.width  = Math.round(dw * bs);
+  canvas.height = Math.round(dh * bs);
+  // Map the logical CW×CH field onto the backing store.
+  ctx.setTransform(canvas.width / CW, 0, 0, canvas.height / CH, 0, 0);
+}
+fitToScreen();
+
+// Re-fit on rotate / browser-chrome show-hide. CW stays fixed for the session
+// so difficulty never shifts mid-run; an orientation flip just letterboxes.
+addEventListener('resize', fitToScreen);
+addEventListener('orientationchange', () => setTimeout(fitToScreen, 120));
+if (window.visualViewport) visualViewport.addEventListener('resize', fitToScreen);
+
+// Offscreen caches still render at a fixed ratio — 2 is plenty for scenery.
 const DPR = Math.min(window.devicePixelRatio || 1, 2);
-canvas.width = CW * DPR; canvas.height = CH * DPR;
-ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
 let selectedChar = CHARS[0];
 let score = 0;
@@ -820,6 +891,14 @@ const SFX = (() => {
     score()  { tone(660, .08, 'square', .08); tone(880, .1, 'square', .08, 0, .07); },
     ball()   { tone(523, .07, 'sine', .15); tone(784, .08, 'sine', .15, 0, .06); tone(1047, .12, 'sine', .15, 0, .12); },
     hit()    { tone(160, .22, 'sawtooth', .2, -100); tone(500, .35, 'square', .07, -420, .08); },
+    // The Pokémon Center healing chime — the most recognisable four notes in
+    // Gen 1. Rising D–F#–A–D on a soft triangle, then a held major third.
+    heal()   {
+      const N = [587, 740, 880, 1175];
+      N.forEach((f, i) => tone(f, .16, 'triangle', .13, 0, i * .13));
+      tone(1175, .5, 'triangle', .10, 0, .52);
+      tone(1480, .5, 'triangle', .07, 0, .52);
+    },
     unlock() { ensureAC(); },
     isMuted()  { return muted; },
     toggle()   { muted = !muted; try { localStorage.setItem('pkflap_mute', muted ? '1' : '0'); } catch(e) {} return muted; },
@@ -835,7 +914,10 @@ function buzz(ms) { if (navigator.vibrate) try { navigator.vibrate(ms); } catch 
 // ─── PARTICLES & SCREEN JUICE ─────────────────────────────────────────────────
 
 let parts = [];
+let rings = [];                                  // expanding shockwave rings
 let shake = 0, flash = 0, scorePop = 0;
+let flapAnim = 0;                                // 1 → 0 after each flap, drives the wing beat
+let banner = 0, bannerText = '';                 // transient mid-run celebration text
 
 function burst(x, y, n, col, spd) {
   for (let i = 0; i < n; i++) {
@@ -844,33 +926,52 @@ function burst(x, y, n, col, spd) {
   }
 }
 
-// Bird
-const BIRD_X = 85;
-const BIRD_R = 22;
-const GRAVITY = 0.35;   // gentle — floaty fall without being sluggish
-const FLAP_V  = -6.8;   // moderate — less height than original, still responsive
-
-let bird = { y:CH/2, vy:0, angle:0 };
-
-// Pipes
-const PIPE_W = 58;
-let pipes = [];
-let pipeTimer = 0;
+function ring(x, y, col, max) {
+  rings.push({ x, y, r: 4, max: max || 46, life: 1, col });
+}
 
 // Ground
 const GH = 58;
+
+// A tall phone field has more vertical room than the 400×600 reference. Left
+// alone that makes the game easier there and leaves the pipes looking sparse,
+// so the surplus becomes a sky margin above the play band instead. The band
+// then holds the same number of bird-heights on every device, and the extra
+// sky is where the sun, clouds and score already live — nothing is wasted.
+const TOP = Math.max(0, (CH - GH) - 542 * WSCALE);
+const BAND_MID = TOP + (CH - GH - TOP) / 2;
+
+// Every spatial quantity scales by WSCALE so the game is geometrically
+// SIMILAR on every device — the bird, the pipes and the gap keep the same
+// proportions to each other and to the field. Because gravity and the flap
+// impulse scale together, the trajectory changes size but not TIMING, so the
+// rhythm of the game is identical everywhere.
+const BIRD_X  = Math.round(CW * .22);
+const BIRD_R  = 22 * WSCALE;
+const GRAVITY = 0.35 * WSCALE;
+const FLAP_V  = -6.8 * WSCALE;
+const VY_MAX  = 9 * WSCALE;    // terminal velocity
+
+let bird = { y:BAND_MID, vy:0, angle:0 };
+
+// Pipes
+const PIPE_W = 58 * WSCALE;
+let pipes = [];
+let pipeTimer = 0;
+
+// Ground scroll offsets
 let groundX = 0;  // wrapped offset for ground tufts, derived from scrollX
 let scrollX = 0;  // continuous distance travelled — keeps grass layers seam-free
 
-// Clouds
+// Clouds — positions proportional so they spread across any field width
 let clouds = [
-  {x:80, y:75, w:90, spd:.4},
-  {x:265,y:130,w:70, spd:.35},
-  {x:165,y:48, w:110,spd:.5},
+  {x:CW*.20, y:75,  w:90,  spd:.4  * WSCALE},
+  {x:CW*.66, y:130, w:70,  spd:.35 * WSCALE},
+  {x:CW*.41, y:48,  w:110, spd:.5  * WSCALE},
 ];
 
 // Butterfree flying the opposite direction to the game scroll
-let bgFlyer = { x: 200, baseY: 152 };
+let bgFlyer = { x: CW * .5, baseY: 152 };
 
 // Poké Ball pickups — drift between pipes, +1 bonus point when collected
 let balls = [];
@@ -889,23 +990,26 @@ const STARS = Array.from({ length: 34 }, () => ({
 function diff() {
   const t = Math.min(score, 50);
   return {
-    speed:  2.0 + t * 0.055,
-    gap:    Math.max(105, 170 - t * 1.3),
-    spawn:  Math.max(58, 95 - t * 0.75),
+    // speed scales with field width so time-to-cross is device-independent
+    speed:  (2.0 + t * 0.055) * WSCALE,
+    // gap scales with the bird so it stays the same number of bird-heights
+    gap:    Math.max(105, 170 - t * 1.3) * WSCALE,
+    spawn:  Math.max(58, 95 - t * 0.75),   // in frames — identical everywhere
   };
 }
 
 // ─── GAME LOGIC ───────────────────────────────────────────────────────────────
 
 function resetGame() {
-  bird = { y:CH/2, vy:0, angle:0 };
+  bird = { y:BAND_MID, vy:0, angle:0 };
   pipes = [];
   balls = [];
   parts = [];
+  rings = [];
   pipeTimer = 0;
   groundX = scrollX = 0;
   score = 0;
-  shake = flash = scorePop = 0;
+  shake = flash = scorePop = flapAnim = banner = 0;
   skyCur = 0;
   runStartBest = bestScore;
   newBest = false;
@@ -919,10 +1023,11 @@ function flap() {
   if (gamePhase === 'dead') return;
   if (gamePhase === 'idle') gamePhase = 'playing';
   bird.vy = FLAP_V;
+  flapAnim = 1;
   SFX.flap();
   // little air puff under the tail
   for (let i = 0; i < 4; i++) parts.push({
-    x: BIRD_X - 14 + Math.random() * 8, y: bird.y + 16,
+    x: BIRD_X - 14 * WSCALE + Math.random() * 8, y: bird.y + 16 * WSCALE,
     vx: -1 - Math.random(), vy: .5 + Math.random(), life: .7,
     col: 'rgba(255,255,255,.9)', r: Math.random() * 2 + 1.5,
   });
@@ -935,7 +1040,17 @@ function addPoint(quiet) {
     bestScore = score;
     try { localStorage.setItem('pkflap_best', bestScore); } catch(e) {}
   }
-  if (score > runStartBest) newBest = true;
+  // The moment you overtake your old record, celebrate it in the run itself
+  // rather than saving the news for the game-over screen.
+  if (score > runStartBest) {
+    if (!newBest && runStartBest > 0) {
+      SFX.heal(); buzz([0, 30, 40, 30]);
+      banner = 1; bannerText = 'NEW BEST!';
+      ring(BIRD_X, bird.y, '#FFD700', 90);
+      burst(BIRD_X, bird.y, 16, '#FFD700', 3.2);
+    }
+    newBest = true;
+  }
 }
 
 function update(dt) {
@@ -947,14 +1062,18 @@ function update(dt) {
   shake    = Math.max(0, shake - .6 * dt);
   flash    = Math.max(0, flash - .05 * dt);
   scorePop = Math.max(0, scorePop - .06 * dt);
+  flapAnim = Math.max(0, flapAnim - .11 * dt);
+  banner   = Math.max(0, banner - .012 * dt);
   for (const p of parts) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += .1 * dt; p.life -= .035 * dt; }
   parts = parts.filter(p => p.life > 0);
+  for (const r of rings) { r.r += (r.max - r.r) * .18 * dt; r.life -= .06 * dt; }
+  rings = rings.filter(r => r.life > 0);
 
   // Sky eases toward the phase set by score
   skyCur += (score / 10 - skyCur) * Math.min(.02 * dt, 1);
 
   if (gamePhase !== 'playing') {
-    if (gamePhase === 'idle') { bird.y = CH/2 + Math.sin(Date.now()*.002)*12; bird.angle = 0; }
+    if (gamePhase === 'idle') { bird.y = BAND_MID + Math.sin(Date.now()*.002)*12*WSCALE; bird.angle = 0; }
     if (gamePhase === 'dead' && bird.y + BIRD_R < CH - GH + 14) {
       // tumble to the ground
       bird.vy += GRAVITY * dt;
@@ -965,21 +1084,22 @@ function update(dt) {
   }
 
   bird.vy   += GRAVITY * dt;
-  bird.vy    = Math.min(bird.vy, 9);   // terminal velocity — stops runaway drops
+  bird.vy    = Math.min(bird.vy, VY_MAX);   // terminal velocity — no runaway drops
   bird.y    += bird.vy * dt;
-  bird.angle = Math.atan2(bird.vy, 9) * .65;
+  bird.angle = Math.atan2(bird.vy, VY_MAX) * .65;
   scrollX   += d.speed * dt;
   groundX    = -(scrollX % 40);
 
   pipeTimer += dt;
   if (pipeTimer >= d.spawn) {
     pipeTimer = 0;
-    const minGap = 70, maxGap = CH - GH - d.gap - 70;
+    const margin = 70 * WSCALE;
+    const minGap = TOP + margin, maxGap = CH - GH - d.gap - margin;
     pipes.push({ x: CW + 20, gy: minGap + Math.random() * (maxGap - minGap), gap: d.gap, scored: false });
     // Sometimes drop a Poké Ball halfway to the next pipe
     if (Math.random() < .35) balls.push({
       x: CW + 20 + d.spawn * d.speed * .5,
-      y: 90 + Math.random() * (CH - GH - 180),
+      y: TOP + margin + Math.random() * Math.max(40, CH - GH - TOP - margin * 2),
       rot: Math.random() * Math.PI * 2, got: false,
     });
   }
@@ -988,25 +1108,28 @@ function update(dt) {
     p.x -= d.speed * dt;
     if (!p.scored && p.x + PIPE_W < BIRD_X) {
       p.scored = true; addPoint();
-      burst(BIRD_X + 18, bird.y, 6, '#FFE060', 2);
+      burst(BIRD_X + 18 * WSCALE, bird.y, 6, '#FFE060', 2);
     }
   }
   pipes = pipes.filter(p => p.x > -PIPE_W - 20);
 
   for (const b of balls) {
     b.x -= d.speed * dt; b.rot += .04 * dt;
-    if (!b.got && Math.hypot(b.x - BIRD_X, b.y - bird.y) < BIRD_R + 12) {
+    if (!b.got && Math.hypot(b.x - BIRD_X, b.y - bird.y) < BIRD_R + 12 * WSCALE) {
       b.got = true; addPoint(true); SFX.ball(); buzz(12);
       burst(b.x, b.y, 12, '#FF4444', 3);
       burst(b.x, b.y, 8, '#FFFFFF', 2.2);
+      ring(b.x, b.y, '#FFFFFF', 52);
+      ring(b.x, b.y, '#FFE45C', 38);
+      flash = Math.max(flash, .18);
     }
   }
   balls = balls.filter(b => !b.got && b.x > -30);
 
-  if (bird.y - BIRD_R < 0) { bird.y = BIRD_R; bird.vy = Math.max(0, bird.vy); }
+  if (bird.y - BIRD_R < TOP) { bird.y = TOP + BIRD_R; bird.vy = Math.max(0, bird.vy); }
   if (bird.y + BIRD_R > CH - GH) { die(); return; }
 
-  const FG = 5;
+  const FG = 5 * WSCALE;
   for (const p of pipes) {
     if (BIRD_X + BIRD_R - FG > p.x && BIRD_X - BIRD_R + FG < p.x + PIPE_W) {
       if (bird.y - BIRD_R + FG < p.gy || bird.y + BIRD_R - FG > p.gy + p.gap) { die(); return; }
@@ -1015,7 +1138,7 @@ function update(dt) {
 }
 
 function die() {
-  gamePhase = 'dead'; bird.vy = -5;
+  gamePhase = 'dead'; bird.vy = -5 * WSCALE;
   SFX.hit(); buzz(60);
   shake = 11; flash = .55;
   burst(BIRD_X, bird.y, 14, '#FFFFFF', 3.5);
@@ -1023,12 +1146,16 @@ function die() {
   setTimeout(() => {
     document.getElementById('go-score').textContent = score;
     document.getElementById('go-best').textContent = bestScore;
-    const medal = score >= 40 ? '🏆' : score >= 25 ? '🥇' : score >= 15 ? '🥈' : score >= 8 ? '🥉' : '';
+
+    // Four tiers, Flappy Bird style — drawn, not emoji, so they match the art
+    const tier = score >= 40 ? 3 : score >= 25 ? 2 : score >= 15 ? 1 : score >= 8 ? 0 : -1;
     const mEl = document.getElementById('go-medal');
-    mEl.textContent = medal;
-    mEl.classList.toggle('hide', !medal);
+    mEl.classList.toggle('hide', tier < 0);
+    if (tier >= 0) drawMedal(mEl, tier);
+
     document.getElementById('go-newbest').classList.toggle('hide', !(newBest && score > 0));
     showScreen('gameover');
+    if (tier >= 2) SFX.heal();
   }, 700);
 }
 
@@ -1074,16 +1201,22 @@ function render() {
   balls.forEach(b => drawPokeball(b));
   drawGround();
   // Wild Pokémon drawn after grass so they appear in front of it
-  drawOddish(ctx, 92, CH - GH);
-  drawOddish(ctx, 305, CH - GH);
-  drawDiglett(ctx, 345, CH - GH);
+  drawOddish(ctx, CW * .23, CH - GH);
+  drawOddish(ctx, CW * .76, CH - GH);
+  drawDiglett(ctx, CW * .87, CH - GH);
 
-  selectedChar.draw(ctx, BIRD_X, bird.y, BIRD_R * 2, bird.angle);
+  drawPlayer();
 
   for (const pt of parts) {
     ctx.globalAlpha = Math.max(0, Math.min(1, pt.life));
     ctx.fillStyle = pt.col;
     ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2); ctx.fill();
+  }
+  // Catch rings — the Poké Ball "gotcha" pulse
+  for (const r of rings) {
+    ctx.globalAlpha = Math.max(0, r.life) * .8;
+    ctx.strokeStyle = r.col; ctx.lineWidth = 3 * r.life + .6;
+    ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2); ctx.stroke();
   }
   ctx.globalAlpha = 1;
 
@@ -1095,7 +1228,40 @@ function render() {
 
   if (gamePhase === 'playing' || gamePhase === 'dead') drawScoreHUD();
   if (gamePhase === 'idle' && curScreen === 'game') drawTapHint();
+  if (banner > 0) drawBanner();
   if (paused) drawPaused();
+}
+
+// The player is drawn through a squash-and-stretch transform driven by
+// flapAnim, so every character gets a readable wing beat without any of the
+// eight character functions needing to know about it.
+function drawPlayer() {
+  const f = flapAnim;
+  const ease = f * f;                       // sharp on the beat, soft on release
+
+  // Beat arcs sweeping off the shoulders — reads as wings catching air
+  if (f > .05) {
+    ctx.save();
+    ctx.globalAlpha = f * .5;
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+    const spread = 16 + (1 - f) * 20;
+    for (const dir of [-1, 1]) {
+      ctx.beginPath();
+      ctx.arc(BIRD_X, bird.y + 2, BIRD_R + spread * .5,
+              dir < 0 ? Math.PI * 1.05 : Math.PI * 1.75,
+              dir < 0 ? Math.PI * 1.25 : Math.PI * 1.95);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  ctx.save();
+  ctx.translate(BIRD_X, bird.y);
+  // Stretch tall on the upbeat, settle back to round — classic game-feel juice
+  ctx.scale(1 - ease * .11, 1 + ease * .15);
+  ctx.translate(-BIRD_X, -bird.y);
+  selectedChar.draw(ctx, BIRD_X, bird.y, BIRD_R * 2, bird.angle);
+  ctx.restore();
 }
 
 function drawStars(a) {
@@ -1123,7 +1289,7 @@ function drawScenery() {
 }
 
 function drawPokeball(b) {
-  const r = 12;
+  const r = 12 * WSCALE;
   ctx.save();
   ctx.translate(b.x, b.y + Math.sin(Date.now() * .004 + b.rot) * 3);
   ctx.rotate(Math.sin(b.rot) * .25);
@@ -1197,38 +1363,63 @@ function drawSun(night) {
 
 // ─── MOUNTAINS ───────────────────────────────────────────────────────────────
 
-function drawMountains(ctx) {
-  // Far layer — pale blue-violet peaks
-  ctx.fillStyle = 'rgba(160,168,210,.65)';
-  ctx.beginPath(); ctx.moveTo(0,CH-GH);
-  ctx.lineTo(0,275); ctx.lineTo(35,225); ctx.lineTo(65,255); ctx.lineTo(100,200);
-  ctx.lineTo(130,240); ctx.lineTo(160,190); ctx.lineTo(195,230); ctx.lineTo(225,185);
-  ctx.lineTo(255,220); ctx.lineTo(285,195); ctx.lineTo(315,235); ctx.lineTo(348,185);
-  ctx.lineTo(375,215); ctx.lineTo(400,200); ctx.lineTo(400,CH-GH);
-  ctx.closePath(); ctx.fill();
-  // Snow caps
-  ctx.fillStyle = 'rgba(240,245,255,.7)';
-  const peaks = [[35,225],[100,200],[160,190],[225,185],[285,195],[348,185]];
-  peaks.forEach(([px,py]) => {
-    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px-14,py+22); ctx.lineTo(px+14,py+22); ctx.closePath(); ctx.fill();
+// All scenery is laid out as FRACTIONS of CW so the composition holds together
+// at any field width — 258 units on a tall phone or 400 on desktop.
+function drawMountains(g) {
+  const groundY = CH - GH;
+
+  // ── Far layer: pale blue-violet peaks, evenly spread across the field ──
+  // Peak count follows width so the range never looks stretched or crowded.
+  const N = Math.max(6, Math.round(CW / 47));
+  const peaks = [];
+  g.fillStyle = 'rgba(160,168,210,.65)';
+  g.beginPath(); g.moveTo(0, groundY); g.lineTo(0, 275);
+  for (let i = 0; i <= N; i++) {
+    const x = (i / N) * CW;
+    const tall = i % 2 === 0;
+    // Deterministic pseudo-variation — same silhouette every load, no RNG
+    const y = tall ? 186 + ((i * 37) % 23) : 222 + ((i * 53) % 27);
+    g.lineTo(x, y);
+    if (tall) peaks.push([x, y]);
+  }
+  g.lineTo(CW, groundY); g.closePath(); g.fill();
+
+  // Snow caps on the tall peaks
+  g.fillStyle = 'rgba(240,245,255,.7)';
+  peaks.forEach(([px, py]) => {
+    g.beginPath(); g.moveTo(px, py);
+    g.lineTo(px - 14, py + 22); g.lineTo(px + 14, py + 22);
+    g.closePath(); g.fill();
   });
 
-  // Near layer — rounded green hills
-  ctx.fillStyle = 'rgba(100,170,100,.6)';
-  ctx.beginPath(); ctx.moveTo(0,CH-GH);
-  ctx.quadraticCurveTo(40,310, 80,330);
-  ctx.quadraticCurveTo(130,285, 180,315);
-  ctx.quadraticCurveTo(230,275, 280,308);
-  ctx.quadraticCurveTo(330,280, 380,305);
-  ctx.lineTo(400,320); ctx.lineTo(400,CH-GH); ctx.lineTo(0,CH-GH);
-  ctx.closePath(); ctx.fill();
+  // ── Near layer: rolling green hills, drawn as two overlapping bands so the
+  // lower half of the screen reads as depth rather than one flat green wall.
+  const hx = f => f * CW;
 
-  // Trees on hills — small stylised firs
-  const trees = [[55,328],[120,308],[210,310],[300,300],[365,315]];
-  trees.forEach(([tx,ty]) => drawTree(ctx, tx, ty));
+  function hillBand(topY, amp, fill) {
+    const waves = Math.max(3, Math.round(CW / 110));
+    g.fillStyle = fill;
+    g.beginPath(); g.moveTo(0, groundY); g.lineTo(0, topY + amp * .6);
+    for (let i = 0; i < waves; i++) {
+      const x0 = (i / waves) * CW, x1 = ((i + 1) / waves) * CW;
+      const crest = topY - (i % 2 === 0 ? amp : amp * .25);
+      g.quadraticCurveTo((x0 + x1) / 2, crest, x1, topY + amp * .5 - (i % 3) * amp * .18);
+    }
+    g.lineTo(CW, groundY); g.lineTo(0, groundY);
+    g.closePath(); g.fill();
+  }
 
-  // Pokémon Center on the hill
-  drawPokeCenter(ctx);
+  // Far band — the crest the Pokémon Center and trees stand on
+  hillBand(348, 30, 'rgba(104,172,104,.62)');
+  // Near band — lighter, lower, gives a second horizon line
+  hillBand(432, 22, 'rgba(126,192,110,.55)');
+
+  // ── Trees on the far crest ──
+  [[.10, 356], [.27, 344], [.58, 350], [.80, 344], [.94, 354]]
+    .forEach(([f, ty]) => drawTree(g, hx(f), ty));
+
+  // ── Pokémon Center, sitting on the hill crest ──
+  drawPokeCenter(g, hx(.45), 344);
   // (Oddish and Diglett are drawn live after the grass strip, not cached here)
 }
 
@@ -1256,7 +1447,7 @@ function drawCloud(x, y, w) {
 // ─── PIPES ───────────────────────────────────────────────────────────────────
 
 function drawPipe(p) {
-  const capH = 18, capX = p.x - 5, capW = PIPE_W + 10;
+  const capH = 18 * WSCALE, capX = p.x - 5 * WSCALE, capW = PIPE_W + 10 * WSCALE;
 
   // Top pipe body
   ctx.fillStyle = '#2A8A45';
@@ -1264,10 +1455,10 @@ function drawPipe(p) {
   ctx.fillStyle = '#38A858';
   ctx.fillRect(capX, p.gy - capH, capW, capH);
   ctx.fillStyle = 'rgba(255,255,255,.18)';
-  ctx.fillRect(p.x+5, 0, 8, p.gy - capH);
+  ctx.fillRect(p.x+5*WSCALE, 0, 8*WSCALE, p.gy - capH);
   ctx.fillStyle = '#1A6030';
-  ctx.fillRect(p.x, 0, 4, p.gy - capH);
-  ctx.fillRect(capX, p.gy-capH, 4, capH);
+  ctx.fillRect(p.x, 0, 4*WSCALE, p.gy - capH);
+  ctx.fillRect(capX, p.gy-capH, 4*WSCALE, capH);
   // Leaf tufts on top pipe cap
   drawPipeLeaves(p.x + PIPE_W/2, p.gy - capH, false);
 
@@ -1278,10 +1469,10 @@ function drawPipe(p) {
   ctx.fillStyle = '#38A858';
   ctx.fillRect(capX, by, capW, capH);
   ctx.fillStyle = 'rgba(255,255,255,.18)';
-  ctx.fillRect(p.x+5, by+capH, 8, bh-capH);
+  ctx.fillRect(p.x+5*WSCALE, by+capH, 8*WSCALE, bh-capH);
   ctx.fillStyle = '#1A6030';
-  ctx.fillRect(p.x, by+capH, 4, bh-capH);
-  ctx.fillRect(capX, by, 4, capH);
+  ctx.fillRect(p.x, by+capH, 4*WSCALE, bh-capH);
+  ctx.fillRect(capX, by, 4*WSCALE, capH);
   // Leaf tufts on bottom pipe cap
   drawPipeLeaves(p.x + PIPE_W/2, by, true);
 }
@@ -1291,14 +1482,14 @@ function drawPipeLeaves(cx, cy, flipped) {
   ctx.fillStyle = '#228838';
   for (let i = -1; i <= 1; i++) {
     ctx.beginPath();
-    ctx.ellipse(cx + i * 14, cy + dir * 10, 7, 12, i * .4, 0, Math.PI*2);
+    ctx.ellipse(cx + i * 14*WSCALE, cy + dir * 10*WSCALE, 7*WSCALE, 12*WSCALE, i * .4, 0, Math.PI*2);
     ctx.fill();
   }
   // Lighter vein on each leaf
   ctx.fillStyle = '#44AA55';
   for (let i = -1; i <= 1; i++) {
     ctx.beginPath();
-    ctx.ellipse(cx + i * 14, cy + dir * 10, 3, 7, i * .4, 0, Math.PI*2);
+    ctx.ellipse(cx + i * 14*WSCALE, cy + dir * 10*WSCALE, 3*WSCALE, 7*WSCALE, i * .4, 0, Math.PI*2);
     ctx.fill();
   }
 }
@@ -1364,12 +1555,11 @@ function drawGround() {
 
 // ─── POKÉMON CENTER ──────────────────────────────────────────────────────────
 
-function drawPokeCenter(ctx) {
-  // Sits on the nearest green hill, centred at cx=175.
-  // baseY = hill surface at x≈175 (quadratic through (80,330)→cp(130,285)→(180,315) ≈ y 312)
-  const cx = 175, baseY = 312;
-  const bw = 100, bh = 62;
-  const bx = cx - bw / 2;   // = 125
+function drawPokeCenter(ctx, cx, baseY) {
+  // cx / baseY are supplied by drawMountains so the building tracks the hill
+  // crest at any field width.
+  const bw = Math.min(100, CW * .30), bh = 62;
+  const bx = cx - bw / 2;
 
   ctx.save();
   ctx.globalAlpha = 0.88;
@@ -1606,30 +1796,183 @@ function drawBgButterfree(x, y) {
 
 // ─── HUD ─────────────────────────────────────────────────────────────────────
 
+const FONT = "'Trebuchet MS','Segoe UI',Verdana,sans-serif";
+
+// Flappy Bird's score is a bare outlined numeral high on the screen — no
+// plaque, no chrome. Reads instantly and never covers the play field.
 function drawScoreHUD() {
-  const txt = String(score), bw = Math.max(70, txt.length * 18 + 30);
-  const bx = CW/2 - bw/2, by = 14;
-  ctx.fillStyle = 'rgba(0,0,0,.35)';
-  roundRect(ctx, bx+2, by+3, bw, 36, 10); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,.92)';
-  roundRect(ctx, bx, by, bw, 36, 10); ctx.fill();
   ctx.save();
-  ctx.translate(CW/2, by+18);
-  ctx.scale(1 + scorePop*.35, 1 + scorePop*.35);
-  ctx.fillStyle = '#222'; ctx.font = 'bold 24px Arial';
+  ctx.translate(CW / 2, 62);
+  const pop = 1 + scorePop * .28;
+  ctx.scale(pop, pop);
+  ctx.font = '900 46px ' + FONT;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(txt, 0, 0);
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.lineWidth = 7;
+  ctx.strokeText(String(score), 0, 0);
+  ctx.fillStyle = '#fff';
+  ctx.fillText(String(score), 0, 0);
   ctx.restore();
 }
 
-function drawTapHint() {
-  const alpha = .5 + .5 * Math.sin(Date.now() * .004);
-  ctx.save(); ctx.globalAlpha = alpha;
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 17px Arial';
+// Mid-run celebration text (currently: beating your record)
+function drawBanner() {
+  const t = banner;
+  const rise = (1 - t) * 26;
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, t * 2.4);
+  ctx.translate(CW / 2, CH * .30 - rise);
+  const s = 1 + Math.max(0, t - .8) * 1.6;
+  ctx.scale(s, s);
+  ctx.font = '900 30px ' + FONT;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.shadowColor = '#000'; ctx.shadowBlur = 5;
-  ctx.fillText('Tap / Space to start!', CW/2, CH/2 + 70);
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(90,50,0,.9)'; ctx.lineWidth = 7;
+  ctx.strokeText(bannerText, 0, 0);
+  ctx.fillStyle = '#FFD700';
+  ctx.fillText(bannerText, 0, 0);
   ctx.restore();
+}
+
+// The "Get Ready" card, straight out of Flappy Bird — title plus a hand
+// that taps in rhythm so the single-input rule needs no words.
+function drawTapHint() {
+  const t = Date.now() * .004;
+  ctx.save();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+  ctx.font = '900 34px ' + FONT;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 7;
+  ctx.strokeText('GET READY!', CW / 2, CH * .30);
+  ctx.fillStyle = '#fff';
+  ctx.fillText('GET READY!', CW / 2, CH * .30);
+
+  // Tapping hand — bobs toward the screen on the beat
+  const bob = Math.max(0, Math.sin(t)) * 7;
+  drawTapHand(CW / 2, CH * .60 + bob);
+
+  // Hint sits on a dark pill so it stays legible over sky, hill or grass
+  const hint = 'Tap to flap', hy = CH * .60 + 54;
+  ctx.font = '800 16px ' + FONT;
+  const pw = ctx.measureText(hint).width + 26;
+  ctx.globalAlpha = .8 + .2 * Math.sin(t);
+  ctx.fillStyle = 'rgba(0,0,0,.5)';
+  roundRect(ctx, CW / 2 - pw / 2, hy - 14, pw, 28, 14); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.fillText(hint, CW / 2, hy);
+  ctx.restore();
+}
+
+// A tapping hand: fist with the index finger extended up-left and a clearly
+// separate thumb, tilted off-vertical. The thumb and folded knuckles are what
+// make it read unambiguously as a pointing hand.
+function drawTapHand(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Ripple pulsing out from the fingertip
+  const p = (Date.now() % 900) / 900;
+  ctx.strokeStyle = 'rgba(255,255,255,' + (0.55 * (1 - p)).toFixed(2) + ')';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(-5, -20, 5 + p * 18, 0, Math.PI * 2); ctx.stroke();
+
+  ctx.rotate(-0.18);
+  ctx.fillStyle = '#FFE0BD';
+  ctx.strokeStyle = 'rgba(90,55,25,.75)';
+  ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+
+  // Fist
+  ctx.beginPath();
+  ctx.moveTo(-10, 0);
+  ctx.quadraticCurveTo(-13, 16, -2, 20);
+  ctx.quadraticCurveTo(11, 21, 13, 8);
+  ctx.quadraticCurveTo(14, -1, 6, -2);
+  ctx.quadraticCurveTo(-2, -3, -10, 0);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // Index finger, extended up and offset to the left of centre
+  ctx.beginPath();
+  ctx.moveTo(-9, 1);
+  ctx.lineTo(-8, -17);
+  ctx.quadraticCurveTo(-7.5, -24, -2.5, -24);
+  ctx.quadraticCurveTo(2, -24, 2, -17);
+  ctx.lineTo(2, 2);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // Thumb tucked across the front — the key silhouette cue
+  ctx.beginPath();
+  ctx.moveTo(-10, 6);
+  ctx.quadraticCurveTo(-17, 8, -15, 14);
+  ctx.quadraticCurveTo(-13, 19, -5, 17);
+  ctx.stroke();
+
+  // Folded knuckles on the right edge
+  ctx.lineWidth = 1.6;
+  ctx.strokeStyle = 'rgba(90,55,25,.45)';
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.arc(6.5, 3 + i * 5.5, 4.5, -Math.PI * .55, Math.PI * .42);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ─── MEDALS ──────────────────────────────────────────────────────────────────
+// Bronze / silver / gold / platinum, each with a Poké Ball struck into the
+// face — the Flappy Bird medal shape wearing the Pokémon motif.
+const MEDALS = [
+  { name:'Bronze',   rim:'#A05A2C', face:'#D08040', hi:'#F0A868' },
+  { name:'Silver',   rim:'#8A8A96', face:'#C4C4D0', hi:'#EDEDF4' },
+  { name:'Gold',     rim:'#B8901E', face:'#F0C230', hi:'#FFE882' },
+  { name:'Platinum', rim:'#4E8FA8', face:'#8FD4E8', hi:'#D4F4FF' },
+];
+
+function drawMedal(cv, tier) {
+  const m = MEDALS[tier] || MEDALS[0];
+  const S = 76, c = S / 2;
+  const bs = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = S * bs; cv.height = S * bs;
+  const g = cv.getContext('2d');
+  g.setTransform(bs, 0, 0, bs, 0, 0);
+  g.clearRect(0, 0, S, S);
+
+  // Ribbon tails behind the disc
+  g.fillStyle = '#3B6FCA';
+  g.beginPath(); g.moveTo(c - 14, 8); g.lineTo(c - 3, 8); g.lineTo(c - 8, 30); g.lineTo(c - 20, 26); g.closePath(); g.fill();
+  g.fillStyle = '#2F58A4';
+  g.beginPath(); g.moveTo(c + 14, 8); g.lineTo(c + 3, 8); g.lineTo(c + 8, 30); g.lineTo(c + 20, 26); g.closePath(); g.fill();
+
+  // Outer rim
+  g.fillStyle = m.rim;
+  g.beginPath(); g.arc(c, c + 8, 26, 0, Math.PI * 2); g.fill();
+  // Face
+  g.fillStyle = m.face;
+  g.beginPath(); g.arc(c, c + 8, 21, 0, Math.PI * 2); g.fill();
+  // Top-left sheen
+  g.fillStyle = m.hi; g.globalAlpha = .55;
+  g.beginPath(); g.arc(c - 6, c + 2, 13, 0, Math.PI * 2); g.fill();
+  g.globalAlpha = 1;
+
+  // Poké Ball struck into the medal face
+  const r = 11, by = c + 8;
+  g.fillStyle = '#D83A3A';
+  g.beginPath(); g.arc(c, by, r, Math.PI, 0); g.fill();
+  g.fillStyle = '#F6F6F6';
+  g.beginPath(); g.arc(c, by, r, 0, Math.PI); g.fill();
+  g.strokeStyle = 'rgba(30,20,10,.8)'; g.lineWidth = 1.8;
+  g.beginPath(); g.arc(c, by, r, 0, Math.PI * 2); g.stroke();
+  g.beginPath(); g.moveTo(c - r, by); g.lineTo(c + r, by); g.stroke();
+  g.fillStyle = '#fff';
+  g.beginPath(); g.arc(c, by, 3.8, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = 'rgba(30,20,10,.8)'; g.lineWidth = 1.5;
+  g.beginPath(); g.arc(c, by, 3.8, 0, Math.PI * 2); g.stroke();
+
+  // Rim highlight
+  g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 1.5;
+  g.beginPath(); g.arc(c, c + 8, 26, Math.PI * 1.05, Math.PI * 1.75); g.stroke();
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -1660,12 +2003,31 @@ function startGame() { resetGame(); showScreen('game'); }
 
 // ─── CHARACTER SELECT UI ──────────────────────────────────────────────────────
 
+// Gen-1 National Dex numbers and primary types — the details that make the
+// select screen read as a Pokédex rather than a generic character grid.
+const DEX = {
+  bulbasaur:  { no:  1, type:'Grass',    tc:'#78C850' },
+  charmander: { no:  4, type:'Fire',     tc:'#F08030' },
+  charizard:  { no:  6, type:'Fire',     tc:'#F08030' },
+  squirtle:   { no:  7, type:'Water',    tc:'#6890F0' },
+  pidgey:     { no: 16, type:'Normal',   tc:'#A8A878' },
+  pikachu:    { no: 25, type:'Electric', tc:'#F8D030' },
+  magikarp:   { no:129, type:'Water',    tc:'#6890F0' },
+  dragonite:  { no:149, type:'Dragon',   tc:'#7038F8' },
+};
+
 function buildCharGrid() {
   const grid = document.getElementById('char-grid');
   grid.innerHTML = '';
   CHARS.forEach(ch => {
+    const dex = DEX[ch.id] || { no: 0, type: '???', tc: '#999' };
     const card = document.createElement('div');
     card.className = 'cc' + (ch.id === selectedChar.id ? ' sel' : '');
+
+    const no = document.createElement('i');
+    no.className = 'dexno';
+    no.textContent = '#' + String(dex.no).padStart(3, '0');
+
     const mc = document.createElement('canvas');
     mc.width = 56 * DPR; mc.height = 56 * DPR;
     mc.style.width = '56px'; mc.style.height = '56px';
@@ -1674,13 +2036,21 @@ function buildCharGrid() {
     mctx.fillStyle = ch.col + '28';
     mctx.beginPath(); mctx.arc(28,28,25,0,Math.PI*2); mctx.fill();
     ch.draw(mctx, 28, 28, 46, 0);
+
     const lbl = document.createElement('span');
     lbl.textContent = ch.name;
-    card.appendChild(mc); card.appendChild(lbl);
+
+    const type = document.createElement('em');
+    type.className = 'dextype';
+    type.textContent = dex.type;
+    type.style.background = dex.tc;
+
+    card.append(no, mc, lbl, type);
     card.addEventListener('click', () => {
       document.querySelectorAll('.cc').forEach(c => c.classList.remove('sel'));
       card.classList.add('sel');
       selectedChar = CHARS.find(c => c.id === ch.id);
+      SFX.flap();
     });
     grid.appendChild(card);
   });
@@ -1747,11 +2117,28 @@ document.getElementById('btn-change').addEventListener('click', () => { buildCha
 
 // ─── LOOP ────────────────────────────────────────────────────────────────────
 
-let lastTs = 0;
+// Physics runs on a FIXED timestep. With a variable dt the same flap traces a
+// different arc at 60Hz, 120Hz (ProMotion) and 144Hz. Quantising the simulation
+// to 1/60s steps makes the game feel bit-identical on every display, while
+// rendering still happens once per animation frame so it stays buttery.
+const STEP = 1000 / 60;
+let acc = 0, lastTs = 0;
+
 function loop(ts) {
-  const dt = Math.min((ts - lastTs) / 16.667, 3);
+  let frameMs = ts - lastTs;
   lastTs = ts;
-  if (!paused) update(dt);
+  // Tab was backgrounded / hitched — don't fast-forward the simulation
+  if (frameMs > 250 || frameMs < 0) frameMs = STEP;
+  acc += frameMs;
+
+  let steps = 0;
+  while (acc >= STEP && steps < 5) {
+    if (!paused) update(1);      // dt is always exactly one logical frame
+    acc -= STEP;
+    steps++;
+  }
+  if (acc > STEP * 5) acc = 0;   // never let the accumulator run away
+
   render();
   requestAnimationFrame(loop);
 }
