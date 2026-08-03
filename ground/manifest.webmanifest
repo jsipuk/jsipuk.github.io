@@ -1,14 +1,14 @@
 {
-  "name": "The Dojo — presales practice",
-  "short_name": "Dojo",
-  "description": "Ninety-second reps on the conversations that decide deals. Private, offline, encrypted at rest.",
+  "name": "Ground — accounts, notes and practice",
+  "short_name": "Ground",
+  "description": "One private, offline store for the judgement you build at work. Encrypted at rest.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f1117",
   "theme_color": "#0f1117",
-  "categories": ["productivity", "education"],
+  "categories": ["productivity", "business"],
   "icons": [
     { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

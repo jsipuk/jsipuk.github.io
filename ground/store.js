@@ -1,4 +1,4 @@
-/* Field Notes — storage and encryption layer.
+/* Ground — storage and encryption layer.
  *
  * Byte-for-byte identical to dojo/store.js apart from the APP constant and the
  * global it exports. The duplication is deliberate: each app precaches its own
@@ -7,7 +7,7 @@
  * both. test/run.js diffs the two files and fails if they drift apart.
  *
  * Deliberately has no DOM access and never touches localStorage itself, so the
- * same file runs in the browser and under Node for `node field-notes/test/run.js`.
+ * same file runs in the browser and under Node for `node ground/test/run.js`.
  * The app layer owns persistence; this file owns the envelope format and the
  * cryptography.
  *
@@ -28,7 +28,7 @@
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var APP = 'field-notes';
+  var APP = 'ground';
   var VERSION = 1;
 
   /* OWASP's current floor for PBKDF2-HMAC-SHA256. Paid once per unlock, not

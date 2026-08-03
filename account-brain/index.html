@@ -2,307 +2,41 @@
 <html lang="en-GB">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#0f1117">
-<meta name="description" content="Account Brain: one living page per account, and a brief you can read in a car park.">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
-<link rel="stylesheet" href="./style.css?v=1">
-<title>Account Brain</title>
+<link rel="canonical" href="/ground/">
+<title>Account Brain has moved to Ground</title>
+<style>
+  body{background:#0f1117;color:#e2e8f0;font-family:'Inter',system-ui,-apple-system,sans-serif;
+       display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:2rem;line-height:1.7}
+  .box{max-width:44ch}
+  h1{font-size:1.4rem;letter-spacing:-.5px;margin:0 0 .8rem}
+  p{color:#8892a4;font-size:.94rem;margin:0 0 1rem}
+  a.btn{display:inline-block;background:#6c63ff;color:#fff;text-decoration:none;border-radius:9px;
+        padding:.65rem 1.4rem;font-weight:600;font-size:.93rem}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em;background:#151827;
+       border:1px solid #2d3148;border-radius:4px;padding:.08rem .32rem}
+</style>
 </head>
 <body>
-
-<header class="top">
-  <div class="top-in">
-    <span class="brand"><span class="dot" aria-hidden="true"></span>Account Brain</span>
-    <div class="top-actions" id="appNav" hidden>
-      <button class="ghost" id="navToday">Today</button>
-      <button class="ghost" id="navAccounts">Accounts</button>
-      <button class="ghost" id="navCraft">Learned</button>
-      <button class="ghost" id="btnData">Settings</button>
-      <button class="ghost" id="btnLock" hidden title="Lock now">Lock</button>
-    </div>
+  <div class="box">
+    <h1>Account Brain is now part of Ground</h1>
+    <p>The three apps were merged into one, so there is a single passphrase, a single backup, and no shuffling files between them.</p>
+    <p>Your data is safe where it is. In Ground, open <strong>Settings</strong> and choose <strong>Look for old data</strong> to bring it across.</p>
+    <p><a class="btn" href="/ground/">Open Ground</a></p>
   </div>
-</header>
-
-<main class="wrap">
-
-  <!-- LOCK -->
-  <section id="viewLock">
-    <form class="lock" id="lockForm" autocomplete="off">
-      <input type="hidden" id="lockMode" value="new">
-      <h1 id="lockTitle">Set a passphrase</h1>
-      <p id="lockBlurb"></p>
-      <div class="field">
-        <label for="lockPass">Passphrase</label>
-        <input type="password" id="lockPass" autocomplete="current-password" spellcheck="false">
-      </div>
-      <div class="field" id="lockPass2Wrap">
-        <label for="lockPass2">Type it again</label>
-        <input type="password" id="lockPass2" autocomplete="new-password" spellcheck="false">
-      </div>
-      <p class="err" id="lockErr" role="alert"></p>
-      <div class="lock-foot">
-        <button type="button" class="primary" id="lockGo">Encrypt and start</button>
-        <span id="lockSkipWrap">
-          <button type="button" class="linky" id="lockSkip">Skip, do not encrypt</button>
-        </span>
-      </div>
-    </form>
-  </section>
-
-  <!-- TODAY -->
-  <section id="viewToday" hidden>
-    <h1 class="page">Today</h1>
-    <p class="lede" id="todayLede"></p>
-    <div class="bar">
-      <label class="sr" for="search">Search everything</label>
-      <input id="search" type="search" placeholder="Search people, promises, quotes, anything…" autocomplete="off">
-    </div>
-    <div id="searchResults" hidden></div>
-    <div id="attention"></div>
-  </section>
-
-  <!-- ACCOUNTS -->
-  <section id="viewAccounts" hidden>
-    <h1 class="page">Accounts</h1>
-    <p class="lede">One page each. The point is not the record, it is the two minutes before the call.</p>
-    <div class="bar">
-      <button class="primary" id="btnAddAcct">Add an account</button>
-      <button class="ghost" id="btnPortfolioPack">Portfolio pack</button>
-      <button class="ghost" id="btnExample">Load an example</button>
-      <label class="check"><input type="checkbox" id="showArchived"> Show archived</label>
-    </div>
-    <div id="acctList"></div>
-  </section>
-
-  <!-- DETAIL -->
-  <section id="viewDetail" hidden>
-    <button class="crumb" id="backList">← All accounts</button>
-    <div class="detail-head">
-      <div>
-        <h1 id="dName"></h1>
-        <p class="meta" id="dMeta"></p>
-      </div>
-      <div class="spacer">
-        <button class="ghost" id="btnEditAcct">Edit</button>
-        <button class="ghost" id="btnPack">Context pack</button>
-        <button class="primary" id="btnBrief">Pre-call brief</button>
-      </div>
-    </div>
-
-    <div class="panel accent">
-      <h2>Log a meeting <button class="add" id="btnAddEntry">Add</button></h2>
-      <p class="panel-note">The five lines. Ninety seconds, straight after the call. Anything you type into <em>I owe</em> or <em>Still open</em> becomes a tracked thread automatically.</p>
-      <div id="entries"></div>
-    </div>
-
-    <div class="panel">
-      <h2>People <button class="add" id="btnAddPerson">Add</button></h2>
-      <div id="people"></div>
-    </div>
-
-    <div class="panel">
-      <h2>Open threads <button class="add" id="btnAddThread">Add</button></h2>
-      <div id="threads"></div>
-    </div>
-
-    <div class="panel">
-      <h2>Closed <button class="add" id="btnToggleDone">Show</button></h2>
-      <div id="threadsDone" hidden></div>
-    </div>
-  </section>
-
-  <!-- BRIEF -->
-  <section id="viewBrief" hidden>
-    <button class="crumb" id="backDetail">← Back to the account</button>
-    <div class="brief" id="briefBody"></div>
-    <div class="bar">
-      <button class="ghost" id="btnPrint">Print or save as PDF</button>
-      <button class="ghost" id="btnCopyBrief">Copy as text</button>
-      <button class="ghost" id="btnCopyCrm">Copy CRM lines</button>
-    </div>
-  </section>
-
-  <!-- CRAFT -->
-  <section id="viewCraft" hidden>
-    <h1 class="page">What you have learned</h1>
-    <p class="lede">Every <em>I learned</em> line, lifted out of its account. An account log is about one customer. This is about the job, and it is the part that travels with you.</p>
-    <div class="bar">
-      <button class="ghost" id="btnCraftPack">Copy as context</button>
-      <button class="ghost" id="btnToDojo">Send to The Dojo</button>
-    </div>
-    <div id="craftList"></div>
-  </section>
-
-</main>
-
-<footer class="foot">
-  Stays in this browser. No account, no network, no analytics.<br>
-  <a href="/">jsip.uk</a>
-</footer>
-
-<!-- ============================ dialogs ============================ -->
-<dialog id="dlgAcct">
-  <div class="dlg-head"><h2 id="acctDlgTitle">Add an account</h2></div>
-  <div class="dlg-body">
-    <div class="field"><label for="aName">Account name</label>
-      <input id="aName" placeholder="Northbank Group" autocomplete="off"></div>
-    <div class="two">
-      <div class="field"><label for="aStage">Where it is</label><select id="aStage"></select></div>
-      <div class="field"><label for="aSector">Sector</label><input id="aSector" placeholder="Banking" autocomplete="off"></div>
-    </div>
-    <div class="field"><label for="aNote">What this account is really about</label>
-      <textarea id="aNote" placeholder="One or two lines you would want to read back in three months."></textarea></div>
-    <label class="check"><input type="checkbox" id="aArchived"> Archived (hidden from Today and the list)</label>
-  </div>
-  <div class="dlg-foot">
-    <button class="ghost danger" id="btnDelAcct" style="margin-right:auto" hidden>Delete</button>
-    <button class="ghost" data-close>Cancel</button>
-    <button class="primary" id="btnSaveAcct">Save</button>
-  </div>
-</dialog>
-
-<dialog id="dlgEntry">
-  <div class="dlg-head"><h2>Log a meeting</h2></div>
-  <div class="dlg-body">
-    <div class="field"><label for="eMeeting">What it was</label>
-      <input id="eMeeting" placeholder="Technical deep dive, Priya and Tom" autocomplete="off"></div>
-
-    <div class="field"><label for="eSoWhat">So what</label>
-      <input id="eSoWhat" placeholder="What actually changed. &ldquo;Nothing changed&rdquo; is a valid answer."></div>
-
-    <div class="field"><label for="eTheySaid">They said</label>
-      <input id="eTheySaid" placeholder="One quote worth keeping. Their words, not your paraphrase."></div>
-
-    <div class="field"><label for="eLearned">I learned</label>
-      <input id="eLearned" placeholder="One thing you know now that you did not at 9am."></div>
-
-    <div class="field"><label for="eOpen">Still open</label>
-      <input id="eOpen" placeholder="What is unresolved or still against you."></div>
-    <div class="sub-field" id="eOpenKindWrap" hidden>
-      <span class="row-label">Track it as</span>
-      <span class="seg" id="eOpenKind">
-        <button type="button" data-kind="objection">Objection</button>
-        <button type="button" data-kind="risk">Risk</button>
-        <button type="button" data-kind="question">To ask</button>
-      </span>
-    </div>
-
-    <div class="field"><label for="eOwe">I owe</label>
-      <input id="eOwe" placeholder="What you promised, to whom. Name and specifics."></div>
-    <div class="sub-field" id="eOweDueWrap" hidden>
-      <span class="row-label">By when</span>
-      <input type="date" id="eOweDue">
-      <span class="muted-note">A promise with no date cannot go overdue, so it cannot remind you.</span>
-    </div>
-
-    <details class="more">
-      <summary>Anything else</summary>
-      <div class="field"><label class="sr" for="eText">Free text</label>
-        <textarea id="eText" placeholder="Only if it does not fit above. The transcript already has the record: this is for your judgement."></textarea></div>
-    </details>
-  </div>
-  <div class="dlg-foot">
-    <button class="ghost" data-close>Cancel</button>
-    <button class="primary" id="btnSaveEntry">Save</button>
-  </div>
-</dialog>
-
-<dialog id="dlgPerson">
-  <div class="dlg-head"><h2 id="personDlgTitle">Add a person</h2></div>
-  <div class="dlg-body">
-    <div class="two">
-      <div class="field"><label for="pName">Name</label><input id="pName" autocomplete="off"></div>
-      <div class="field"><label for="pRole">Role</label><input id="pRole" placeholder="Head of Network" autocomplete="off"></div>
-    </div>
-    <div class="field"><label for="pCares">What they actually care about</label>
-      <textarea id="pCares" placeholder="Not their job title. The thing that makes them lean forward."></textarea></div>
-    <div class="field"><label>Where they stand</label><div class="seg" id="pStance"></div></div>
-  </div>
-  <div class="dlg-foot">
-    <button class="ghost danger" id="btnDelPerson" style="margin-right:auto" hidden>Delete</button>
-    <button class="ghost" data-close>Cancel</button>
-    <button class="primary" id="btnSavePerson">Save</button>
-  </div>
-</dialog>
-
-<dialog id="dlgThread">
-  <div class="dlg-head"><h2 id="threadDlgTitle">Add a thread</h2></div>
-  <div class="dlg-body">
-    <div class="field"><label>What kind</label><div class="seg" id="tKind"></div></div>
-    <div class="field"><label for="tText">What it is</label>
-      <textarea id="tText" placeholder="Send the regional data handling answer to Priya, confirmed in writing."></textarea></div>
-    <div class="field" id="tDueWrap"><label for="tDue">Due by</label><input type="date" id="tDue"></div>
-  </div>
-  <div class="dlg-foot">
-    <button class="ghost danger" id="btnDelThread" style="margin-right:auto" hidden>Delete</button>
-    <button class="ghost" data-close>Cancel</button>
-    <button class="primary" id="btnSaveThread">Save</button>
-  </div>
-</dialog>
-
-<dialog id="dlgPack">
-  <div class="dlg-head"><h2 id="packTitle">Context pack</h2></div>
-  <div class="dlg-body">
-    <p>Grounding context for Claude. Paste it in before asking for a follow-up, a plan or an executive summary, so it works from the real history rather than guessing.</p>
-    <p><strong>This is plaintext and it names real people and customers.</strong> Paste it somewhere you would be comfortable sending the underlying notes.</p>
-    <label class="sr" for="packOut">Generated context pack</label>
-    <textarea id="packOut" readonly spellcheck="false"></textarea>
-  </div>
-  <div class="dlg-foot">
-    <button class="ghost" data-close>Close</button>
-    <button class="primary" id="btnCopyPack">Copy to clipboard</button>
-  </div>
-</dialog>
-
-<dialog id="dlgData">
-  <div class="dlg-head"><h2>Settings and data</h2></div>
-  <div class="dlg-body">
-    <h3 class="dh">Security</h3>
-    <p class="secstate" id="secState"></p>
-    <p>This page is public, but the data never is: it lives in this browser only, on this device, and no version of it is sent anywhere or committed to the site. <strong>This app holds real customer names and things people said in confidence</strong>, so encryption is strongly recommended here.</p>
-    <p>Encryption cannot protect you from someone who has both the device and the passphrase, and <strong>a forgotten passphrase means the data is gone</strong>.</p>
-    <div class="bar" id="lockMinsWrap">
-      <span class="row-label">Auto-lock</span>
-      <button class="ghost" data-lockmins="5">5 min</button>
-      <button class="ghost" data-lockmins="15">15 min</button>
-      <button class="ghost" data-lockmins="60">1 hour</button>
-      <button class="ghost" data-lockmins="0">Never</button>
-    </div>
-    <div class="bar">
-      <button class="ghost" id="btnSetPass">Set a passphrase</button>
-      <button class="ghost danger" id="btnDropPass" hidden>Remove encryption</button>
-    </div>
-
-    <h3 class="dh">Backup</h3>
-    <p>Browsers clear storage and devices get replaced. An encrypted backup is safe to keep in Google Drive because it is ciphertext. Import merges by id, so restoring an older backup will not discard newer work.</p>
-    <div class="bar">
-      <button class="primary" id="btnExportEnc">Encrypted backup</button>
-      <button class="ghost" id="btnImport">Import…</button>
-      <button class="ghost" id="btnExportPlain">Plain export</button>
-    </div>
-
-    <h3 class="dh">Erase</h3>
-    <p>Clears only Account Brain's own storage key. Nothing else in this browser is touched.</p>
-    <div class="bar"><button class="ghost danger" id="btnReset">Erase everything</button></div>
-  </div>
-  <div class="dlg-foot"><button class="ghost" data-close>Close</button></div>
-</dialog>
-
-<input type="file" id="file" accept="application/json,.json" hidden>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-<script src="./store.js?v=1"></script>
-<script src="./model.js?v=1"></script>
-<script src="./app.js?v=1"></script>
 <script>
+  /* This app is retired. Remove its service worker and caches so the browser
+     stops serving the old shell from disk. */
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js').catch(function () { /* offline install is a bonus, not a requirement */ });
+    navigator.serviceWorker.getRegistrations().then(function (rs) {
+      rs.forEach(function (r) { if (r.scope.indexOf('/account-brain/') !== -1) r.unregister(); });
+    });
+  }
+  if (window.caches) {
+    caches.keys().then(function (keys) {
+      keys.filter(function (k) { return /^(dojo|account-brain|field-notes)-/.test(k); })
+          .forEach(function (k) { caches.delete(k); });
     });
   }
 </script>

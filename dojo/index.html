@@ -2,250 +2,41 @@
 <html lang="en-GB">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#0f1117">
-<meta name="description" content="The Dojo: deliberate practice for the conversations that decide deals.">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
-<link rel="stylesheet" href="./style.css?v=1">
-<title>The Dojo</title>
+<link rel="canonical" href="/ground/">
+<title>The Dojo has moved to Ground</title>
+<style>
+  body{background:#0f1117;color:#e2e8f0;font-family:'Inter',system-ui,-apple-system,sans-serif;
+       display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:2rem;line-height:1.7}
+  .box{max-width:44ch}
+  h1{font-size:1.4rem;letter-spacing:-.5px;margin:0 0 .8rem}
+  p{color:#8892a4;font-size:.94rem;margin:0 0 1rem}
+  a.btn{display:inline-block;background:#6c63ff;color:#fff;text-decoration:none;border-radius:9px;
+        padding:.65rem 1.4rem;font-weight:600;font-size:.93rem}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em;background:#151827;
+       border:1px solid #2d3148;border-radius:4px;padding:.08rem .32rem}
+</style>
 </head>
 <body>
-
-<header class="top">
-  <div class="top-in">
-    <span class="brand"><span class="dot" aria-hidden="true"></span>The Dojo</span>
-    <div class="top-actions" id="appNav" hidden>
-      <button class="ghost" id="navHome">Home</button>
-      <button class="ghost" id="navBank">Answers</button>
-      <button class="ghost" id="navCards">Cards</button>
-      <button class="ghost" id="btnData">Settings</button>
-      <button class="ghost" id="btnLock" hidden title="Lock now">Lock</button>
-    </div>
+  <div class="box">
+    <h1>The Dojo is now part of Ground</h1>
+    <p>The three apps were merged into one, so there is a single passphrase, a single backup, and no shuffling files between them.</p>
+    <p>Your data is safe where it is. In Ground, open <strong>Settings</strong> and choose <strong>Look for old data</strong> to bring it across.</p>
+    <p><a class="btn" href="/ground/">Open Ground</a></p>
   </div>
-</header>
-
-<main class="wrap">
-
-  <!-- LOCK -->
-  <section id="viewLock">
-    <form class="lock" id="lockForm" autocomplete="off">
-      <input type="hidden" id="lockMode" value="new">
-      <h1 id="lockTitle">Set a passphrase</h1>
-      <p id="lockBlurb"></p>
-      <div class="field">
-        <label for="lockPass">Passphrase</label>
-        <input type="password" id="lockPass" autocomplete="current-password" spellcheck="false">
-      </div>
-      <div class="field" id="lockPass2Wrap">
-        <label for="lockPass2">Type it again</label>
-        <input type="password" id="lockPass2" autocomplete="new-password" spellcheck="false">
-      </div>
-      <p class="err" id="lockErr" role="alert"></p>
-      <div class="lock-foot">
-        <button type="button" class="primary" id="lockGo">Encrypt and start</button>
-        <span id="lockSkipWrap">
-          <button type="button" class="linky" id="lockSkip">Skip, do not encrypt</button>
-        </span>
-      </div>
-    </form>
-  </section>
-
-  <!-- HOME -->
-  <section id="viewHome" hidden>
-    <div class="hero">
-      <div id="duePill"></div>
-      <h1>You practise the piano.<br>Practise the thing that pays.</h1>
-      <p>One rep is ninety seconds. A real question, under a clock, answered out loud or typed. Then you mark it honestly, and the ones you fumble come back sooner.</p>
-      <button class="primary big" id="btnStart">Start a rep</button>
-    </div>
-
-    <div class="stat-grid" id="stats"></div>
-
-    <div class="row">
-      <span class="row-label">Clock</span>
-      <button class="ghost" data-timer="0">Off</button>
-      <button class="ghost" data-timer="60">60s</button>
-      <button class="ghost" data-timer="90">90s</button>
-    </div>
-
-    <h2 class="sec">Where you are strong, and where you are not</h2>
-    <div class="cats" id="cats"></div>
-  </section>
-
-  <!-- REP -->
-  <section id="viewRep" hidden>
-    <div class="rep-head">
-      <span class="badge" id="repCat"></span>
-      <span class="timer" id="timer" hidden>0:00</span>
-    </div>
-    <div class="card">
-      <p class="prompt" id="repPrompt"></p>
-      <p class="setting" id="repSetting"></p>
-      <label class="sr" for="answer">Your answer</label>
-      <textarea id="answer" placeholder="Say it out loud first, then type the version you would actually use. Rough is fine. This is a gym, not a document."></textarea>
-      <div class="rep-foot">
-        <p class="hint">Answer before you look at the shape. Looking first teaches you nothing.</p>
-        <button class="ghost" id="btnQuit">Stop</button>
-        <button class="primary" id="btnReveal">Done, show me the shape</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- REVIEW -->
-  <section id="viewReview" hidden>
-    <div class="rep-head"><span class="badge" id="revCat"></span></div>
-
-    <div class="shape" id="shape"></div>
-
-    <div class="yours" id="yours">
-      <h3>What you said</h3>
-      <div class="txt" id="yourText"></div>
-    </div>
-
-    <div class="rubric">
-      <h3>Mark it honestly</h3>
-      <div class="axis">
-        <span class="axis-label"><b>Clarity</b><span>Would a non-expert follow it?</span></span>
-        <span class="scale" data-axis="clarity"></span>
-      </div>
-      <div class="axis">
-        <span class="axis-label"><b>Evidence</b><span>Anchored in something real?</span></span>
-        <span class="scale" data-axis="evidence"></span>
-      </div>
-      <div class="axis">
-        <span class="axis-label"><b>Control</b><span>Did you end holding the next step?</span></span>
-        <span class="scale" data-axis="control"></span>
-      </div>
-    </div>
-
-    <div class="verdict" id="verdict">
-      <button class="vb" data-v="fumbled"><b>Fumbled</b><span>Back tomorrow</span></button>
-      <button class="vb" data-v="ok"><b>Got there</b><span>Back soon</span></button>
-      <button class="vb" data-v="nailed"><b>Nailed it</b><span>Back later</span></button>
-    </div>
-
-    <div class="rep-foot">
-      <p class="hint" id="keepHint">Keep the answer if it is one you would use again.</p>
-      <button class="ghost" id="btnKeep">Keep this answer</button>
-      <button class="primary" id="btnNext" disabled>Next rep</button>
-    </div>
-    <p class="next-note" id="nextNote"></p>
-  </section>
-
-  <!-- BANK -->
-  <section id="viewBank" hidden>
-    <h1 class="page">Answer bank</h1>
-    <p class="lede">The answers you marked as keepers. This is the part that outlives the job.</p>
-    <div class="row"><button class="ghost" id="btnPack">Build context pack</button></div>
-    <div id="bankList"></div>
-  </section>
-
-  <!-- CARDS -->
-  <section id="viewCards" hidden>
-    <h1 class="page">Your cards</h1>
-    <p class="lede" id="cardCount"></p>
-    <div class="row"><button class="primary" id="btnAddCard">Add a card</button></div>
-    <div id="cardList"></div>
-  </section>
-
-</main>
-
-<footer class="foot">
-  <span id="footNote">Stays in this browser. No account, no network, no analytics.</span><br>
-  <a href="/">jsip.uk</a>
-</footer>
-
-<dialog id="dlgPack">
-  <div class="dlg-head"><h2>Context pack</h2></div>
-  <div class="dlg-body">
-    <p>Your kept answers, written out as grounding context. Paste it into Claude before asking it to draft anything customer facing, so it writes in your voice and argues from positions you have already tested.</p>
-    <label class="sr" for="packOut">Generated context pack</label>
-    <textarea id="packOut" readonly spellcheck="false"></textarea>
-  </div>
-  <div class="dlg-foot">
-    <button class="ghost" data-close>Close</button>
-    <button class="primary" id="btnCopyPack">Copy to clipboard</button>
-  </div>
-</dialog>
-
-<dialog id="dlgCard">
-  <div class="dlg-head"><h2 id="cardDlgTitle">Add a card</h2></div>
-  <div class="dlg-body">
-    <div class="field">
-      <label for="cPrompt">The question, as it was actually asked</label>
-      <textarea id="cPrompt" placeholder="&ldquo;Your competitor says you cannot do this without a second agent. Is that true?&rdquo;"></textarea>
-    </div>
-    <div class="field">
-      <label for="cSetting">The setting</label>
-      <input id="cSetting" placeholder="Architect, in front of their whole team, halfway through a workshop.">
-    </div>
-    <div class="field">
-      <label for="cCat">Category</label>
-      <select id="cCat"></select>
-    </div>
-    <div class="field">
-      <label for="cShape">The shape of a good answer, one step per line</label>
-      <textarea id="cShape" placeholder="Confirm what is true without hedging.&#10;Name the boundary precisely.&#10;Offer the test rather than the assurance."></textarea>
-    </div>
-    <div class="field">
-      <label for="cWatch">The failure mode to train out</label>
-      <input id="cWatch" placeholder="Answering the jibe instead of giving them something to check.">
-    </div>
-  </div>
-  <div class="dlg-foot">
-    <button class="ghost danger" id="btnDelCard" hidden>Delete</button>
-    <button class="ghost" data-close>Cancel</button>
-    <button class="primary" id="btnSaveCard">Save card</button>
-  </div>
-</dialog>
-
-<dialog id="dlgData">
-  <div class="dlg-head"><h2>Settings and data</h2></div>
-  <div class="dlg-body">
-    <h3 class="dh">Security</h3>
-    <p class="secstate" id="secState"></p>
-    <p>This page is public, but the data never is: it lives in this browser only, on this device, and no version of it is ever sent anywhere or committed to the site. Encryption protects it from someone opening this page on your unlocked machine. It cannot protect you from someone who has both the device and the passphrase, and <strong>a forgotten passphrase means the data is gone</strong>.</p>
-    <div class="row" id="lockMinsWrap">
-      <span class="row-label">Auto-lock</span>
-      <button class="ghost" data-lockmins="5">5 min</button>
-      <button class="ghost" data-lockmins="15">15 min</button>
-      <button class="ghost" data-lockmins="60">1 hour</button>
-      <button class="ghost" data-lockmins="0">Never</button>
-    </div>
-    <div class="row">
-      <button class="ghost" id="btnSetPass">Set a passphrase</button>
-      <button class="ghost danger" id="btnDropPass" hidden>Remove encryption</button>
-    </div>
-
-    <h3 class="dh">Backup</h3>
-    <p>Browsers clear storage, and devices get replaced. An encrypted backup is safe to keep in Google Drive or anywhere else, because it is useless without your passphrase. Import merges rather than overwrites, so you will not lose reps made since the backup.</p>
-    <div class="row">
-      <button class="primary" id="btnExportEnc">Encrypted backup</button>
-      <button class="ghost" id="btnImport">Import…</button>
-      <button class="ghost" id="btnExportPlain">Plain export</button>
-    </div>
-
-    <h3 class="dh">Erase</h3>
-    <p>Clears only The Dojo's own storage key. Nothing else in this browser is touched.</p>
-    <div class="row"><button class="ghost danger" id="btnReset">Erase everything</button></div>
-  </div>
-  <div class="dlg-foot"><button class="ghost" data-close>Close</button></div>
-</dialog>
-
-<input type="file" id="file" accept="application/json,.json" hidden>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-<script src="./store.js?v=1"></script>
-<script src="./deck.js?v=1"></script>
-<script src="./app.js?v=1"></script>
 <script>
+  /* This app is retired. Remove its service worker and caches so the browser
+     stops serving the old shell from disk. */
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js').catch(function () { /* offline install is a bonus, not a requirement */ });
+    navigator.serviceWorker.getRegistrations().then(function (rs) {
+      rs.forEach(function (r) { if (r.scope.indexOf('/dojo/') !== -1) r.unregister(); });
+    });
+  }
+  if (window.caches) {
+    caches.keys().then(function (keys) {
+      keys.filter(function (k) { return /^(dojo|account-brain|field-notes)-/.test(k); })
+          .forEach(function (k) { caches.delete(k); });
     });
   }
 </script>
