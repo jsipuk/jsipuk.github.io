@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0f1117">
+<meta name="description" content="The Dojo: deliberate practice for the conversations that decide deals.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1117'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%236c63ff'/%3E%3C/svg%3E">
+<title>The Dojo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117; --surface:#1a1d2e; --surface-2:#151827;
+  --accent:#6c63ff; --accent-light:#a89dff;
+  --text:#e2e8f0; --muted:#8892a4; --border:#2d3148;
+  --ok:#4ade80; --warn:#fbbf24; --hot:#fb7185;
+  --radius:14px;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom);
+}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent-light);outline-offset:2px;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+[hidden]{display:none!important}
+
+header.top{
+  position:sticky;top:0;z-index:50;background:rgba(15,17,23,.9);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+}
+.top-in{max-width:880px;margin:0 auto;padding:.7rem 1rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:-.4px;display:flex;align-items:center;gap:.5rem}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.brand small{font-weight:500;color:var(--muted);font-size:.72rem;letter-spacing:.09em;text-transform:uppercase}
+.top-actions{margin-left:auto;display:flex;gap:.4rem;flex-wrap:wrap}
+.wrap{max-width:880px;margin:0 auto;padding:1.2rem 1rem}
+
+.ghost{background:transparent;border:1px solid var(--border);border-radius:8px;padding:.4rem .7rem;
+  font-size:.82rem;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s}
+.ghost:hover{border-color:var(--accent-light);color:var(--text)}
+.ghost[aria-pressed="true"]{background:rgba(108,99,255,.14);border-color:var(--accent);color:var(--accent-light)}
+.primary{background:var(--accent);border:1px solid var(--accent);color:#fff;border-radius:8px;
+  padding:.6rem 1.15rem;font-size:.9rem;font-weight:600;cursor:pointer;transition:.15s}
+.primary:hover{background:#7b73ff}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.big{padding:.8rem 1.6rem;font-size:1rem;border-radius:10px}
+
+/* ---------- home ---------- */
+.hero{text-align:center;padding:2rem 0 1.4rem}
+.hero h1{font-size:clamp(1.9rem,6vw,2.7rem);font-weight:700;letter-spacing:-1px;line-height:1.15;margin-bottom:.6rem}
+.hero p{color:var(--muted);max-width:52ch;margin:0 auto 1.5rem}
+.due-pill{display:inline-flex;align-items:center;gap:.5rem;background:rgba(108,99,255,.14);
+  border:1px solid var(--accent);color:var(--accent-light);border-radius:999px;padding:.35rem .9rem;
+  font-size:.83rem;font-weight:600;margin-bottom:1.3rem}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.7rem;margin:1.6rem 0}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center}
+.stat b{display:block;font-size:1.6rem;line-height:1.2;font-weight:700}
+.stat span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+
+.cats{display:grid;gap:.55rem;margin-top:1.4rem}
+.cat{display:flex;align-items:center;gap:.75rem;background:var(--surface);border:1px solid var(--border);
+  border-left:3px solid var(--c);border-radius:10px;padding:.7rem .9rem;width:100%;text-align:left;cursor:pointer;transition:.15s}
+.cat:hover{border-color:var(--accent);transform:translateX(2px)}
+.cat-name{font-weight:600;font-size:.95rem}
+.cat-sub{font-size:.78rem;color:var(--muted)}
+.bar-track{margin-left:auto;width:82px;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;flex:none}
+.bar-fill{height:100%;background:var(--c);border-radius:3px}
+.cat-score{font-size:.78rem;color:var(--muted);width:2.6rem;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+
+/* ---------- rep ---------- */
+.rep-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap}
+.badge{font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--c,var(--accent-light));border:1px solid var(--c,var(--accent));border-radius:999px;padding:.2rem .6rem}
+.timer{margin-left:auto;font-family:var(--mono);font-size:1.05rem;font-weight:600;font-variant-numeric:tabular-nums}
+.timer.low{color:var(--warn)}
+.timer.out{color:var(--hot)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;margin-bottom:1rem}
+.prompt{font-size:clamp(1.1rem,3.4vw,1.35rem);font-weight:600;line-height:1.45;letter-spacing:-.3px}
+.setting{color:var(--muted);font-size:.87rem;margin-top:.6rem}
+#answer{width:100%;min-height:150px;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:10px;padding:.85rem;resize:vertical;line-height:1.6;margin-top:.9rem}
+#answer::placeholder{color:#5c6478}
+.rep-foot{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.9rem}
+.rep-foot .hint{font-size:.78rem;color:var(--muted);flex:1;min-width:150px}
+
+/* ---------- review ---------- */
+.shape{background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem}
+.shape h3{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-light);margin-bottom:.55rem}
+.shape ol{margin:0 0 0 1.1rem;font-size:.94rem}
+.shape li{margin-bottom:.3rem}
+.shape .watch{margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--border);font-size:.87rem;color:var(--muted)}
+.shape .watch b{color:var(--warn);font-weight:600}
+
+.yours{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.yours h3{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.yours .txt{white-space:pre-wrap;font-size:.94rem;overflow-wrap:anywhere}
+
+.rubric{margin-bottom:1.1rem}
+.rubric h3{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem}
+.axis{display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem;flex-wrap:wrap}
+.axis-label{width:150px;flex:none}
+.axis-label b{display:block;font-size:.9rem;font-weight:600}
+.axis-label span{font-size:.76rem;color:var(--muted)}
+.scale{display:flex;gap:.35rem}
+.sc{width:38px;height:34px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);
+  color:var(--muted);font-weight:600;cursor:pointer;transition:.12s}
+.sc:hover{border-color:var(--accent-light)}
+.sc[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.verdict{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem}
+.vb{padding:.75rem .5rem;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);
+  cursor:pointer;text-align:center;transition:.15s}
+.vb b{display:block;font-size:.92rem}
+.vb span{font-size:.72rem;color:var(--muted)}
+.vb:hover{border-color:var(--accent-light)}
+.vb[data-v="fumbled"][aria-pressed="true"]{background:rgba(251,113,133,.18);border-color:var(--hot)}
+.vb[data-v="ok"][aria-pressed="true"]{background:rgba(251,191,36,.18);border-color:var(--warn)}
+.vb[data-v="nailed"][aria-pressed="true"]{background:rgba(74,222,128,.18);border-color:var(--ok)}
+
+.next-note{font-size:.83rem;color:var(--muted);text-align:center;margin-top:.9rem}
+
+/* ---------- bank ---------- */
+.bank-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--c,var(--accent));
+  border-radius:10px;padding:.9rem 1rem;margin-bottom:.6rem}
+.bank-q{font-weight:600;font-size:.93rem;margin-bottom:.45rem}
+.bank-a{white-space:pre-wrap;font-size:.9rem;color:var(--text);overflow-wrap:anywhere}
+.bank-meta{display:flex;gap:.5rem;align-items:center;margin-top:.55rem;font-size:.75rem;color:var(--muted)}
+.bank-meta button{margin-left:auto}
+.icon{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.76rem;padding:.2rem .4rem;border-radius:5px}
+.icon:hover{color:var(--text);background:var(--surface-2)}
+.icon.danger:hover{color:var(--hot)}
+
+.empty{border:1px dashed var(--border);border-radius:var(--radius);padding:2rem 1.25rem;text-align:center;color:var(--muted)}
+.empty h3{color:var(--text);font-size:1rem;margin-bottom:.5rem}
+
+dialog{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:var(--radius);
+  padding:0;max-width:700px;width:calc(100vw - 2rem)}
+dialog::backdrop{background:rgba(0,0,0,.62)}
+.dlg-head{padding:1rem 1.1rem;border-bottom:1px solid var(--border)}
+.dlg-head h2{font-size:1.02rem}
+.dlg-body{padding:1.1rem;max-height:62vh;overflow:auto}
+.dlg-body p{font-size:.9rem;color:var(--muted);margin-bottom:.8rem}
+.dlg-foot{padding:.85rem 1.1rem;border-top:1px solid var(--border);display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap}
+#packOut{width:100%;min-height:240px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:.8rem;font-family:var(--mono);font-size:.8rem;line-height:1.5;resize:vertical}
+.row{display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;flex-wrap:wrap}
+.row > span{font-size:.88rem}
+
+.toast{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%) translateY(1.5rem);background:var(--accent);
+  color:#fff;padding:.6rem 1.1rem;border-radius:999px;font-size:.86rem;font-weight:600;opacity:0;
+  pointer-events:none;transition:.2s;z-index:200;box-shadow:0 8px 28px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+footer.foot{border-top:1px solid var(--border);margin-top:2.5rem;padding:1.4rem 1rem 2rem;text-align:center;
+  font-size:.8rem;color:var(--muted)}
+footer.foot a{color:var(--accent-light);text-decoration:none}
+
+@media (max-width:560px){
+  .brand small{display:none}
+  .axis-label{width:100%}
+  .verdict{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <span class="brand"><span class="dot" aria-hidden="true"></span>The Dojo <small>v2</small></span>
+    <div class="top-actions">
+      <button class="ghost" id="navHome">Home</button>
+      <button class="ghost" id="navBank">Answer bank</button>
+      <button class="ghost" id="btnData">Data</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- HOME -->
+  <section id="viewHome">
+    <div class="hero">
+      <div id="duePill"></div>
+      <h1>You practise the piano.<br>Practise the thing that pays.</h1>
+      <p>One rep is ninety seconds. A real question, under a clock, answered out loud or typed. Then you mark it honestly, and the ones you fumble come back sooner.</p>
+      <button class="primary big" id="btnStart">Start a rep</button>
+    </div>
+
+    <div class="stat-grid" id="stats"></div>
+
+    <div class="row" style="margin-top:1.2rem">
+      <span style="color:var(--muted);font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;font-weight:600">Clock</span>
+      <button class="ghost" data-timer="0">Off</button>
+      <button class="ghost" data-timer="60">60s</button>
+      <button class="ghost" data-timer="90">90s</button>
+    </div>
+
+    <h2 style="font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:1.6rem">
+      Where you are strong, and where you are not
+    </h2>
+    <div class="cats" id="cats"></div>
+  </section>
+
+  <!-- REP -->
+  <section id="viewRep" hidden>
+    <div class="rep-head">
+      <span class="badge" id="repCat"></span>
+      <span class="timer" id="timer" hidden>0:00</span>
+    </div>
+    <div class="card">
+      <p class="prompt" id="repPrompt"></p>
+      <p class="setting" id="repSetting"></p>
+      <label class="sr" for="answer">Your answer</label>
+      <textarea id="answer" placeholder="Say it out loud first, then type the version you would actually use. Rough is fine. This is a gym, not a document."></textarea>
+      <div class="rep-foot">
+        <p class="hint">Answer before you look at the shape. Looking first teaches you nothing.</p>
+        <button class="ghost" id="btnQuit">Stop</button>
+        <button class="primary" id="btnReveal">Done, show me the shape</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW -->
+  <section id="viewReview" hidden>
+    <div class="rep-head">
+      <span class="badge" id="revCat"></span>
+    </div>
+
+    <div class="shape" id="shape"></div>
+
+    <div class="yours" id="yours">
+      <h3>What you said</h3>
+      <div class="txt" id="yourText"></div>
+    </div>
+
+    <div class="rubric">
+      <h3>Mark it honestly</h3>
+      <div class="axis">
+        <span class="axis-label"><b>Clarity</b><span>Would a non-expert follow it?</span></span>
+        <span class="scale" data-axis="clarity"></span>
+      </div>
+      <div class="axis">
+        <span class="axis-label"><b>Evidence</b><span>Anchored in something real?</span></span>
+        <span class="scale" data-axis="evidence"></span>
+      </div>
+      <div class="axis">
+        <span class="axis-label"><b>Control</b><span>Did you end holding the next step?</span></span>
+        <span class="scale" data-axis="control"></span>
+      </div>
+    </div>
+
+    <div class="verdict" id="verdict">
+      <button class="vb" data-v="fumbled"><b>Fumbled</b><span>Back tomorrow</span></button>
+      <button class="vb" data-v="ok"><b>Got there</b><span>Back soon</span></button>
+      <button class="vb" data-v="nailed"><b>Nailed it</b><span>Back later</span></button>
+    </div>
+
+    <div class="rep-foot">
+      <p class="hint" id="keepHint">Keep the answer if it is one you would use again.</p>
+      <button class="ghost" id="btnKeep">Keep this answer</button>
+      <button class="primary" id="btnNext" disabled>Next rep</button>
+    </div>
+    <p class="next-note" id="nextNote"></p>
+  </section>
+
+  <!-- BANK -->
+  <section id="viewBank" hidden>
+    <h1 style="font-size:1.5rem;letter-spacing:-.5px;margin-bottom:.4rem">Answer bank</h1>
+    <p style="color:var(--muted);font-size:.92rem;margin-bottom:1.3rem">
+      The answers you marked as keepers. This is the part that outlives the job.
+    </p>
+    <div class="row">
+      <button class="ghost" id="btnPack">Build context pack</button>
+    </div>
+    <div id="bankList"></div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  Everything stays in this browser. No account, no network, no analytics.<br>
+  <a href="../">Back to the three versions</a>
+</footer>
+
+<dialog id="dlgPack">
+  <div class="dlg-head"><h2>Context pack</h2></div>
+  <div class="dlg-body">
+    <p>Your kept answers, written out as grounding context. Paste it into Claude before asking it to draft anything customer facing, so it writes in your voice and argues from positions you have already tested.</p>
+    <label class="sr" for="packOut">Generated context pack</label>
+    <textarea id="packOut" readonly spellcheck="false"></textarea>
+  </div>
+  <div class="dlg-foot">
+    <button class="ghost" data-close>Close</button>
+    <button class="primary" id="btnCopyPack">Copy to clipboard</button>
+  </div>
+</dialog>
+
+<dialog id="dlgData">
+  <div class="dlg-head"><h2>Your training data</h2></div>
+  <div class="dlg-body">
+    <p>Reps, scores, schedule and kept answers live in this browser only. Export writes a JSON file you can keep or move to another machine. Import merges by card id.</p>
+    <p>Resetting clears progress and kept answers for this app only. Nothing else in the browser is touched.</p>
+  </div>
+  <div class="dlg-foot">
+    <button class="ghost" data-close>Close</button>
+    <button class="ghost danger" id="btnReset" style="color:var(--hot);border-color:rgba(251,113,133,.4)">Reset</button>
+    <button class="ghost" id="btnImport">Import…</button>
+    <button class="primary" id="btnExport">Export JSON</button>
+  </div>
+</dialog>
+
+<input type="file" id="file" accept="application/json,.json" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+const KEY = 'dojo:v1';
+
+const CATS = {
+  discovery:   {label:'Discovery',   colour:'#a89dff'},
+  objection:   {label:'Objection',   colour:'#fb7185'},
+  exec:        {label:'Executive',   colour:'#38bdf8'},
+  technical:   {label:'Technical',   colour:'#4ade80'},
+  competitive: {label:'Competitive', colour:'#f472b6'},
+  pov:         {label:'Evaluation',  colour:'#fbbf24'},
+  process:     {label:'Deal craft',  colour:'#94a3b8'}
+};
+
+/* ------------------------------------------------------------------
+   The deck.
+
+   Deliberately vendor neutral. Every card is about craft: how you think,
+   sequence and hold a conversation. Nothing here asserts a product
+   capability, a competitor gap or a statistic, because those go stale and
+   because an unverified claim in a practice tool is how you end up making
+   one in a room. Product specifics belong in your own kept answers.
+
+   shape = the structure of a good answer, not the answer itself.
+   watch = the failure mode this card exists to train out of you.
+------------------------------------------------------------------- */
+const DECK = [
+  /* ---- Discovery ---- */
+  {id:'d1', cat:'discovery',
+   prompt:'You have twenty minutes with a CISO you have never met. What are your first three questions?',
+   setting:'They agreed to the call as a favour to someone. They are half in the room.',
+   shape:['Open on their world, not your product: what is changing for them this year.','Find the forcing function: what has a date attached to it.','Find the cost of doing nothing, in their words.'],
+   watch:'Three questions that are really one pitch with question marks on the end.'},
+
+  {id:'d2', cat:'discovery',
+   prompt:'Your champion says "we want SASE". What do you ask to find out what they actually mean?',
+   setting:'They have used the word four times and defined it zero times.',
+   shape:['Ask what prompted the term: a board slide, an analyst, a peer, a renewal.','Ask which problem disappears first if it works.','Ask who else has to agree with the definition.'],
+   watch:'Accepting the acronym as a requirement. It is almost never the requirement.'},
+
+  {id:'d3', cat:'discovery',
+   prompt:'How do you find out who really signs, without asking who signs?',
+   setting:'You are on a call with three people and one of them is quiet.',
+   shape:['Ask how the last comparable purchase actually got approved.','Ask what would need to be true for this to survive a budget review.','Ask who would be unhappy if this went ahead.'],
+   watch:'Taking the most senior title in the room as the decision maker.'},
+
+  {id:'d4', cat:'discovery',
+   prompt:'A prospect says everything is fine and they are just looking. What now?',
+   setting:'Genuinely no pain on the table. Fifteen minutes left.',
+   shape:['Believe them out loud. Stop selling, visibly.','Ask what would have to break for this to become urgent.','Offer one thing worth their time regardless of outcome, and leave.'],
+   watch:'Manufacturing urgency. They can hear it and it costs you the next call.'},
+
+  {id:'d5', cat:'discovery',
+   prompt:'The technical team is enthusiastic and the business is absent. Diagnose the risk out loud to your AE.',
+   setting:'Two good labs done. No executive has ever joined a call.',
+   shape:['Name it plainly: no business sponsor, no budget event.','Say what specifically is missing, not that it "feels risky".','Propose the smallest action that tests it this week.'],
+   watch:'Mistaking technical enthusiasm for a deal.'},
+
+  {id:'d6', cat:'discovery',
+   prompt:'Ask a question that would make a stranger tell you something they were not planning to say.',
+   setting:'Any account, any stage.',
+   shape:['Make it specific enough to be answerable and open enough to be interesting.','Ask about a decision, not a fact.','Then say nothing at all.'],
+   watch:'Filling the silence. The silence is the question.'},
+
+  /* ---- Objection ---- */
+  {id:'o1', cat:'objection',
+   prompt:'"We already have a VPN and it works fine. Why would we change?"',
+   setting:'Network lead, arms folded, has run that VPN for nine years.',
+   shape:['Agree that it works, honestly, for what it was built to do.','Move the ground from performance to what the estate looks like now.','One concrete difference in behaviour, not a feature list.','Ask what would have to be true to look again.'],
+   watch:'Implying they made a bad decision. They did not, in 2016.'},
+
+  {id:'o2', cat:'objection',
+   prompt:'"We tried DLP before. It produced thousands of false positives and we switched it off."',
+   setting:'They are not bluffing. It genuinely happened.',
+   shape:['Take the scar seriously and ask what the rollout looked like.','Separate the tool from the approach that failed.','Say what you would do differently, specifically.','Agree a definition of acceptable noise before anything is turned on.'],
+   watch:'Answering with accuracy claims. They have heard accuracy claims before.'},
+
+  {id:'o3', cat:'objection',
+   prompt:'"Your competitor is thirty percent cheaper for what looks like the same thing."',
+   setting:'Procurement is on the call. Your champion has gone quiet.',
+   shape:['Do not discount in the room and do not flinch.','Ask what is in each scope, out loud, line by line.','Name where the difference genuinely is, including where it is not.','Hand the comparison back as something they own.'],
+   watch:'Defending price. Make the scope the subject, not the number.'},
+
+  {id:'o4', cat:'objection',
+   prompt:'"We are a Microsoft shop. Why would we not just use what is already included?"',
+   setting:'Fair question. Partly true. Asked without hostility.',
+   shape:['Concede the genuine overlap immediately and specifically.','Move to where the boundary sits in their estate.','Name what they would still have to solve, and let them check it.'],
+   watch:'Pretending there is no overlap. It destroys everything you say next.'},
+
+  {id:'o5', cat:'objection',
+   prompt:'"Inline inspection will slow everyone down and break our applications."',
+   setting:'Architect who has been burned by an inline proxy before.',
+   shape:['Take the concern as legitimate engineering, not resistance.','Separate the two claims: latency and breakage. They have different answers.','Say how each would be measured in their environment.','Offer the test before the assurance.'],
+   watch:'Reassurance without a measurement. It sounds like marketing.'},
+
+  {id:'o6', cat:'objection',
+   prompt:'"Our users will not accept us decrypting their traffic."',
+   setting:'Works council, privacy officer, or a genuinely principled engineer.',
+   shape:['Treat it as a legitimate position, because it is.','Separate what is technically possible from what they should choose.','Talk about scope, exclusions and transparency before capability.','Ask who needs to be comfortable, and what would make them comfortable.'],
+   watch:'Winning the technical argument and losing the room.'},
+
+  {id:'o7', cat:'objection',
+   prompt:'"We cannot deploy agents on contractor or unmanaged devices."',
+   setting:'Real constraint, not an excuse. Thousands of them.',
+   shape:['Accept the constraint as fixed, do not negotiate it.','Split the population and handle each honestly.','Be explicit about what is weaker in the agentless path.'],
+   watch:'Overstating what you can do without an agent, which the POV will expose.'},
+
+  {id:'o8', cat:'objection',
+   prompt:'"We signed a three year deal with your competitor eight months ago."',
+   setting:'Nothing you can do about it. They still took the meeting.',
+   shape:['Say the obvious thing: you are not asking them to rip it out.','Ask why they took the call, and listen properly to the answer.','Find the gap that will still be there at renewal.','Agree a reason to talk again with a date on it.'],
+   watch:'Leaving without a next step because there is no deal this year.'},
+
+  {id:'o9', cat:'objection',
+   prompt:'"What happens when your service is unreachable?"',
+   setting:'Asked flatly, in front of their whole team.',
+   shape:['Answer the failure mode directly and first.','Describe the behaviour, not the availability figure.','Say what they can configure and what they cannot.','Offer to test the failure path in the evaluation.'],
+   watch:'Reaching for an uptime number. They asked what happens, not how often.'},
+
+  {id:'o10', cat:'objection',
+   prompt:'"How do we know you will not be acquired, or drop this product line?"',
+   setting:'A CIO who has been through two acquisitions of their suppliers.',
+   shape:['Do not promise anything about the future you cannot know.','Talk about what protects them contractually and architecturally.','Talk about what an exit would actually cost them, honestly.'],
+   watch:'Any sentence that starts "that would never happen".'},
+
+  {id:'o11', cat:'objection',
+   prompt:'"Prove our data never leaves our region."',
+   setting:'Regulated. Their legal team will read your answer.',
+   shape:['Separate the classes: traffic, metadata, logs, telemetry, support access.','Answer each precisely, including where you are unsure.','Say what you will confirm in writing and by when.'],
+   watch:'A confident single sentence. This question has five different answers.'},
+
+  {id:'o12', cat:'objection',
+   prompt:'"You are a collection of acquired products with one badge on the front."',
+   setting:'The incumbent planted it. Your champion is repeating it.',
+   shape:['Do not get defensive and do not attack the source.','Turn it into something testable rather than a claim war.','Name the specific seams they should go and check.','Let the evaluation answer it instead of you.'],
+   watch:'Answering an architecture jibe with an architecture speech. Give them a test.'},
+
+  /* ---- Executive ---- */
+  {id:'e1', cat:'exec',
+   prompt:'The CFO asks: "If I buy this, what do I stop paying for?"',
+   setting:'Thirty seconds. They will not ask twice.',
+   shape:['Answer the actual question first, with what genuinely goes.','Be honest about what does not go, and what runs in parallel for a while.','Give the timing, because that is the real question.'],
+   watch:'A benefits answer to a cost question. They will notice.'},
+
+  {id:'e2', cat:'exec',
+   prompt:'The board asks: "Are we more or less exposed than our peers?"',
+   setting:'You have thirty seconds and no benchmark data you can defend.',
+   shape:['Refuse the false precision gracefully.','Reframe to what you can speak to: what is visible and what is not.','Give them one question to ask their own team on Monday.'],
+   watch:'Inventing a comparison. It is the fastest way to lose a boardroom.'},
+
+  {id:'e3', cat:'exec',
+   prompt:'Explain zero trust to a non-technical executive in thirty seconds, without using the words "zero trust".',
+   setting:'They are polite, busy, and have heard the phrase forty times.',
+   shape:['One sentence about what changed in how people work.','One sentence about what the old assumption was.','One sentence about what you check instead, in plain words.'],
+   watch:'Any jargon at all. Ban the acronyms and see what is left.'},
+
+  {id:'e4', cat:'exec',
+   prompt:'Turn a technical finding from a trial into one sentence a CIO would repeat to their board.',
+   setting:'You found a real problem in week two. It is technical and it is dull.',
+   shape:['Lead with the consequence, not the mechanism.','Quantify it in their units: people, money, time, exposure.','Make it repeatable by someone who does not understand the detail.'],
+   watch:'A sentence that only works if the listener already understands the technology.'},
+
+  {id:'e5', cat:'exec',
+   prompt:'A sponsor asks what could go wrong with this project. Answer as though you want them to trust you in a year.',
+   setting:'They are about to put their name on it.',
+   shape:['Name the two real risks before they do.','Say which one you have seen actually happen.','Say what you would do to catch it early.'],
+   watch:'Minimising. The sponsor is testing whether you are safe to rely on.'},
+
+  /* ---- Technical ---- */
+  {id:'t1', cat:'technical',
+   prompt:'Whiteboard how a user reaches a private application without a VPN. Talk it through as you draw.',
+   setting:'Two network engineers watching closely.',
+   shape:['Start with the user and the app, and nothing in the middle.','Add only what you need, naming each thing as you add it.','Be explicit about where the decision happens and where enforcement happens.','Stop and check before adding the next layer.'],
+   watch:'Drawing the vendor architecture instead of their traffic flow.'},
+
+  {id:'t2', cat:'technical',
+   prompt:'Explain the difference between where policy is decided and where it is enforced, to someone who thinks it is the same box.',
+   setting:'It matters here because their estate has four enforcement points.',
+   shape:['Use one concrete request as the example.','Walk the request, saying what is known at each step.','Show what breaks when the decision has the wrong context.'],
+   watch:'Abstraction. Use one real request, end to end.'},
+
+  {id:'t3', cat:'technical',
+   prompt:'Explain to a security engineer why an API scan and inline inspection are not the same control.',
+   setting:'They believe one replaces the other. They are half right.',
+   shape:['Give the point in time each one acts.','Give one thing each catches that the other cannot.','Say plainly where they overlap and where you would use both.'],
+   watch:'Selling both instead of explaining both.'},
+
+  {id:'t4', cat:'technical',
+   prompt:'Explain data classification to someone who believes a regular expression is enough.',
+   setting:'They have built regex rules for eight years and they work, mostly.',
+   shape:['Give them the credit: for structured identifiers, they are largely right.','Show the case where it falls over, with a real example.','Say what you would add rather than what you would replace.'],
+   watch:'Dismissing what they built. They will stop listening.'},
+
+  {id:'t5', cat:'technical',
+   prompt:'A customer asks you something you genuinely do not know, in front of eight people.',
+   setting:'You have a plausible guess. It is only a guess.',
+   shape:['Say you do not know, immediately and without apology.','Say what you do know that is adjacent.','Commit to who will answer and by when, then write it down visibly.'],
+   watch:'The plausible guess. It is the single most expensive habit in this job.'},
+
+  {id:'t6', cat:'technical',
+   prompt:'Explain how you would size and stage a rollout for forty thousand users across nine countries.',
+   setting:'Asked casually, over lunch, by the person who will own it.',
+   shape:['Ask two questions before answering: what is fixed, and what is first.','Stage by risk and reversibility, not by geography.','Name the checkpoint where you would stop and reassess.'],
+   watch:'A confident plan built on assumptions you never stated.'},
+
+  /* ---- Competitive ---- */
+  {id:'c1', cat:'competitive',
+   prompt:'The competitor demoed something you do not have. The customer saw it and liked it.',
+   setting:'They ask you directly, in the room.',
+   shape:['Confirm what is true without hedging.','Ask what they would use it for, and how often.','Address the underlying job, or concede it cleanly.','Move to ground where the comparison is yours.'],
+   watch:'Casting doubt on whether they really saw it. It always backfires.'},
+
+  {id:'c2', cat:'competitive',
+   prompt:'You genuinely lose on one requirement that matters to them. Handle it out loud.',
+   setting:'It is a real gap. They will find it anyway.',
+   shape:['Say it before they do. The timing is the whole answer.','Be precise about the boundary of the gap.','Show what the workaround costs, honestly.','Ask how it weighs against the rest, and accept the answer.'],
+   watch:'Burying it and hoping. Being second and honest beats first and caught.'},
+
+  {id:'c3', cat:'competitive',
+   prompt:'Their evaluation criteria were clearly written by your competitor. Respond without saying so.',
+   setting:'Sixty requirements. Eleven are suspiciously specific.',
+   shape:['Do not name what has happened. Everyone knows.','Ask what outcome sits behind three of the oddly specific ones.','Offer to help them add the criteria they are missing.','Compete on the criteria, not on the criteria being unfair.'],
+   watch:'Complaining. It reads as losing.'},
+
+  {id:'c4', cat:'competitive',
+   prompt:'Say why you would win here, in two sentences, to your own manager. Then say why you might lose.',
+   setting:'Forecast call. They want the truth, not the pipeline story.',
+   shape:['Lead with the reason that is about them, not about you.','Give the loss reason with equal specificity.','Say what would change your confidence either way.'],
+   watch:'A win reason that is a feature and a loss reason that is "price".'},
+
+  /* ---- Evaluation / POV ---- */
+  {id:'p1', cat:'pov',
+   prompt:'Write three success criteria for an evaluation that you could genuinely fail.',
+   setting:'Four weeks. They asked you to propose the criteria.',
+   shape:['Each one measurable by them without your help.','Each one with a threshold agreed before you start.','At least one where failure is a real possibility.'],
+   watch:'Criteria you know you pass. They prove nothing and everyone knows it.'},
+
+  {id:'p2', cat:'pov',
+   prompt:'They want to test forty things in four weeks. Cut it down, in the room, without losing the deal.',
+   setting:'The list came from six different teams.',
+   shape:['Ask which three would change the decision if they failed.','Group the rest as documented or deferred, visibly not deleted.','Get agreement that the three are decisive.'],
+   watch:'Agreeing to all forty to seem accommodating, then failing slowly.'},
+
+  {id:'p3', cat:'pov',
+   prompt:'Week three. Usage has collapsed. Nobody has said anything. What do you do?',
+   setting:'The champion is still friendly and still busy.',
+   shape:['Raise it yourself, early, with the data in front of you.','Ask what changed rather than why they stopped.','Offer a reduced scope that can still finish honestly.','Agree what happens if it does not recover.'],
+   watch:'Waiting politely. A quiet evaluation is a failing one.'},
+
+  {id:'p4', cat:'pov',
+   prompt:'The evaluation passed technically and the deal is not moving. Diagnose it out loud.',
+   setting:'Everything you controlled went well.',
+   shape:['Separate technical validation from commercial permission.','Name what was never established: sponsor, budget event, or consequence.','Propose the one conversation that would tell you which.'],
+   watch:'Doing more technical work. It is not a technical problem.'},
+
+  {id:'p5', cat:'pov',
+   prompt:'Something broke during the evaluation and it was your fault. Open the next call.',
+   setting:'They lost half a day. They are annoyed and polite.',
+   shape:['Lead with it. Do not let it come up in question five.','Say what happened in plain terms, no passive voice.','Say what you changed so it cannot recur.','Then, and only then, move on.'],
+   watch:'"There were some issues." Own it in the active voice.'},
+
+  /* ---- Deal craft ---- */
+  {id:'x1', cat:'process',
+   prompt:'You promised something in a call that the product cannot do. What do you do next?',
+   setting:'You realised an hour later. Nobody has noticed yet.',
+   shape:['Correct it in writing today, to everyone who was there.','State what is actually true and what you got wrong.','Offer the nearest real alternative.','Do not wait to be caught.'],
+   watch:'Hoping it never comes up. It always comes up, at the worst moment.'},
+
+  {id:'x2', cat:'process',
+   prompt:'Your AE wants you to demo a roadmap feature as though it ships today. Handle it, with them.',
+   setting:'They are under quota pressure and they are not a bad person.',
+   shape:['Say what you will do rather than what you refuse.','Offer the honest version: show it, label it, date it.','Name the specific downside for them, not the principle.'],
+   watch:'Making it about ethics. Make it about what happens in month four.'},
+
+  {id:'x3', cat:'process',
+   prompt:'The deal has been stuck in procurement for five weeks. What is your move as the SE, not the AE?',
+   setting:'Technical work is finished. You feel powerless.',
+   shape:['Find the technical question still open inside the delay, if there is one.','Give the champion something that makes their internal case easier.','Keep the relationship warm without chasing the deal.'],
+   watch:'Chasing. It is not your lever and it damages the one you have.'},
+
+  {id:'x4', cat:'process',
+   prompt:'A customer asks you, privately, whether they should buy your product. Answer honestly.',
+   setting:'They trust you. That is exactly why they asked.',
+   shape:['Answer as though you will still know them in five years.','Say what it is genuinely good for, and what it is not.','Name the condition under which you would say no.'],
+   watch:'The sales answer. It is the one moment where it costs the most.'},
+
+  {id:'x5', cat:'process',
+   prompt:'Name the objection you handle worst. Then write the answer you wish you had given last time.',
+   setting:'No audience. Just you, being honest.',
+   shape:['Pick the real one, not a convenient one.','Write what you actually said, first.','Then write the version with the concession moved to the front.'],
+   watch:'Choosing an easy card. This one only works if it stings.'},
+
+  {id:'x6', cat:'process',
+   prompt:'Give the thirty second version of what you do, to someone at a school gate.',
+   setting:'They are being polite. You have one shot at being interesting.',
+   shape:['No acronyms, no company names, no job title.','One concrete thing you did this month.','Stop before they need to be polite again.'],
+   watch:'The job description. Nobody has ever been interested in a job description.'}
+];
+
+/* ---------- state ---------- */
+let state = {reps:[], sched:{}, bank:[], timerLen:0, lastRepDay:null, streak:0};
+let current = null, scores = {}, verdict = null, timerId = null, remaining = 0, kept = false;
+
+const $ = id => document.getElementById(id);
+const today = () => new Date().toISOString().slice(0,10);
+const DAY = 86400000;
+
+function load(){
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) Object.assign(state, JSON.parse(raw));
+  } catch (e) { /* start clean rather than break */ }
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch (e) { toast('Could not save. Storage may be full or blocked.'); }
+}
+
+const esc = s => String(s).replace(/[&<>"']/g, c => (
+  {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+));
+
+/* ---------- scheduling (SM-2, simplified) ----------
+   fumbled  -> tomorrow, interval reset
+   got there-> modest growth
+   nailed   -> real growth
+   Capped so nothing disappears for more than four months. */
+function schedule(cardId, v){
+  const s = state.sched[cardId] || {interval:0, reps:0, lapses:0};
+  s.reps++;
+  if (v === 'fumbled')      { s.interval = 1; s.lapses++; }
+  else if (v === 'ok')      { s.interval = Math.max(3, Math.round((s.interval || 2) * 1.7)); }
+  else                      { s.interval = Math.max(6, Math.round((s.interval || 3) * 2.4)); }
+  s.interval = Math.min(s.interval, 120);
+  s.due = Date.now() + s.interval * DAY;
+  s.last = v;
+  state.sched[cardId] = s;
+  return s;
+}
+
+const dueCards = () => DECK.filter(c => {
+  const s = state.sched[c.id];
+  return !s || !s.due || s.due <= Date.now();
+});
+
+/* Pick the card that has waited longest past its due date, so nothing rots.
+   Unseen cards come first, in a stable but varied order. */
+function pickCard(cat){
+  let pool = dueCards();
+  if (cat) pool = pool.filter(c => c.cat === cat);
+  if (!pool.length) {
+    pool = cat ? DECK.filter(c => c.cat === cat) : DECK.slice();
+    const soonest = pool.reduce((a,c) => {
+      const d = (state.sched[c.id] && state.sched[c.id].due) || 0;
+      return d < a.d ? {c, d} : a;
+    }, {c:pool[0], d:Infinity});
+    return soonest.c;
+  }
+  const unseen = pool.filter(c => !state.sched[c.id]);
+  const list = unseen.length ? unseen : pool;
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+/* ---------- views ---------- */
+const VIEWS = ['viewHome','viewRep','viewReview','viewBank'];
+function show(v){
+  VIEWS.forEach(id => { $(id).hidden = (id !== v); });
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+function renderHome(){
+  const due = dueCards().length;
+  $('duePill').innerHTML = due
+    ? `<span class="due-pill">${due} card${due===1?'':'s'} ready for you</span>`
+    : `<span class="due-pill">All caught up. Anything you start now is a bonus rep.</span>`;
+
+  const total = state.reps.length;
+  const last7 = state.reps.filter(r => Date.now() - r.ts < 7*DAY).length;
+  const avg = total ? (state.reps.reduce((a,r) => a + r.total, 0) / total).toFixed(1) : '0';
+  $('stats').innerHTML = [
+    [total, 'reps'], [last7, 'this week'],
+    [state.streak || 0, 'day streak'], [avg + '/9', 'avg score']
+  ].map(([v,l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+
+  document.querySelectorAll('[data-timer]').forEach(b =>
+    b.setAttribute('aria-pressed', String(Number(b.dataset.timer) === state.timerLen)));
+
+  $('cats').innerHTML = Object.entries(CATS).map(([id, c]) => {
+    const rs = state.reps.filter(r => r.cat === id);
+    const cards = DECK.filter(k => k.cat === id).length;
+    const dueN = dueCards().filter(k => k.cat === id).length;
+    const avgS = rs.length ? rs.reduce((a,r) => a + r.total, 0) / rs.length : 0;
+    const pct = rs.length ? Math.round((avgS / 9) * 100) : 0;
+    return `
+      <button class="cat" data-cat="${id}" style="--c:${c.colour}">
+        <span>
+          <span class="cat-name">${c.label}</span><br>
+          <span class="cat-sub">${cards} cards${dueN ? ` · ${dueN} due` : ''}${rs.length ? ` · ${rs.length} rep${rs.length===1?'':'s'}` : ' · not started'}</span>
+        </span>
+        <span class="bar-track"${rs.length ? '' : ' style="visibility:hidden"'}><span class="bar-fill" style="width:${pct}%"></span></span>
+        <span class="cat-score">${rs.length ? avgS.toFixed(1) : ''}</span>
+      </button>`;
+  }).join('');
+}
+
+/* ---------- rep ---------- */
+function startRep(cat){
+  current = pickCard(cat);
+  scores = {}; verdict = null; kept = false;
+  const c = CATS[current.cat];
+  $('repCat').textContent = c.label;
+  $('repCat').style.setProperty('--c', c.colour);
+  $('repPrompt').textContent = current.prompt;
+  $('repSetting').textContent = current.setting;
+  $('answer').value = '';
+  show('viewRep');
+  startTimer();
+  setTimeout(() => $('answer').focus(), 60);
+}
+
+function startTimer(){
+  stopTimer();
+  const t = $('timer');
+  if (!state.timerLen) { t.hidden = true; return; }
+  remaining = state.timerLen;
+  t.hidden = false;
+  t.className = 'timer';
+  paint();
+  timerId = setInterval(() => {
+    remaining--;
+    paint();
+    if (remaining <= 0) { stopTimer(); t.classList.add('out'); t.textContent = "Time"; }
+  }, 1000);
+
+  function paint(){
+    const m = Math.floor(Math.max(remaining,0) / 60);
+    const s = Math.max(remaining,0) % 60;
+    t.textContent = `${m}:${String(s).padStart(2,'0')}`;
+    t.classList.toggle('low', remaining <= 15 && remaining > 0);
+  }
+}
+function stopTimer(){ if (timerId) { clearInterval(timerId); timerId = null; } }
+
+/* ---------- review ---------- */
+function reveal(){
+  stopTimer();
+  const c = CATS[current.cat];
+  $('revCat').textContent = c.label;
+  $('revCat').style.setProperty('--c', c.colour);
+
+  $('shape').innerHTML = `
+    <h3>The shape of a good answer</h3>
+    <ol>${current.shape.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+    <p class="watch"><b>Watch for:</b> ${esc(current.watch)}</p>`;
+
+  const ans = $('answer').value.trim();
+  $('yours').hidden = !ans;
+  $('yourText').textContent = ans;
+  $('btnKeep').disabled = !ans;
+  $('keepHint').textContent = ans
+    ? 'Keep the answer if it is one you would use again.'
+    : 'Nothing typed this time, so there is nothing to keep. That is a valid rep.';
+
+  document.querySelectorAll('.scale').forEach(sc => {
+    sc.innerHTML = [1,2,3].map(n =>
+      `<button class="sc" data-score="${n}" aria-pressed="false" aria-label="${sc.dataset.axis} ${n} of 3">${n}</button>`).join('');
+  });
+  document.querySelectorAll('.vb').forEach(b => b.setAttribute('aria-pressed','false'));
+  $('btnNext').disabled = true;
+  $('nextNote').textContent = '';
+  $('btnKeep').textContent = 'Keep this answer';
+
+  show('viewReview');
+}
+
+function commit(){
+  const total = (scores.clarity || 0) + (scores.evidence || 0) + (scores.control || 0);
+  const s = schedule(current.id, verdict);
+  state.reps.push({id:current.id, cat:current.cat, ts:Date.now(), total, verdict, ...scores});
+
+  const d = today();
+  if (state.lastRepDay !== d) {
+    const yest = new Date(Date.now() - DAY).toISOString().slice(0,10);
+    state.streak = (state.lastRepDay === yest) ? (state.streak || 0) + 1 : 1;
+    state.lastRepDay = d;
+  }
+  save();
+  $('nextNote').textContent = `Back in ${s.interval} day${s.interval===1?'':'s'}.`;
+  $('btnNext').disabled = false;
+}
+
+function keepAnswer(){
+  const text = $('answer').value.trim();
+  if (!text) return;
+  if (kept) return;
+  state.bank = state.bank.filter(b => !(b.cardId === current.id && b.text === text));
+  state.bank.unshift({id:Date.now().toString(36), cardId:current.id, cat:current.cat,
+                      prompt:current.prompt, text, ts:Date.now()});
+  kept = true;
+  $('btnKeep').textContent = 'Kept';
+  save();
+  toast('Added to your answer bank');
+}
+
+/* ---------- bank ---------- */
+function renderBank(){
+  if (!state.bank.length) {
+    $('bankList').innerHTML = `
+      <div class="empty">
+        <h3>Nothing kept yet</h3>
+        <p>When a rep produces an answer you would genuinely use again, keep it. Those answers become the thing you take with you.</p>
+      </div>`;
+    return;
+  }
+  $('bankList').innerHTML = state.bank.map(b => {
+    const c = CATS[b.cat] || {colour:'#6c63ff', label:'Card'};
+    return `
+    <article class="bank-item" style="--c:${c.colour}">
+      <div class="bank-q">${esc(b.prompt)}</div>
+      <div class="bank-a">${esc(b.text)}</div>
+      <div class="bank-meta">
+        <span>${c.label}</span>
+        <button class="icon danger" data-del="${b.id}">Remove</button>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function buildPack(){
+  const lines = [
+    '# My answer bank',
+    '',
+    `${state.bank.length} answer${state.bank.length===1?'':'s'} I have practised and would use again. Exported ${today()}.`,
+    '',
+    'These are my own positions, in my own words, tested in practice. When drafting',
+    'anything customer facing, match this voice and reuse these arguments. Do not',
+    'invent product claims, statistics or competitor gaps that do not appear here.',
+    ''
+  ];
+  Object.entries(CATS).forEach(([id, c]) => {
+    const group = state.bank.filter(b => b.cat === id);
+    if (!group.length) return;
+    lines.push(`## ${c.label}`, '');
+    group.forEach(b => {
+      lines.push(`**${b.prompt}**`, '', b.text.trim(), '');
+    });
+  });
+  if (!state.bank.length) lines.push('_Nothing kept yet._');
+  return lines.join('\n');
+}
+
+/* ---------- data ---------- */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify({app:'dojo', v:1, exported:new Date().toISOString(), state}, null, 2)],
+                        {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `dojo-${today()}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast('Exported');
+}
+
+function importJSON(file){
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      const s = data.state || data;
+      if (!s || typeof s !== 'object') throw new Error('bad shape');
+      state.reps  = [...(Array.isArray(s.reps) ? s.reps : []), ...state.reps];
+      state.sched = Object.assign({}, s.sched || {}, state.sched);
+      const seen = new Set(state.bank.map(b => b.cardId + '|' + b.text));
+      (Array.isArray(s.bank) ? s.bank : []).forEach(b => {
+        if (b && b.text && !seen.has(b.cardId + '|' + b.text)) state.bank.push(b);
+      });
+      if (typeof s.streak === 'number') state.streak = Math.max(state.streak || 0, s.streak);
+      save(); renderHome(); renderBank();
+      toast('Imported');
+    } catch (e) { toast('That file could not be read'); }
+  };
+  r.readAsText(file);
+}
+
+let toastTimer;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1900);
+}
+
+/* ---------- wiring ---------- */
+function init(){
+  load();
+  renderHome();
+  renderBank();
+
+  $('btnStart').addEventListener('click', () => startRep(null));
+  $('cats').addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]');
+    if (b) startRep(b.dataset.cat);
+  });
+
+  document.querySelectorAll('[data-timer]').forEach(b =>
+    b.addEventListener('click', () => { state.timerLen = Number(b.dataset.timer); save(); renderHome(); }));
+
+  $('btnReveal').addEventListener('click', reveal);
+  $('btnQuit').addEventListener('click', () => { stopTimer(); show('viewHome'); renderHome(); });
+  $('answer').addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); reveal(); }
+  });
+
+  document.querySelector('.rubric').addEventListener('click', e => {
+    const b = e.target.closest('[data-score]');
+    if (!b) return;
+    const scale = b.closest('.scale');
+    scale.querySelectorAll('.sc').forEach(x => x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    scores[scale.dataset.axis] = Number(b.dataset.score);
+    if (verdict) commit();
+  });
+
+  $('verdict').addEventListener('click', e => {
+    const b = e.target.closest('[data-v]');
+    if (!b) return;
+    document.querySelectorAll('.vb').forEach(x => x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    verdict = b.dataset.v;
+    commit();
+  });
+
+  $('btnKeep').addEventListener('click', keepAnswer);
+  $('btnNext').addEventListener('click', () => startRep(null));
+
+  $('navHome').addEventListener('click', () => { stopTimer(); renderHome(); show('viewHome'); });
+  $('navBank').addEventListener('click', () => { stopTimer(); renderBank(); show('viewBank'); });
+
+  $('bankList').addEventListener('click', e => {
+    const b = e.target.closest('[data-del]');
+    if (!b) return;
+    state.bank = state.bank.filter(x => x.id !== b.dataset.del);
+    save(); renderBank(); toast('Removed');
+  });
+
+  $('btnPack').addEventListener('click', () => { $('packOut').value = buildPack(); $('dlgPack').showModal(); });
+  $('btnCopyPack').addEventListener('click', () => copy($('packOut').value));
+
+  $('btnData').addEventListener('click', () => $('dlgData').showModal());
+  $('btnExport').addEventListener('click', exportJSON);
+  $('btnImport').addEventListener('click', () => $('file').click());
+  $('file').addEventListener('change', e => {
+    if (e.target.files[0]) importJSON(e.target.files[0]);
+    e.target.value = '';
+  });
+  $('btnReset').addEventListener('click', () => {
+    if (!confirm('Clear all reps, scores, schedule and kept answers for The Dojo?\n\nNothing else in this browser is touched. This cannot be undone.')) return;
+    localStorage.removeItem(KEY);
+    state = {reps:[], sched:{}, bank:[], timerLen:0, lastRepDay:null, streak:0};
+    $('dlgData').close();
+    renderHome(); renderBank(); show('viewHome');
+    toast('Reset');
+  });
+
+  document.querySelectorAll('[data-close]').forEach(b =>
+    b.addEventListener('click', () => b.closest('dialog').close()));
+}
+
+function copy(text){
+  const done = () => toast('Copied');
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done, fallback);
+  } else fallback();
+  function fallback(){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('Copy failed'); }
+    ta.remove();
+  }
+}
+
+init();
+})();
+</script>
+</body>
+</html>
