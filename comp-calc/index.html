@@ -26,8 +26,12 @@
     <section class="panel" aria-labelledby="plan-heading">
       <div class="panel-header">
         <h2 id="plan-heading">Compensation plan</h2>
-        <span class="panel-hint">Saved automatically in this browser</span>
+        <span class="panel-hint">Stored in this browser only, when you click Save plan</span>
       </div>
+
+      <p id="empty-plan-hint" class="panel-hint empty-hint" hidden>
+        Nothing saved yet. Enter your own plan below, or load an invented example to see the shape of one. No real plan ships with this app.
+      </p>
 
       <form id="plan-form" novalidate>
         <div class="field-grid">
@@ -56,7 +60,7 @@
           <label class="field">
             <span>Average deductions / tax (%)</span>
             <input type="number" id="deductionPct" name="deductionPct" min="0" max="100" step="any" inputmode="decimal" required />
-            <small>Applied to gross commission to estimate net. Defaults to 49%, fully editable.</small>
+            <small>Applied to gross commission to estimate net.</small>
           </label>
 
           <label class="field">
@@ -85,7 +89,8 @@
 
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">Save plan</button>
-          <button type="button" id="reset-plan" class="btn btn-ghost">Reset to defaults</button>
+          <button type="button" id="load-example" class="btn btn-secondary">Load example</button>
+          <button type="button" id="clear-plan" class="btn btn-ghost">Clear plan</button>
           <span id="save-status" class="save-status" aria-live="polite"></span>
         </div>
       </form>

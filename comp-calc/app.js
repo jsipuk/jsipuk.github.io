@@ -4,13 +4,15 @@
  */
 (() => {
   const STORAGE_KEY = 'comp-calc:plan';
-  const { defaultPlan, validatePlan, validateDeal, calculateCommission } = window.CommissionCalc;
+  const { emptyPlan, examplePlan, isEmptyPlan, validatePlan, validateDeal, calculateCommission } = window.CommissionCalc;
 
   const planForm = document.getElementById('plan-form');
   const dealForm = document.getElementById('deal-form');
   const tiersList = document.getElementById('tiers-list');
   const addTierBtn = document.getElementById('add-tier');
-  const resetPlanBtn = document.getElementById('reset-plan');
+  const loadExampleBtn = document.getElementById('load-example');
+  const clearPlanBtn = document.getElementById('clear-plan');
+  const emptyPlanHintEl = document.getElementById('empty-plan-hint');
   const planErrorsEl = document.getElementById('plan-errors');
   const dealErrorsEl = document.getElementById('deal-errors');
   const saveStatusEl = document.getElementById('save-status');
@@ -100,20 +102,26 @@
 
   // ---------------------------------------------------------------- storage
 
+  // Nothing is seeded: a browser with no saved plan gets the empty first-run
+  // state, not somebody else's numbers.
   function loadPlan() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return defaultPlan();
+      if (!raw) return emptyPlan();
       const parsed = JSON.parse(raw);
-      if (validatePlan(parsed).length > 0) return defaultPlan();
+      if (validatePlan(parsed).length > 0) return emptyPlan();
       return parsed;
     } catch {
-      return defaultPlan();
+      return emptyPlan();
     }
   }
 
   function savePlan(plan) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
+  }
+
+  function forgetPlan() {
+    localStorage.removeItem(STORAGE_KEY);
   }
 
   // ------------------------------------------------------------ tier rows
@@ -168,15 +176,22 @@
 
   // ------------------------------------------------------------ plan form
 
+  // A missing figure renders as an empty box, never as "null" — the first-run
+  // plan has every numeric field unset.
+  function setNumberValue(id, value) {
+    document.getElementById(id).value = Number.isFinite(value) ? value : '';
+  }
+
   function renderPlan(plan) {
     setThousandsValue(document.getElementById('quota'), plan.quota);
     setThousandsValue(document.getElementById('priorAttainment'), plan.priorAttainment);
-    document.getElementById('baseCommissionRate').value = plan.baseCommissionRate;
-    document.getElementById('tcvCreditPct').value = plan.tcvCreditPct;
-    document.getElementById('deductionPct').value = plan.deductionPct;
-    document.getElementById('renewalRatePct').value = plan.renewalRatePct;
-    document.getElementById('oyNbMultiplier').value = plan.oyNbMultiplier;
+    setNumberValue('baseCommissionRate', plan.baseCommissionRate);
+    setNumberValue('tcvCreditPct', plan.tcvCreditPct);
+    setNumberValue('deductionPct', plan.deductionPct);
+    setNumberValue('renewalRatePct', plan.renewalRatePct);
+    setNumberValue('oyNbMultiplier', plan.oyNbMultiplier);
     renderTiers(plan.tiers);
+    emptyPlanHintEl.hidden = !isEmptyPlan(plan);
   }
 
   function readPlanFromForm() {
@@ -216,21 +231,31 @@
       return;
     }
     savePlan(plan);
-    saveStatusEl.textContent = 'Saved ✓';
-    setTimeout(() => {
-      if (saveStatusEl.textContent === 'Saved ✓') saveStatusEl.textContent = '';
-    }, 2500);
+    emptyPlanHintEl.hidden = true;
+    flashStatus('Saved ✓');
   });
 
-  resetPlanBtn.addEventListener('click', () => {
-    const plan = defaultPlan();
-    renderPlan(plan);
-    savePlan(plan);
-    showErrors(planErrorsEl, []);
-    saveStatusEl.textContent = 'Reset to defaults';
+  function flashStatus(message) {
+    saveStatusEl.textContent = message;
     setTimeout(() => {
-      if (saveStatusEl.textContent === 'Reset to defaults') saveStatusEl.textContent = '';
+      if (saveStatusEl.textContent === message) saveStatusEl.textContent = '';
     }, 2500);
+  }
+
+  // Fills the form with the invented example so the shape of a plan is
+  // visible. It is not saved until Save plan is clicked.
+  loadExampleBtn.addEventListener('click', () => {
+    renderPlan(examplePlan());
+    showErrors(planErrorsEl, []);
+    flashStatus('Example loaded, not saved');
+  });
+
+  clearPlanBtn.addEventListener('click', () => {
+    renderPlan(emptyPlan());
+    forgetPlan();
+    showErrors(planErrorsEl, []);
+    resultsEl.hidden = true;
+    flashStatus('Plan cleared from this browser');
   });
 
   // ------------------------------------------------------------ deal form

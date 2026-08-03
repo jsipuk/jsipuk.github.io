@@ -5,7 +5,8 @@ const path = require('path');
 
 const src = fs.readFileSync(path.join(__dirname, '..', 'calc.js'), 'utf8');
 const calc = new Function(
-  src + '\n;return { defaultPlan, validatePlan, validateDeal, tierBands, graduatedNewBusinessCommission, calculateCommission };'
+  src +
+    '\n;return { emptyPlan, examplePlan, isEmptyPlan, validatePlan, validateDeal, tierBands, graduatedNewBusinessCommission, calculateCommission };'
 )();
 
 let pass = 0;
@@ -20,18 +21,54 @@ const ok = (cond, msg) => {
 };
 const approx = (a, b, msg, epsilon = 1e-6) => ok(Math.abs(a - b) < epsilon, `${msg} (got ${a}, expected ${b})`);
 
+// Test fixture, not anybody's compensation plan. Round numbers on purpose:
+// a $1M quota and a 2% base rate make every expected figure checkable by
+// hand, and nothing real is committed to this public repository.
 function basePlan(overrides = {}) {
   return {
-    ...calc.defaultPlan(),
+    quota: 1000000,
+    priorAttainment: 0,
+    baseCommissionRate: 2,
+    tcvCreditPct: 0,
+    deductionPct: 50,
+    tiers: [
+      { minAttainmentPct: 0, multiplier: 0.5 },
+      { minAttainmentPct: 50, multiplier: 1 },
+      { minAttainmentPct: 100, multiplier: 2 },
+    ],
+    renewalRatePct: 1,
+    oyNbMultiplier: 0.5,
     ...overrides,
   };
+}
+
+// -------------------------------------------------------------- first run
+
+{
+  const plan = calc.emptyPlan();
+  const errors = calc.validatePlan(plan);
+  ok(errors.length > 0, 'empty first-run plan does not validate until it is filled in');
+  ok(calc.isEmptyPlan(plan), 'empty first-run plan is reported as empty');
+  const seeded = Object.entries(plan).filter(([k, v]) => k !== 'tiers' && v !== null);
+  ok(seeded.length === 0, 'empty first-run plan seeds no figures at all');
+  ok(plan.tiers.length === 1 && plan.tiers[0].minAttainmentPct === 0, 'empty plan still offers one 0% tier row');
+}
+
+{
+  const plan = calc.examplePlan();
+  ok(calc.validatePlan(plan).length === 0, 'example plan is valid');
+  ok(!calc.isEmptyPlan(plan), 'example plan is not reported as empty');
+}
+
+{
+  ok(calc.isEmptyPlan(basePlan({ quota: null })) === false, 'a plan with any figure set is not empty');
 }
 
 // ---------------------------------------------------------------- validation
 
 {
-  const errors = calc.validatePlan(calc.defaultPlan());
-  ok(errors.length === 0, 'default plan is valid');
+  const errors = calc.validatePlan(basePlan());
+  ok(errors.length === 0, 'fixture plan is valid');
 }
 
 {
@@ -139,9 +176,9 @@ function basePlan(overrides = {}) {
 
 {
   const tiers = [
-    { minAttainmentPct: 0, multiplier: 0.9 },
-    { minAttainmentPct: 50, multiplier: 1.1 },
-    { minAttainmentPct: 100, multiplier: 1.5 },
+    { minAttainmentPct: 0, multiplier: 0.5 },
+    { minAttainmentPct: 50, multiplier: 1 },
+    { minAttainmentPct: 100, multiplier: 2 },
   ];
   const bands = calc.tierBands(tiers);
   ok(bands.length === 3, 'expands tiers into bands');
@@ -152,41 +189,34 @@ function basePlan(overrides = {}) {
 {
   // Order independence.
   const tiers = [
-    { minAttainmentPct: 100, multiplier: 1.5 },
-    { minAttainmentPct: 0, multiplier: 0.9 },
-    { minAttainmentPct: 50, multiplier: 1.1 },
+    { minAttainmentPct: 100, multiplier: 2 },
+    { minAttainmentPct: 0, multiplier: 0.5 },
+    { minAttainmentPct: 50, multiplier: 1 },
   ];
   const bands = calc.tierBands(tiers);
   ok(bands[0].minAttainmentPct === 0 && bands[1].minAttainmentPct === 50 && bands[2].minAttainmentPct === 100, 'sorts unordered tiers');
 }
 
-// ---------------------------------------------------------------- real-plan validation
+// ---------------------------------------------------------- full-quota worked example
 
-// This is the actual worked example from the compensation plan: a £1.7M New
-// Business ACV quota, the six graduated tiers below, and a BCR of 2.2402%.
-// At exactly 100% attainment (a single £1.7M deal from a standing start),
-// the plan's own total OTE is £44,804.27, split 85% New Business / 15%
-// Renewal — so New Business alone should land on £38,083.40 (85% of OTE).
+// A whole year at exactly 100% attainment, done by hand on the fixture:
+// $1,000,000 of quota, a 2% base rate, and the first two bands split at 50%.
+//   first  $500,000 at 2% x 0.5 = 1.0%  ->  $5,000
+//   second $500,000 at 2% x 1.0 = 2.0%  -> $10,000
+//                                 total -> $15,000 gross, $7,500 net at 50%.
 {
-  const plan = basePlan({
-    quota: 1700000,
-    priorAttainment: 0,
-    baseCommissionRate: 2.2402,
-    tcvCreditPct: 0,
-    deductionPct: 49,
-  });
-  const deal = { dealType: 'newBusiness', acv: 1700000, tcv: 1700000 };
+  const plan = basePlan();
+  const deal = { dealType: 'newBusiness', acv: 1000000, tcv: 1000000 };
   const r = calc.calculateCommission(plan, deal);
 
-  approx(r.attainmentPctAfter, 100, 'real plan: reaches exactly 100% attainment');
-  ok(r.segments.length === 2, 'real plan: a full-quota deal from zero spans exactly the first two tiers');
-  approx(r.segments[0].width, 850000, 'real plan: first tier band is the first 50% of quota');
-  approx(r.segments[1].width, 850000, 'real plan: second tier band is the next 50% of quota');
-  approx(r.grossCommission, 38083.4, 'real plan: graduated NB commission at 100% attainment matches the 85% split', 0.01);
-
-  const totalOte = 44804.27;
-  const impliedRenewalShare = totalOte - r.grossCommission;
-  approx(impliedRenewalShare, 6720.87, 'real plan: implied renewal share matches the remaining 15% of OTE', 0.01);
+  approx(r.attainmentPctAfter, 100, 'full quota: reaches exactly 100% attainment');
+  ok(r.segments.length === 2, 'full quota: a full-quota deal from zero spans exactly the first two tiers');
+  approx(r.segments[0].width, 500000, 'full quota: first tier band is the first 50% of quota');
+  approx(r.segments[1].width, 500000, 'full quota: second tier band is the next 50% of quota');
+  approx(r.segments[0].commission, 5000, 'full quota: first band pays the base rate at 0.5x');
+  approx(r.segments[1].commission, 10000, 'full quota: second band pays the base rate at 1x');
+  approx(r.grossCommission, 15000, 'full quota: gross is the sum of both bands', 0.01);
+  approx(r.netCommission, 7500, 'full quota: net is gross less the deduction', 0.01);
 }
 
 // ---------------------------------------------------------------- graduated New Business math
@@ -199,8 +229,8 @@ function basePlan(overrides = {}) {
 
   approx(r.attainmentPctAfter, 20, 'within base tier: attainment % after deal');
   ok(r.segments.length === 1, 'within base tier: only one tier touched');
-  approx(r.segments[0].multiplier, 0.9, 'within base tier: base tier multiplier used');
-  approx(r.grossCommission, 200000 * (2.2402 * 0.9) / 100, 'within base tier: gross matches single-tier rate');
+  approx(r.segments[0].multiplier, 0.5, 'within base tier: base tier multiplier used');
+  approx(r.grossCommission, 200000 * (2 * 0.5) / 100, 'within base tier: gross matches single-tier rate');
 }
 
 {
@@ -214,7 +244,7 @@ function basePlan(overrides = {}) {
   ok(r.segments.length === 2, 'straddling deal: touches two tiers');
   approx(r.segments[0].width, 100000, 'straddling deal: 100k in the 0-50% tier');
   approx(r.segments[1].width, 100000, 'straddling deal: 100k in the 50-100% tier');
-  const expected = 100000 * (2.2402 * 0.9) / 100 + 100000 * (2.2402 * 1.1) / 100;
+  const expected = 100000 * (2 * 0.5) / 100 + 100000 * (2 * 1) / 100;
   approx(r.grossCommission, expected, 'straddling deal: gross is the sum of both tiers\' contributions');
 }
 
@@ -227,7 +257,7 @@ function basePlan(overrides = {}) {
 
   ok(r.segments.length === 1, 'incremental deal: only touches the tier it falls in');
   approx(r.segments[0].width, 50000, 'incremental deal: full deal value counted, not cumulative total');
-  approx(r.grossCommission, 50000 * (2.2402 * 1.1) / 100, 'incremental deal: only this deal\'s value is charged');
+  approx(r.grossCommission, 50000 * (2 * 1) / 100, 'incremental deal: only this deal\'s value is charged');
 }
 
 {
@@ -254,14 +284,14 @@ function basePlan(overrides = {}) {
 }
 
 {
-  const plan = basePlan({ baseCommissionRate: 2.2402, oyNbMultiplier: 0.25, deductionPct: 49 });
+  const plan = basePlan({ baseCommissionRate: 2, oyNbMultiplier: 0.25, deductionPct: 50 });
   const deal = { dealType: 'oyNb', acv: 100000 };
   const r = calc.calculateCommission(plan, deal);
 
   ok(r.dealType === 'oyNb', 'OY NB: result tagged with deal type');
   ok(r.segments.length === 0, 'OY NB: no tiered segments');
-  approx(r.ratePct, 2.2402 * 0.25, 'OY NB: effective rate is BCR x OY multiplier');
-  approx(r.grossCommission, 100000 * (2.2402 * 0.25) / 100, 'OY NB: gross uses BCR x OY multiplier, not full BCR');
+  approx(r.ratePct, 2 * 0.25, 'OY NB: effective rate is BCR x OY multiplier');
+  approx(r.grossCommission, 100000 * (2 * 0.25) / 100, 'OY NB: gross uses BCR x OY multiplier, not full BCR');
 }
 
 {
@@ -281,6 +311,33 @@ function basePlan(overrides = {}) {
     const deal = { dealType, acv: 10000, tcv: 10000 };
     const r = calc.calculateCommission(plan, deal);
     approx(r.netCommission, 0, `100% deduction (${dealType}): net commission is zero`);
+  });
+}
+
+// ------------------------------------------------- no real plan in the source
+
+// This repository is public. calc.js is served as-is to anyone who opens the
+// page, and is readable on GitHub whatever the page does, so it must never
+// carry a real compensation plan again. A plan is "real-looking" here if its
+// rates are precise to more than two decimal places, or its quota is an
+// oddly specific figure: invented examples are round.
+{
+  const shipped = { ...calc.emptyPlan(), ...calc.examplePlan() };
+  const rateFields = ['baseCommissionRate', 'renewalRatePct', 'oyNbMultiplier', 'deductionPct', 'tcvCreditPct'];
+
+  rateFields.forEach((field) => {
+    const v = shipped[field];
+    const decimals = String(v).includes('.') ? String(v).split('.')[1].length : 0;
+    ok(decimals <= 2, `shipped ${field} (${v}) is a round number, not a real plan's rate`);
+  });
+
+  ok(shipped.quota % 100000 === 0, `shipped quota (${shipped.quota}) is a round figure, not a real quota`);
+  ok(shipped.priorAttainment === 0, 'shipped example starts from zero attainment');
+
+  shipped.tiers.forEach((t, i) => {
+    const decimals = String(t.multiplier).includes('.') ? String(t.multiplier).split('.')[1].length : 0;
+    ok(decimals <= 1, `shipped tier ${i + 1} multiplier (${t.multiplier}) is round`);
+    ok(t.minAttainmentPct % 50 === 0, `shipped tier ${i + 1} threshold (${t.minAttainmentPct}%) is round`);
   });
 }
 

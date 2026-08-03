@@ -34,6 +34,27 @@ python3 -m http.server 8000
 # then visit http://localhost:8000/comp-calc/
 ```
 
+## No plan ships with this app
+
+**This repository is public.** Anything committed to it is readable by
+anyone, on the website and on GitHub, for good. So the calculator ships
+with **no compensation plan in it at all** — not a redacted one, not a
+partial one, none. The first run shows an empty form.
+
+Your own figures are typed into the UI and kept in this browser's
+`localStorage` (key `comp-calc:plan`) when you click **Save plan**. They
+are never sent anywhere and never committed. **Clear plan** removes them
+from the browser again.
+
+**Load example** fills the form with invented round numbers ($1M quota, a
+1% base rate, one accelerator at 100%) so the shape of a plan is visible.
+They are illustrative only, are not saved until you click **Save plan**,
+and describe nobody's actual plan.
+
+If you change the shipped starting values, keep them round. The test suite
+fails any shipped rate carrying more than two decimal places or a quota
+that is not a round figure, because that is what a real plan looks like.
+
 ## Updating your commission assumptions
 
 Everything under **Compensation plan** is editable and saved to this
@@ -52,9 +73,9 @@ comes back next time you open the page on the same browser/device.
   `TCV − ACV`) counts toward New Business commission. Set to `0` if your
   plan only pays on ACV; set to `100` if it pays on full TCV.
 - **Average deductions / tax (%)** — used to turn gross commission into an
-  estimated net figure. Defaults to **49%**, fully editable.
+  estimated net figure.
 - **Renewal rate (%)** — a flat rate applied to Renewal ACV, no tiers or
-  acceleration. Defaults to **0.4253%**.
+  acceleration.
 - **Out-Year New Business multiplier** — applied to BCR (not tiered) for
   Out-Year New Business ACV, representing commission paid annually in each
   year after the first on a multi-year deal.
@@ -64,27 +85,21 @@ comes back next time you open the page on the same browser/device.
   band only (see "How the maths works" below). Add or remove rows with
   **+ Add tier** / the **×** button.
 
-Click **Reset to defaults** to restore the starting values shown below and
-overwrite the saved plan.
+**Load example** fills the form with the invented plan; **Clear plan**
+empties the form and deletes the saved plan from this browser.
 
-### Starting defaults
+### The example plan
 
-The calculator ships pre-loaded with a real six-tier New Business
-compensation structure rather than arbitrary placeholders, so it's usable
-immediately:
+Round numbers, invented to show the shape of a plan and nothing more:
 
 | Tier | Attainment band | Multiplier |
 | --- | --- | --- |
-| 1 | 0–50% | 0.90× |
-| 2 | 50–100% | 1.10× |
-| 3 | 100–150% | 1.50× |
-| 4 | 150–200% | 2.00× |
-| 5 | 200–300% | 1.25× |
-| 6 | 300%+ | 1.00× |
+| 1 | 0–100% | 1.00× |
+| 2 | 100%+ | 2.00× |
 
-...with a $1,700,000 quota, a 2.2402% BCR, a 0.4253% Renewal rate, and a
-0.25× Out-Year New Business multiplier. Every one of these is editable —
-they're just a sensible, non-empty starting point.
+...with a $1,000,000 quota, a 1% BCR, a 0.5% Renewal rate, a 0.5×
+Out-Year New Business multiplier and 40% deductions. Every one of these is
+editable, and none of them is real.
 
 ## Calculating a deal
 
@@ -165,13 +180,14 @@ netCommission   = grossCommission − deductionAmount
 Also no tiers or acceleration — this models a fixed rate paid annually on
 years two-plus of a multi-year deal.
 
-### Verified against a real plan
+### Verified against a worked example
 
-The New Business formula is checked in the test suite against a real
-worked example: a $1,700,000 quota with the six tiers above and a 2.2402%
-BCR produces exactly **£38,083.40** of New Business commission at 100%
-attainment from a standing start — which is 85% of that plan's total
-£44,804.27 OTE (the other 15% being Renewal).
+The New Business formula is checked in the test suite against a full year
+worked by hand on invented figures: a $1,000,000 quota, a 2% base rate and
+a band split at 50% attainment. A single full-quota deal from a standing
+start pays $5,000 in the first band (2% × 0.5×) and $10,000 in the second
+(2% × 1×), so **£15,000 gross** and **£7,500 net** at 50% deductions. Every
+step of that is checkable without knowing anybody's real plan.
 
 ## Tests
 
@@ -188,3 +204,10 @@ node comp-calc/test/calc.test.js
 
 No accounts, no backend, no analytics, no network calls. Your plan
 assumptions live only in this browser via `localStorage`.
+
+What that does and does not mean, plainly: the **page is public and always
+will be**, because this is a public repository on a static host. What is
+protected is the **data you type**, and only because it never leaves your
+browser. Anyone who can open your browser profile can read it — there is no
+passphrase on this app, unlike [Ground](../ground/README.md). Treat the
+saved plan as no more private than a note in that browser.
