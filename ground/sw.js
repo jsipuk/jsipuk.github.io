@@ -7,7 +7,7 @@
  * Bump CACHE whenever any file in ASSETS changes, or returning visitors keep
  * the old version. Same rule as piano/ and departures/.
  */
-var CACHE = 'ground-1.0.0';
+var CACHE = 'ground-1.0.1';
 
 var ASSETS = [
   './',
