@@ -1,281 +1,285 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>John Saunders</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="description" content="John Saunders, Consulting Sales Engineer at Netskope. Small, private, offline web apps for work, music, family and play.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jsip.uk/">
+<meta property="og:title" content="John Saunders">
+<meta property="og:description" content="Consulting Sales Engineer at Netskope. Small, private, offline web apps for work, music, family and play.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1117'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%236c63ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css?v=2">
+<title>John Saunders</title>
 </head>
 <body>
-  <header class="header">
-    <nav class="nav">
-      <span class="logo">John Saunders</span>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <ul class="nav-links" id="nav-links">
-        <li><a href="#about">About</a></li>
-        <li><a href="#tools">Tools</a></li>
-        <li><a href="#games">Games</a></li>
-        <li><a href="https://www.linkedin.com/in/saundersjohn/" target="_blank" rel="noopener">LinkedIn</a></li>
-        <li><a href="https://github.com/jsipuk" target="_blank" rel="noopener">GitHub</a></li>
-      </ul>
-    </nav>
-  </header>
 
-  <main>
-    <section class="hero">
-      <div class="hero-content">
-        <p class="hero-eyebrow">Hello, I'm</p>
-        <h1 class="hero-title">John Saunders</h1>
-        <p class="hero-subtitle">Consulting SE at Netskope &nbsp;&middot;&nbsp; SASE &nbsp;&middot;&nbsp; SSE &nbsp;&middot;&nbsp; Zero Trust</p>
-        <div class="hero-actions">
-          <a href="#tools" class="btn btn-primary">Explore tools</a>
-          <a href="#about" class="btn btn-secondary">About me</a>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <nav class="nav" aria-label="Main">
+    <a class="logo" href="/">John Saunders</a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#everyday">Everyday</a></li>
+      <li><a href="#play">Play</a></li>
+      <li><a href="#how">How</a></li>
+      <li><a href="https://www.linkedin.com/in/saundersjohn/" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="https://github.com/jsipuk" target="_blank" rel="noopener">GitHub</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Consulting Sales Engineer at Netskope</p>
+      <h1>I build small, private tools that do one thing well.</h1>
+      <p class="lede">Fifteen of them live here: things for the day job, for the piano, for a flight with two kids, and for ten quiet minutes. All of them run in your browser, keep your data on your device, and work without a signal.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#work">See the work</a>
+        <a class="btn btn-ghost" href="#about">About me</a>
+      </div>
+    </div>
+    <div class="glow" aria-hidden="true"></div>
+  </section>
+
+  <section id="about" class="band">
+    <div class="wrap about">
+      <div>
+        <h2 class="sec-title">About</h2>
+        <p>I am a Consulting Sales Engineer at Netskope, with more than five years helping organisations turn complicated security and networking requirements into something practical. I specialise in SASE, SSE and Zero Trust, across enterprises of every size and most industries and regions.</p>
+        <p>The work spans presales, deep-dive architecture sessions, proofs of concept, partner enablement and customer demos. I like making modern security approachable, and I build software in the same spirit: small, clear, and honest about what it does.</p>
+      </div>
+      <div>
+        <h3 class="mini-title">Areas of expertise</h3>
+        <ul class="skills">
+          <li>SASE and SSE</li>
+          <li>Zero Trust and ZTNA</li>
+          <li>CASB and DLP</li>
+          <li>SD-WAN</li>
+          <li>AI security</li>
+          <li>Cloud and SaaS security</li>
+          <li>Presales leadership</li>
+          <li>Solution architecture</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="work" class="band band-alt">
+    <div class="wrap">
+      <h2 class="sec-title">Work</h2>
+      <p class="sec-lede">Things built for the day job, and for the people who do it.</p>
+      <div class="grid">
+
+        <article class="card">
+          <p class="card-meta">Interactive reference</p>
+          <h3>Netskope Product Explorer</h3>
+          <p class="card-desc">The full Netskope One suite, browsable: 28 products across 7 categories, with capabilities and the links between them.</p>
+          <ul class="tags"><li>SASE</li><li>SSE</li><li>Reference</li></ul>
+          <a class="card-link" href="/netskope-product-explorer">Explore products</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Analysis</p>
+          <h3>The Future SE Stack</h3>
+          <p class="card-desc">A systems-level look at AI workflows, agents and semi-autonomous tooling in enterprise security presales, and what they mean for the Solutions Engineer role.</p>
+          <ul class="tags"><li>AI</li><li>Presales</li><li>Strategy</li></ul>
+          <a class="card-link" href="/the-future-se-stack">Read the analysis</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Calculator</p>
+          <h3>Commission Calculator</h3>
+          <p class="card-desc">Save your compensation plan once: quota, tiers, multipliers, deductions. Then enter a deal and see gross and net commission with the full breakdown.</p>
+          <ul class="tags"><li>Sales</li><li>Compensation</li></ul>
+          <a class="card-link" href="/comp-calc/">Open the calculator</a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="everyday" class="band">
+    <div class="wrap">
+      <h2 class="sec-title">Everyday</h2>
+      <p class="sec-lede">The ones I actually open during the week.</p>
+      <div class="grid">
+
+        <article class="card">
+          <p class="card-meta">Planner</p>
+          <h3>Mediterranean OS</h3>
+          <p class="card-desc">A mobile-first planner for meals, prep, gym, habits and weight, built around the Mediterranean way of eating. Installs to your home screen and works offline.</p>
+          <ul class="tags"><li>Health</li><li>Planner</li><li>Offline</li></ul>
+          <a class="card-link" href="/medos/">Open the planner</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Music</p>
+          <h3>Aria</h3>
+          <p class="card-desc">Learn piano on an iPad: scrolling sheet music above, falling notes and a keyboard below. Adjustable speed, note-name and finger overlays, and MusicXML import.</p>
+          <ul class="tags"><li>Piano</li><li>iPad</li><li>Offline</li></ul>
+          <a class="card-link" href="/piano/">Start playing</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Music</p>
+          <h3>Encore</h3>
+          <p class="card-desc">The ten-minute piano room. Guided scales, sight-reading flash cards, public-domain songs and short burst timers for daily practice.</p>
+          <ul class="tags"><li>Piano</li><li>Practice</li></ul>
+          <a class="card-link" href="/encore">Practise now</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Family</p>
+          <h3>NostalgiAI</h3>
+          <p class="card-desc">The little drawings and paper games UK kids made in the nineties: the Cool S, fortune tellers, MASH, friendship bracelets. Step by step, so you can teach them again.</p>
+          <ul class="tags"><li>Nostalgia</li><li>Crafts</li><li>Family</li></ul>
+          <a class="card-link" href="/nostalgiai/">Relearn them</a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="play" class="band band-alt">
+    <div class="wrap">
+      <h2 class="sec-title">Play</h2>
+      <p class="sec-lede">Games, mostly built for a specific afternoon or a specific child.</p>
+      <div class="grid">
+
+        <article class="card">
+          <p class="card-meta">Six games</p>
+          <h3>Departures</h3>
+          <p class="card-desc">For the airport and the plane: a one-tap flyer, pairs, dots and boxes against the phone, a family quiz, a word puzzle and spot-it bingo. Runs entirely in flight mode.</p>
+          <ul class="tags"><li>Kids</li><li>Travel</li><li>Offline</li></ul>
+          <a class="card-link" href="/departures/">Play now</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Game</p>
+          <h3>Merge Life</h3>
+          <p class="card-desc">A calm merge game about watchmaking, built around short intentional sessions. No streaks, no timers, no adverts, no prompts to play again.</p>
+          <ul class="tags"><li>Wellbeing</li><li>Offline</li></ul>
+          <a class="card-link" href="/merge-life/">Play now</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Interactive fiction</p>
+          <h3>The Ruler of Three Faces</h3>
+          <p class="card-desc">A text-first fantasy RPG where the kingdom remembers every choice. Talk your way past the palace gate by picking a reply or typing anything you like.</p>
+          <ul class="tags"><li>RPG</li><li>Story</li></ul>
+          <a class="card-link" href="/ruler-of-three-faces/">Begin</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Learning game</p>
+          <h3>Dino Expedition</h3>
+          <p class="card-desc">Fact-checked dinosaurs for ages 5 to 10. Explore real species, dig up fossils, take a friendly quiz and build habitats, earning discovery badges along the way.</p>
+          <ul class="tags"><li>Kids</li><li>Learning</li></ul>
+          <a class="card-link" href="/dino/">Start exploring</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Strategy</p>
+          <h3>Odyssey: Sectors</h3>
+          <p class="card-desc">Space exploration and colonisation. Scan unknown worlds, settle the habitable ones, grow an economy and hunt for the Beacon to earn your charter.</p>
+          <ul class="tags"><li>Space</li><li>Strategy</li></ul>
+          <a class="card-link" href="/odyssey">Play now</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Arcade</p>
+          <h3>Pok&eacute;mon Flappy</h3>
+          <p class="card-desc">A Flappy Bird-style arcade game with eight playable characters, pickups, sound and a day and night cycle. Good on a phone.</p>
+          <ul class="tags"><li>Arcade</li><li>Mobile</li></ul>
+          <a class="card-link" href="/pokemon-flappy">Play now</a>
+        </article>
+
+        <article class="card">
+          <p class="card-meta">Arcade</p>
+          <h3>VOID</h3>
+          <p class="card-desc">Drag to survive, nova to destroy. A fast, minimalist survival game built for very short sessions.</p>
+          <ul class="tags"><li>Arcade</li><li>Mobile</li></ul>
+          <a class="card-link" href="/m/void">Play now</a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="band">
+    <div class="wrap">
+      <h2 class="sec-title">How these are built</h2>
+      <p class="sec-lede">Everything here follows the same four rules. They are the reason the list holds together.</p>
+      <div class="principles">
+        <div class="principle">
+          <h3>Your data stays with you</h3>
+          <p>Nothing here has an account to create or a server to sign in to. What you type is stored in your own browser, on your own device.</p>
+        </div>
+        <div class="principle">
+          <h3>No tracking</h3>
+          <p>No analytics, no advertising, no third-party scripts. This page loads nothing from anywhere else, and neither do the apps.</p>
+        </div>
+        <div class="principle">
+          <h3>Works without a signal</h3>
+          <p>Most of these install to a home screen and run offline, which is the point when you are on a plane or in a basement.</p>
+        </div>
+        <div class="principle">
+          <h3>Small and readable</h3>
+          <p>Static files, no build step where one can be avoided, and source you can read in an afternoon. All of it is public on GitHub.</p>
         </div>
       </div>
-      <div class="hero-decoration" aria-hidden="true">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-      </div>
-    </section>
+    </div>
+  </section>
 
-    <section id="about" class="section">
-      <div class="container">
-        <h2 class="section-title">About</h2>
-        <div class="about-grid">
-          <div class="about-text">
-            <p>I'm a Consulting Sales Engineer at Netskope with 5+ years helping organisations translate complex security and networking requirements into practical, outcome-driven solutions. I specialise in SASE, SSE, and Zero Trust — working across technical and non-technical audiences in enterprises of all sizes, across most industries and global regions.</p>
-            <p>My work spans presales, deep-dive architecture sessions, proof of concepts, partner training, and customer demos. I'm passionate about making modern security approachable and helping people understand how converged platforms can solve real business problems.</p>
-          </div>
-          <div class="skills">
-            <h3>Areas of expertise</h3>
-            <ul class="skill-list">
-              <li>SASE &amp; SSE</li>
-              <li>Zero Trust / ZTNA</li>
-              <li>CASB &amp; DLP</li>
-              <li>SD-WAN</li>
-              <li>Presales &amp; SEs</li>
-              <li>Cybersecurity</li>
-              <li>SaaS &amp; Cloud Security</li>
-              <li>Solution Selling</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
+  <section id="personal" class="band band-alt">
+    <div class="wrap narrow">
+      <h2 class="sec-title">Personal</h2>
+      <p class="sec-lede">One of these is mine rather than yours. It is listed for my own convenience, and it will ask for a passphrase.</p>
+      <a class="row-link" href="/ground/">
+        <span class="row-main">
+          <span class="row-title">Ground</span>
+          <span class="row-desc">Accounts, notes and practice in one place. Encrypted at rest, offline, and private to whichever browser it was set up in.</span>
+        </span>
+        <span class="row-go" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </section>
 
-    <section id="tools" class="section section-alt">
-      <div class="container">
-        <h2 class="section-title">Tools</h2>
-        <div class="projects-grid">
-          <article class="project-card">
-            <div class="project-meta">Interactive app</div>
-            <h3 class="project-title">Mediterranean OS</h3>
-            <p class="project-desc">A mobile-first planner for meals, prep, gym, habits and weight &mdash; built around the Mediterranean way of eating. Fully offline and installable as a PWA, with all your data kept privately in your own browser.</p>
-            <div class="project-tags">
-              <span class="tag">Health</span>
-              <span class="tag">Planner</span>
-              <span class="tag">PWA</span>
-            </div>
-            <a href="/medos/" class="project-link">Open planner &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Interactive tool</div>
-            <h3 class="project-title">Netskope Product Explorer</h3>
-            <p class="project-desc">Browse and explore the full Netskope One product suite — 28 products across 7 categories with detailed descriptions, key capabilities, and related product links.</p>
-            <div class="project-tags">
-              <span class="tag">SASE</span>
-              <span class="tag">SSE</span>
-              <span class="tag">Netskope</span>
-            </div>
-            <a href="/netskope-product-explorer" class="project-link">Explore products &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Interactive tool</div>
-            <h3 class="project-title">Commission Calculator</h3>
-            <p class="project-desc">Save your sales compensation-plan assumptions &mdash; quota, achievement tiers, multipliers, deductions &mdash; then enter a deal's ACV/TCV to estimate gross and net commission with a full breakdown.</p>
-            <div class="project-tags">
-              <span class="tag">Sales</span>
-              <span class="tag">Compensation</span>
-              <span class="tag">Calculator</span>
-            </div>
-            <a href="/comp-calc/" class="project-link">Open calculator &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Interactive report</div>
-            <h3 class="project-title">The Future SE Stack</h3>
-            <p class="project-desc">A systems-level analysis of AI workflows, agents, and semi-autonomous tooling for enterprise cybersecurity presales — and what they mean for the Solutions Engineer role.</p>
-            <div class="project-tags">
-              <span class="tag">AI</span>
-              <span class="tag">Presales</span>
-              <span class="tag">Strategy</span>
-            </div>
-            <a href="/the-future-se-stack" class="project-link">Read analysis &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Interactive app</div>
-            <h3 class="project-title">Aria &mdash; Piano Practice</h3>
-            <p class="project-desc">Learn piano on your iPad with scrolling sheet music and a falling-note visualiser. Demo exercises, adjustable speed, beginner note-name and finger-number overlays, and MusicXML import.</p>
-            <div class="project-tags">
-              <span class="tag">Music</span>
-              <span class="tag">iPad</span>
-              <span class="tag">PWA</span>
-            </div>
-            <a href="/piano/" class="project-link">Learn piano &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Interactive app</div>
-            <h3 class="project-title">NostalgiAI</h3>
-            <p class="project-desc">Rediscover the little drawings, paper games and playground crafts UK millennials made as kids &mdash; the Cool S, the paper fortune teller, MASH, friendship bracelets and more &mdash; with step-by-step instructions to relearn them and teach your own children.</p>
-            <div class="project-tags">
-              <span class="tag">Nostalgia</span>
-              <span class="tag">Crafts</span>
-              <span class="tag">Family</span>
-            </div>
-            <a href="/nostalgiai/" class="project-link">Open NostalgiAI &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Interactive app</div>
-            <h3 class="project-title">Encore &mdash; The Ten-Minute Piano Room</h3>
-            <p class="project-desc">A warm little piano practice room: guided scales, sight-reading flash cards, public-domain songs, and short burst timers for focused daily practice.</p>
-            <div class="project-tags">
-              <span class="tag">Music</span>
-              <span class="tag">Practice</span>
-            </div>
-            <a href="/encore" class="project-link">Practice now &rarr;</a>
-          </article>
-        </div>
-      </div>
-    </section>
+</main>
 
-    <section id="games" class="section">
-      <div class="container">
-        <h2 class="section-title">Games</h2>
-        <div class="projects-grid">
-          <article class="project-card">
-            <div class="project-meta">Games &amp; family</div>
-            <h3 class="project-title">Departures</h3>
-            <p class="project-desc">Six quick games for the airport and the plane &mdash; a one-tap flyer, pairs, dots and boxes with a phone opponent, a family quiz, a word puzzle and spot-it bingo. Works entirely in flight mode, saves as you go, and installs to your home screen.</p>
-            <div class="project-tags">
-              <span class="tag">Kids</span>
-              <span class="tag">Travel</span>
-              <span class="tag">Offline</span>
-            </div>
-            <a href="/departures/" class="project-link">Play now &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Game &amp; wellbeing</div>
-            <h3 class="project-title">Merge Life</h3>
-            <p class="project-desc">A calm merge game about watchmaking, built around short intentional sessions. Merge parts into finished watches, keep a permanent collection, and see how much time you have reclaimed &mdash; with no streaks, timers, adverts or &ldquo;play again&rdquo; prompts. Works offline and installs to your home screen.</p>
-            <div class="project-tags">
-              <span class="tag">Game</span>
-              <span class="tag">Wellbeing</span>
-              <span class="tag">Offline</span>
-            </div>
-            <a href="/merge-life/" class="project-link">Play now &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Game &amp; story</div>
-            <h3 class="project-title">The Ruler of Three Faces</h3>
-            <p class="project-desc">A text-first interactive fantasy RPG where a kingdom remembers every choice. Talk your way past the palace gate, explore its secrets, meet its people &mdash; by picking choices or typing anything you like.</p>
-            <div class="project-tags">
-              <span class="tag">Game</span>
-              <span class="tag">Interactive fiction</span>
-              <span class="tag">RPG</span>
-            </div>
-            <a href="/ruler-of-three-faces/" class="project-link">Play now &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Game &amp; learning</div>
-            <h3 class="project-title">Dino Expedition</h3>
-            <p class="project-desc">A fun, fact-based dinosaur learning game for children aged 5&ndash;10. Explore real dinosaurs, dig up fossils, take a friendly quiz, and build habitats &mdash; earning discovery badges along the way.</p>
-            <div class="project-tags">
-              <span class="tag">Kids</span>
-              <span class="tag">Learning</span>
-              <span class="tag">Dinosaurs</span>
-            </div>
-            <a href="/dino/" class="project-link">Play now &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Game</div>
-            <h3 class="project-title">Odyssey &mdash; Sectors</h3>
-            <p class="project-desc">A space exploration and colonisation game. Scan unknown worlds, settle the habitable ones, grow your economy, and hunt for the Beacon to earn your colonial charter.</p>
-            <div class="project-tags">
-              <span class="tag">Game</span>
-              <span class="tag">Space</span>
-              <span class="tag">Strategy</span>
-            </div>
-            <a href="/odyssey" class="project-link">Play now &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Game</div>
-            <h3 class="project-title">Pok&eacute;mon Flappy</h3>
-            <p class="project-desc">A Flappy Bird-style arcade game with a Pok&eacute;mon twist — eight playable characters, pickups, sound, and a day/night cycle. Works great on mobile.</p>
-            <div class="project-tags">
-              <span class="tag">Game</span>
-              <span class="tag">Arcade</span>
-              <span class="tag">Mobile</span>
-            </div>
-            <a href="/pokemon-flappy" class="project-link">Play now &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Game</div>
-            <h3 class="project-title">VOID</h3>
-            <p class="project-desc">Drag to survive, nova to destroy. A fast, minimalist arcade survival game built for quick mobile sessions.</p>
-            <div class="project-tags">
-              <span class="tag">Game</span>
-              <span class="tag">Arcade</span>
-              <span class="tag">Mobile</span>
-            </div>
-            <a href="/m/void" class="project-link">Play now &rarr;</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">Game &amp; nostalgia</div>
-            <h3 class="project-title">NostalgiAI</h3>
-            <p class="project-desc">Rediscover the little drawings and paper games you made as a kid &mdash; the Cool S, paper fortune tellers, MASH, friendship bracelets, and more &mdash; so you can teach them to your own children.</p>
-            <div class="project-tags">
-              <span class="tag">Nostalgia</span>
-              <span class="tag">Craft</span>
-              <span class="tag">Kids</span>
-            </div>
-            <a href="/nostalgiai/" class="project-link">Learn now &rarr;</a>
-          </article>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <p>John Saunders &nbsp;&middot;&nbsp;
-      <a href="https://www.linkedin.com/in/saundersjohn/" target="_blank" rel="noopener">LinkedIn</a> &nbsp;&middot;&nbsp;
+<footer class="site-foot">
+  <div class="wrap foot-inner">
+    <p>John Saunders</p>
+    <p class="foot-links">
+      <a href="https://www.linkedin.com/in/saundersjohn/" target="_blank" rel="noopener">LinkedIn</a>
       <a href="https://github.com/jsipuk" target="_blank" rel="noopener">GitHub</a>
     </p>
-  </footer>
+  </div>
+</footer>
 
-  <script>
-    // Mobile navigation toggle
-    const navToggle = document.getElementById('nav-toggle');
-    const navLinks = document.getElementById('nav-links');
-
-    navToggle.addEventListener('click', () => {
-      const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
-      navToggle.setAttribute('aria-expanded', !isExpanded);
-      navLinks.setAttribute('aria-expanded', !isExpanded);
+<script>
+  (function () {
+    var toggle = document.getElementById('nav-toggle');
+    var links = document.getElementById('nav-links');
+    toggle.addEventListener('click', function () {
+      var open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      links.setAttribute('data-open', String(!open));
     });
-
-    // Close menu when a link is clicked
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        navToggle.setAttribute('aria-expanded', 'false');
-        navLinks.setAttribute('aria-expanded', 'false');
-      });
+    links.addEventListener('click', function (e) {
+      if (e.target.tagName !== 'A') return;
+      toggle.setAttribute('aria-expanded', 'false');
+      links.setAttribute('data-open', 'false');
     });
-  </script>
+  }());
+</script>
 </body>
 </html>
