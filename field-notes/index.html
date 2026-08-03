@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="/ground/">
+<title>Field Notes has moved to Ground</title>
+<style>
+  body{background:#0f1117;color:#e2e8f0;font-family:'Inter',system-ui,-apple-system,sans-serif;
+       display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:2rem;line-height:1.7}
+  .box{max-width:44ch}
+  h1{font-size:1.4rem;letter-spacing:-.5px;margin:0 0 .8rem}
+  p{color:#8892a4;font-size:.94rem;margin:0 0 1rem}
+  a.btn{display:inline-block;background:#6c63ff;color:#fff;text-decoration:none;border-radius:9px;
+        padding:.65rem 1.4rem;font-weight:600;font-size:.93rem}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em;background:#151827;
+       border:1px solid #2d3148;border-radius:4px;padding:.08rem .32rem}
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>Field Notes is now part of Ground</h1>
+    <p>The three apps were merged into one, so there is a single passphrase, a single backup, and no shuffling files between them.</p>
+    <p>Your data is safe where it is. In Ground, open <strong>Settings</strong> and choose <strong>Look for old data</strong> to bring it across.</p>
+    <p><a class="btn" href="/ground/">Open Ground</a></p>
+  </div>
+<script>
+  /* This app is retired. Remove its service worker and caches so the browser
+     stops serving the old shell from disk. */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function (rs) {
+      rs.forEach(function (r) { if (r.scope.indexOf('/field-notes/') !== -1) r.unregister(); });
+    });
+  }
+  if (window.caches) {
+    caches.keys().then(function (keys) {
+      keys.filter(function (k) { return /^(dojo|account-brain|field-notes)-/.test(k); })
+          .forEach(function (k) { caches.delete(k); });
+    });
+  }
+</script>
+</body>
+</html>

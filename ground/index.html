@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0f1117">
+<meta name="description" content="Ground: accounts, notes and practice in one private, offline store.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="stylesheet" href="./style.css?v=1">
+<title>Ground</title>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <span class="brand"><span class="dot" aria-hidden="true"></span>Ground</span>
+    <div class="top-actions" id="appNav" hidden>
+      <button class="ghost" id="navToday">Today</button>
+      <button class="ghost" id="navAccounts">Accounts</button>
+      <button class="ghost" id="navNotes">Notes</button>
+      <button class="ghost" id="navPractice">Practice</button>
+      <button class="ghost" id="btnData">Settings</button>
+      <button class="ghost" id="btnLock" hidden title="Lock now">Lock</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- LOCK -->
+  <section id="viewLock">
+    <form class="lock" id="lockForm" autocomplete="off">
+      <input type="hidden" id="lockMode" value="new">
+      <h1 id="lockTitle">Set a passphrase</h1>
+      <p id="lockBlurb"></p>
+      <div class="field">
+        <label for="lockPass">Passphrase</label>
+        <input type="password" id="lockPass" autocomplete="current-password" spellcheck="false">
+      </div>
+      <div class="field" id="lockPass2Wrap">
+        <label for="lockPass2">Type it again</label>
+        <input type="password" id="lockPass2" autocomplete="new-password" spellcheck="false">
+      </div>
+      <p class="err" id="lockErr" role="alert"></p>
+      <div class="lock-foot">
+        <button type="button" class="primary" id="lockGo">Encrypt and start</button>
+        <span id="lockSkipWrap"><button type="button" class="linky" id="lockSkip">Skip, do not encrypt</button></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- TODAY -->
+  <section id="viewToday" hidden>
+    <h1 class="page">Today</h1>
+    <p class="lede" id="todayLede"></p>
+    <div class="bar">
+      <label class="sr" for="search">Search everything</label>
+      <input id="search" type="search" placeholder="Search people, promises, quotes, notes, answers…" autocomplete="off">
+    </div>
+    <div id="searchResults" hidden></div>
+    <div id="attention"></div>
+    <div id="todayElse"></div>
+  </section>
+
+  <!-- ACCOUNTS -->
+  <section id="viewAccounts" hidden>
+    <h1 class="page">Accounts</h1>
+    <p class="lede">One page each. The point is not the record, it is the two minutes before the call.</p>
+    <div class="bar">
+      <button class="primary" id="btnAddAcct">Add an account</button>
+      <button class="ghost" id="btnPortfolioPack">Portfolio pack</button>
+      <button class="ghost" id="btnExample">Load an example</button>
+      <label class="check"><input type="checkbox" id="showArchived"> Show archived</label>
+    </div>
+    <div id="acctList"></div>
+  </section>
+
+  <!-- ACCOUNT DETAIL -->
+  <section id="viewDetail" hidden>
+    <button class="crumb" id="backList">← All accounts</button>
+    <div class="detail-head">
+      <div><h1 id="dName"></h1><p class="meta" id="dMeta"></p></div>
+      <div class="spacer">
+        <button class="ghost" id="btnEditAcct">Edit</button>
+        <button class="ghost" id="btnPack">Context pack</button>
+        <button class="primary" id="btnBrief">Pre-call brief</button>
+      </div>
+    </div>
+
+    <div class="panel accent">
+      <h2>Log a meeting <button class="add" id="btnAddEntry">Add</button></h2>
+      <p class="panel-note">The five lines. Ninety seconds, straight after the call. <em>I owe</em> and <em>Still open</em> become tracked threads, and <em>I learned</em> appears in Notes without being copied.</p>
+      <div id="entries"></div>
+    </div>
+
+    <div class="panel">
+      <h2>People <button class="add" id="btnAddPerson">Add</button></h2>
+      <div id="people"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Open threads <button class="add" id="btnAddThread">Add</button></h2>
+      <div id="threads"></div>
+    </div>
+
+    <div class="panel" id="alsoPanel" hidden>
+      <h2>Also known</h2>
+      <p class="panel-note">Notes of yours that mention this account. Reference only: a note is true forever, a thread is something you have to close. Promote one deliberately if it needs chasing.</p>
+      <div id="alsoList"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Closed <button class="add" id="btnToggleDone">Show</button></h2>
+      <div id="threadsDone" hidden></div>
+    </div>
+  </section>
+
+  <!-- BRIEF -->
+  <section id="viewBrief" hidden>
+    <button class="crumb" id="backDetail">← Back to the account</button>
+    <div class="brief" id="briefBody"></div>
+    <div class="bar">
+      <button class="ghost" id="btnPrint">Print or save as PDF</button>
+      <button class="ghost" id="btnCopyBrief">Copy as text</button>
+      <button class="ghost" id="btnCopyCrm">Copy CRM lines</button>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <section id="viewNotes" hidden>
+    <div class="capture" id="capture">
+      <div class="cap-label">What did you just learn?</div>
+      <label class="sr" for="note">Note text</label>
+      <textarea id="note" placeholder="Policy import silently drops rules with unicode names. Cost us an afternoon. #dlp #tooling"></textarea>
+      <div class="chips" id="kinds" role="group" aria-label="Note type"></div>
+      <div class="cap-foot">
+        <p class="hint">Use <code>#tag</code> for topics and <code>@Account</code> when it belongs to one. <code>Ctrl</code>+<code>Enter</code> saves.</p>
+        <button class="primary" id="btnSaveNote" disabled>Save note</button>
+      </div>
+    </div>
+
+    <section class="resurface" id="resurface" hidden>
+      <h2>Worth seeing again</h2>
+      <div id="resList"></div>
+    </section>
+
+    <div class="bar">
+      <label class="sr" for="noteSearch">Search notes</label>
+      <input id="noteSearch" type="search" placeholder="Search your notes…" autocomplete="off">
+      <button class="ghost" id="btnClearNotes">Clear</button>
+      <button class="ghost" id="btnNotesPack">Context pack</button>
+      <button class="ghost" id="navTopics">Topics</button>
+    </div>
+    <div class="filters" id="noteFilters" role="group" aria-label="Filter by type"></div>
+    <div id="activeScope" hidden></div>
+    <p class="count" id="noteCount" role="status" aria-live="polite"></p>
+    <div id="noteList"></div>
+  </section>
+
+  <!-- TOPICS -->
+  <section id="viewTopics" hidden>
+    <button class="crumb" id="backNotes">← Back to notes</button>
+    <h1 class="page">Topics</h1>
+    <p class="lede">What you know about a subject, regardless of which customer it came from.</p>
+    <div class="stat-grid" id="stats"></div>
+    <h2 class="sec">By topic</h2>
+    <div id="topicList"></div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section id="viewPractice" hidden>
+    <div class="hero">
+      <div id="duePill"></div>
+      <h1>You practise the piano.<br>Practise the thing that pays.</h1>
+      <p>One rep is ninety seconds. A real question, under a clock. Then you mark it honestly, and the ones you fumble come back sooner.</p>
+      <button class="primary big" id="btnStart">Start a rep</button>
+    </div>
+    <div class="stat-grid" id="repStats"></div>
+    <div class="bar">
+      <span class="row-label">Clock</span>
+      <button class="ghost" data-timer="0">Off</button>
+      <button class="ghost" data-timer="60">60s</button>
+      <button class="ghost" data-timer="90">90s</button>
+      <button class="ghost" id="navAnswers" style="margin-left:auto">Answer bank</button>
+    </div>
+    <h2 class="sec">Where you are strong, and where you are not</h2>
+    <div class="cats" id="cats"></div>
+  </section>
+
+  <!-- REP -->
+  <section id="viewRep" hidden>
+    <div class="rep-head">
+      <span class="badge" id="repCat"></span>
+      <span class="timer" id="timer" hidden>0:00</span>
+    </div>
+    <div class="card">
+      <p class="prompt" id="repPrompt"></p>
+      <p class="setting" id="repSetting"></p>
+      <label class="sr" for="answer">Your answer</label>
+      <textarea id="answer" placeholder="Say it out loud first, then type the version you would actually use. Rough is fine. This is a gym, not a document."></textarea>
+      <div class="rep-foot">
+        <p class="hint">Answer before you look at the shape. Looking first teaches you nothing.</p>
+        <button class="ghost" id="btnQuit">Stop</button>
+        <button class="primary" id="btnReveal">Done, show me the shape</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW -->
+  <section id="viewReview" hidden>
+    <div class="rep-head"><span class="badge" id="revCat"></span></div>
+    <div class="shape" id="shape"></div>
+    <div class="yours" id="yours"><h3>What you said</h3><div class="txt" id="yourText"></div></div>
+    <div class="rubric">
+      <h3>Mark it honestly</h3>
+      <div class="axis">
+        <span class="axis-label"><b>Clarity</b><span>Would a non-expert follow it?</span></span>
+        <span class="scale" data-axis="clarity"></span>
+      </div>
+      <div class="axis">
+        <span class="axis-label"><b>Evidence</b><span>Anchored in something real?</span></span>
+        <span class="scale" data-axis="evidence"></span>
+      </div>
+      <div class="axis">
+        <span class="axis-label"><b>Control</b><span>Did you end holding the next step?</span></span>
+        <span class="scale" data-axis="control"></span>
+      </div>
+    </div>
+    <div class="verdict" id="verdict">
+      <button class="vb" data-v="fumbled"><b>Fumbled</b><span>Back tomorrow</span></button>
+      <button class="vb" data-v="ok"><b>Got there</b><span>Back soon</span></button>
+      <button class="vb" data-v="nailed"><b>Nailed it</b><span>Back later</span></button>
+    </div>
+    <div class="rep-foot">
+      <p class="hint" id="keepHint">Keep the answer if it is one you would use again.</p>
+      <button class="ghost" id="btnKeep">Keep this answer</button>
+      <button class="primary" id="btnNext" disabled>Next rep</button>
+    </div>
+    <p class="next-note" id="nextNote"></p>
+  </section>
+
+  <!-- ANSWERS -->
+  <section id="viewAnswers" hidden>
+    <button class="crumb" id="backPractice">← Back to practice</button>
+    <h1 class="page">Answer bank</h1>
+    <p class="lede">The answers you marked as keepers. This is the part that outlives the job.</p>
+    <div class="bar"><button class="ghost" id="btnAnswerPack">Copy as context</button></div>
+    <div id="bankList"></div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  Stays in this browser. No account, no network, no analytics.<br>
+  <a href="/whats-missing/">Why this exists</a> &nbsp;&middot;&nbsp; <a href="/">jsip.uk</a>
+</footer>
+
+<!-- ============================ dialogs ============================ -->
+<dialog id="dlgAcct">
+  <div class="dlg-head"><h2 id="acctDlgTitle">Add an account</h2></div>
+  <div class="dlg-body">
+    <div class="field"><label for="aName">Account name</label><input id="aName" placeholder="Northbank Group" autocomplete="off"></div>
+    <div class="two">
+      <div class="field"><label for="aStage">Where it is</label><select id="aStage"></select></div>
+      <div class="field"><label for="aSector">Sector</label><input id="aSector" placeholder="Banking" autocomplete="off"></div>
+    </div>
+    <div class="field"><label for="aNote">What this account is really about</label>
+      <textarea id="aNote" placeholder="One or two lines you would want to read back in three months."></textarea></div>
+    <label class="check"><input type="checkbox" id="aArchived"> Archived (hidden from Today and the list)</label>
+  </div>
+  <div class="dlg-foot">
+    <button class="ghost danger" id="btnDelAcct" style="margin-right:auto" hidden>Delete</button>
+    <button class="ghost" data-close>Cancel</button>
+    <button class="primary" id="btnSaveAcct">Save</button>
+  </div>
+</dialog>
+
+<dialog id="dlgEntry">
+  <div class="dlg-head"><h2>Log a meeting</h2></div>
+  <div class="dlg-body">
+    <div class="field"><label for="eMeeting">What it was</label><input id="eMeeting" placeholder="Technical deep dive, Priya and Tom" autocomplete="off"></div>
+    <div class="field"><label for="eSoWhat">So what</label><input id="eSoWhat" placeholder="What actually changed. &ldquo;Nothing changed&rdquo; is a valid answer."></div>
+    <div class="field"><label for="eTheySaid">They said</label><input id="eTheySaid" placeholder="One quote worth keeping. Their words, not your paraphrase."></div>
+    <div class="field"><label for="eLearned">I learned</label><input id="eLearned" placeholder="One thing you know now that you did not at 9am."></div>
+    <div class="field"><label for="eOpen">Still open</label><input id="eOpen" placeholder="What is unresolved or still against you."></div>
+    <div class="sub-field" id="eOpenKindWrap" hidden>
+      <span class="row-label">Track it as</span>
+      <span class="seg" id="eOpenKind">
+        <button type="button" data-kind="objection">Objection</button>
+        <button type="button" data-kind="risk">Risk</button>
+        <button type="button" data-kind="question">To ask</button>
+      </span>
+    </div>
+    <div class="field"><label for="eOwe">I owe</label><input id="eOwe" placeholder="What you promised, to whom. Name and specifics."></div>
+    <div class="sub-field" id="eOweDueWrap" hidden>
+      <span class="row-label">By when</span>
+      <input type="date" id="eOweDue">
+      <span class="muted-note">A promise with no date cannot go overdue, so it cannot remind you.</span>
+    </div>
+    <details class="more">
+      <summary>Anything else</summary>
+      <div class="field"><label class="sr" for="eText">Free text</label>
+        <textarea id="eText" placeholder="Only if it does not fit above. The transcript already has the record: this is for your judgement."></textarea></div>
+    </details>
+  </div>
+  <div class="dlg-foot">
+    <button class="ghost" data-close>Cancel</button>
+    <button class="primary" id="btnSaveEntry">Save</button>
+  </div>
+</dialog>
+
+<dialog id="dlgPerson">
+  <div class="dlg-head"><h2 id="personDlgTitle">Add a person</h2></div>
+  <div class="dlg-body">
+    <div class="two">
+      <div class="field"><label for="pName">Name</label><input id="pName" autocomplete="off"></div>
+      <div class="field"><label for="pRole">Role</label><input id="pRole" placeholder="Head of Network" autocomplete="off"></div>
+    </div>
+    <div class="field"><label for="pCares">What they actually care about</label>
+      <textarea id="pCares" placeholder="Not their job title. The thing that makes them lean forward."></textarea></div>
+    <div class="field"><label>Where they stand</label><div class="seg" id="pStance"></div></div>
+  </div>
+  <div class="dlg-foot">
+    <button class="ghost danger" id="btnDelPerson" style="margin-right:auto" hidden>Delete</button>
+    <button class="ghost" data-close>Cancel</button>
+    <button class="primary" id="btnSavePerson">Save</button>
+  </div>
+</dialog>
+
+<dialog id="dlgThread">
+  <div class="dlg-head"><h2 id="threadDlgTitle">Add a thread</h2></div>
+  <div class="dlg-body">
+    <div class="field"><label>What kind</label><div class="seg" id="tKind"></div></div>
+    <div class="field"><label for="tText">What it is</label>
+      <textarea id="tText" placeholder="Send the regional data handling answer to Priya, confirmed in writing."></textarea></div>
+    <div class="field"><label for="tDue">Due by</label><input type="date" id="tDue"></div>
+  </div>
+  <div class="dlg-foot">
+    <button class="ghost danger" id="btnDelThread" style="margin-right:auto" hidden>Delete</button>
+    <button class="ghost" data-close>Cancel</button>
+    <button class="primary" id="btnSaveThread">Save</button>
+  </div>
+</dialog>
+
+<dialog id="dlgPack">
+  <div class="dlg-head"><h2 id="packTitle">Context pack</h2></div>
+  <div class="dlg-body">
+    <p>Grounding context for Claude. Paste it in before asking for a draft, so it works from the real history rather than guessing.</p>
+    <p><strong>This is plaintext and it may name real people and customers.</strong> Paste it somewhere you would be comfortable sending the underlying notes.</p>
+    <label class="sr" for="packOut">Generated context pack</label>
+    <textarea id="packOut" readonly spellcheck="false"></textarea>
+  </div>
+  <div class="dlg-foot">
+    <button class="ghost" data-close>Close</button>
+    <button class="primary" id="btnCopyPack">Copy to clipboard</button>
+  </div>
+</dialog>
+
+<dialog id="dlgData">
+  <div class="dlg-head"><h2>Settings and data</h2></div>
+  <div class="dlg-body">
+    <h3 class="dh">Security</h3>
+    <p class="secstate" id="secState"></p>
+    <p>This page is public, but the data never is: it lives in this browser only, on this device, and no version of it is sent anywhere or committed to the site. <strong>This holds real customer names and things people said in confidence</strong>, so encryption is strongly recommended.</p>
+    <p>Encryption cannot protect you from someone who has both the device and the passphrase, and <strong>a forgotten passphrase means the data is gone</strong>.</p>
+    <div class="bar" id="lockMinsWrap">
+      <span class="row-label">Auto-lock</span>
+      <button class="ghost" data-lockmins="5">5 min</button>
+      <button class="ghost" data-lockmins="15">15 min</button>
+      <button class="ghost" data-lockmins="60">1 hour</button>
+      <button class="ghost" data-lockmins="0">Never</button>
+    </div>
+    <div class="bar">
+      <button class="ghost" id="btnSetPass">Set a passphrase</button>
+      <button class="ghost danger" id="btnDropPass" hidden>Remove encryption</button>
+    </div>
+
+    <h3 class="dh">Bring in the old apps</h3>
+    <p id="migrateNote">Ground replaces Field Notes, Account Brain and The Dojo. If you used any of them in this browser, their data can be merged in here. Merging is by id, so running it twice changes nothing.</p>
+    <div class="bar">
+      <button class="primary" id="btnMigrate">Look for old data</button>
+      <button class="ghost" id="btnImport">Import a backup file…</button>
+    </div>
+
+    <h3 class="dh">Backup</h3>
+    <p>Browsers clear storage and devices get replaced. An encrypted backup is safe to keep in Google Drive because it is ciphertext.</p>
+    <div class="bar">
+      <button class="primary" id="btnExportEnc">Encrypted backup</button>
+      <button class="ghost" id="btnExportPlain">Plain export</button>
+    </div>
+
+    <h3 class="dh">Erase</h3>
+    <p>Clears only Ground's own storage key. Nothing else in this browser is touched.</p>
+    <div class="bar"><button class="ghost danger" id="btnReset">Erase everything</button></div>
+  </div>
+  <div class="dlg-foot"><button class="ghost" data-close>Close</button></div>
+</dialog>
+
+<input type="file" id="file" accept="application/json,.json" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="./store.js?v=1"></script>
+<script src="./deck.js?v=1"></script>
+<script src="./model.js?v=1"></script>
+<script src="./app.js?v=1"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () { /* offline install is a bonus, not a requirement */ });
+    });
+  }
+</script>
+</body>
+</html>
