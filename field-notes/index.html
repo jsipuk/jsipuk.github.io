@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0f1117">
+<meta name="description" content="Field Notes: the topic-indexed library of what you know.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="stylesheet" href="./style.css?v=1">
+<title>Field Notes</title>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <span class="brand"><span class="dot" aria-hidden="true"></span>Field Notes</span>
+    <div class="top-actions" id="appNav" hidden>
+      <button class="ghost" id="navNotes">Notes</button>
+      <button class="ghost" id="navTopics">Topics</button>
+      <button class="ghost" id="btnData">Settings</button>
+      <button class="ghost" id="btnLock" hidden title="Lock now">Lock</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- LOCK -->
+  <section id="viewLock">
+    <form class="lock" id="lockForm" autocomplete="off">
+      <input type="hidden" id="lockMode" value="new">
+      <h1 id="lockTitle">Set a passphrase</h1>
+      <p id="lockBlurb"></p>
+      <div class="field">
+        <label for="lockPass">Passphrase</label>
+        <input type="password" id="lockPass" autocomplete="current-password" spellcheck="false">
+      </div>
+      <div class="field" id="lockPass2Wrap">
+        <label for="lockPass2">Type it again</label>
+        <input type="password" id="lockPass2" autocomplete="new-password" spellcheck="false">
+      </div>
+      <p class="err" id="lockErr" role="alert"></p>
+      <div class="lock-foot">
+        <button type="button" class="primary" id="lockGo">Encrypt and start</button>
+        <span id="lockSkipWrap">
+          <button type="button" class="linky" id="lockSkip">Skip, do not encrypt</button>
+        </span>
+      </div>
+    </form>
+  </section>
+
+  <!-- NOTES -->
+  <section id="viewNotes" hidden>
+    <div class="capture" id="capture">
+      <div class="cap-label">What did you just learn?</div>
+      <label class="sr" for="note">Note text</label>
+      <textarea id="note" placeholder="Policy import silently drops rules with unicode names. Cost us an afternoon. #dlp #gotcha"></textarea>
+      <div class="chips" id="kinds" role="group" aria-label="Note type"></div>
+      <div class="cap-foot">
+        <p class="hint">Use <code>#tag</code> for topics and <code>@Account</code> when it belongs to one. <code>Ctrl</code>+<code>Enter</code> saves.</p>
+        <button class="primary" id="btnSave" disabled>Save note</button>
+      </div>
+    </div>
+
+    <section class="resurface" id="resurface" hidden>
+      <h2>Worth seeing again</h2>
+      <div id="resList"></div>
+    </section>
+
+    <div class="bar">
+      <label class="sr" for="search">Search notes</label>
+      <input id="search" type="search" placeholder="Search everything you know…" autocomplete="off">
+      <button class="ghost" id="btnClear">Clear</button>
+      <button class="ghost" id="btnPack">Context pack</button>
+      <button class="ghost" id="btnToDojo">Send to Dojo</button>
+    </div>
+    <div class="filters" id="filters" role="group" aria-label="Filter by type"></div>
+    <div id="activeScope" hidden></div>
+    <p class="count" id="count" role="status" aria-live="polite"></p>
+    <div id="list"></div>
+  </section>
+
+  <!-- TOPICS -->
+  <section id="viewTopics" hidden>
+    <h1 class="page">Topics</h1>
+    <p class="lede">What you know about a subject, regardless of which customer it came from. This is the view neither of the other two apps has.</p>
+    <div class="stat-grid" id="stats"></div>
+    <h2 class="sec">By topic</h2>
+    <div id="topicList"></div>
+    <h2 class="sec">By account</h2>
+    <div id="accountList"></div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  Stays in this browser. No account, no network, no analytics.<br>
+  <a href="/">jsip.uk</a>
+</footer>
+
+<dialog id="dlgPack">
+  <div class="dlg-head"><h2>Context pack</h2></div>
+  <div class="dlg-body">
+    <p>The current filter, written out as grounding context. Paste it into Claude before asking it to draft an answer, a plan or a follow-up, so it argues from what you actually know.</p>
+    <p><strong>This is plaintext and it may name real customers.</strong> Paste it somewhere you would be comfortable sending the underlying notes.</p>
+    <label class="sr" for="packOut">Generated context pack</label>
+    <textarea id="packOut" readonly spellcheck="false"></textarea>
+  </div>
+  <div class="dlg-foot">
+    <button class="ghost" data-close>Close</button>
+    <button class="primary" id="btnCopyPack">Copy to clipboard</button>
+  </div>
+</dialog>
+
+<dialog id="dlgData">
+  <div class="dlg-head"><h2>Settings and data</h2></div>
+  <div class="dlg-body">
+    <h3 class="dh">Security</h3>
+    <p class="secstate" id="secState"></p>
+    <p>This page is public, but the data never is: it lives in this browser only, on this device, and no version of it is sent anywhere or committed to the site. Notes here can name real customers, so encryption is recommended.</p>
+    <p>Encryption cannot protect you from someone who has both the device and the passphrase, and <strong>a forgotten passphrase means the data is gone</strong>.</p>
+    <div class="bar" id="lockMinsWrap">
+      <span class="row-label">Auto-lock</span>
+      <button class="ghost" data-lockmins="5">5 min</button>
+      <button class="ghost" data-lockmins="15">15 min</button>
+      <button class="ghost" data-lockmins="60">1 hour</button>
+      <button class="ghost" data-lockmins="0">Never</button>
+    </div>
+    <div class="bar">
+      <button class="ghost" id="btnSetPass">Set a passphrase</button>
+      <button class="ghost danger" id="btnDropPass" hidden>Remove encryption</button>
+    </div>
+
+    <h3 class="dh">Fill it from Account Brain</h3>
+    <p>A capture tool is worth nothing on day one, which is the main reason they get abandoned. Import an Account Brain backup and every <em>I learned</em> line and open objection arrives here as a note, tagged with its account. Run it again any time: it only adds what is new.</p>
+    <p>Quotes and promises are deliberately not imported. A quote is as often a proof point as an objection, and guessing the wrong label is worse than no note.</p>
+    <div class="bar"><button class="primary" id="btnFromAB">Import from Account Brain…</button></div>
+
+    <h3 class="dh">Backup</h3>
+    <p>Browsers clear storage and devices get replaced. An encrypted backup is safe to keep in Google Drive because it is ciphertext. Import merges by id, so restoring an older backup will not discard newer notes.</p>
+    <div class="bar">
+      <button class="primary" id="btnExportEnc">Encrypted backup</button>
+      <button class="ghost" id="btnImport">Import…</button>
+      <button class="ghost" id="btnExportPlain">Plain export</button>
+    </div>
+
+    <h3 class="dh">Erase</h3>
+    <p>Clears only Field Notes' own storage key. Nothing else in this browser is touched.</p>
+    <div class="bar"><button class="ghost danger" id="btnReset">Erase everything</button></div>
+  </div>
+  <div class="dlg-foot"><button class="ghost" data-close>Close</button></div>
+</dialog>
+
+<input type="file" id="file" accept="application/json,.json" hidden>
+<input type="file" id="fileAB" accept="application/json,.json" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="./store.js?v=1"></script>
+<script src="./model.js?v=1"></script>
+<script src="./app.js?v=1"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () { /* offline install is a bonus, not a requirement */ });
+    });
+  }
+</script>
+</body>
+</html>
