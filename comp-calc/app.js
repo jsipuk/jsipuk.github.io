@@ -102,26 +102,55 @@
 
   // ---------------------------------------------------------------- storage
 
-  // Nothing is seeded: a browser with no saved plan gets the empty first-run
-  // state, not somebody else's numbers.
-  function loadPlan() {
+  // The stored value is a SecureStore envelope, the same format Ground uses:
+  // { app, v, enc:false, data } when unprotected, or { app, v, enc:true, kdf,
+  // iter, salt, iv, ct } when a passphrase is set. Protecting the plan is
+  // opt-in per browser, which is exactly what the envelope's `enc` flag is
+  // for. Plans saved before encryption existed are bare objects and are
+  // re-wrapped on the next save.
+  //
+  // The key is derived once per unlock and held in memory for the session, so
+  // saving does not pay the 600,000 PBKDF2 iterations again.
+  let sessionKey = null;
+  let sessionSalt = null;
+  let sessionIter = null;
+
+  function readStored() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return emptyPlan();
-      const parsed = JSON.parse(raw);
-      if (validatePlan(parsed).length > 0) return emptyPlan();
-      return parsed;
+      if (!raw) return null;
+      return JSON.parse(raw);
     } catch {
-      return emptyPlan();
+      return null;
     }
   }
 
+  function usablePlan(plan) {
+    if (!plan || validatePlan(plan).length > 0) return emptyPlan();
+    return plan;
+  }
+
+  function isProtected() {
+    return SecureStore.isEncrypted(readStored());
+  }
+
+  // Writes through whichever envelope the browser is currently using. A
+  // session key means the plan is protected and stays protected.
   function savePlan(plan) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
+    if (sessionKey) {
+      return SecureStore.reseal(plan, sessionKey, sessionSalt, sessionIter).then((env) => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(env));
+      });
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(SecureStore.plainEnvelope(plan)));
+    return Promise.resolve();
   }
 
   function forgetPlan() {
     localStorage.removeItem(STORAGE_KEY);
+    sessionKey = null;
+    sessionSalt = null;
+    sessionIter = null;
   }
 
   // ------------------------------------------------------------ tier rows
@@ -230,9 +259,10 @@
       saveStatusEl.textContent = '';
       return;
     }
-    savePlan(plan);
-    emptyPlanHintEl.hidden = true;
-    flashStatus('Saved ✓');
+    savePlan(plan).then(() => {
+      emptyPlanHintEl.hidden = true;
+      flashStatus(sessionKey ? 'Saved and encrypted ✓' : 'Saved ✓');
+    });
   });
 
   function flashStatus(message) {
@@ -255,6 +285,7 @@
     forgetPlan();
     showErrors(planErrorsEl, []);
     resultsEl.hidden = true;
+    refreshProtectionUi();
     flashStatus('Plan cleared from this browser');
   });
 
@@ -447,11 +478,158 @@
     resultsEl.hidden = false;
   });
 
+  // ------------------------------------------------------- passphrase lock
+
+  const lockPanelEl = document.getElementById('lock-panel');
+  const lockFormEl = document.getElementById('lock-form');
+  const lockTitleEl = document.getElementById('lock-title');
+  const lockBlurbEl = document.getElementById('lock-blurb');
+  const lockPassEl = document.getElementById('lock-pass');
+  const lockPass2WrapEl = document.getElementById('lock-pass2-wrap');
+  const lockPass2El = document.getElementById('lock-pass2');
+  const lockErrEl = document.getElementById('lock-err');
+  const lockGoEl = document.getElementById('lock-go');
+  const lockCancelEl = document.getElementById('lock-cancel');
+  const mainEl = document.querySelector('main.layout');
+  const protectBtn = document.getElementById('protect-plan');
+  const lockNowBtn = document.getElementById('lock-now');
+
+  // 'unlock' opens existing encrypted storage; 'new' sets a passphrase on the
+  // plan currently in the form; 'remove' takes one off again.
+  let lockMode = 'unlock';
+
+  function showLock(mode) {
+    lockMode = mode;
+    lockErrEl.textContent = '';
+    lockPassEl.value = '';
+    lockPass2El.value = '';
+    lockPass2WrapEl.hidden = mode !== 'new';
+    lockCancelEl.hidden = mode === 'unlock';
+
+    if (mode === 'unlock') {
+      lockTitleEl.textContent = 'This plan is protected';
+      lockBlurbEl.textContent = 'Enter the passphrase for this browser to open it. There is no recovery: forget it and the saved plan is gone, though you can always clear it and start again.';
+      lockGoEl.textContent = 'Unlock';
+    } else if (mode === 'new') {
+      lockTitleEl.textContent = 'Protect this plan with a passphrase';
+      lockBlurbEl.textContent = 'The plan is encrypted before it is written to this browser, so it cannot be read from storage without the passphrase. At least 8 characters. There is no recovery.';
+      lockGoEl.textContent = 'Encrypt and save';
+    } else {
+      lockTitleEl.textContent = 'Remove the passphrase';
+      lockBlurbEl.textContent = 'Confirm the current passphrase. The plan stays saved in this browser, but in plain text, readable by anything that can read this browser profile.';
+      lockGoEl.textContent = 'Remove protection';
+    }
+
+    lockPanelEl.hidden = false;
+    mainEl.hidden = mode === 'unlock';
+    lockPassEl.focus();
+  }
+
+  function hideLock() {
+    lockPanelEl.hidden = true;
+    mainEl.hidden = false;
+  }
+
+  function refreshProtectionUi() {
+    const on = isProtected();
+    protectBtn.textContent = on ? 'Remove passphrase' : 'Protect with a passphrase';
+    lockNowBtn.hidden = !on;
+  }
+
+  lockFormEl.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const pass = lockPassEl.value;
+    lockErrEl.textContent = '';
+
+    if (lockMode === 'unlock') {
+      SecureStore.unseal(readStored(), pass)
+        .then(({ data, key, salt, iter }) => {
+          sessionKey = key;
+          sessionSalt = salt;
+          sessionIter = iter;
+          renderPlan(usablePlan(data));
+          hideLock();
+          refreshProtectionUi();
+        })
+        .catch((err) => {
+          lockErrEl.textContent = err && /passphrase/i.test(err.message) ? err.message : 'Could not open the saved plan.';
+        });
+      return;
+    }
+
+    if (lockMode === 'new') {
+      if (pass.length < 8) {
+        lockErrEl.textContent = 'Use at least 8 characters.';
+        return;
+      }
+      if (pass !== lockPass2El.value) {
+        lockErrEl.textContent = 'The two passphrases do not match.';
+        return;
+      }
+      const plan = readPlanFromForm();
+      SecureStore.seal(plan, pass).then(({ envelope, key, salt, iter }) => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
+        sessionKey = key;
+        sessionSalt = salt;
+        sessionIter = iter;
+        hideLock();
+        refreshProtectionUi();
+        emptyPlanHintEl.hidden = true;
+        flashStatus('Saved and encrypted ✓');
+      });
+      return;
+    }
+
+    // remove: prove the passphrase before downgrading to plain storage
+    SecureStore.unseal(readStored(), pass)
+      .then(({ data }) => {
+        sessionKey = null;
+        sessionSalt = null;
+        sessionIter = null;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(SecureStore.plainEnvelope(data)));
+        renderPlan(usablePlan(data));
+        hideLock();
+        refreshProtectionUi();
+        flashStatus('Passphrase removed, plan saved in plain text');
+      })
+      .catch((err) => {
+        lockErrEl.textContent = err && /passphrase/i.test(err.message) ? err.message : 'Could not open the saved plan.';
+      });
+  });
+
+  lockCancelEl.addEventListener('click', () => {
+    hideLock();
+    refreshProtectionUi();
+  });
+
+  protectBtn.addEventListener('click', () => showLock(isProtected() ? 'remove' : 'new'));
+
+  lockNowBtn.addEventListener('click', () => {
+    sessionKey = null;
+    sessionSalt = null;
+    sessionIter = null;
+    renderPlan(emptyPlan());
+    resultsEl.hidden = true;
+    showLock('unlock');
+  });
+
   // ---------------------------------------------------------------- init
 
   attachThousandsFormatting(document.getElementById('quota'));
   attachThousandsFormatting(document.getElementById('priorAttainment'));
-  renderPlan(loadPlan());
+
+  const stored = readStored();
+  if (SecureStore.isEncrypted(stored)) {
+    renderPlan(emptyPlan());
+    showLock('unlock');
+  } else if (SecureStore.isEnvelope(stored)) {
+    renderPlan(usablePlan(stored.data));
+  } else {
+    // null, or a bare plan saved before encryption existed
+    renderPlan(usablePlan(stored));
+  }
+  refreshProtectionUi();
+
   updateDealFieldsForType();
   updateTcvTotal();
 })();

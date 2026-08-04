@@ -22,6 +22,26 @@
     <p class="currency-note">Deal values (ACV / TCV / quota) are entered in <strong>USD $</strong>. Commission is calculated and shown in <strong>GBP £</strong> &mdash; that's this plan's actual rate structure (a dollar deal value times a rate produces a pound commission figure), not a live currency conversion.</p>
   </header>
 
+  <section id="lock-panel" class="panel lock-panel" hidden>
+    <form id="lock-form" autocomplete="off" novalidate>
+      <h2 id="lock-title">This plan is protected</h2>
+      <p id="lock-blurb" class="panel-hint"></p>
+      <label class="field field-standalone">
+        <span>Passphrase</span>
+        <input type="password" id="lock-pass" autocomplete="current-password" spellcheck="false" />
+      </label>
+      <label class="field field-standalone" id="lock-pass2-wrap" hidden>
+        <span>Type it again</span>
+        <input type="password" id="lock-pass2" autocomplete="new-password" spellcheck="false" />
+      </label>
+      <div id="lock-err" class="errors" role="alert" aria-live="polite"></div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="lock-go">Unlock</button>
+        <button type="button" class="btn btn-ghost" id="lock-cancel" hidden>Cancel</button>
+      </div>
+    </form>
+  </section>
+
   <main class="layout">
     <section class="panel" aria-labelledby="plan-heading">
       <div class="panel-header">
@@ -91,6 +111,8 @@
           <button type="submit" class="btn btn-primary">Save plan</button>
           <button type="button" id="load-example" class="btn btn-secondary">Load example</button>
           <button type="button" id="clear-plan" class="btn btn-ghost">Clear plan</button>
+          <button type="button" id="protect-plan" class="btn btn-ghost">Protect with a passphrase</button>
+          <button type="button" id="lock-now" class="btn btn-ghost" hidden>Lock</button>
           <span id="save-status" class="save-status" aria-live="polite"></span>
         </div>
       </form>
@@ -163,6 +185,7 @@
     <p>Runs entirely in your browser. Nothing is sent anywhere &mdash; plan assumptions are stored in this browser's <code>localStorage</code> only.</p>
   </footer>
 
+  <script src="store.js"></script>
   <script src="calc.js"></script>
   <script src="app.js"></script>
 </body>

@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Netskope One — Product Suite</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Netskope One Product Explorer — an unofficial personal reference</title>
+<meta name="description" content="A personal, unofficial reference to the Netskope One product suite, compiled from public product pages. Not a Netskope publication.">
+<meta name="robots" content="noindex">
+<!-- Fonts are served from this site. No runtime request leaves the page. -->
+<link rel="stylesheet" href="/fonts/fonts.css">
 <style>
   :root {
     --ns-teal: #00A7CE;
@@ -78,6 +80,17 @@
     letter-spacing: -0.02em;
   }
   .logo-text span { color: var(--ns-teal); }
+  .disclaimer {
+    margin-top: 12px;
+    padding: 9px 12px;
+    border-left: 3px solid var(--ns-orange);
+    background: var(--ns-orange-light);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    max-width: 62ch;
+  }
+  .disclaimer a { color: inherit; }
   .topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.12); }
   .topbar-title { font-size: 13px; color: rgba(255,255,255,0.55); font-weight: 400; }
   .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
@@ -556,11 +569,11 @@
 
 <!-- TOP NAV -->
 <nav class="topbar">
-  <a class="logo" href="https://www.netskope.com/products" target="_blank">
-    <img src="https://cdn.brandfetch.io/id8gc0ILB0/theme/light/logo.svg?c=1dxbfHSJFAPEGdCLU4o5B" alt="Netskope" style="height:26px;width:auto">
+  <a class="logo" href="/">
+    <span class="logo-text">JSIP<span>.UK</span></span>
   </a>
   <div class="topbar-divider"></div>
-  <span class="topbar-title">Product Explorer</span>
+  <span class="topbar-title">Netskope One Product Explorer</span>
   <div class="topbar-right">
     <div class="search-box">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="m11 11 2.5 2.5" stroke-linecap="round"/></svg>
@@ -582,6 +595,7 @@
       <div class="hero-text">
         <h1>Netskope One Platform</h1>
         <p>The industry's leading SSE and SASE platform — now with AgentSkope agentic operations and a full AI security suite, built natively on a single cloud.</p>
+        <p class="disclaimer">A personal reference built by John Saunders from Netskope's public product pages. Not a Netskope publication, not endorsed by Netskope, and not an authoritative source. For anything that matters, use <a href="https://www.netskope.com/products" target="_blank" rel="noopener">netskope.com</a>.</p>
       </div>
       <div class="hero-stats">
         <div class="hero-stat">

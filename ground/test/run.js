@@ -397,7 +397,7 @@ function db() {
       .replace(/var APP = '[^']+';/, "var APP = 'X';")
       .replace(/root\.\w+ = factory\(\)/, 'root.X = factory()');
     const mine = fs.readFileSync(path.join(__dirname, '..', 'store.js'), 'utf8');
-    ['dojo', 'account-brain', 'field-notes'].forEach(app => {
+    ['dojo', 'account-brain', 'field-notes', 'comp-calc'].forEach(app => {
       const p = path.join(__dirname, '..', '..', app, 'store.js');
       if (!fs.existsSync(p)) { pass++; return; }          // sibling retired: nothing to drift from
       ok(strip(mine) === strip(fs.readFileSync(p, 'utf8')), `identical to ${app}/store.js apart from the app name`);

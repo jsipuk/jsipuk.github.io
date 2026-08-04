@@ -200,6 +200,29 @@ real-plan example above:
 node comp-calc/test/calc.test.js
 ```
 
+## Protecting the saved plan
+
+The plan can be encrypted with a passphrase before it is written to this
+browser. It is **off by default**: click **Protect with a passphrase** in
+the plan panel to turn it on, and **Remove passphrase** to turn it off
+again (which asks for the current passphrase first).
+
+- **AES-GCM 256**, key derived by **PBKDF2-HMAC-SHA256** at **600,000
+  iterations**, fresh salt and IV per save.
+- The key is derived once per unlock and held in memory for the session, so
+  saving does not pay the derivation cost again.
+- With it on, the page opens locked and the app stays hidden until the
+  passphrase is entered. **Lock** re-locks without a reload.
+- **There is no recovery.** Forget the passphrase and the saved plan is
+  gone, though **Clear plan** always lets you start again.
+
+`store.js` is a copy of [`ground/store.js`](../ground/store.js), identical
+apart from the header comment and the `APP` constant, and Ground's test
+suite fails if the two drift apart. The envelope format is the same, which
+is why the unencrypted mode is a real envelope (`enc: false`) rather than a
+bare object. See [Ground's README](../ground/README.md) for the reasoning
+behind the model.
+
 ## Privacy
 
 No accounts, no backend, no analytics, no network calls. Your plan
@@ -207,7 +230,8 @@ assumptions live only in this browser via `localStorage`.
 
 What that does and does not mean, plainly: the **page is public and always
 will be**, because this is a public repository on a static host. What is
-protected is the **data you type**, and only because it never leaves your
-browser. Anyone who can open your browser profile can read it — there is no
-passphrase on this app, unlike [Ground](../ground/README.md). Treat the
-saved plan as no more private than a note in that browser.
+protected is the **data you type**. Without a passphrase it is stored in
+plain text, readable by anything that can read this browser profile. With
+one, the stored blob contains no readable figure, which is checked in the
+browser test. Neither case protects you from someone holding both the
+device and the passphrase.

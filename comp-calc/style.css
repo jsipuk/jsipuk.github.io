@@ -64,6 +64,17 @@ body {
 }
 .currency-note strong { color: var(--color-text); }
 
+/* `display: grid` below beats the hidden attribute's UA rule, so the lock
+   screen could not hide the app without this. */
+.layout[hidden] { display: none; }
+
+.lock-panel {
+  max-width: 34rem;
+  margin: 1rem auto 3rem;
+}
+.lock-panel h2 { margin-bottom: 0.5rem; }
+.lock-panel .panel-hint { display: block; margin-bottom: 1.25rem; line-height: 1.5; }
+
 .layout {
   max-width: var(--max-width);
   margin: 0 auto;
