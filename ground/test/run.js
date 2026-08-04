@@ -390,18 +390,37 @@ function db() {
     ok(a.envelope.salt !== b.envelope.salt && a.envelope.iv !== b.envelope.iv, 'fresh salt and iv per seal');
   }
 
-  section('crypto layer has not drifted from its siblings');
+  section('crypto layer contract');
   {
+    /* This section used to diff store.js against the three sibling apps. Those
+       have been retired and deleted, so the comparison had nothing to run
+       against and was quietly counting three passes for checks it never made.
+       Guard store.js's own contract instead: every value below is baked into
+       the stored envelope format, and changing one silently would make existing
+       backups unreadable. */
+    eq(Store.APP, 'ground', 'the app name written into envelopes');
+    eq(Store.VERSION, 1, 'envelope version is pinned');
+    ok(Store.ITERATIONS >= 600000, `PBKDF2 work factor meets the OWASP floor (${Store.ITERATIONS})`);
+
+    const env = Store.plainEnvelope({ hello: 'world' });
+    eq(env.app, 'ground', 'plain envelopes carry the app name');
+    eq(env.enc, false, 'and are flagged unencrypted');
+    ok(Store.isEnvelope(env), 'and are recognised as ours');
+
+    /* If a retired sibling is ever restored, it still must not diverge. An
+       assertion that cannot run is not counted, which is the bug this replaces. */
     const strip = s => s
       .replace(/\/\*[\s\S]*?\*\//, '')
       .replace(/var APP = '[^']+';/, "var APP = 'X';")
       .replace(/root\.\w+ = factory\(\)/, 'root.X = factory()');
     const mine = fs.readFileSync(path.join(__dirname, '..', 'store.js'), 'utf8');
-    ['dojo', 'account-brain', 'field-notes'].forEach(app => {
-      const p = path.join(__dirname, '..', '..', app, 'store.js');
-      if (!fs.existsSync(p)) { pass++; return; }          // sibling retired: nothing to drift from
-      ok(strip(mine) === strip(fs.readFileSync(p, 'utf8')), `identical to ${app}/store.js apart from the app name`);
+    const siblings = ['dojo', 'account-brain', 'field-notes']
+      .map(app => path.join(__dirname, '..', '..', app, 'store.js'))
+      .filter(f => fs.existsSync(f));
+    siblings.forEach(f => {
+      ok(strip(mine) === strip(fs.readFileSync(f, 'utf8')), `no drift from ${f}`);
     });
+    console.log(`  (${siblings.length} sibling copies on disk to compare against)`);
   }
 
   console.log(`\n${pass} passed, ${fail} failed`);

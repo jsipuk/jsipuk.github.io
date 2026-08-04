@@ -1,73 +1,64 @@
-# What is missing
+# /whats-missing/
 
-A research note and three working prototypes, at [jsip.uk/whats-missing](https://jsip.uk/whats-missing/).
+The page that explains [Ground](../ground/), at
+[jsip.uk/whats-missing](https://jsip.uk/whats-missing/). Unlisted and `noindex`,
+linked only from Ground's own footer.
 
-## The finding
+The path is a historical name. It began as a research note proposing three
+prototypes, and the URL was kept when the note became a product page so an
+existing bookmark would not break.
 
-Sixteen things live on this site. Every one is self contained and stateless, and
-none of them accumulates anything. Meanwhile the reports in this same repository
-specify, in detail, systems that were never built:
+## What the page covers
+
+1. **Why it exists** — the audit finding that motivated the work
+2. **What it is** — the three faces, and the Today screen
+3. **How it holds together** — the five lines, and the two rules everything rests on
+4. **The loop** — conversation to account to notes to practice
+5. **What it will not do** — the honest limits
+
+## The finding, for the record
+
+An audit of this site, the installed skills, and the reports written about the
+job itself turned up the same shape everywhere:
 
 - **The Future SE Stack** ranks 22 systems by leverage and names five as
-  buildable now. None exists.
-- **Champion Deposits** is a complete operating model, and its README says
+  buildable now. None existed.
+- **Champion Deposits** is a complete operating model whose README said
   `The spreadsheet doesn't exist yet.`
-- **inbox-sweep** exists in five hand-maintained versions because the sender map
-  lives in prompt text rather than in data.
-- **test-plan-tracker** deliberately gives each POV its own `storageKey`, so
-  nothing carries from one evaluation to the next.
-- **netskope-ai-positioning** re-researches from zero on every run.
+- **inbox-sweep** existed in five hand-maintained versions, because the sender
+  map lived in prompt text rather than in data.
+- The **POV tracker** gives each plan a unique `storageKey`, so nothing carried
+  from one evaluation to the next.
+- The **positioning skill** re-researched from zero on every run.
 
-They all depend on the same absent thing: a durable, private, portable store of
-John's own professional judgement, designed from the start to be handed to an AI
-as context. The commercial equivalents (Vivun, Tribble, SiftHub, AutoRFP,
-Consensus) are all employer-owned cloud SaaS, so the expertise accrues to the
-employer rather than to the person who built it.
+Sixteen good things, none of which held anything up for the next one. All of the
+systems above depended on the same absent thing: a durable, private store of
+professional judgement. That store is now `/ground/`.
 
-## The three versions
+Two further reasons it was worth building rather than merely noting: every
+commercial equivalent is cloud software bought by an employer, so the expertise
+accrues to their tenant rather than to you; and there were already two piano
+practice apps on this site and nothing at all for the skill that pays.
 
-Three different daily rituals, not three skins of one idea.
+## History
 
-| | Ritual | Cost | Useful on day one |
-| --- | --- | --- | --- |
-| `v1-field-notes/` | After the call | 3 to 5 min | No |
-| `v2-dojo/` | Dead time | 90 sec | Yes |
-| `v3-account-brain/` | Before the call | 2 min | Partly |
+Three prototypes were built here first, at `v1-field-notes/`, `v2-dojo/` and
+`v3-account-brain/`. Each was promoted to a full app, then all three were merged
+into Ground when it became clear that three passphrases and three backups was a
+worse problem than any duplication between them.
 
-**V1 Field Notes** is the library: fast capture of objections, answers, proof
-points and gotchas, tagged inline with `#topic` and `@Account`, searchable, and
-exportable as a markdown context pack.
+Those three paths, and the `/field-notes/`, `/dojo/` and `/account-brain/` paths
+that followed them, are now one-hop redirects.
 
-**V2 The Dojo** is the gym: 44 seeded cards across seven categories, a clock, a
-self-scoring rubric (clarity, evidence, control) and SM-2 style spaced
-repetition. Kept answers become the library as a by-product.
+Each retired app keeps two files. `index.html` is the landing page. `sw.js` is
+load-bearing rather than leftover: the retired apps were installable, and their
+cache-first service workers would otherwise keep serving the old shell from disk
+forever. Each has been replaced by a worker that clears its own caches,
+unregisters itself and reloads any open tab. Do not delete them.
 
-**V3 Account Brain** is the field: one living page per account, with people,
-open threads, and a one-button pre-call brief that leads with what you promised
-and have not sent.
+## Maintenance
 
-Recommendation is in section 04 of `index.html`: start with V2, add V3.
-
-## Technical notes
-
-Each version is a single self-contained `index.html`. No build step, no
-dependencies, no network call of any kind, including fonts. Verified with a
-browser harness: zero external requests, zero console errors, no horizontal
-overflow at 390px, and every form field labelled.
-
-State lives in `localStorage` under one key each (`fieldnotes:v1`, `dojo:v1`,
-`acctbrain:v1`). All three export and import JSON, and all three generate a
-markdown context pack designed to be pasted into Claude as grounding context.
-
-The Dojo's deck is deliberately vendor neutral. No card asserts a product
-capability, a competitor gap or a statistic, because those go stale and because
-a practice tool that trains you to repeat an unverified claim is worse than no
-practice tool.
-
-## If one gets adopted
-
-1. Move the folder to its own path, for example `/dojo/`, and add a card to the
-   Tools section of the homepage.
-2. Add `manifest.webmanifest` and a service worker so it installs to a home
-   screen and runs offline, as `departures/` and `medos/` already do.
-3. Delete the other two and this folder.
+The page is a single self-contained `index.html` with inline styles, no
+dependencies and no network requests. If Ground's design changes, sections 3 and
+5 are the ones that go stale first: they describe the two rules and the limits,
+which are the parts most likely to move.
