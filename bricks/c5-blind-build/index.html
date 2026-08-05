@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Blind Build — a two-player game with real bricks. One of you can see the model, the other has to build it. The screen is only the referee.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1117'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%236c63ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="../system/system.css">
+<title>Blind Build · Brick Lab</title>
+<style>
+.wrap { max-width: 760px; margin: 0 auto; padding: 1.1rem 1.1rem 3rem; }
+.screen { display: none; }
+.screen.on { display: block; }
+
+.lead { color: var(--muted); font-size: .92rem; max-width: 62ch; margin-bottom: 1.2rem; }
+
+.field { margin-bottom: .9rem; }
+.field > label {
+  display: block; font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: .4rem;
+}
+.names { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.names input { width: 100%; }
+
+.chips { display: flex; gap: .35rem; flex-wrap: wrap; }
+.chip {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+  padding: .34rem .78rem; font-size: .84rem; font-weight: 600; color: var(--muted); cursor: pointer;
+}
+.chip.on { border-color: var(--accent); background: rgba(108,99,255,.16); color: var(--accent-lt); }
+
+.variant { display: grid; gap: .45rem; }
+.vopt {
+  display: flex; gap: .6rem; align-items: flex-start; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .6rem .8rem;
+}
+.vopt.on { border-color: var(--accent); background: rgba(108,99,255,.1); }
+.vopt b { color: var(--text); font-size: .9rem; display: block; }
+.vopt span { color: var(--muted); font-size: .8rem; }
+.vopt .dot {
+  width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--border);
+  flex: none; margin-top: .18rem;
+}
+.vopt.on .dot { border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 3px var(--surface); }
+
+/* ── Round chrome ─────────────────────────────────────────────────────────── */
+.roundbar {
+  display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+  margin-bottom: .9rem; padding-bottom: .7rem; border-bottom: 1px solid var(--border);
+}
+.roundbar .who { color: var(--text); font-weight: 700; }
+.roundbar .spacer { margin-left: auto; }
+.clock { font-family: var(--mono); font-size: 1.15rem; font-weight: 700; color: var(--text); }
+
+/* ── The shield ───────────────────────────────────────────────────────────── */
+.shield {
+  background: linear-gradient(170deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--accent); border-radius: 18px;
+  padding: 2.6rem 1.6rem; text-align: center; cursor: pointer;
+}
+.shield h2 { font-size: 1.5rem; color: var(--text); margin-bottom: .5rem; letter-spacing: -.5px; }
+.shield p { color: var(--body); max-width: 40ch; margin: 0 auto .3rem; font-size: .95rem; }
+.shield .tap { color: var(--accent-lt); font-weight: 700; margin-top: 1.2rem; font-size: .9rem; }
+
+.stage { height: 320px; border-radius: var(--radius); border: 1px solid var(--border); }
+
+.tray { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: .45rem; }
+.tray .t {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: .35rem; text-align: center;
+}
+.tray .t canvas { width: 100%; height: 44px; display: block; }
+.tray .t b { display: block; font-size: .8rem; color: var(--accent-lt); font-family: var(--mono); }
+.tray .t small { font-size: .68rem; color: var(--muted); line-height: 1.2; display: block; }
+
+.scores { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
+.score {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: .9rem 1rem; text-align: center;
+}
+.score.lead { border-color: var(--accent); }
+.score b { display: block; font-size: 2rem; color: var(--text); font-weight: 700; line-height: 1.1; }
+.score span { font-size: .84rem; color: var(--muted); }
+
+.judge { display: grid; gap: .45rem; grid-template-columns: repeat(3, 1fr); }
+.judge button { flex-direction: column; padding: .8rem .4rem; gap: .1rem; height: 100%; }
+.judge button i { font-style: normal; font-size: 1.2rem; }
+.judge button small { color: var(--muted); font-size: .72rem; font-weight: 500; }
+
+.rounds { display: flex; gap: .3rem; flex-wrap: wrap; margin-top: .8rem; }
+.rdot {
+  width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center;
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: .74rem; font-weight: 700; color: var(--muted);
+}
+.rdot.done { border-color: var(--ok); color: var(--ok); }
+.rdot.now { border-color: var(--accent); color: var(--accent-lt); background: rgba(108,99,255,.16); }
+
+.actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<header class="lab-head">
+  <a class="lab-back" href="../">&larr; Brick&nbsp;Lab</a>
+  <span class="lab-num">05</span>
+  <span class="lab-title">Blind Build</span>
+  <span class="lab-sub">Real bricks. The screen only referees.</span>
+</header>
+
+<main class="wrap">
+
+  <!-- ── Setup ─────────────────────────────────────────────────────────── -->
+  <section class="screen on" id="sSetup">
+    <p class="lead">One of you can see the model. The other has to build it, out of real bricks, from
+    nothing but a description. Then you swap. The screen never sees your bricks and never scores you —
+    it deals the models, guards the secret and keeps count.</p>
+
+    <div class="field">
+      <label>Who is playing</label>
+      <div class="names">
+        <input type="text" id="p1" placeholder="Player one" maxlength="18">
+        <input type="text" id="p2" placeholder="Player two" maxlength="18">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>What is in front of you</label>
+      <div class="chips" id="pools"></div>
+      <p class="hint" style="margin-top:.4rem">Models are only ever built from what you tick, so both of
+      you can lay out the same handful of parts.</p>
+    </div>
+
+    <div class="field">
+      <label>How hard</label>
+      <div class="chips" id="diff"></div>
+    </div>
+
+    <div class="field">
+      <label>How to describe it</label>
+      <div class="variant" id="variants"></div>
+    </div>
+
+    <div class="field">
+      <label>Rounds</label>
+      <div class="chips" id="roundCount"></div>
+    </div>
+
+    <button class="btn primary" id="startGame" style="width:100%; padding:.8rem">Start playing</button>
+  </section>
+
+  <!-- ── Tray ──────────────────────────────────────────────────────────── -->
+  <section class="screen" id="sTray">
+    <div class="roundbar">
+      <span class="who" id="trayRound"></span>
+      <span class="spacer"></span>
+      <span class="hint">Both of you look at this bit</span>
+    </div>
+    <h2 style="color:var(--text); margin-bottom:.3rem">Take these parts. One set each.</h2>
+    <p class="hint" style="margin-bottom:.9rem">Same parts, both of you. Anything left in the tub is out of play.</p>
+    <div class="tray" id="trayList"></div>
+    <div class="actions">
+      <button class="btn primary" id="trayGo">Ready &mdash; hide the model</button>
+      <button class="btn" id="trayReDeal">Deal a different model</button>
+    </div>
+  </section>
+
+  <!-- ── Shield ────────────────────────────────────────────────────────── -->
+  <section class="screen" id="sShield">
+    <div class="shield" id="shieldBox" role="button" tabindex="0">
+      <h2 id="shieldWho">Only the describer</h2>
+      <p id="shieldRule"></p>
+      <p class="tap">Tap when the other one is looking away</p>
+    </div>
+  </section>
+
+  <!-- ── Describe ──────────────────────────────────────────────────────── -->
+  <section class="screen" id="sDescribe">
+    <div class="roundbar">
+      <span class="who" id="descWho"></span>
+      <span class="spacer"></span>
+      <span class="clock" id="clock">0:00</span>
+    </div>
+    <div class="stage"><canvas id="cv"></canvas></div>
+    <div class="actions">
+      <button class="btn small" id="turnL" aria-label="Turn left">&#8630; Turn</button>
+      <button class="btn small" id="turnR" aria-label="Turn right">Turn &#8631;</button>
+      <span class="spacer" style="flex:1"></span>
+      <button class="btn primary" id="doneBuilding">They say they are done</button>
+    </div>
+    <p class="hint" style="margin-top:.7rem" id="descRule"></p>
+  </section>
+
+  <!-- ── Reveal ────────────────────────────────────────────────────────── -->
+  <section class="screen" id="sReveal">
+    <div class="roundbar">
+      <span class="who">Compare them</span>
+      <span class="spacer"></span>
+      <span class="clock" id="finalTime"></span>
+    </div>
+    <div class="stage"><canvas id="cv2"></canvas></div>
+    <p class="hint" style="margin:.8rem 0">How did <b id="builderName"></b> do? You two decide — the screen
+    cannot see your carpet.</p>
+    <div class="judge">
+      <button class="btn" data-score="3"><i>&#9733;&#9733;&#9733;</i>Spot on<small>3 points</small></button>
+      <button class="btn" data-score="2"><i>&#9733;&#9733;</i>Very close<small>2 points</small></button>
+      <button class="btn" data-score="1"><i>&#9733;</i>Not quite<small>1 point</small></button>
+    </div>
+  </section>
+
+  <!-- ── Scoreboard ────────────────────────────────────────────────────── -->
+  <section class="screen" id="sScores">
+    <h2 style="color:var(--text); margin-bottom:.8rem" id="scoreTitle">Scores</h2>
+    <div class="scores" id="scoreCards"></div>
+    <div class="rounds" id="roundDots"></div>
+    <div class="actions">
+      <button class="btn primary" id="nextRound">Next round</button>
+      <button class="btn" id="newGame">New game</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="lab-foot">
+  <p class="disclaimer">Concept 05 of Brick&nbsp;Lab. Names and scores stay in this browser.
+  Not affiliated with, endorsed or sponsored by the LEGO Group.</p>
+</footer>
+
+<script src="../system/system.js"></script>
+<script src="../system/iso.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var STORE = 'bricklab.blind.v1';
+
+  var POOLS = [
+    { id: 'basics', label: 'Standard bricks', parts: ['b2x2', 'b2x3', 'b2x4', 'b1x4'] },
+    { id: 'smalls', label: 'Small bricks', parts: ['b1x1', 'b1x2', 'b1x3'] },
+    { id: 'plates', label: 'Plates', parts: ['p1x2', 'p1x4', 'p2x2', 'p2x4'] },
+    { id: 'tiles', label: 'Tiles', parts: ['t1x2', 't2x2'] },
+    { id: 'slopes', label: 'Slopes', parts: ['s2x1', 's2x2'] },
+    { id: 'round', label: 'Round', parts: ['r1x1', 'q1x1'] },
+  ];
+
+  var DIFFS = [
+    { id: 'easy', label: 'Gentle', count: 5 },
+    { id: 'mid', label: 'Proper', count: 8 },
+    { id: 'hard', label: 'Cruel', count: 12 },
+  ];
+
+  var VARIANTS = [
+    { id: 'talk', label: 'Just talk', note: 'Describe it however you like. No pointing, no showing.' },
+    { id: 'q20', label: 'Yes or no only', note: 'The builder asks; the describer may only answer yes or no.' },
+    { id: 'silent', label: 'Silent', note: 'No words at all. Hands and faces only.' },
+    { id: 'draw', label: 'Draw it', note: 'The describer may draw on paper but may not speak.' },
+  ];
+
+  var COLOUR_POOL = ['red', 'blue', 'yellow', 'white', 'green', 'black', 'orange', 'lgrey'];
+
+  /* ── State ─────────────────────────────────────────────────────────────── */
+
+  var st = {
+    names: ['', ''],
+    pools: { basics: true, smalls: true, plates: true, tiles: false, slopes: false, round: false },
+    diff: 'mid',
+    variant: 'talk',
+    rounds: 6,
+    round: 0,
+    scores: [0, 0],
+    results: [],
+    session: 0,
+  };
+
+  var model = null, elapsed = 0, tick = null, viewTurn = 0;
+
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORE) || '{}');
+    if (saved && saved.names) {
+      st.names = saved.names;
+      st.pools = saved.pools || st.pools;
+      st.diff = saved.diff || st.diff;
+      st.variant = saved.variant || st.variant;
+      st.rounds = saved.rounds || st.rounds;
+    }
+  } catch (e) { /* first run */ }
+
+  function save() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify({
+        names: st.names, pools: st.pools, diff: st.diff, variant: st.variant, rounds: st.rounds,
+      }));
+    } catch (e) { /* private mode */ }
+  }
+
+  function show(id) {
+    ['sSetup', 'sTray', 'sShield', 'sDescribe', 'sReveal', 'sScores'].forEach(function (s) {
+      document.getElementById(s).classList.toggle('on', s === id);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  /* Player 0 describes on even rounds. */
+  function describerIndex() { return st.round % 2; }
+  function builderIndex() { return (st.round + 1) % 2; }
+  function nameOf(i) { return st.names[i] || ('Player ' + (i + 1)); }
+
+  /* ── Setup UI ──────────────────────────────────────────────────────────── */
+
+  function chips(host, items, isOn, onPick) {
+    host.innerHTML = '';
+    items.forEach(function (it) {
+      var b = document.createElement('button');
+      b.className = 'chip' + (isOn(it) ? ' on' : '');
+      b.textContent = it.label;
+      b.addEventListener('click', function () { onPick(it); });
+      host.appendChild(b);
+    });
+  }
+
+  function renderSetup() {
+    document.getElementById('p1').value = st.names[0];
+    document.getElementById('p2').value = st.names[1];
+
+    chips(document.getElementById('pools'), POOLS,
+      function (p) { return !!st.pools[p.id]; },
+      function (p) {
+        st.pools[p.id] = !st.pools[p.id];
+        if (!activeParts().length) st.pools[p.id] = true;   /* never empty */
+        save(); renderSetup();
+      });
+
+    chips(document.getElementById('diff'), DIFFS,
+      function (d) { return st.diff === d.id; },
+      function (d) { st.diff = d.id; save(); renderSetup(); });
+
+    chips(document.getElementById('roundCount'),
+      [{ id: 2, label: '2' }, { id: 4, label: '4' }, { id: 6, label: '6' }, { id: 10, label: '10' }],
+      function (r) { return st.rounds === r.id; },
+      function (r) { st.rounds = r.id; save(); renderSetup(); });
+
+    var host = document.getElementById('variants');
+    host.innerHTML = '';
+    VARIANTS.forEach(function (v) {
+      var d = document.createElement('div');
+      d.className = 'vopt' + (st.variant === v.id ? ' on' : '');
+      d.setAttribute('role', 'button');
+      d.setAttribute('tabindex', '0');
+      d.innerHTML = '<span class="dot"></span><span><b>' + v.label + '</b><span>' + v.note + '</span></span>';
+      var choose = function () { st.variant = v.id; save(); renderSetup(); };
+      d.addEventListener('click', choose);
+      d.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(); }
+      });
+      host.appendChild(d);
+    });
+  }
+
+  function activeParts() {
+    var out = [];
+    POOLS.forEach(function (p) { if (st.pools[p.id]) out = out.concat(p.parts); });
+    return out;
+  }
+
+  function variantNote() {
+    var v = VARIANTS.filter(function (x) { return x.id === st.variant; })[0];
+    return v ? v.note : '';
+  }
+
+  document.getElementById('p1').addEventListener('input', function () { st.names[0] = this.value; save(); });
+  document.getElementById('p2').addEventListener('input', function () { st.names[1] = this.value; save(); });
+
+  /* ── Dealing ───────────────────────────────────────────────────────────── */
+
+  /* Take a few distinct items from a list, by seed. */
+  function narrow(list, want, rand) {
+    var pool = list.slice(), out = [];
+    while (pool.length && out.length < want) {
+      out.push(pool.splice(Math.floor(rand() * pool.length) % pool.length, 1)[0]);
+    }
+    return out;
+  }
+
+  function deal(seed) {
+    var d = DIFFS.filter(function (x) { return x.id === st.diff; })[0] || DIFFS[1];
+
+    /* Narrow the palette before generating. Left to the whole pool, an
+       eight-brick model comes out as eight different parts in eight colours —
+       a tray nobody can assemble twice from a real tub, and a model that is
+       tedious rather than hard to describe. Three part types and three colours
+       gives repeats, which is what makes it gatherable and sayable. */
+    var rand = rngFrom(seed);
+    var parts = narrow(activeParts(), 3, rand);
+    var colours = narrow(COLOUR_POOL, 3, rand);
+
+    model = generate({
+      seed: seed,
+      count: d.count,
+      parts: parts,
+      colours: colours,
+      name: 'Round ' + (st.round + 1),
+    });
+    viewTurn = 0;
+  }
+
+  function renderTray() {
+    document.getElementById('trayRound').textContent =
+      'Round ' + (st.round + 1) + ' of ' + st.rounds + ' · ' + nameOf(describerIndex()) + ' describes';
+
+    var host = document.getElementById('trayList');
+    host.innerHTML = '';
+    bom(model.parts).forEach(function (l) {
+      var part = PART[l.part], col = COLOUR[l.c];
+      if (!part || !col) return;
+      var cell = document.createElement('div');
+      cell.className = 't';
+      var cvs = document.createElement('canvas');
+      var b = document.createElement('b');
+      b.textContent = l.n + '×';
+      var s = document.createElement('small');
+      s.textContent = part.name + ' · ' + col.name;
+      cell.appendChild(cvs); cell.appendChild(b); cell.appendChild(s);
+      host.appendChild(cell);
+      requestAnimationFrame(function () {
+        var w = cvs.clientWidth || 86, h = 44;
+        var dd = Math.min(window.devicePixelRatio || 1, 2);
+        cvs.width = w * dd; cvs.height = h * dd;
+        var c = cvs.getContext('2d');
+        c.setTransform(dd, 0, 0, dd, 0, 0);
+        var one = [place(l.part, l.c, 0, 0, 0, 0)];
+        Iso.render(c, one, Iso.fit(one, w, h, 5, 15));
+      });
+    });
+  }
+
+  /* ── Model view ────────────────────────────────────────────────────────── */
+
+  function paintModel(canvas) {
+    var r = canvas.parentNode.getBoundingClientRect();
+    var d = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, r.width * d);
+    canvas.height = Math.max(1, r.height * d);
+    var c = canvas.getContext('2d');
+    c.setTransform(d, 0, 0, d, 0, 0);
+    c.clearRect(0, 0, r.width, r.height);
+    var parts = rotateParts(model.parts, viewTurn);
+    var view = Iso.fit(parts, r.width, r.height, 34);
+    Iso.grid(c, view, 8, 'rgba(255,255,255,0.05)');
+    Iso.render(c, parts, view);
+  }
+
+  /* ── Clock ─────────────────────────────────────────────────────────────── */
+
+  function fmt(s) { return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
+
+  function startClock() {
+    elapsed = 0;
+    document.getElementById('clock').textContent = '0:00';
+    stopClock();
+    tick = setInterval(function () {
+      elapsed++;
+      document.getElementById('clock').textContent = fmt(elapsed);
+    }, 1000);
+  }
+  function stopClock() { if (tick) { clearInterval(tick); tick = null; } }
+
+  /* ── Scores ────────────────────────────────────────────────────────────── */
+
+  function renderScores(final) {
+    document.getElementById('scoreTitle').textContent = final
+      ? (st.scores[0] === st.scores[1] ? 'A draw. Play again.' : nameOf(st.scores[0] > st.scores[1] ? 0 : 1) + ' wins.')
+      : 'After round ' + st.round;
+
+    var host = document.getElementById('scoreCards');
+    host.innerHTML = '';
+    [0, 1].forEach(function (i) {
+      var d = document.createElement('div');
+      var leading = st.scores[i] > st.scores[1 - i];
+      d.className = 'score' + (leading ? ' lead' : '');
+      d.innerHTML = '<b>' + st.scores[i] + '</b><span>' + nameOf(i) + '</span>';
+      host.appendChild(d);
+    });
+
+    var dots = document.getElementById('roundDots');
+    dots.innerHTML = '';
+    for (var r = 0; r < st.rounds; r++) {
+      var e = document.createElement('span');
+      var done = r < st.results.length;
+      e.className = 'rdot' + (done ? ' done' : r === st.round ? ' now' : '');
+      e.textContent = done ? st.results[r].score : (r + 1);
+      e.title = done
+        ? nameOf(st.results[r].builder) + ' scored ' + st.results[r].score + ' in ' + fmt(st.results[r].time)
+        : 'Round ' + (r + 1);
+      dots.appendChild(e);
+    }
+
+    var more = st.round < st.rounds;
+    document.getElementById('nextRound').style.display = more ? '' : 'none';
+    document.getElementById('nextRound').textContent = 'Round ' + (st.round + 1);
+  }
+
+  /* ── Flow ──────────────────────────────────────────────────────────────── */
+
+  document.getElementById('startGame').addEventListener('click', function () {
+    st.round = 0;
+    st.scores = [0, 0];
+    st.results = [];
+    st.session = Math.floor(Math.random() * 9000) + 1000;
+    beginRound();
+  });
+
+  function beginRound() {
+    deal(st.session * 31 + st.round * 7919);
+    renderTray();
+    show('sTray');
+  }
+
+  document.getElementById('trayReDeal').addEventListener('click', function () {
+    deal(Math.floor(Math.random() * 1e6));
+    renderTray();
+  });
+
+  document.getElementById('trayGo').addEventListener('click', function () {
+    document.getElementById('shieldWho').textContent = nameOf(describerIndex()) + ', this bit is yours';
+    document.getElementById('shieldRule').textContent = variantNote();
+    show('sShield');
+  });
+
+  function openDescribe() {
+    document.getElementById('descWho').textContent =
+      nameOf(describerIndex()) + ' describes · ' + nameOf(builderIndex()) + ' builds';
+    document.getElementById('descRule').textContent = variantNote();
+    show('sDescribe');
+    paintModel(document.getElementById('cv'));
+    startClock();
+  }
+
+  var shield = document.getElementById('shieldBox');
+  shield.addEventListener('click', openDescribe);
+  shield.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDescribe(); }
+  });
+
+  document.getElementById('turnL').addEventListener('click', function () {
+    viewTurn = (viewTurn + 3) % 4; paintModel(document.getElementById('cv'));
+  });
+  document.getElementById('turnR').addEventListener('click', function () {
+    viewTurn = (viewTurn + 1) % 4; paintModel(document.getElementById('cv'));
+  });
+
+  document.getElementById('doneBuilding').addEventListener('click', function () {
+    stopClock();
+    document.getElementById('finalTime').textContent = fmt(elapsed);
+    document.getElementById('builderName').textContent = nameOf(builderIndex());
+    show('sReveal');
+    paintModel(document.getElementById('cv2'));
+  });
+
+  document.querySelector('.judge').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    var score = Number(b.getAttribute('data-score'));
+    st.scores[builderIndex()] += score;
+    st.results.push({ builder: builderIndex(), score: score, time: elapsed });
+    st.round++;
+    renderScores(st.round >= st.rounds);
+    show('sScores');
+  });
+
+  document.getElementById('nextRound').addEventListener('click', beginRound);
+  document.getElementById('newGame').addEventListener('click', function () {
+    stopClock(); show('sSetup');
+  });
+
+  window.addEventListener('resize', function () {
+    if (document.getElementById('sDescribe').classList.contains('on')) paintModel(document.getElementById('cv'));
+    if (document.getElementById('sReveal').classList.contains('on')) paintModel(document.getElementById('cv2'));
+  });
+
+  renderSetup();
+}());
+</script>
+</body>
+</html>

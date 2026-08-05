@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Three Views — a puzzle game about reading a shape from its shadows, which is the skill every instruction booklet quietly demands.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1117'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%236c63ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="../system/system.css">
+<title>Three Views · Brick Lab</title>
+<style>
+.wrap { max-width: 1020px; margin: 0 auto; padding: 1.1rem 1.1rem 3rem; }
+
+.lead { color: var(--muted); font-size: .92rem; max-width: 64ch; margin-bottom: 1.1rem; }
+
+.levels { display: flex; gap: .3rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+.lvl {
+  width: 34px; height: 34px; border-radius: 8px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--muted); font-weight: 700; font-size: .82rem;
+}
+.lvl:hover { border-color: var(--accent-lt); color: var(--text); }
+.lvl.on { border-color: var(--accent); background: rgba(108,99,255,.2); color: var(--accent-lt); }
+.lvl.done { color: var(--ok); border-color: rgba(74,222,128,.45); }
+.lvl.done.on { background: rgba(74,222,128,.16); }
+
+.board { display: grid; gap: 1rem; grid-template-columns: 340px 1fr; align-items: start; }
+@media (max-width: 880px) { .board { grid-template-columns: 1fr; } }
+
+/* ── Shadow panels ────────────────────────────────────────────────────────── */
+.views { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: .6rem; }
+.view h3 {
+  font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: .35rem; text-align: center;
+}
+.vgrid {
+  display: grid; gap: 2px; background: var(--border); padding: 2px;
+  border-radius: 8px; border: 1px solid var(--border);
+}
+.vcell { aspect-ratio: 1; background: var(--sunken); border-radius: 2px; }
+.vcell.hit  { background: var(--accent); }
+.vcell.miss { background: #1b2036; box-shadow: inset 0 0 0 2px rgba(108,99,255,.9); }
+.vcell.over { background: var(--hot); }
+
+/* ── Layer editor ─────────────────────────────────────────────────────────── */
+.layerpick { display: flex; gap: .25rem; flex-wrap: wrap; margin-bottom: .5rem; align-items: center; }
+.layerpick .hint { margin-left: auto; }
+.lbtn {
+  min-width: 30px; height: 30px; border-radius: 7px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+  font-weight: 700; font-size: .78rem;
+}
+.lbtn.on { border-color: var(--accent); background: rgba(108,99,255,.2); color: var(--accent-lt); }
+.lbtn.has { color: var(--text); }
+
+.egrid { display: grid; gap: 4px; margin: 0 auto; }
+.ecell {
+  aspect-ratio: 1; border-radius: 5px; cursor: pointer; padding: 0;
+  background: var(--sunken); border: 1px solid var(--border);
+  transition: background .1s, border-color .1s;
+}
+.ecell:hover { border-color: var(--accent-lt); }
+.ecell.allowed { background: #1e2338; border-color: #3a4166; }
+.ecell.on { background: var(--accent); border-color: var(--accent-lt); }
+.ecell.below { background: #1a1f33; border-color: #343b5c; }
+.ecell.below::after { content: ''; display: block; width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(168,157,255,.62); margin: auto; }
+
+.statline { display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; margin: .7rem 0; }
+.big { font-family: var(--mono); font-size: 1.05rem; color: var(--text); font-weight: 700; }
+
+.win {
+  background: linear-gradient(180deg, rgba(74,222,128,.14), transparent);
+  border: 1px solid var(--ok); border-radius: var(--radius);
+  padding: .8rem 1rem; margin-bottom: .8rem;
+}
+.win b { color: var(--ok); }
+.win p { font-size: .88rem; margin-top: .2rem; }
+
+.stage { height: 260px; border-radius: var(--radius); border: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<header class="lab-head">
+  <a class="lab-back" href="../">&larr; Brick&nbsp;Lab</a>
+  <span class="lab-num">04</span>
+  <span class="lab-title">Three Views</span>
+  <span class="lab-sub">Rebuild the shape from its shadows.</span>
+</header>
+
+<main class="wrap">
+
+  <p class="lead">A hidden shape casts three shadows. Rebuild something that casts all three — that is the
+  whole game. It is also, quietly, the exact skill an instruction booklet demands: reading a solid object
+  from flat pictures of it.</p>
+
+  <div class="levels" id="levels"></div>
+
+  <div id="winbox"></div>
+
+  <div class="board">
+    <div class="panel">
+      <div class="panel-title">The three shadows</div>
+      <div class="views">
+        <div class="view"><h3>Front</h3><div class="vgrid" id="vFront"></div></div>
+        <div class="view"><h3>Side</h3><div class="vgrid" id="vSide"></div></div>
+        <div class="view"><h3>Top</h3><div class="vgrid" id="vTop"></div></div>
+      </div>
+      <p class="hint" style="margin-top:.6rem">
+        <span style="color:var(--accent-lt)">Solid</span> is matched,
+        outlined is still missing, <span style="color:var(--hot)">red</span> is a shadow you are casting
+        that the shape does not.
+      </p>
+
+      <div class="statline">
+        <span class="big" id="used">0</span>
+        <span class="hint">bricks used · par <b id="par">–</b></span>
+      </div>
+      <div class="statline">
+        <button class="btn small" id="clearLayer">Clear layer</button>
+        <button class="btn small danger" id="clearAll">Clear all</button>
+        <button class="btn small" id="reveal">Give up</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Build it, one layer at a time</div>
+      <div class="layerpick" id="layerpick"></div>
+      <div class="egrid" id="egrid"></div>
+      <p class="hint" style="margin-top:.55rem; text-align:center">
+        Looking down from above. Faint squares are allowed by the top shadow; dots show the layer below.
+      </p>
+      <div class="stage" style="margin-top:.8rem"><canvas id="cv"></canvas></div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="lab-foot">
+  <p class="disclaimer">Concept 04 of Brick&nbsp;Lab. Progress stays in this browser.
+  Not affiliated with, endorsed or sponsored by the LEGO Group.</p>
+</footer>
+
+<script src="../system/system.js"></script>
+<script src="../system/iso.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var STORE = 'bricklab.threeviews.v1';
+
+  /* Grid size and par for each level. Seeds are fixed so every family gets the
+     same twelve puzzles in the same order. */
+  var LEVELS = [
+    { n: 3, count: 6 },  { n: 3, count: 9 },  { n: 4, count: 10 },
+    { n: 4, count: 13 }, { n: 4, count: 16 }, { n: 5, count: 16 },
+    { n: 5, count: 21 }, { n: 5, count: 26 }, { n: 6, count: 24 },
+    { n: 6, count: 31 }, { n: 6, count: 39 }, { n: 7, count: 46 },
+  ];
+
+  var LAYER_COLOURS = ['red', 'orange', 'yellow', 'bgreen', 'azure', 'blue', 'purple'];
+
+  var level = 0;
+  var N = 3;
+  var target = new Set();
+  var mine = new Set();
+  var layer = 0;
+  var revealed = false;
+  var progress = {};
+
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+
+  /* ── Storage ───────────────────────────────────────────────────────────── */
+
+  try { progress = JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch (e) { progress = {}; }
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(progress)); } catch (e) { /* private mode */ }
+  }
+
+  /* ── Puzzle generation ─────────────────────────────────────────────────── */
+
+  var key = function (x, y, z) { return x + ',' + y + ',' + z; };
+
+  /* Grow a face-connected blob. Connected shapes make silhouettes that read as
+     an object rather than as noise, which matters more than it sounds. */
+  function makePuzzle(seed, n, count) {
+    var rand = rngFrom(seed);
+    var cells = new Set();
+    var list = [];
+    var start = [Math.floor(rand() * n), 0, Math.floor(rand() * n)];
+    cells.add(key(start[0], start[1], start[2]));
+    list.push(start);
+
+    var dirs = [[1,0,0], [-1,0,0], [0,1,0], [0,-1,0], [0,0,1], [0,0,-1]];
+    var guard = count * 200;
+    while (cells.size < count && guard-- > 0) {
+      var from = list[Math.floor(rand() * list.length) % list.length];
+      var d = dirs[Math.floor(rand() * 6) % 6];
+      var c = [from[0] + d[0], from[1] + d[1], from[2] + d[2]];
+      if (c[0] < 0 || c[0] >= n || c[1] < 0 || c[1] >= n || c[2] < 0 || c[2] >= n) continue;
+      var k = key(c[0], c[1], c[2]);
+      if (cells.has(k)) continue;
+      cells.add(k); list.push(c);
+    }
+    return cells;
+  }
+
+  /* ── Projections ───────────────────────────────────────────────────────── */
+
+  function blank(n) {
+    var g = [];
+    for (var i = 0; i < n; i++) { g.push(new Array(n).fill(0)); }
+    return g;
+  }
+
+  /* front[x][y] — looking at the front face.  side[z][y] — looking along X.
+     top[x][z]  — looking straight down. */
+  function shadows(cells, n) {
+    var f = blank(n), s = blank(n), t = blank(n);
+    cells.forEach(function (k) {
+      var p = k.split(',');
+      var x = +p[0], y = +p[1], z = +p[2];
+      f[x][y] = 1; s[z][y] = 1; t[x][z] = 1;
+    });
+    return { front: f, side: s, top: t };
+  }
+
+  function same(a, b, n) {
+    for (var i = 0; i < n; i++) for (var j = 0; j < n; j++) if (a[i][j] !== b[i][j]) return false;
+    return true;
+  }
+
+  function solved() {
+    var mt = shadows(mine, N), tt = shadows(target, N);
+    return same(mt.front, tt.front, N) && same(mt.side, tt.side, N) && same(mt.top, tt.top, N);
+  }
+
+  /* ── Rendering the shadow panels ───────────────────────────────────────── */
+
+  /* `flip` puts row 0 at the bottom, which is what a front elevation wants. */
+  function paintView(host, mineG, targetG, flip) {
+    host.style.gridTemplateColumns = 'repeat(' + N + ', 1fr)';
+    host.innerHTML = '';
+    for (var row = 0; row < N; row++) {
+      var j = flip ? (N - 1 - row) : row;
+      for (var i = 0; i < N; i++) {
+        var d = document.createElement('div');
+        var t = targetG[i][j], m = mineG[i][j];
+        d.className = 'vcell' + (t && m ? ' hit' : t ? ' miss' : m ? ' over' : '');
+        host.appendChild(d);
+      }
+    }
+  }
+
+  function paintViews() {
+    var m = shadows(mine, N), t = shadows(target, N);
+    paintView(document.getElementById('vFront'), m.front, t.front, true);
+    paintView(document.getElementById('vSide'), m.side, t.side, true);
+    paintView(document.getElementById('vTop'), m.top, t.top, false);
+  }
+
+  /* ── Layer editor ──────────────────────────────────────────────────────── */
+
+  function paintLayers() {
+    var host = document.getElementById('layerpick');
+    host.innerHTML = '';
+    var lab = document.createElement('span');
+    lab.className = 'hint';
+    lab.textContent = 'Layer';
+    host.appendChild(lab);
+    for (var y = 0; y < N; y++) {
+      (function (yy) {
+        var b = document.createElement('button');
+        b.className = 'lbtn' + (yy === layer ? ' on' : '') + (layerCount(yy) ? ' has' : '');
+        b.textContent = yy + 1;
+        b.setAttribute('aria-label', 'Layer ' + (yy + 1));
+        b.addEventListener('click', function () { layer = yy; paintAll(); });
+        host.appendChild(b);
+      }(y));
+    }
+    var note = document.createElement('span');
+    note.className = 'hint';
+    note.textContent = 'ground is 1';
+    host.appendChild(note);
+  }
+
+  function layerCount(y) {
+    var n = 0;
+    mine.forEach(function (k) { if (+k.split(',')[1] === y) n++; });
+    return n;
+  }
+
+  function paintEditor() {
+    var host = document.getElementById('egrid');
+    host.style.gridTemplateColumns = 'repeat(' + N + ', 1fr)';
+    /* Keep a cell roughly thumb-sized whatever the grid size, rather than
+       letting three columns stretch to fill the panel. */
+    host.style.maxWidth = Math.min(330, N * 58) + 'px';
+    host.innerHTML = '';
+    var t = shadows(target, N);
+    for (var z = 0; z < N; z++) {
+      for (var x = 0; x < N; x++) {
+        (function (xx, zz) {
+          var b = document.createElement('button');
+          var on = mine.has(key(xx, layer, zz));
+          var below = layer > 0 && mine.has(key(xx, layer - 1, zz));
+          var allowed = t.top[xx][zz] === 1;
+          b.className = 'ecell' + (on ? ' on' : below ? ' below' : allowed ? ' allowed' : '');
+          b.setAttribute('aria-label', 'x' + (xx + 1) + ' z' + (zz + 1) + (on ? ', filled' : ', empty'));
+          b.addEventListener('click', function () {
+            var k = key(xx, layer, zz);
+            if (mine.has(k)) mine.delete(k); else mine.add(k);
+            paintAll();
+          });
+          host.appendChild(b);
+        }(x, z));
+      }
+    }
+  }
+
+  /* ── Iso preview ───────────────────────────────────────────────────────── */
+
+  function modelParts(cells) {
+    var out = [];
+    cells.forEach(function (k) {
+      var p = k.split(',');
+      out.push(place('b1x1', LAYER_COLOURS[(+p[1]) % LAYER_COLOURS.length], +p[0], (+p[1]) * 3, +p[2], 0));
+    });
+    return out;
+  }
+
+  function paintStage() {
+    var r = cv.parentNode.getBoundingClientRect();
+    var d = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+    ctx.clearRect(0, 0, r.width, r.height);
+
+    /* Frame on the whole cube so the model never jumps as it grows. */
+    var span = [place('b1x1', 'lgrey', 0, 0, 0, 0), place('b1x1', 'lgrey', N - 1, (N - 1) * 3, N - 1, 0)];
+    var view = Iso.fit(span, r.width, r.height, 22);
+
+    Iso.grid(ctx, view, N, 'rgba(255,255,255,0.06)');
+    Iso.render(ctx, modelParts(revealed ? target : mine), view);
+  }
+
+  /* ── Chrome ────────────────────────────────────────────────────────────── */
+
+  function paintLevels() {
+    var host = document.getElementById('levels');
+    host.innerHTML = '';
+    LEVELS.forEach(function (L, i) {
+      var b = document.createElement('button');
+      b.className = 'lvl' + (i === level ? ' on' : '') + (progress['l' + i] ? ' done' : '');
+      b.textContent = i + 1;
+      b.title = L.n + '×' + L.n + '×' + L.n + ', par ' + L.count;
+      b.setAttribute('aria-label', 'Level ' + (i + 1));
+      b.addEventListener('click', function () { start(i); });
+      host.appendChild(b);
+    });
+    var rnd = document.createElement('button');
+    rnd.className = 'btn small';
+    rnd.textContent = 'Random';
+    rnd.style.marginLeft = '.4rem';
+    rnd.addEventListener('click', function () { start(level, Math.floor(Math.random() * 1e6)); });
+    host.appendChild(rnd);
+  }
+
+  function paintWin() {
+    var box = document.getElementById('winbox');
+    if (revealed) {
+      box.innerHTML = '<div class="win" style="border-color:var(--warn)"><b style="color:var(--warn)">' +
+        'That was the shape.</b><p>Have a look, then press the level again to try it properly.</p></div>';
+      return;
+    }
+    if (!mine.size || !solved()) { box.innerHTML = ''; return; }
+
+    var used = mine.size, par = LEVELS[level].count;
+    var best = progress['l' + level];
+    if (!best || used < best) { progress['l' + level] = used; save(); paintLevels(); }
+
+    var verdict = used < par
+      ? 'And with ' + (par - used) + ' fewer than par. That is a better answer than the one it was made from.'
+      : used === par ? 'Exactly par.'
+      : 'Par is ' + par + ' — there is a tidier answer in there.';
+
+    box.innerHTML = '<div class="win"><b>Solved with ' + used + ' bricks.</b><p>' + verdict +
+      ' ' + (level + 1 < LEVELS.length ? 'Level ' + (level + 2) + ' is waiting.' : 'That is all twelve.') +
+      '</p></div>';
+  }
+
+  function paintAll() {
+    document.getElementById('used').textContent = mine.size;
+    document.getElementById('par').textContent = LEVELS[level].count;
+    paintViews(); paintLayers(); paintEditor(); paintStage(); paintWin();
+  }
+
+  /* ── Wiring ────────────────────────────────────────────────────────────── */
+
+  function start(i, seed) {
+    level = i;
+    N = LEVELS[i].n;
+    revealed = false;
+    target = makePuzzle(seed === undefined ? (8191 * (i + 1) + 13) : seed, N, LEVELS[i].count);
+    mine = new Set();
+    layer = 0;
+    paintLevels(); paintAll();
+  }
+
+  document.getElementById('clearLayer').addEventListener('click', function () {
+    Array.from(mine).forEach(function (k) { if (+k.split(',')[1] === layer) mine.delete(k); });
+    paintAll();
+  });
+  document.getElementById('clearAll').addEventListener('click', function () {
+    mine = new Set(); revealed = false; paintAll();
+  });
+  document.getElementById('reveal').addEventListener('click', function () {
+    revealed = !revealed; paintAll();
+  });
+
+  window.addEventListener('resize', paintStage);
+
+  start(0);
+}());
+</script>
+</body>
+</html>
