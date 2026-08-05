@@ -6,13 +6,14 @@
  * ----------
  * Plan (the editable compensation assumptions):
  *   {
- *     quota:              number   // annual New Business ACV quota
+ *     quota:              number   // annual New Business ACV quota. null in the
+ *                                  // first-run state, before anything is entered.
  *     priorAttainment:    number   // NB ACV already booked this period, before this deal
- *     baseCommissionRate: number   // BCR, as a percentage (e.g. 2.2402 = 2.2402%).
+ *     baseCommissionRate: number   // BCR, as a percentage (e.g. 1.5 = 1.5%).
  *                                  // Applied to New Business ACV within each tier band, and
  *                                  // used as the base for the Out-Year New Business rate.
  *     tcvCreditPct:       number   // % of (TCV - ACV) credited as NB commissionable value
- *     deductionPct:       number   // average tax/deductions, as a percentage (default 49)
+ *     deductionPct:       number   // average tax/deductions, as a percentage
  *     tiers: [
  *       { minAttainmentPct: number, multiplier: number }, ...
  *     ]                            // graduated achievement bands: every dollar of NB ACV
@@ -33,28 +34,63 @@
 
 const DEAL_TYPES = ['newBusiness', 'renewal', 'oyNb'];
 
-// Starting defaults matching a real annual-New-Business-ACV comp plan:
-// £1.7M quota, six graduated achievement tiers, and a BCR of 2.2402% (which
-// reproduces the plan's own worked example: £38,083.40 New Business
-// commission at exactly 100% attainment), and a flat 0.4253% Renewal rate.
-function defaultPlan() {
+// This repository is public, so no real compensation plan is committed to it.
+// The app ships empty and the user types their own numbers in, which are then
+// held in this browser's localStorage and nowhere else. Two starting points
+// exist and neither describes anybody's actual plan:
+//
+//   emptyPlan()   - the genuine first-run state: every figure blank, one tier
+//                   row so the tier editor has something to show. Deliberately
+//                   fails validatePlan() until the user fills it in.
+//   examplePlan() - round, obviously-invented numbers, loaded only when the
+//                   user asks for them, so the shape of a plan is visible
+//                   without shipping a real one.
+function emptyPlan() {
   return {
-    quota: 1700000,
-    priorAttainment: 0,
-    baseCommissionRate: 2.2402,
-    tcvCreditPct: 0,
-    deductionPct: 49,
-    tiers: [
-      { minAttainmentPct: 0, multiplier: 0.9 },
-      { minAttainmentPct: 50, multiplier: 1.1 },
-      { minAttainmentPct: 100, multiplier: 1.5 },
-      { minAttainmentPct: 150, multiplier: 2.0 },
-      { minAttainmentPct: 200, multiplier: 1.25 },
-      { minAttainmentPct: 300, multiplier: 1.0 },
-    ],
-    renewalRatePct: 0.4253,
-    oyNbMultiplier: 0.25,
+    quota: null,
+    priorAttainment: null,
+    baseCommissionRate: null,
+    tcvCreditPct: null,
+    deductionPct: null,
+    tiers: [{ minAttainmentPct: 0, multiplier: 1 }],
+    renewalRatePct: null,
+    oyNbMultiplier: null,
   };
+}
+
+// Illustrative only: a $1M quota, a 1% base rate, and one accelerator at
+// 100% attainment. Round on purpose, so it can never be mistaken for a
+// real plan.
+function examplePlan() {
+  return {
+    quota: 1000000,
+    priorAttainment: 0,
+    baseCommissionRate: 1,
+    tcvCreditPct: 0,
+    deductionPct: 40,
+    tiers: [
+      { minAttainmentPct: 0, multiplier: 1 },
+      { minAttainmentPct: 100, multiplier: 2 },
+    ],
+    renewalRatePct: 0.5,
+    oyNbMultiplier: 0.5,
+  };
+}
+
+// True when a plan carries no user-entered figures at all — the first-run
+// state. Used to decide whether to show the "nothing saved yet" hint.
+function isEmptyPlan(plan) {
+  if (!plan || typeof plan !== 'object') return true;
+  const numericFields = [
+    'quota',
+    'priorAttainment',
+    'baseCommissionRate',
+    'tcvCreditPct',
+    'deductionPct',
+    'renewalRatePct',
+    'oyNbMultiplier',
+  ];
+  return numericFields.every((f) => !isFiniteNumber(plan[f]));
 }
 
 function isFiniteNumber(v) {
@@ -250,7 +286,9 @@ function calculateCommission(plan, deal) {
 if (typeof window !== 'undefined') {
   window.CommissionCalc = {
     DEAL_TYPES,
-    defaultPlan,
+    emptyPlan,
+    examplePlan,
+    isEmptyPlan,
     validatePlan,
     validateDeal,
     tierBands,

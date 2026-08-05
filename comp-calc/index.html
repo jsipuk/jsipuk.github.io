@@ -22,12 +22,36 @@
     <p class="currency-note">Deal values (ACV / TCV / quota) are entered in <strong>USD $</strong>. Commission is calculated and shown in <strong>GBP £</strong> &mdash; that's this plan's actual rate structure (a dollar deal value times a rate produces a pound commission figure), not a live currency conversion.</p>
   </header>
 
+  <section id="lock-panel" class="panel lock-panel" hidden>
+    <form id="lock-form" autocomplete="off" novalidate>
+      <h2 id="lock-title">This plan is protected</h2>
+      <p id="lock-blurb" class="panel-hint"></p>
+      <label class="field field-standalone">
+        <span>Passphrase</span>
+        <input type="password" id="lock-pass" autocomplete="current-password" spellcheck="false" />
+      </label>
+      <label class="field field-standalone" id="lock-pass2-wrap" hidden>
+        <span>Type it again</span>
+        <input type="password" id="lock-pass2" autocomplete="new-password" spellcheck="false" />
+      </label>
+      <div id="lock-err" class="errors" role="alert" aria-live="polite"></div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="lock-go">Unlock</button>
+        <button type="button" class="btn btn-ghost" id="lock-cancel" hidden>Cancel</button>
+      </div>
+    </form>
+  </section>
+
   <main class="layout">
     <section class="panel" aria-labelledby="plan-heading">
       <div class="panel-header">
         <h2 id="plan-heading">Compensation plan</h2>
-        <span class="panel-hint">Saved automatically in this browser</span>
+        <span class="panel-hint">Stored in this browser only, when you click Save plan</span>
       </div>
+
+      <p id="empty-plan-hint" class="panel-hint empty-hint" hidden>
+        Nothing saved yet. Enter your own plan below, or load an invented example to see the shape of one. No real plan ships with this app.
+      </p>
 
       <form id="plan-form" novalidate>
         <div class="field-grid">
@@ -56,7 +80,7 @@
           <label class="field">
             <span>Average deductions / tax (%)</span>
             <input type="number" id="deductionPct" name="deductionPct" min="0" max="100" step="any" inputmode="decimal" required />
-            <small>Applied to gross commission to estimate net. Defaults to 49%, fully editable.</small>
+            <small>Applied to gross commission to estimate net.</small>
           </label>
 
           <label class="field">
@@ -85,7 +109,10 @@
 
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">Save plan</button>
-          <button type="button" id="reset-plan" class="btn btn-ghost">Reset to defaults</button>
+          <button type="button" id="load-example" class="btn btn-secondary">Load example</button>
+          <button type="button" id="clear-plan" class="btn btn-ghost">Clear plan</button>
+          <button type="button" id="protect-plan" class="btn btn-ghost">Protect with a passphrase</button>
+          <button type="button" id="lock-now" class="btn btn-ghost" hidden>Lock</button>
           <span id="save-status" class="save-status" aria-live="polite"></span>
         </div>
       </form>
@@ -158,6 +185,7 @@
     <p>Runs entirely in your browser. Nothing is sent anywhere &mdash; plan assumptions are stored in this browser's <code>localStorage</code> only.</p>
   </footer>
 
+  <script src="store.js"></script>
   <script src="calc.js"></script>
   <script src="app.js"></script>
 </body>

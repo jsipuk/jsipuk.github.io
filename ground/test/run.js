@@ -407,20 +407,22 @@ function db() {
     eq(env.enc, false, 'and are flagged unencrypted');
     ok(Store.isEnvelope(env), 'and are recognised as ours');
 
-    /* If a retired sibling is ever restored, it still must not diverge. An
-       assertion that cannot run is not counted, which is the bug this replaces. */
+    /* Every other copy of this file must not diverge: comp-calc ships one so
+       its saved plan uses the same envelope, and a retired sibling would still
+       have to match if one were ever restored. An assertion that cannot run is
+       not counted, which is the bug this replaces. */
     const strip = s => s
       .replace(/\/\*[\s\S]*?\*\//, '')
       .replace(/var APP = '[^']+';/, "var APP = 'X';")
       .replace(/root\.\w+ = factory\(\)/, 'root.X = factory()');
     const mine = fs.readFileSync(path.join(__dirname, '..', 'store.js'), 'utf8');
-    const siblings = ['dojo', 'account-brain', 'field-notes']
+    const siblings = ['dojo', 'account-brain', 'field-notes', 'comp-calc']
       .map(app => path.join(__dirname, '..', '..', app, 'store.js'))
       .filter(f => fs.existsSync(f));
     siblings.forEach(f => {
       ok(strip(mine) === strip(fs.readFileSync(f, 'utf8')), `no drift from ${f}`);
     });
-    console.log(`  (${siblings.length} sibling copies on disk to compare against)`);
+    console.log(`  (${siblings.length} sibling cop${siblings.length === 1 ? 'y' : 'ies'} on disk to compare against)`);
   }
 
   console.log(`\n${pass} passed, ${fail} failed`);
