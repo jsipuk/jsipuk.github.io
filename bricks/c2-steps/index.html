@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Steps — compiles any brick model into a real instruction booklet: build order, one step at a time, with a parts callout and a printable contact sheet.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1117'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%236c63ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="../system/system.css">
+<title>Steps · Brick Lab</title>
+<style>
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; overflow: hidden; }
+
+.work { flex: 1; display: flex; min-height: 0; }
+
+.viewer { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.viewer .stage { flex: 1; min-height: 0; }
+
+.stepbar {
+  display: flex; align-items: center; gap: .6rem; padding: .6rem .9rem;
+  background: var(--surface-2); border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+.stepbar .count { font-family: var(--mono); font-size: .82rem; color: var(--muted); min-width: 6.5rem; }
+.stepbar .count b { color: var(--text); }
+.progress {
+  flex: 1; min-width: 90px; height: 5px; background: var(--sunken);
+  border-radius: 3px; overflow: hidden; border: 1px solid var(--border);
+}
+.progress i { display: block; height: 100%; background: var(--accent); transition: width .18s; }
+
+.callout {
+  width: 264px; flex: none; background: var(--surface-2);
+  border-left: 1px solid var(--border); overflow-y: auto; padding: .9rem;
+  display: flex; flex-direction: column; gap: .9rem;
+}
+
+.bomlist { display: flex; flex-direction: column; gap: .3rem; }
+.bomrow {
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: .3rem .5rem;
+}
+.bomrow canvas { width: 40px; height: 27px; flex: none; }
+.bomrow .n { font-family: var(--mono); font-weight: 700; color: var(--accent-lt); font-size: .84rem; flex: none; }
+.bomrow .t { font-size: .78rem; color: var(--body); line-height: 1.35; min-width: 0; }
+.bomrow .t b { color: var(--text); display: block; font-weight: 600; }
+
+.stat { display: flex; justify-content: space-between; font-size: .82rem; padding: .12rem 0; }
+.stat span { color: var(--muted); }
+.stat b { color: var(--text); font-weight: 600; }
+
+.empty { padding: 2rem 1.2rem; max-width: 46ch; margin: auto; text-align: center; }
+.empty h2 { color: var(--text); margin-bottom: .6rem; }
+
+/* Contact sheet — the printable one */
+.sheet { flex: 1; overflow-y: auto; padding: 1rem; display: none; }
+.sheet.on { display: block; }
+.work.sheeting .viewer, .work.sheeting .callout { display: none; }
+.tiles { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.tile canvas { width: 100%; height: 150px; display: block; background: var(--sunken); }
+.tile .cap {
+  display: flex; align-items: baseline; gap: .4rem; padding: .4rem .6rem;
+  border-top: 1px solid var(--border); font-size: .76rem; color: var(--muted);
+}
+.tile .cap b { font-family: var(--mono); color: var(--accent-lt); font-size: .82rem; }
+
+@media (max-width: 780px) {
+  .work { flex-direction: column; }
+  .callout { width: 100%; border-left: none; border-top: 1px solid var(--border); max-height: 38vh; }
+  .viewer .stage { min-height: 40vh; }
+}
+
+@media print {
+  html, body { height: auto; overflow: visible; background: #fff; }
+  body { color: #111; }
+  .lab-head, .stepbar, .callout, .viewer, .lab-foot, .noprint { display: none !important; }
+  .sheet { display: block !important; overflow: visible; padding: 0; }
+  .tiles { grid-template-columns: repeat(3, 1fr); gap: .4rem; }
+  .tile { border-color: #bbb; break-inside: avoid; }
+  .tile canvas { background: #fff; height: 130px; }
+  .tile .cap { color: #333; border-color: #bbb; }
+  .tile .cap b { color: #000; }
+}
+</style>
+</head>
+<body>
+
+<header class="lab-head">
+  <a class="lab-back" href="../">&larr; Brick&nbsp;Lab</a>
+  <span class="lab-num">02</span>
+  <span class="lab-title">Steps</span>
+  <span class="lab-sub" id="modelName"></span>
+  <span class="spacer"></span>
+  <div class="seg noprint" id="mode">
+    <button data-mode="one" class="on">One step</button>
+    <button data-mode="all">All steps</button>
+  </div>
+  <button class="btn small noprint" id="print">Print</button>
+  <a class="btn small noprint" id="editLink" href="../c1-bench/">Edit in Bench</a>
+</header>
+
+<div class="work" id="work">
+
+  <div class="viewer">
+    <div class="stage"><canvas id="cv"></canvas></div>
+    <div class="stepbar">
+      <button class="btn small" id="first" aria-label="First step">&#8676;</button>
+      <button class="btn small" id="prev">Back</button>
+      <span class="count" id="count"></span>
+      <div class="progress"><i id="bar"></i></div>
+      <button class="btn primary small" id="next">Next</button>
+      <button class="btn small" id="ghostBtn" title="Show the finished model faintly behind">Preview</button>
+    </div>
+  </div>
+
+  <aside class="callout">
+    <div>
+      <div class="panel-title" id="calloutTitle">Find these parts</div>
+      <div class="bomlist" id="stepBom"></div>
+    </div>
+    <div>
+      <div class="panel-title">This build</div>
+      <div class="stat"><span>Parts</span><b id="sParts">–</b></div>
+      <div class="stat"><span>Steps</span><b id="sSteps">–</b></div>
+      <div class="stat"><span>Layers</span><b id="sLayers">–</b></div>
+      <div class="stat"><span>Colours</span><b id="sColours">–</b></div>
+      <div class="stat"><span>Parts per step</span><b id="sPer">–</b></div>
+    </div>
+    <div>
+      <div class="panel-title">Everything you need</div>
+      <div class="bomlist" id="fullBom"></div>
+    </div>
+  </aside>
+
+  <div class="sheet" id="sheet">
+    <div class="tiles" id="tiles"></div>
+  </div>
+</div>
+
+<script src="../system/system.js"></script>
+<script src="../system/iso.js"></script>
+<script src="../system/steps.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+
+  var model = null;
+  var steps = [];
+  var at = -1;              /* -1 is the cover: the finished model */
+  var showGhost = false;
+  var view = null;          /* framed once, from the finished model, so the
+                               model never jumps between steps */
+  var dpr = 1;
+
+  /* ── Load a model ──────────────────────────────────────────────────────── */
+
+  function load() {
+    var h = location.hash.slice(1);
+    if (h) {
+      try {
+        var m = decode(decodeURIComponent(h));
+        if (m.parts.length) return m;
+      } catch (e) { /* fall through */ }
+    }
+    try {
+      var s = JSON.parse(localStorage.getItem('bricklab.bench.v1') || '{}');
+      if (s.current) {
+        var cur = decode(s.current);
+        if (cur.parts.length) return cur;
+      }
+    } catch (e) { /* fall through */ }
+    /* Nothing to compile: show what the compiler does on something of its own. */
+    return generate({
+      seed: 20260805, count: 22, name: 'Demo build',
+      parts: ['b1x2', 'b1x4', 'b2x2', 'b2x4', 'p2x4', 'p1x2', 's2x1', 't1x2', 'r1x1'],
+      colours: ['red', 'blue', 'yellow', 'white', 'lgrey'],
+    });
+  }
+
+  /* ── Canvas ────────────────────────────────────────────────────────────── */
+
+  function sizeCanvas(canvas, cssW, cssH) {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.round(cssW * dpr));
+    canvas.height = Math.max(1, Math.round(cssH * dpr));
+    var c = canvas.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, cssW, cssH);
+    return c;
+  }
+
+  function frame() {
+    var r = cv.parentNode.getBoundingClientRect();
+    view = Iso.fit(model.parts, r.width, r.height, 46);
+    view.w = r.width; view.h = r.height;
+  }
+
+  function draw() {
+    if (!view) frame();
+    var c = sizeCanvas(cv, view.w, view.h);
+
+    if (at < 0) {
+      /* The cover: the finished thing, which is what you look at first. */
+      Iso.render(c, model.parts, view);
+    } else {
+      var built = Steps.builtBy(steps, at);
+      var added = Steps.addedBy(steps, at);
+      var list = [], highlight = new Set(), ghost = new Set();
+
+      model.parts.forEach(function (pl, i) {
+        if (built.has(i)) {
+          list.push(pl);
+          if (added.has(i)) highlight.add(list.length - 1);
+        } else if (showGhost) {
+          list.push(pl);
+          ghost.add(list.length - 1);
+        }
+      });
+
+      /* Ghosted parts first, so the solid model always sits in front of the
+         hint rather than behind it. */
+      var ordered = [], hi = new Set(), gh = new Set();
+      list.forEach(function (pl, i) { if (ghost.has(i)) { ordered.push(pl); gh.add(ordered.length - 1); } });
+      list.forEach(function (pl, i) {
+        if (!ghost.has(i)) { ordered.push(pl); if (highlight.has(i)) hi.add(ordered.length - 1); }
+      });
+
+      Iso.render(c, ordered, {
+        scale: view.scale, ox: view.ox, oy: view.oy,
+        highlight: hi, ghost: gh, outline: '#ffffff',
+      });
+    }
+    updateChrome();
+  }
+
+  function updateChrome() {
+    var total = steps.length;
+    document.getElementById('count').innerHTML = at < 0
+      ? 'Finished model'
+      : 'Step <b>' + (at + 1) + '</b> of ' + total;
+    document.getElementById('bar').style.width =
+      (total ? ((at + 1) / total) * 100 : 0) + '%';
+    document.getElementById('prev').disabled = at < 0;
+    document.getElementById('next').disabled = at >= total - 1;
+    document.getElementById('first').disabled = at < 0;
+    document.getElementById('ghostBtn').classList.toggle('on', showGhost);
+
+    document.getElementById('calloutTitle').textContent =
+      at < 0 ? 'The finished build' : 'Find these parts';
+    renderBom(document.getElementById('stepBom'),
+      at < 0 ? [] : steps[at].bom,
+      at < 0 ? 'Press Next to start building.' : '');
+  }
+
+  /* ── Parts callouts ────────────────────────────────────────────────────── */
+
+  function renderBom(host, lines, emptyMsg) {
+    host.innerHTML = '';
+    if (!lines.length) {
+      var p = document.createElement('p');
+      p.className = 'hint';
+      p.textContent = emptyMsg || '';
+      host.appendChild(p);
+      return;
+    }
+    lines.forEach(function (l) {
+      var part = PART[l.part], col = COLOUR[l.c];
+      if (!part || !col) return;
+      var row = document.createElement('div');
+      row.className = 'bomrow';
+
+      var n = document.createElement('span');
+      n.className = 'n'; n.textContent = l.n + '×';
+
+      var icon = document.createElement('canvas');
+
+      var t = document.createElement('span');
+      t.className = 't';
+      t.innerHTML = '<b>' + part.name + '</b>' + col.name;
+
+      row.appendChild(n); row.appendChild(icon); row.appendChild(t);
+      host.appendChild(row);
+
+      requestAnimationFrame(function () {
+        var one = [place(l.part, l.c, 0, 0, 0, 0)];
+        var c = sizeCanvas(icon, 40, 27);
+        Iso.render(c, one, Iso.fit(one, 40, 27, 3, 11));
+      });
+    });
+  }
+
+  /* ── Contact sheet ─────────────────────────────────────────────────────── */
+
+  function renderSheet() {
+    var host = document.getElementById('tiles');
+    host.innerHTML = '';
+    var TW = 210, TH = 150;
+    var tileView = Iso.fit(model.parts, TW, TH, 10);
+
+    steps.forEach(function (s, si) {
+      var tile = document.createElement('div');
+      tile.className = 'tile';
+      var c = document.createElement('canvas');
+      var cap = document.createElement('div');
+      cap.className = 'cap';
+      var names = s.bom.map(function (l) {
+        return l.n + '× ' + shortName(l.part);
+      }).join(', ');
+      cap.innerHTML = '<b>' + s.n + '</b><span>' + names + '</span>';
+      tile.appendChild(c); tile.appendChild(cap);
+      host.appendChild(tile);
+
+      requestAnimationFrame(function () {
+        var built = Steps.builtBy(steps, si);
+        var added = Steps.addedBy(steps, si);
+        var list = [], hi = new Set();
+        model.parts.forEach(function (pl, i) {
+          if (!built.has(i)) return;
+          list.push(pl);
+          if (added.has(i)) hi.add(list.length - 1);
+        });
+        var cc = sizeCanvas(c, TW, TH);
+        Iso.render(cc, list, {
+          scale: tileView.scale, ox: tileView.ox, oy: tileView.oy,
+          highlight: hi, outline: '#ffffff',
+        });
+      });
+    });
+  }
+
+  /* ── Wiring ────────────────────────────────────────────────────────────── */
+
+  function go(n) {
+    at = Math.max(-1, Math.min(steps.length - 1, n));
+    draw();
+  }
+
+  document.getElementById('next').addEventListener('click', function () { go(at + 1); });
+  document.getElementById('prev').addEventListener('click', function () { go(at - 1); });
+  document.getElementById('first').addEventListener('click', function () { go(-1); });
+  document.getElementById('ghostBtn').addEventListener('click', function () {
+    showGhost = !showGhost; draw();
+  });
+  document.getElementById('print').addEventListener('click', function () {
+    setMode('all');
+    setTimeout(function () { window.print(); }, 260);
+  });
+
+  function setMode(m) {
+    var work = document.getElementById('work');
+    work.classList.toggle('sheeting', m === 'all');
+    document.getElementById('sheet').classList.toggle('on', m === 'all');
+    Array.prototype.forEach.call(document.getElementById('mode').children, function (b) {
+      b.classList.toggle('on', b.getAttribute('data-mode') === m);
+    });
+    if (m === 'all') renderSheet(); else { frame(); draw(); }
+  }
+
+  document.getElementById('mode').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    setMode(b.getAttribute('data-mode'));
+  });
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowRight' || ev.key === ' ') { ev.preventDefault(); go(at + 1); }
+    else if (ev.key === 'ArrowLeft') { ev.preventDefault(); go(at - 1); }
+    else if (ev.key === 'Home') go(-1);
+  });
+
+  window.addEventListener('resize', function () { frame(); draw(); });
+
+  /* A pasted model link changes only the hash, which is not a navigation, so
+     nothing would happen without this. */
+  window.addEventListener('hashchange', function () { location.reload(); });
+
+  /* ── Boot ──────────────────────────────────────────────────────────────── */
+
+  model = load();
+  steps = Steps.compile(model);
+  var sum = Steps.summarise(model, steps);
+
+  document.getElementById('modelName').textContent = model.name;
+  document.getElementById('sParts').textContent = sum.parts;
+  document.getElementById('sSteps').textContent = sum.steps;
+  document.getElementById('sLayers').textContent = sum.layers;
+  document.getElementById('sColours').textContent = sum.colours;
+  document.getElementById('sPer').textContent = sum.partsPerStep;
+  document.getElementById('editLink').href = '../c1-bench/#' + encodeURIComponent(encode(model));
+
+  renderBom(document.getElementById('fullBom'), bom(model.parts), 'Nothing to build.');
+  frame();
+  draw();
+}());
+</script>
+
+<footer class="lab-foot noprint">
+  <p class="disclaimer">Concept 02 of Brick&nbsp;Lab. The build order is computed, not authored — see
+  <span class="mono">system/steps.js</span>. Not affiliated with, endorsed or sponsored by the LEGO Group.</p>
+</footer>
+</body>
+</html>

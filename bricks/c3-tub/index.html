@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="The Tub — build challenges filtered by the bricks you actually own, so nothing it suggests is impossible with what is on the carpet.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1117'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%236c63ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="../system/system.css">
+<title>The Tub · Brick Lab</title>
+<style>
+body { min-height: 100%; }
+.wrap { max-width: 940px; margin: 0 auto; padding: 1.2rem 1.1rem 3rem; }
+
+.lead { color: var(--muted); font-size: .92rem; max-width: 62ch; margin-bottom: 1.2rem; }
+
+/* ── Tub setup ────────────────────────────────────────────────────────────── */
+details.tub { margin-bottom: 1.2rem; }
+details.tub > summary {
+  cursor: pointer; list-style: none; display: flex; align-items: center; gap: .6rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: .8rem 1rem; font-weight: 600; color: var(--text); font-size: .95rem;
+}
+details.tub > summary::-webkit-details-marker { display: none; }
+details.tub > summary::after { content: '▾'; margin-left: auto; color: var(--muted); }
+details.tub[open] > summary::after { content: '▴'; }
+details.tub > summary .pill { font-weight: 600; }
+
+.groups {
+  display: grid; gap: .5rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  margin-top: .7rem;
+}
+.group {
+  display: flex; align-items: center; gap: .6rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .5rem .7rem;
+}
+.group .lbl { flex: 1; min-width: 0; }
+.group .lbl b { display: block; color: var(--text); font-size: .88rem; font-weight: 600; }
+.group .lbl span { font-size: .76rem; color: var(--muted); }
+.levels { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; flex: none; }
+.levels button {
+  background: var(--sunken); border: none; border-right: 1px solid var(--border);
+  color: var(--muted); font-size: .74rem; font-weight: 700; padding: .3rem .5rem; cursor: pointer;
+}
+.levels button:last-child { border-right: none; }
+.levels button.on { background: rgba(108,99,255,.22); color: var(--accent-lt); }
+
+/* ── Challenge card ───────────────────────────────────────────────────────── */
+.deal { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+
+.card-big {
+  background: linear-gradient(165deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border); border-radius: 18px; padding: 1.6rem 1.5rem;
+  position: relative; overflow: hidden; margin-bottom: 1rem;
+}
+.card-big::before {
+  content: ''; position: absolute; width: 320px; height: 320px; border-radius: 50%;
+  background: var(--accent); filter: blur(120px); opacity: .12; top: -180px; right: -120px;
+}
+.card-big > * { position: relative; }
+.kicker {
+  font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--accent-lt); margin-bottom: .8rem;
+}
+.subject {
+  font-size: clamp(1.5rem, 4.6vw, 2.3rem); font-weight: 700; letter-spacing: -1px;
+  color: var(--text); line-height: 1.15; margin-bottom: 1rem; text-wrap: balance;
+}
+.rules { display: flex; flex-direction: column; gap: .5rem; }
+.rule { display: flex; gap: .65rem; align-items: baseline; }
+.rule .tag {
+  font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); flex: none; width: 5.4rem;
+}
+.rule .txt { color: var(--body); font-size: .97rem; }
+.rule.twist .tag { color: var(--warn); }
+.seedline { margin-top: 1.1rem; font-size: .74rem; color: var(--muted); font-family: var(--mono); }
+
+/* ── Ten bricks ───────────────────────────────────────────────────────────── */
+.tenrow { display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: .45rem; margin-top: .9rem; }
+.ten {
+  background: var(--sunken); border: 1px solid var(--border); border-radius: 10px;
+  padding: .3rem; text-align: center;
+}
+.ten canvas { width: 100%; height: 46px; display: block; }
+.ten small { font-size: .66rem; color: var(--muted); display: block; margin-top: .15rem; line-height: 1.2; }
+
+/* ── Timer ────────────────────────────────────────────────────────────────── */
+.timer { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.clock { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; color: var(--text); min-width: 4.2rem; }
+.clock.done { color: var(--warn); }
+.tbar { flex: 1; min-width: 100px; height: 6px; background: var(--sunken); border: 1px solid var(--border);
+  border-radius: 4px; overflow: hidden; }
+.tbar i { display: block; height: 100%; background: var(--accent); }
+.tbar.done i { background: var(--warn); }
+
+/* ── Log ──────────────────────────────────────────────────────────────────── */
+.logrow {
+  display: flex; align-items: center; gap: .7rem; padding: .55rem .8rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: .35rem;
+}
+.logrow .who { flex: 1; min-width: 0; }
+.logrow .who b { display: block; color: var(--text); font-size: .9rem; font-weight: 600; }
+.logrow .who span { font-size: .75rem; color: var(--muted); }
+.logrow .stars { color: var(--warn); letter-spacing: 2px; font-size: .9rem; flex: none; }
+.logrow button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: .76rem; }
+.logrow button:hover { color: var(--hot); }
+
+.grid2 { display: grid; gap: 1rem; grid-template-columns: 1.35fr 1fr; align-items: start; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+
+.starpick { display: flex; gap: .2rem; }
+.starpick button {
+  background: none; border: none; cursor: pointer; font-size: 1.3rem;
+  color: var(--border); padding: 0 .05rem; line-height: 1;
+}
+.starpick button.on { color: var(--warn); }
+</style>
+</head>
+<body>
+
+<header class="lab-head">
+  <a class="lab-back" href="../">&larr; Brick&nbsp;Lab</a>
+  <span class="lab-num">03</span>
+  <span class="lab-title">The Tub</span>
+  <span class="lab-sub">Ideas you can actually build tonight.</span>
+</header>
+
+<main class="wrap">
+
+  <p class="lead">Inspiration is easy. Inspiration you can build with the tub in front of you is the
+  hard part — so this asks what is in the tub first, then never suggests anything you cannot make.</p>
+
+  <details class="tub" id="tubPanel">
+    <summary>What is in your tub? <span class="pill" id="tubSummary">Not set</span></summary>
+    <div class="groups" id="groups"></div>
+    <p class="hint" style="margin-top:.7rem">Rough is fine. It only decides which challenges are fair to offer.
+    Stored on this device.</p>
+  </details>
+
+  <div class="deal">
+    <div class="seg" id="mode">
+      <button data-mode="challenge" class="on">Challenge</button>
+      <button data-mode="ten">Ten bricks</button>
+    </div>
+    <button class="btn primary" id="dealBtn">Deal a new one</button>
+    <span class="hint" id="poolNote"></span>
+  </div>
+
+  <section class="card-big" id="card"></section>
+
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-title">Clock</div>
+      <div class="timer">
+        <span class="clock" id="clock">10:00</span>
+        <div class="tbar" id="tbar"><i style="width:100%"></i></div>
+      </div>
+      <div class="deal" style="margin:.8rem 0 0">
+        <div class="seg" id="mins">
+          <button data-m="5">5 min</button>
+          <button data-m="10" class="on">10 min</button>
+          <button data-m="20">20 min</button>
+          <button data-m="0">Off</button>
+        </div>
+        <button class="btn small" id="startBtn">Start</button>
+        <button class="btn small" id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">We built it</div>
+      <input type="text" id="logName" placeholder="What did you build?" maxlength="60">
+      <div class="deal" style="margin:.6rem 0 0">
+        <div class="starpick" id="stars" aria-label="Rate this build"></div>
+        <button class="btn small primary" id="logBtn" style="margin-left:auto">Add to the log</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:1rem">
+    <div class="panel-title">The log <span id="logCount"></span></div>
+    <div id="log"></div>
+  </div>
+
+</main>
+
+<footer class="lab-foot">
+  <p class="disclaimer">Concept 03 of Brick&nbsp;Lab. Your tub and your log stay in this browser; nothing is sent
+  anywhere. Not affiliated with, endorsed or sponsored by the LEGO Group.</p>
+</footer>
+
+<script src="../system/system.js"></script>
+<script src="../system/iso.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var STORE = 'bricklab.tub.v1';
+
+  /* ── What a tub can contain ────────────────────────────────────────────── */
+  /* Levels: 0 none, 1 a few, 2 loads. A challenge that needs a group at level
+     n is only offered when the tub is at n or better. */
+
+  var GROUPS = [
+    { id: 'basics',  name: 'Standard bricks',  note: '2×4, 2×2, the ordinary ones' },
+    { id: 'smalls',  name: 'Small bricks',     note: '1×1 and 1×2' },
+    { id: 'plates',  name: 'Plates',           note: 'the thin ones' },
+    { id: 'bigplate',name: 'A big base',       note: 'baseplate or a large plate' },
+    { id: 'slopes',  name: 'Slopes',           note: 'roof and wedge pieces' },
+    { id: 'round',   name: 'Round pieces',     note: 'round bricks, cones, studs' },
+    { id: 'wheels',  name: 'Wheels',           note: 'wheels and axles' },
+    { id: 'openings',name: 'Windows & doors',  note: 'the frames' },
+    { id: 'figs',    name: 'Minifigures',      note: 'people and their bits' },
+    { id: 'colours', name: 'Lots of colours',  note: 'or is it mostly one?' },
+  ];
+
+  /* ── The deck ──────────────────────────────────────────────────────────── */
+
+  var SUBJECTS = [
+    { t: 'a lighthouse', needs: {} },
+    { t: 'a bridge a toy car can drive under', needs: { basics: 2 } },
+    { t: 'a creature with more than four legs', needs: { smalls: 1 } },
+    { t: 'a chair somebody could actually sit on', needs: { figs: 1 } },
+    { t: 'the front of a shop', needs: { openings: 1 } },
+    { t: 'a fairground ride', needs: { round: 1 } },
+    { t: 'a robot’s head, life size', needs: {} },
+    { t: 'a boat that would float in the bath', needs: { plates: 1 } },
+    { t: 'a tower that reaches your knee', needs: { basics: 2 } },
+    { t: 'a house for a bird', needs: { slopes: 1 } },
+    { t: 'a vehicle with no wheels at all', needs: {} },
+    { t: 'a garden, with something growing in it', needs: { round: 1 } },
+    { t: 'a machine that does one completely useless thing', needs: {} },
+    { t: 'a birthday cake', needs: { round: 1 } },
+    { t: 'an animal you might find in the garden', needs: { smalls: 1 } },
+    { t: 'something from the kitchen, twice the real size', needs: {} },
+    { t: 'a spaceship with exactly one engine', needs: { slopes: 1 } },
+    { t: 'a bus stop, with the bus', needs: { wheels: 1 } },
+    { t: 'a castle gate that opens', needs: { basics: 2 } },
+    { t: 'a windmill', needs: { plates: 1 } },
+    { t: 'a dinosaur, any dinosaur', needs: { basics: 1 } },
+    { t: 'a musical instrument', needs: {} },
+    { t: 'a flag nobody has flown before', needs: { plates: 1 } },
+    { t: 'a tree in autumn', needs: { round: 1 } },
+    { t: 'a den you would want to live in', needs: { bigplate: 1 } },
+    { t: 'a telephone from before you were born', needs: {} },
+    { t: 'the tallest thing that still fits in a shoebox', needs: {} },
+    { t: 'a throne for the family pet', needs: { basics: 2 } },
+    { t: 'a rocket on its launch pad', needs: { bigplate: 1 } },
+    { t: 'a postbox', needs: { smalls: 1 } },
+    { t: 'a swimming pool with a diving board', needs: { plates: 2 } },
+    { t: 'a market stall selling one thing', needs: { figs: 1 } },
+  ];
+
+  var CONSTRAINTS = [
+    { t: 'it has to fit in the palm of your hand', needs: {} },
+    { t: 'no more than three colours', needs: { colours: 1 } },
+    { t: 'exactly twenty pieces, no more, no fewer', needs: {} },
+    { t: 'taller than it is wide', needs: {} },
+    { t: 'not a single 2×4 brick anywhere in it', needs: { smalls: 1 } },
+    { t: 'it must balance on one small brick', needs: { smalls: 1 } },
+    { t: 'symmetrical from the front', needs: {} },
+    { t: 'one colour only', needs: {} },
+    { t: 'something on it has to move', needs: {} },
+    { t: 'something round must be visible', needs: { round: 1 } },
+    { t: 'bricks only — no plates', needs: { basics: 2 } },
+    { t: 'it must survive being picked up and gently shaken', needs: {} },
+    { t: 'build it upside-down and turn it over at the end', needs: {} },
+    { t: 'nothing may be more than four bricks tall', needs: {} },
+    { t: 'it must have a door you can open', needs: { openings: 1 } },
+    { t: 'every layer a different colour', needs: { colours: 2 } },
+  ];
+
+  var TWISTS = [
+    { t: 'swap models halfway and finish each other’s', needs: {} },
+    { t: 'you may not look at the tub — reach in and take what you get', needs: {} },
+    { t: 'somebody else picks your colours', needs: { colours: 1 } },
+    { t: 'it needs a hidden compartment', needs: {} },
+    { t: 'when it is done, tell its story in three sentences', needs: {} },
+    { t: 'one hand only', needs: {} },
+    { t: 'no talking until somebody is finished', needs: {} },
+    { t: 'the youngest picks the subject, the oldest has to build it', needs: {} },
+    { t: 'it must be able to hold a real pencil', needs: {} },
+    { t: 'give it a name before you start, not after', needs: {} },
+    { t: 'no twist this time — just build it', needs: {} },
+    { t: 'add one deliberate mistake and see if anyone spots it', needs: {} },
+  ];
+
+  /* Which system parts a group can hand to the Ten Bricks deal. */
+  var GROUP_PARTS = {
+    basics:   ['b2x2', 'b2x3', 'b2x4', 'b2x6', 'b1x4', 'b1x6'],
+    smalls:   ['b1x1', 'b1x2', 'b1x3'],
+    plates:   ['p1x2', 'p1x4', 'p2x2', 'p2x4', 'p2x6', 't1x2', 't2x2'],
+    bigplate: ['p4x6', 'p4x8', 'p6x8'],
+    slopes:   ['s2x1', 's2x2', 's3x1'],
+    round:    ['r1x1', 'q1x1'],
+  };
+
+  /* ── State ─────────────────────────────────────────────────────────────── */
+
+  var state = { tub: {}, log: [], seed: 0, mode: 'challenge', stars: 3, mins: 10 };
+
+  function read() {
+    try { return JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function write() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify({ tub: state.tub, log: state.log, mins: state.mins }));
+    } catch (e) { /* private mode */ }
+  }
+
+  var saved = read();
+  GROUPS.forEach(function (g) {
+    state.tub[g.id] = (saved.tub && typeof saved.tub[g.id] === 'number') ? saved.tub[g.id] : 1;
+  });
+  state.log = Array.isArray(saved.log) ? saved.log : [];
+  state.mins = typeof saved.mins === 'number' ? saved.mins : 10;
+  var tubWasSet = !!(saved.tub);
+
+  /* ── Tub UI ────────────────────────────────────────────────────────────── */
+
+  function renderGroups() {
+    var host = document.getElementById('groups');
+    host.innerHTML = '';
+    GROUPS.forEach(function (g) {
+      var row = document.createElement('div');
+      row.className = 'group';
+      row.innerHTML = '<span class="lbl"><b>' + g.name + '</b><span>' + g.note + '</span></span>';
+      var lv = document.createElement('span');
+      lv.className = 'levels';
+      ['None', 'A few', 'Loads'].forEach(function (label, i) {
+        var b = document.createElement('button');
+        b.textContent = label;
+        b.className = state.tub[g.id] === i ? 'on' : '';
+        b.addEventListener('click', function () {
+          state.tub[g.id] = i;
+          write(); renderGroups(); updateTubSummary(); deal();
+        });
+        lv.appendChild(b);
+      });
+      row.appendChild(lv);
+      host.appendChild(row);
+    });
+  }
+
+  function updateTubSummary() {
+    var have = GROUPS.filter(function (g) { return state.tub[g.id] > 0; }).length;
+    var el = document.getElementById('tubSummary');
+    el.textContent = have + ' of ' + GROUPS.length + ' kinds';
+    el.className = 'pill' + (have >= 6 ? ' ok' : have >= 3 ? '' : ' warn');
+  }
+
+  function affordable(card) {
+    var n = card.needs || {};
+    return Object.keys(n).every(function (k) { return (state.tub[k] || 0) >= n[k]; });
+  }
+
+  /* ── Dealing ───────────────────────────────────────────────────────────── */
+
+  function dealFrom(deck, rand) {
+    var ok = deck.filter(affordable);
+    var pool = ok.length ? ok : deck;
+    return pool[Math.floor(rand() * pool.length) % pool.length];
+  }
+
+  function deal(seed) {
+    state.seed = seed === undefined ? (Math.floor(Math.random() * 900000) + 100000) : seed;
+    var rand = rngFrom(state.seed);
+    var card = document.getElementById('card');
+
+    if (state.mode === 'ten') {
+      var pool = [];
+      Object.keys(GROUP_PARTS).forEach(function (g) {
+        var lvl = state.tub[g] || 0;
+        for (var i = 0; i < lvl; i++) pool = pool.concat(GROUP_PARTS[g]);
+      });
+      if (!pool.length) pool = GROUP_PARTS.basics.concat(GROUP_PARTS.smalls);
+
+      var cols = (state.tub.colours > 0)
+        ? ['red', 'blue', 'yellow', 'white', 'green', 'orange', 'lgrey', 'tan', 'black']
+        : ['red', 'lgrey', 'white'];
+
+      var picks = [];
+      for (var j = 0; j < 10; j++) {
+        picks.push({
+          part: pool[Math.floor(rand() * pool.length) % pool.length],
+          c: cols[Math.floor(rand() * cols.length) % cols.length],
+        });
+      }
+
+      card.innerHTML =
+        '<p class="kicker">Ten bricks</p>' +
+        '<h2 class="subject">Find these ten. Build anything at all.</h2>' +
+        '<div class="tenrow" id="tenrow"></div>' +
+        '<p class="hint" style="margin-top:.9rem">No subject, no rules. The limit is the whole game — ' +
+        'and the second-best thing about it is that everyone gets the same ten.</p>' +
+        '<p class="seedline">deal ' + state.seed + '</p>';
+
+      var row = document.getElementById('tenrow');
+      picks.forEach(function (p) {
+        var cell = document.createElement('div');
+        cell.className = 'ten';
+        var cvs = document.createElement('canvas');
+        var lab = document.createElement('small');
+        lab.textContent = shortName(p.part);
+        cell.appendChild(cvs); cell.appendChild(lab);
+        row.appendChild(cell);
+        requestAnimationFrame(function () {
+          var w = cvs.clientWidth || 66, h = 46;
+          var d = Math.min(window.devicePixelRatio || 1, 2);
+          cvs.width = w * d; cvs.height = h * d;
+          var c = cvs.getContext('2d');
+          c.setTransform(d, 0, 0, d, 0, 0);
+          var one = [place(p.part, p.c, 0, 0, 0, 0)];
+          Iso.render(c, one, Iso.fit(one, w, h, 5, 15));
+        });
+      });
+      document.getElementById('poolNote').textContent = pool.length + ' part types in play';
+      return;
+    }
+
+    var subject = dealFrom(SUBJECTS, rand);
+    var constraint = dealFrom(CONSTRAINTS, rand);
+    var twist = dealFrom(TWISTS, rand);
+
+    card.innerHTML =
+      '<p class="kicker">Tonight’s build</p>' +
+      '<h2 class="subject">Build ' + subject.t + '.</h2>' +
+      '<div class="rules">' +
+        '<div class="rule"><span class="tag">Rule</span><span class="txt">' + up(constraint.t) + '.</span></div>' +
+        '<div class="rule twist"><span class="tag">Twist</span><span class="txt">' + up(twist.t) + '.</span></div>' +
+      '</div>' +
+      '<p class="seedline">deal ' + state.seed + '</p>';
+
+    var offered = SUBJECTS.filter(affordable).length;
+    document.getElementById('poolNote').textContent =
+      offered + ' of ' + SUBJECTS.length + ' subjects fit your tub';
+  }
+
+  function up(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  /* ── Timer ─────────────────────────────────────────────────────────────── */
+
+  var left = state.mins * 60, running = false, tick = null;
+
+  function paint() {
+    var el = document.getElementById('clock');
+    var bar = document.getElementById('tbar');
+    if (!state.mins) {
+      el.textContent = '—:—';
+      el.className = 'clock';
+      bar.className = 'tbar';
+      bar.firstElementChild.style.width = '0%';
+      return;
+    }
+    var m = Math.floor(Math.max(0, left) / 60), s = Math.max(0, left) % 60;
+    el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    var done = left <= 0;
+    el.className = 'clock' + (done ? ' done' : '');
+    bar.className = 'tbar' + (done ? ' done' : '');
+    bar.firstElementChild.style.width = Math.max(0, (left / (state.mins * 60)) * 100) + '%';
+  }
+
+  function stop() {
+    running = false;
+    if (tick) { clearInterval(tick); tick = null; }
+    document.getElementById('startBtn').textContent = 'Start';
+  }
+
+  document.getElementById('startBtn').addEventListener('click', function () {
+    if (!state.mins) return;
+    if (running) { stop(); return; }
+    running = true;
+    this.textContent = 'Pause';
+    tick = setInterval(function () {
+      left--;
+      if (left <= 0) { left = 0; stop(); }
+      paint();
+    }, 1000);
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    stop(); left = state.mins * 60; paint();
+  });
+
+  document.getElementById('mins').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    Array.prototype.forEach.call(this.children, function (c) { c.classList.toggle('on', c === b); });
+    state.mins = Number(b.getAttribute('data-m'));
+    write(); stop(); left = state.mins * 60; paint();
+  });
+
+  /* ── Log ───────────────────────────────────────────────────────────────── */
+
+  function renderStars() {
+    var host = document.getElementById('stars');
+    host.innerHTML = '';
+    for (var i = 1; i <= 5; i++) {
+      (function (n) {
+        var b = document.createElement('button');
+        b.textContent = '★';
+        b.className = n <= state.stars ? 'on' : '';
+        b.setAttribute('aria-label', n + ' of 5');
+        b.addEventListener('click', function () { state.stars = n; renderStars(); });
+        host.appendChild(b);
+      }(i));
+    }
+  }
+
+  function renderLog() {
+    var host = document.getElementById('log');
+    host.innerHTML = '';
+    document.getElementById('logCount').textContent = state.log.length ? '· ' + state.log.length : '';
+    if (!state.log.length) {
+      host.innerHTML = '<p class="hint">Nothing yet. Build something and it goes here.</p>';
+      return;
+    }
+    state.log.slice().reverse().forEach(function (e, ri) {
+      var i = state.log.length - 1 - ri;
+      var row = document.createElement('div');
+      row.className = 'logrow';
+      var who = document.createElement('span');
+      who.className = 'who';
+      who.innerHTML = '<b></b><span></span>';
+      who.firstChild.textContent = e.name;
+      who.lastChild.textContent = e.when + (e.seed ? ' · deal ' + e.seed : '');
+      var st = document.createElement('span');
+      st.className = 'stars';
+      st.textContent = '★'.repeat(e.stars || 0);
+      var del = document.createElement('button');
+      del.textContent = 'Remove';
+      del.addEventListener('click', function () { state.log.splice(i, 1); write(); renderLog(); });
+      row.appendChild(who); row.appendChild(st); row.appendChild(del);
+      host.appendChild(row);
+    });
+  }
+
+  document.getElementById('logBtn').addEventListener('click', function () {
+    var input = document.getElementById('logName');
+    var n = (input.value || '').trim();
+    if (!n) { input.focus(); return; }
+    state.log.push({
+      name: n,
+      stars: state.stars,
+      seed: state.seed,
+      when: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+    });
+    if (state.log.length > 200) state.log.shift();
+    input.value = '';
+    write(); renderLog();
+  });
+
+  /* ── Wiring ────────────────────────────────────────────────────────────── */
+
+  document.getElementById('mode').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    Array.prototype.forEach.call(this.children, function (c) { c.classList.toggle('on', c === b); });
+    state.mode = b.getAttribute('data-mode');
+    deal();
+  });
+
+  document.getElementById('dealBtn').addEventListener('click', function () { deal(); });
+
+  renderGroups();
+  updateTubSummary();
+  renderStars();
+  renderLog();
+  paint();
+  deal();
+
+  /* First visit: open the tub panel, because the whole point is that it asks
+     before it suggests. */
+  if (!tubWasSet) document.getElementById('tubPanel').open = true;
+}());
+</script>
+</body>
+</html>

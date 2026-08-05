@@ -1,0 +1,156 @@
+/* ===========================================================================
+   Brick Lab — shared shell
+   ---------------------------------------------------------------------------
+   The site's tokens, plus the handful of controls every concept needs. Each
+   concept page adds only what is peculiar to itself. Self-contained on
+   purpose: no web fonts, no third-party anything.
+   =========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0f1117;
+  --surface:   #1a1d2e;
+  --surface-2: #151827;
+  --sunken:    #0d0f18;
+  --accent:    #6c63ff;
+  --accent-lt: #a89dff;
+  --text:      #e6ebf2;
+  --body:      #c2cbd9;
+  --muted:     #8892a4;
+  --border:    #2d3148;
+  --ok:        #4ade80;
+  --warn:      #fbbf24;
+  --hot:       #fb7185;
+  --radius:    14px;
+  --max:       1120px;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--body);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+a { color: var(--accent-lt); text-decoration: none; }
+a:hover { color: #fff; }
+:focus-visible { outline: 2px solid var(--accent-lt); outline-offset: 2px; border-radius: 4px; }
+
+.skip { position: absolute; left: -999px; top: 0; z-index: 200;
+  background: var(--accent); color: #fff; padding: .7rem 1.1rem; border-radius: 0 0 8px 0; }
+.skip:focus { left: 0; color: #fff; }
+
+/* ── Concept header ───────────────────────────────────────────────────────── */
+
+.lab-head {
+  display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
+  padding: .75rem 1.1rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.lab-back { color: var(--muted); font-size: .85rem; font-weight: 600; flex: none; }
+.lab-back:hover { color: var(--text); }
+.lab-title { color: var(--text); font-weight: 700; font-size: 1.02rem; letter-spacing: -.3px; }
+.lab-num {
+  font-family: var(--mono); font-size: .7rem; color: var(--accent);
+  border: 1px solid var(--border); border-radius: 5px; padding: .12rem .42rem; flex: none;
+}
+.lab-sub { color: var(--muted); font-size: .84rem; }
+.lab-head .spacer { margin-left: auto; }
+
+/* ── Controls ─────────────────────────────────────────────────────────────── */
+
+button, select, input[type="text"], input[type="number"] {
+  font-family: inherit; font-size: .9rem; color: var(--text);
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 9px;
+  padding: .5rem .9rem; font-weight: 600; font-size: .88rem;
+  cursor: pointer; transition: border-color .15s, background .15s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:hover:not(:disabled) { border-color: var(--accent-lt); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .38; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: #7b73ff; border-color: #7b73ff; }
+.btn.on { border-color: var(--accent); background: rgba(108, 99, 255, .16); color: var(--accent-lt); }
+.btn.small { padding: .32rem .6rem; font-size: .8rem; }
+.btn.danger:hover:not(:disabled) { border-color: var(--hot); color: var(--hot); }
+
+select, input[type="text"], input[type="number"] {
+  background: var(--sunken); border: 1px solid var(--border); border-radius: 9px;
+  padding: .5rem .7rem;
+}
+select:focus, input:focus { border-color: var(--accent); outline: none; }
+
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+.seg button {
+  background: var(--surface); border: none; border-right: 1px solid var(--border);
+  padding: .45rem .8rem; font-weight: 600; font-size: .84rem; cursor: pointer; color: var(--muted);
+}
+.seg button:last-child { border-right: none; }
+.seg button.on { background: rgba(108, 99, 255, .18); color: var(--accent-lt); }
+.seg button:hover:not(.on) { color: var(--text); }
+
+/* ── Panels ───────────────────────────────────────────────────────────────── */
+
+.panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.1rem;
+}
+.panel h2, .panel h3 { color: var(--text); letter-spacing: -.2px; }
+.panel-title {
+  font-size: .72rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .12em; margin-bottom: .7rem;
+}
+
+.hint { color: var(--muted); font-size: .84rem; }
+.mono { font-family: var(--mono); }
+
+.pill {
+  display: inline-block; background: rgba(108, 99, 255, .13); color: var(--accent-lt);
+  padding: .16rem .55rem; border-radius: 5px; font-size: .74rem; font-weight: 600;
+}
+.pill.ok   { background: rgba(74, 222, 128, .14); color: var(--ok); }
+.pill.warn { background: rgba(251, 191, 36, .14); color: var(--warn); }
+.pill.hot  { background: rgba(251, 113, 133, .14); color: var(--hot); }
+
+/* ── Swatches, shared by every concept that names a colour ────────────────── */
+
+.swatch {
+  width: 15px; height: 15px; border-radius: 4px; flex: none;
+  border: 1px solid rgba(255, 255, 255, .22); display: inline-block; vertical-align: -2px;
+}
+
+/* ── Canvas ───────────────────────────────────────────────────────────────── */
+
+.stage { position: relative; background: var(--sunken); overflow: hidden; }
+.stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+
+.lab-foot {
+  border-top: 1px solid var(--border); padding: 1.4rem 1.2rem;
+  color: var(--muted); font-size: .78rem; line-height: 1.65;
+}
+.lab-foot a { color: var(--muted); text-decoration: underline; }
+.lab-foot a:hover { color: var(--text); }
+
+/* The mark belongs to somebody else; say so everywhere it could be mistaken. */
+.disclaimer { max-width: 74ch; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
