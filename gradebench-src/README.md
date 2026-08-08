@@ -32,6 +32,24 @@ into the config process only, and never passes it to `define`.
 
 Set `GRADEBENCH_MODEL` in `.env` to use something other than `claude-opus-5`.
 
+## Why this isn't on the web
+
+This repository is a GitHub Pages site, but Gradebench runs locally only, and
+that is not a gap to be closed later — it follows from where the API key lives.
+
+`/api/inspect` holds `ANTHROPIC_API_KEY` and calls Anthropic server-side. Pages
+is static hosting: there is no server, so there is nowhere to keep a key. A
+published build would either ship your key to every visitor or need a separate
+backend to proxy the call. Neither is worth it for a tool you use at a desk with
+a card in front of you.
+
+So there is deliberately no build step feeding a public directory, and no
+built output committed. The directory is named `gradebench-src` for the same
+reason `merge-life-src` is: to keep a source tree from sitting on a browsable
+path. (Vite still needs its `index.html` at the root of this directory, so
+`/gradebench-src/` technically resolves — it just renders nothing, at a URL
+nobody has a reason to visit.)
+
 ## The ten photos
 
 Only **front — full card** is required. Everything else degrades gracefully:
@@ -129,8 +147,11 @@ Two things worth flagging back to the brand:
 
 ## Layout
 
+The `-src` suffix matches `merge-life-src`: this directory is source, not
+something the site serves. See *Why this isn't on the web* below.
+
 ```
-gradebench/
+gradebench-src/
   .env                 ANTHROPIC_API_KEY=sk-ant-...   (gitignored)
   vite.config.js       dev-server plugin: /api/inspect, /api/vault
   server/
