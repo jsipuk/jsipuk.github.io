@@ -95,12 +95,19 @@ Everything lives in `src/tokens.js` and `src/Brand.jsx`:
 | Type | Inter, four weights: Bold headings, SemiBold subheads, Regular body, Light captions |
 | Icons | `lucide-react` — open shapes, rounded corners, purpose driven |
 
-The submark is two identical open arcs — each a C — offset along the ↘
-diagonal and rotated 180° against each other, so together they read as an S.
-The second arc is literally the first rotated about the centre (`p` → `48 − p`),
-which is why `Brand.jsx` draws the whole mark in two paths. It is drawn as SVG
-rather than shipped as an asset so it stays sharp at every size and inverts by
-prop (`ring` / `curve`); it holds down to 16px. The app icon is that submark on
+The submark is two identical open arcs — each a C — the second being the first
+rotated 180° about the centre (`p` → `48 − p`). Together they read as an S.
+
+One property of the construction is load-bearing and should survive any future
+edit: **each arc's opening sits exactly where the other arc would pass, so the
+two strokes never cross.** Each free terminal reaches into the other's counter
+and stops. That is what lets the mark interlock without a weave, a z-order or a
+mask — and what keeps it clean at 16px. Geometry (radius 10.8, centres offset
+`(5.4, 10.6)` on a steep diagonal, 66° gap facing horizontally outward) is
+measured from the supplied artwork and recorded in `Brand.jsx`.
+
+It is drawn as SVG rather than shipped as an asset so it stays sharp at every
+size and inverts by prop (`ring` / `curve`). The app icon is that submark on
 Deep Navy, per the CONSAU icon family — `public/icon.svg`.
 
 Inter is bundled via `@fontsource-variable/inter` rather than pulled from

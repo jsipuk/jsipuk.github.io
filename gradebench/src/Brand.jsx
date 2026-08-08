@@ -2,18 +2,26 @@ import React from 'react';
 import { C, font, W } from './tokens.js';
 
 /* ══════════════════════════  CONSAU MARKS  ══════════════════════════
-   Two identical open arcs — each one a C — offset along the ↘ diagonal and
-   rotated 180° against each other, so together they read as an S. Two of the
-   same form, facing opposite ways, interlocking: the "two minds" idea before
-   the words say it, and C + S in one shape.
+   Two identical open arcs — each one a C — the second being the first rotated
+   180° about the centre (every point p becomes 48 − p). Together they read as
+   an S: the same form twice, facing opposite ways.
 
-   The second arc is literally the first rotated about the centre (each point
-   p becomes 48 − p), which is why the construction below is two paths and no
-   more. `ring` and `curve` are separate props so the mark inverts cleanly:
-   warm white on navy, deep navy on warm white, teal constant in both. */
+   The construction has one property worth preserving through any future edit.
+   Each arc's opening sits exactly where the other arc would pass, so the two
+   strokes NEVER cross: each free terminal reaches into the other's counter and
+   stops. The mark interlocks without overlapping, which is why it needs no
+   weave, no z-order and no masking — and why it stays clean at 16px.
 
-const ARC_A = 'M23.15 8.53 A11 11 0 1 0 29.13 21.35';
-const ARC_B = 'M24.85 39.47 A11 11 0 1 0 18.87 26.65';
+   Geometry measured from the supplied artwork: radius 10.8, centres offset
+   (5.4, 10.6) — a steep diagonal, not 45° — and a 66° gap facing horizontally
+   outward, left on one arc and right on the other.
+
+   `ring` and `curve` are separate props so the mark inverts cleanly: warm
+   white on navy, deep navy on warm white, teal constant in both. */
+
+const ARC_A = 'M30.36 12.83 A10.8 10.8 0 1 0 30.36 24.59';
+const ARC_B = 'M17.64 35.17 A10.8 10.8 0 1 0 17.64 23.41';
+const STROKE = 3.85;
 
 export function Submark({ size = 40, ring = C.ink, curve = C.teal, style }) {
   return (
@@ -21,8 +29,8 @@ export function Submark({ size = 40, ring = C.ink, curve = C.teal, style }) {
       width={size} height={size} viewBox="0 0 48 48"
       fill="none" role="img" aria-label="CONSAU" style={style}
     >
-      <path d={ARC_A} stroke={ring} strokeWidth="4.4" strokeLinecap="round" />
-      <path d={ARC_B} stroke={curve} strokeWidth="4.4" strokeLinecap="round" />
+      <path d={ARC_A} stroke={ring} strokeWidth={STROKE} strokeLinecap="round" />
+      <path d={ARC_B} stroke={curve} strokeWidth={STROKE} strokeLinecap="round" />
     </svg>
   );
 }

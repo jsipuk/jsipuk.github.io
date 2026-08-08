@@ -1,8 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-  <!-- Gradebench app icon: the CONSAU submark on Deep Navy, per the CONSAU icon family. -->
+  <!-- Gradebench app icon: the CONSAU submark on Deep Navy, per the CONSAU icon family.
+       Two arcs, the second the first rotated 180° about the centre. They interlock
+       without ever crossing — each opening sits where the other arc would pass. -->
   <rect width="48" height="48" rx="10.8" fill="#0B1320"/>
-  <g transform="translate(24 24) scale(0.8) translate(-24 -24)" fill="none" stroke-width="4.4" stroke-linecap="round">
-    <path d="M23.15 8.53 A11 11 0 1 0 29.13 21.35" stroke="#F7F7F5"/>
-    <path d="M24.85 39.47 A11 11 0 1 0 18.87 26.65" stroke="#00BFA6"/>
+  <g transform="translate(24 24) scale(0.86) translate(-24 -24)" fill="none" stroke-width="3.85" stroke-linecap="round">
+    <path d="M30.36 12.83 A10.8 10.8 0 1 0 30.36 24.59" stroke="#F7F7F5"/>
+    <path d="M17.64 35.17 A10.8 10.8 0 1 0 17.64 23.41" stroke="#00BFA6"/>
   </g>
 </svg>
