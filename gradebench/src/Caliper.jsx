@@ -76,7 +76,7 @@ export default function Caliper({ src, frames, onChange }) {
             >
               <div style={{
                 width: active ? 17 : 13, height: active ? 17 : 13, borderRadius: '50%',
-                background: colour, border: `2px solid ${C.bench}`, transition: 'width .1s, height .1s',
+                background: colour, border: `2px solid ${C.navy}`, transition: 'width .1s, height .1s',
               }} />
             </div>
           );
@@ -89,30 +89,30 @@ export default function Caliper({ src, frames, onChange }) {
     <div style={{ position: 'relative' }}>
       <div ref={wrapRef} style={{ position: 'relative', userSelect: 'none', touchAction: 'none', background: '#000', borderRadius: 3, overflow: 'hidden' }}>
         <img src={src} alt="Card being measured" draggable={false} style={{ width: '100%', display: 'block' }} />
-        {frame('outer', C.amber, false)}
-        {frame('inner', C.steel, true)}
+        {frame('outer', C.teal, false)}
+        {frame('inner', C.blue, true)}
       </div>
 
       {loupe && (
         <div style={{
           position: 'absolute', right: 8, [loupe.top ? 'top' : 'bottom']: 8,
           width: 116, height: 116, borderRadius: '50%', overflow: 'hidden',
-          border: `2px solid ${C.amber}`, boxShadow: '0 6px 22px #000A', pointerEvents: 'none',
+          border: `2px solid ${C.teal}`, boxShadow: '0 6px 22px #000A', pointerEvents: 'none',
           background: `#000 url(${src}) no-repeat`,
           backgroundSize: `${(wrapRef.current?.clientWidth || 300) * 4}px auto`,
           backgroundPosition: `${58 - loupe.x * (wrapRef.current?.clientWidth || 300) * 4}px ${58 - loupe.y * (wrapRef.current?.clientHeight || 400) * 4}px`,
         }}>
-          <div style={{ position: 'absolute', left: 0, right: 0, top: 57, height: 1, background: `${C.amber}CC` }} />
-          <div style={{ position: 'absolute', top: 0, bottom: 0, left: 57, width: 1, background: `${C.amber}CC` }} />
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 57, height: 1, background: `${C.teal}CC` }} />
+          <div style={{ position: 'absolute', top: 0, bottom: 0, left: 57, width: 1, background: `${C.teal}CC` }} />
         </div>
       )}
 
       <div style={{ display: 'flex', gap: 14, marginTop: 10, fontSize: 11, color: C.muted, flexWrap: 'wrap' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 16, height: 0, borderTop: `2px solid ${C.amber}` }} /> Solid line — card edge
+          <span style={{ width: 16, height: 0, borderTop: `2px solid ${C.teal}` }} /> Solid line — card edge
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 16, height: 0, borderTop: `2px dashed ${C.steel}` }} /> Dashed line — print border
+          <span style={{ width: 16, height: 0, borderTop: `2px dashed ${C.blue}` }} /> Dashed line — print border
         </span>
       </div>
     </div>

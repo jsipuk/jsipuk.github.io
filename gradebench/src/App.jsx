@@ -5,7 +5,8 @@ import {
   ChevronDown, ShieldCheck, Minus, MoveDiagonal, X, ClipboardCheck,
 } from 'lucide-react';
 
-import { C, FONTS, sans, serif, mono } from './tokens.js';
+import { C, font, W, eyebrow, numeric } from './tokens.js';
+import { ProductLockup, ConsauLogo } from './Brand.jsx';
 import Caliper from './Caliper.jsx';
 import SlabLabel from './SlabLabel.jsx';
 import {
@@ -56,27 +57,30 @@ const VENDORS = ['PSA', 'BGS', 'CGC'];
 /* ────────────────────────────  UI ATOMS  ─────────────────────────── */
 
 const Panel = ({ children, style }) => (
-  <div style={{ background: C.panel, border: `1px solid ${C.rule}`, borderRadius: 4, ...style }}>
+  <div style={{ background: C.panel, border: `1px solid ${C.rule}`, borderRadius: 6, ...style }}>
     {children}
   </div>
 );
 
 const Eyebrow = ({ children, icon: Icon }) => (
   <div style={{
-    display: 'flex', alignItems: 'center', gap: 7, fontFamily: mono, fontSize: 10,
-    letterSpacing: '0.18em', textTransform: 'uppercase', color: C.faint, marginBottom: 10,
+    display: 'flex', alignItems: 'center', gap: 7, ...eyebrow,
+    color: C.faint, marginBottom: 10,
   }}>
     {Icon && <Icon size={12} strokeWidth={2} />}
     {children}
   </div>
 );
 
-/* Severity is always icon + word, never colour on its own. */
+/* Severity is always icon + word, never colour on its own — the colour only
+   reinforces. Clean sits on Mist Green; the two warning steps use the
+   semantic pair, which is deliberately kept away from Teal so a damaged
+   corner never reads as a call to action. */
 function severityOf(score) {
-  if (score >= 9.5) return { icon: Check, word: 'Clean', tone: C.steel };
+  if (score >= 9.5) return { icon: Check, word: 'Clean', tone: C.mist };
   if (score >= 9) return { icon: Minus, word: 'Minor', tone: C.muted };
-  if (score >= 8) return { icon: AlertTriangle, word: 'Notable', tone: C.amber };
-  return { icon: CircleSlash, word: 'Heavy', tone: '#E8825A' };
+  if (score >= 8) return { icon: AlertTriangle, word: 'Notable', tone: C.caution };
+  return { icon: CircleSlash, word: 'Heavy', tone: C.negative };
 }
 
 const ScoreRow = ({ label, score, note, sub }) => {
@@ -92,12 +96,15 @@ const ScoreRow = ({ label, score, note, sub }) => {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'baseline' }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{label}</span>
-          <span style={{ fontFamily: mono, fontSize: 15, fontWeight: 700, color: C.ink }}>
+          <span style={{ fontSize: 14, fontWeight: W.semibold, color: C.ink }}>{label}</span>
+          <span style={{ fontSize: 15, fontWeight: W.bold, color: C.ink, ...numeric }}>
             {score.toFixed(1)}
           </span>
         </div>
-        <div style={{ fontSize: 11, color: C.faint, marginTop: 1, fontFamily: mono, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+        <div style={{
+          fontSize: 10.5, color: C.faint, marginTop: 2, fontWeight: W.semibold,
+          letterSpacing: '0.12em', textTransform: 'uppercase',
+        }}>
           {s.word}{sub ? ` · ${sub}` : ''}
         </div>
         {note && <div style={{ fontSize: 13, color: C.muted, marginTop: 5, lineHeight: 1.45 }}>{note}</div>}
@@ -106,11 +113,12 @@ const ScoreRow = ({ label, score, note, sub }) => {
   );
 };
 
+/* Teal is the action colour; Deep Navy sits on top of it for contrast. */
 const btn = (primary) => ({
-  background: primary ? C.amber : C.panel2,
-  color: primary ? '#141414' : C.ink,
+  background: primary ? C.teal : C.panel2,
+  color: primary ? C.navy : C.ink,
   border: primary ? 'none' : `1px solid ${C.rule}`,
-  borderRadius: 3, fontWeight: primary ? 700 : 600, cursor: 'pointer',
+  borderRadius: 6, fontWeight: primary ? W.bold : W.semibold, cursor: 'pointer',
 });
 
 /* ──────────────────────────  PHOTO SLOTS  ────────────────────────── */
@@ -135,21 +143,21 @@ function Slot({ role, rec, wide, onPick, onClear }) {
       }}>
         <div style={{
           width: wide ? 46 : '100%', height: wide ? 64 : 52, flexShrink: 0, borderRadius: 2,
-          background: C.bench, display: 'grid', placeItems: 'center', overflow: 'hidden',
+          background: C.navy, display: 'grid', placeItems: 'center', overflow: 'hidden',
         }}>
           {rec
             ? <img src={rec.dataUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : <Upload size={15} color={C.faint} />}
         </div>
         <div style={{ flex: 1, minWidth: 0, textAlign: wide ? 'left' : 'center' }}>
-          <div style={{ fontSize: wide ? 14 : 11.5, fontWeight: 600, color: rec ? C.ink : C.muted }}>
+          <div style={{ fontSize: wide ? 14 : 11.5, fontWeight: W.semibold, color: rec ? C.ink : C.muted }}>
             {wide ? label : label.split('— ')[1]}
           </div>
           <div style={{ fontSize: 11, color: C.faint, marginTop: 2, lineHeight: 1.35 }}>
             {rec ? 'Loaded — tap to replace' : wide ? 'Centering, edges and surface' : 'Corner detail'}
           </div>
         </div>
-        {wide && (rec ? <Check size={16} color={C.steel} /> : <ChevronRight size={16} color={C.faint} />)}
+        {wide && (rec ? <Check size={16} color={C.teal} /> : <ChevronRight size={16} color={C.faint} />)}
       </div>
       {rec && (
         <button
@@ -157,7 +165,7 @@ function Slot({ role, rec, wide, onPick, onClear }) {
           onClick={(e) => { e.preventDefault(); onClear(role); }}
           style={{
             position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 3,
-            border: `1px solid ${C.rule}`, background: C.bench, color: C.muted,
+            border: `1px solid ${C.rule}`, background: C.navy, color: C.muted,
             display: 'grid', placeItems: 'center', cursor: 'pointer', padding: 0,
           }}
         ><X size={12} /></button>
@@ -180,8 +188,8 @@ function SidePanel({ side, slots, open, onToggle, onPick, onClear }) {
         }}
       >
         {open ? <ChevronDown size={16} color={C.muted} /> : <ChevronRight size={16} color={C.muted} />}
-        <span style={{ fontSize: 15, fontWeight: 600, flex: 1, textTransform: 'capitalize' }}>{side}</span>
-        <span style={{ fontFamily: mono, fontSize: 11, color: loaded ? C.steel : C.faint }}>
+        <span style={{ fontSize: 15, fontWeight: W.semibold, flex: 1, textTransform: 'capitalize' }}>{side}</span>
+        <span style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 11, color: loaded ? C.blue : C.faint }}>
           {loaded} / 5
         </span>
       </button>
@@ -369,11 +377,13 @@ export default function GradeBench() {
     const psa = psaFinal(bgsSubs, psaCent);
     const cgc = bgsFinal(bgsSubs);
 
+    /* The verdict carries its own tone for the same reason the pillars do:
+       Teal means "go", so only Submit is allowed to wear it. */
     const verdict =
-      psa.grade >= 10 ? { icon: Sparkles, word: 'Submit', line: 'This scans as a gem candidate. Worth the fee on any card with a real 10/9 price gap.' }
-      : psa.grade === 9 && bgsSubs.centering >= 9 ? { icon: AlertTriangle, word: 'Borderline', line: 'Reads as a strong 9 with 10 upside. Only submit if the card carries enough value to justify a 9 outcome.' }
-      : psa.grade === 9 ? { icon: AlertTriangle, word: 'Borderline', line: 'Reads as a 9, held back by centering rather than condition. A 10 is unlikely from these numbers.' }
-      : { icon: CircleSlash, word: 'Hold', line: 'Predicted below 9. Grading fees will likely exceed the uplift unless this card is scarce or high-value.' };
+      psa.grade >= 10 ? { icon: Sparkles, word: 'Submit', tone: C.teal, line: 'This scans as a gem candidate. Worth the fee on any card with a real 10/9 price gap.' }
+      : psa.grade === 9 && bgsSubs.centering >= 9 ? { icon: AlertTriangle, word: 'Borderline', tone: C.caution, line: 'Reads as a strong 9 with 10 upside. Only submit if the card carries enough value to justify a 9 outcome.' }
+      : psa.grade === 9 ? { icon: AlertTriangle, word: 'Borderline', tone: C.caution, line: 'Reads as a 9, held back by centering rather than condition. A 10 is unlikely from these numbers.' }
+      : { icon: CircleSlash, word: 'Hold', tone: C.negative, line: 'Predicted below 9. Grading fees will likely exceed the uplift unless this card is scarce or high-value.' };
 
     const gaps = [...corners.missing, ...edges.missing, ...surface.missing];
     if (!bm) gaps.push('back centering not measured');
@@ -447,24 +457,19 @@ export default function GradeBench() {
   const caliperSide = frames[side] ? side : 'front';
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bench, color: C.ink, fontFamily: sans }}>
-      <style>{FONTS}{`
+    <div style={{ minHeight: '100vh', background: C.navy, color: C.ink, fontFamily: font, fontWeight: W.regular }}>
+      <style>{`
         *{box-sizing:border-box}
         input,button,select{font-family:inherit}
-        input:focus-visible,button:focus-visible,select:focus-visible,label:focus-within{outline:2px solid ${C.amber};outline-offset:2px}
+        input:focus-visible,button:focus-visible,select:focus-visible,label:focus-within{outline:2px solid ${C.teal};outline-offset:2px}
         @keyframes spin{to{transform:rotate(360deg)}}
         @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
       `}</style>
 
       {/* header */}
-      <header style={{ borderBottom: `1px solid ${C.rule}`, padding: '14px 16px 12px', position: 'sticky', top: 0, background: C.bench, zIndex: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontFamily: serif, fontSize: 25, lineHeight: 1 }}>Gradebench</div>
-            <div style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.faint, marginTop: 3 }}>
-              Pre-submission inspection
-            </div>
-          </div>
+      <header style={{ borderBottom: `1px solid ${C.rule}`, padding: '14px 16px 12px', position: 'sticky', top: 0, background: C.navy, zIndex: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <ProductLockup compact={loadedRoles.length > 0} />
           {loadedRoles.length > 0 && (
             <button onClick={reset} style={{
               display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: `1px solid ${C.rule}`,
@@ -474,13 +479,20 @@ export default function GradeBench() {
             </button>
           )}
         </div>
+        {loadedRoles.length === 0 && (
+          <div style={{
+            fontSize: 13, color: C.muted, marginTop: 10, fontWeight: W.regular,
+          }}>
+            Know before you send.
+          </div>
+        )}
       </header>
 
       <main style={{ padding: '16px 16px 108px', maxWidth: 620, margin: '0 auto' }}>
         {error && (
-          <Panel style={{ padding: 13, marginBottom: 14, borderColor: `${C.amber}66` }}>
+          <Panel style={{ padding: 13, marginBottom: 14, borderColor: `${C.caution}66` }}>
             <div style={{ display: 'flex', gap: 9 }}>
-              <AlertTriangle size={16} color={C.amber} style={{ flexShrink: 0, marginTop: 1 }} />
+              <AlertTriangle size={16} color={C.caution} style={{ flexShrink: 0, marginTop: 1 }} />
               <div style={{ fontSize: 13, lineHeight: 1.5 }}>{error}</div>
             </div>
           </Panel>
@@ -519,7 +531,7 @@ export default function GradeBench() {
                   <span style={{ fontSize: 12.5, color: C.muted }}>
                     {loadedRoles.length} photo{loadedRoles.length === 1 ? '' : 's'} · est. {(estimate.input / 1000).toFixed(1)}k input tokens
                   </span>
-                  <span style={{ fontFamily: mono, fontSize: 14, fontWeight: 700 }}>
+                  <span style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 14, fontWeight: W.bold }}>
                     ≈ ${estimate.cost.toFixed(2)}
                   </span>
                 </div>
@@ -569,9 +581,9 @@ export default function GradeBench() {
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                 {SIDES.map((s) => (
                   <button key={s} onClick={() => setSide(s)} style={{
-                    flex: 1, padding: '9px', borderRadius: 3, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    flex: 1, padding: '9px', borderRadius: 3, fontSize: 13, fontWeight: W.semibold, cursor: 'pointer',
                     background: caliperSide === s ? C.panel2 : 'transparent',
-                    border: `1px solid ${caliperSide === s ? C.amber : C.rule}`,
+                    border: `1px solid ${caliperSide === s ? C.teal : C.rule}`,
                     color: caliperSide === s ? C.ink : C.muted,
                   }}>
                     {caliperSide === s ? '● ' : '○ '}{s === 'front' ? 'Front' : 'Back'}
@@ -599,19 +611,19 @@ export default function GradeBench() {
                     {[['Left / right', m.lrText, m.lrBias], ['Top / bottom', m.tbText, m.tbBias]].map(([k, v, bias]) => (
                       <div key={k}>
                         <div style={{ fontSize: 11.5, color: C.faint }}>{k}</div>
-                        <div style={{ fontFamily: mono, fontSize: 24, fontWeight: 700, marginTop: 2 }}>{v}</div>
+                        <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 24, fontWeight: W.bold, marginTop: 2 }}>{v}</div>
                         <div style={{ fontSize: 11.5, color: C.muted }}>{bias}</div>
                       </div>
                     ))}
                   </div>
                   <div style={{ display: 'flex', gap: 18, marginTop: 14, paddingTop: 12, borderTop: `1px solid ${C.rule}` }}>
                     <div>
-                      <div style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>BGS SUB</div>
-                      <div style={{ fontFamily: serif, fontSize: 26, lineHeight: 1.1 }}>{grade.toFixed(1)}</div>
+                      <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>BGS SUB</div>
+                      <div style={{ fontFamily: font, fontWeight: W.bold, ...numeric, fontSize: 26, lineHeight: 1.1 }}>{grade.toFixed(1)}</div>
                     </div>
                     <div>
-                      <div style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>PSA CEILING</div>
-                      <div style={{ fontFamily: serif, fontSize: 26, lineHeight: 1.1 }}>{psaG}</div>
+                      <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>PSA CEILING</div>
+                      <div style={{ fontFamily: font, fontWeight: W.bold, ...numeric, fontSize: 26, lineHeight: 1.1 }}>{psaG}</div>
                     </div>
                   </div>
                   <div style={{ fontSize: 12.5, color: C.muted, marginTop: 10, lineHeight: 1.5 }}>
@@ -625,7 +637,7 @@ export default function GradeBench() {
 
             <button onClick={inspect} disabled={busy} style={{
               ...btn(!busy), width: '100%', marginTop: 16, padding: '15px', fontSize: 15,
-              color: busy ? C.muted : '#141414', background: busy ? C.panel2 : C.amber,
+              color: busy ? C.muted : C.navy, background: busy ? C.panel2 : C.teal,
               cursor: busy ? 'wait' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
             }}>
@@ -660,13 +672,14 @@ export default function GradeBench() {
             <Panel style={{ padding: 14, marginTop: 14 }}>
               <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start' }}>
                 <div style={{
-                  width: 34, height: 34, borderRadius: 3, display: 'grid', placeItems: 'center',
-                  border: `1px solid ${C.amber}55`, background: `${C.amber}14`, color: C.amber, flexShrink: 0,
+                  width: 34, height: 34, borderRadius: 5, display: 'grid', placeItems: 'center',
+                  border: `1px solid ${report.verdict.tone}55`, background: `${report.verdict.tone}14`,
+                  color: report.verdict.tone, flexShrink: 0,
                 }}>
                   <report.verdict.icon size={17} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 700 }}>{report.verdict.word}</div>
+                  <div style={{ fontSize: 16, fontWeight: W.bold }}>{report.verdict.word}</div>
                   <div style={{ fontSize: 13.5, color: C.muted, marginTop: 4, lineHeight: 1.5 }}>{report.verdict.line}</div>
                 </div>
               </div>
@@ -674,7 +687,7 @@ export default function GradeBench() {
 
             {/* what was never photographed */}
             {missingRoles.length > 0 && (
-              <Panel style={{ padding: 14, marginTop: 14, borderColor: `${C.amber}44` }}>
+              <Panel style={{ padding: 14, marginTop: 14, borderColor: `${C.caution}44` }}>
                 <Eyebrow icon={CircleSlash}>Never photographed</Eyebrow>
                 <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.55 }}>
                   {missingRoles.map((r) => ROLE_TEXT[r]).join(' · ')}
@@ -730,17 +743,17 @@ export default function GradeBench() {
               </div>
               <div style={{ marginTop: 12, paddingTop: 11, borderTop: `1px solid ${C.rule}`, display: 'flex', gap: 20, flexWrap: 'wrap' }}>
                 <div>
-                  <div style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>MODEL CONFIDENCE</div>
-                  <div style={{ fontFamily: mono, fontSize: 17, fontWeight: 700 }}>{Math.round((ai.confidence ?? 0.5) * 100)}%</div>
+                  <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>MODEL CONFIDENCE</div>
+                  <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 17, fontWeight: W.bold }}>{Math.round((ai.confidence ?? 0.5) * 100)}%</div>
                 </div>
                 <div>
-                  <div style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>IMAGE QUALITY</div>
-                  <div style={{ fontFamily: mono, fontSize: 17, fontWeight: 700, textTransform: 'capitalize' }}>{ai.imageQuality || 'unknown'}</div>
+                  <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>IMAGE QUALITY</div>
+                  <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 17, fontWeight: W.bold, textTransform: 'capitalize' }}>{ai.imageQuality || 'unknown'}</div>
                 </div>
                 {meta && (
                   <div>
-                    <div style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>TOKENS IN / OUT</div>
-                    <div style={{ fontFamily: mono, fontSize: 17, fontWeight: 700 }}>
+                    <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 9.5, letterSpacing: '0.14em', color: C.faint }}>TOKENS IN / OUT</div>
+                    <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 17, fontWeight: W.bold }}>
                       {(meta.usage.input / 1000).toFixed(1)}k / {meta.usage.output}
                     </div>
                   </div>
@@ -751,8 +764,8 @@ export default function GradeBench() {
 
             <button onClick={saveToVault} disabled={saved} style={{
               width: '100%', marginTop: 16, background: saved ? 'transparent' : C.panel2,
-              border: `1px solid ${saved ? C.rule : C.amber}`, color: saved ? C.muted : C.ink,
-              padding: '14px', borderRadius: 3, fontSize: 14.5, fontWeight: 600,
+              border: `1px solid ${saved ? C.rule : C.teal}`, color: saved ? C.muted : C.ink,
+              padding: '14px', borderRadius: 3, fontSize: 14.5, fontWeight: W.semibold,
               cursor: saved ? 'default' : 'pointer', display: 'flex', alignItems: 'center',
               justifyContent: 'center', gap: 8,
             }}>
@@ -770,7 +783,7 @@ export default function GradeBench() {
         {tab === 'report' && !report && (
           <Panel style={{ padding: 22, textAlign: 'center' }}>
             <ScrollText size={26} color={C.faint} />
-            <div style={{ fontSize: 15, fontWeight: 600, marginTop: 10 }}>No inspection yet</div>
+            <div style={{ fontSize: 15, fontWeight: W.semibold, marginTop: 10 }}>No inspection yet</div>
             <div style={{ fontSize: 13, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
               Load a front image, seat the calipers, then run the inspection.
             </div>
@@ -793,12 +806,12 @@ export default function GradeBench() {
                     const s = summary[v];
                     return (
                       <div key={v} style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
-                        <span style={{ fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', width: 38 }}>{v}</span>
+                        <span style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 11, fontWeight: W.bold, letterSpacing: '0.14em', width: 38 }}>{v}</span>
                         <span style={{ fontSize: 13, color: C.muted, flex: 1 }}>
                           {s.n} card{s.n === 1 ? '' : 's'} · {Math.round(s.exact * 100)}% exact ·{' '}
                           {Math.round(s.within * 100)}% within 0.5
                         </span>
-                        <span style={{ fontFamily: mono, fontSize: 13, fontWeight: 700 }}>
+                        <span style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 13, fontWeight: W.bold }}>
                           {s.bias > 0 ? '+' : ''}{s.bias.toFixed(2)}
                         </span>
                       </div>
@@ -808,7 +821,7 @@ export default function GradeBench() {
                 <div style={{ fontSize: 12, color: C.faint, marginTop: 11, lineHeight: 1.5 }}>
                   The right-hand number is average bias — positive means Gradebench predicts higher than the
                   slab came back. Once that number is consistently off in one direction, tune the weights at
-                  the top of <span style={{ fontFamily: mono }}>src/grading.js</span> against it.
+                  the top of <span style={{ fontWeight: W.semibold, color: C.muted }}>src/grading.js</span> against it.
                 </div>
               </Panel>
             )}
@@ -816,7 +829,7 @@ export default function GradeBench() {
             {vaultBusy && <div style={{ color: C.muted, fontSize: 13 }}>Opening the vault…</div>}
             {!vaultBusy && vault.length === 0 && (
               <Panel style={{ padding: 22, textAlign: 'center' }}>
-                <div style={{ fontSize: 15, fontWeight: 600 }}>Nothing filed yet</div>
+                <div style={{ fontSize: 15, fontWeight: W.semibold }}>Nothing filed yet</div>
                 <div style={{ fontSize: 13, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
                   Saved cards land here so you can compare a batch before deciding what goes in the envelope —
                   and record what each one actually graded when it comes back.
@@ -831,6 +844,17 @@ export default function GradeBench() {
             </div>
           </div>
         )}
+        {/* maker's mark — the product leads, the company endorses */}
+        <footer style={{
+          marginTop: 30, paddingTop: 18, borderTop: `1px solid ${C.rule}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        }}>
+          <ConsauLogo size={22} ring={C.muted} curve={C.teal} />
+          <div style={{ fontSize: 11, color: C.faint, textAlign: 'right', lineHeight: 1.5 }}>
+            Two minds. Useful things.
+            <br />consau.com
+          </div>
+        </footer>
       </main>
 
       {/* bottom dock */}
@@ -846,9 +870,9 @@ export default function GradeBench() {
             <button key={t.id} onClick={() => t.ok && setTab(t.id)} disabled={!t.ok}
               style={{
                 background: 'none', border: 'none', padding: '11px 4px 13px', cursor: t.ok ? 'pointer' : 'not-allowed',
-                color: active ? C.amber : t.ok ? C.muted : C.faint, opacity: t.ok ? 1 : 0.4,
+                color: active ? C.teal : t.ok ? C.muted : C.faint, opacity: t.ok ? 1 : 0.4,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                borderTop: `2px solid ${active ? C.amber : 'transparent'}`, marginTop: -1,
+                borderTop: `2px solid ${active ? C.teal : 'transparent'}`, marginTop: -1,
               }}>
               <Icon size={19} strokeWidth={active ? 2.4 : 1.9} />
               <span style={{ fontSize: 10.5, fontWeight: active ? 700 : 500, letterSpacing: '0.02em' }}>{t.label}</span>
@@ -876,8 +900,8 @@ function VaultRow({ entry, onRecord, onRemove }) {
       <div style={{ display: 'flex', gap: 11, alignItems: 'center' }}>
         {thumb && <img src={thumb} alt="" style={{ width: 42, height: 58, objectFit: 'cover', borderRadius: 2, flexShrink: 0 }} />}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{entry.title}</div>
-          <div style={{ fontFamily: mono, fontSize: 11, color: C.muted, marginTop: 3 }}>
+          <div style={{ fontSize: 14, fontWeight: W.semibold, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{entry.title}</div>
+          <div style={{ fontFamily: font, fontWeight: W.semibold, ...numeric, fontSize: 11, color: C.muted, marginTop: 3 }}>
             PSA {entry.psa} · BGS {entry.bgs.toFixed(1)} · CGC {(entry.cgc ?? entry.bgs).toFixed(1)}
           </div>
           <div style={{ fontSize: 11, color: C.faint, marginTop: 2 }}>

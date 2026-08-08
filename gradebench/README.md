@@ -1,4 +1,6 @@
-# Gradebench
+# Gradebench by CONSAU
+
+**Know before you send.**
 
 Pre-submission inspection bench for trading cards. You photograph a card — up to
 ten shots, two sides, five slots each — seat the calipers on the print border,
@@ -76,6 +78,45 @@ reverse-engineered from submission data by the collecting community and are
 wrong often enough to matter. PSA's published figures cover the 10 and 9
 thresholds only.
 
+## Brand
+
+Gradebench is a CONSAU product and follows the CONSAU guidelines. The product
+name leads and CONSAU endorses — `Gradebench` in Inter Bold with `by CONSAU`
+beneath it, never the other way round.
+
+Everything lives in `src/tokens.js` and `src/Brand.jsx`:
+
+| | |
+|---|---|
+| Foundation | Deep Navy `#0B1320`, roughly 60% of any screen |
+| Accent | Teal `#00BFA6` — actions, active states, the maker's mark |
+| Energy | Ocean Blue `#2563EB` — the caliper's print-border line, secondary marks |
+| Support | Mist Green `#7EE2B8`, Warm White `#F7F7F5`, Slate `#6B7280` |
+| Type | Inter, four weights: Bold headings, SemiBold subheads, Regular body, Light captions |
+| Icons | `lucide-react` — open shapes, rounded corners, purpose driven |
+
+The submark is the interlocking C and S, drawn as SVG in `Brand.jsx` so it
+stays sharp at every size and inverts by prop (`ring` / `curve`) rather than by
+shipping a second asset. It is legible down to 16px. The app icon is that
+submark on Deep Navy, per the CONSAU icon family — `public/icon.svg`.
+
+Inter is bundled via `@fontsource-variable/inter` rather than pulled from
+Google Fonts. This is a tool you use at a desk with a card in front of you; it
+should look right with the network off.
+
+Two things worth flagging back to the brand:
+
+1. **Warm White's hex reads `#F7F775` on the guidelines sheet**, which is a pale
+   yellow and doesn't match the swatch or the name. Implemented as `#F7F7F5`.
+   Worth correcting on the sheet either way.
+2. **The palette has no caution or negative colour.** A grading tool has to be
+   able to say "this corner is damaged", so `tokens.js` adds exactly two
+   semantic colours (`#E0A33C`, `#E8825A`) outside the palette, deliberately
+   muted so they never compete with Teal. Severity is always icon + word as
+   well as colour, so they are reinforcement rather than the signal. Teal is
+   reserved for "go": only a **Submit** verdict wears it, never Borderline or
+   Hold.
+
 ## Layout
 
 ```
@@ -92,14 +133,20 @@ gradebench/
     images.js          EXIF-safe downscale, crop, thumbnail, frame detection
     Caliper.jsx        the draggable frames and loupe
     SlabLabel.jsx      the slab label rendering
-    tokens.js          colour/type tokens shared by the three components
+    Brand.jsx          CONSAU submark, logo, product lockup, app icon
+    tokens.js          CONSAU palette, type scale, semantic colours
+  public/icon.svg      app icon — submark on Deep Navy
 ```
 
 ## Notes on the port
 
-- `tokens.js` is not in the original handoff structure. `Caliper.jsx` and
-  `SlabLabel.jsx` both need the token object, and importing it from `App.jsx`
-  would make a cycle.
+- `tokens.js` and `Brand.jsx` are not in the original handoff structure.
+  `Caliper.jsx` and `SlabLabel.jsx` both need the token object, and importing
+  it from `App.jsx` would make a cycle; `Brand.jsx` holds the CONSAU marks.
+- The artifact's Archivo / Instrument Serif / JetBrains Mono trio is gone —
+  CONSAU is a single-typeface brand. Numeric readouts that used the mono face
+  now use Inter with `tabular-nums`, which holds the columns steady without a
+  second family.
 - `max_tokens` is 8000, not the 2500 the brief specified. On `claude-opus-5`
   adaptive thinking is on by default and shares the `max_tokens` budget with
   the response, so 2500 truncates the JSON mid-object. 2500 was right for the
