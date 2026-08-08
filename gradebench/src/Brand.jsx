@@ -2,12 +2,18 @@ import React from 'react';
 import { C, font, W } from './tokens.js';
 
 /* ══════════════════════════  CONSAU MARKS  ══════════════════════════
-   The submark is the interlocking C and S — Conner × Saunders. The C is
-   an open ring, the S threads through it. Two shapes, one form: the mark
-   is the "two minds" idea before the words say it.
+   Two identical open arcs — each one a C — offset along the ↘ diagonal and
+   rotated 180° against each other, so together they read as an S. Two of the
+   same form, facing opposite ways, interlocking: the "two minds" idea before
+   the words say it, and C + S in one shape.
 
-   `ring` and `curve` are separate props so the mark can invert cleanly:
-   light ring on navy, navy ring on warm white. */
+   The second arc is literally the first rotated about the centre (each point
+   p becomes 48 − p), which is why the construction below is two paths and no
+   more. `ring` and `curve` are separate props so the mark inverts cleanly:
+   warm white on navy, deep navy on warm white, teal constant in both. */
+
+const ARC_A = 'M23.15 8.53 A11 11 0 1 0 29.13 21.35';
+const ARC_B = 'M24.85 39.47 A11 11 0 1 0 18.87 26.65';
 
 export function Submark({ size = 40, ring = C.ink, curve = C.teal, style }) {
   return (
@@ -15,18 +21,8 @@ export function Submark({ size = 40, ring = C.ink, curve = C.teal, style }) {
       width={size} height={size} viewBox="0 0 48 48"
       fill="none" role="img" aria-label="CONSAU" style={style}
     >
-      {/* C — open ring, gap at the upper right */}
-      <path
-        d="M31.5 11 A15 15 0 1 0 38.5 27.9"
-        stroke={ring} strokeWidth="4.4" strokeLinecap="round"
-      />
-      {/* S — threaded through the opening */}
-      <path
-        d="M30.5 17.5 C30.5 14.2 27.5 12.5 24 12.5 C20.5 12.5 17.5 14.5 17.5 18
-           C17.5 21.5 20.5 23 24 24 C27.5 25 30.5 26.5 30.5 30
-           C30.5 33.5 27.5 35.5 24 35.5 C20.5 35.5 17.5 33.8 17.5 30.5"
-        stroke={curve} strokeWidth="4" strokeLinecap="round"
-      />
+      <path d={ARC_A} stroke={ring} strokeWidth="4.4" strokeLinecap="round" />
+      <path d={ARC_B} stroke={curve} strokeWidth="4.4" strokeLinecap="round" />
     </svg>
   );
 }

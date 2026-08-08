@@ -95,10 +95,13 @@ Everything lives in `src/tokens.js` and `src/Brand.jsx`:
 | Type | Inter, four weights: Bold headings, SemiBold subheads, Regular body, Light captions |
 | Icons | `lucide-react` — open shapes, rounded corners, purpose driven |
 
-The submark is the interlocking C and S, drawn as SVG in `Brand.jsx` so it
-stays sharp at every size and inverts by prop (`ring` / `curve`) rather than by
-shipping a second asset. It is legible down to 16px. The app icon is that
-submark on Deep Navy, per the CONSAU icon family — `public/icon.svg`.
+The submark is two identical open arcs — each a C — offset along the ↘
+diagonal and rotated 180° against each other, so together they read as an S.
+The second arc is literally the first rotated about the centre (`p` → `48 − p`),
+which is why `Brand.jsx` draws the whole mark in two paths. It is drawn as SVG
+rather than shipped as an asset so it stays sharp at every size and inverts by
+prop (`ring` / `curve`); it holds down to 16px. The app icon is that submark on
+Deep Navy, per the CONSAU icon family — `public/icon.svg`.
 
 Inter is bundled via `@fontsource-variable/inter` rather than pulled from
 Google Fonts. This is a tool you use at a desk with a card in front of you; it
