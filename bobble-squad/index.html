@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#12b6a6">
+<meta name="description" content="Bobble Squad: a block-built town adventure for young explorers. Works offline, made for iPad.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+<title>Bobble Squad — Bumbleblock Bay</title>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="hud">
+
+  <!-- top left: what to do now -->
+  <div id="missionCard" class="card">
+    <div id="missionIcon" class="m-icon">🤖</div>
+    <div class="m-body">
+      <div id="missionText" class="m-text">Look around</div>
+      <div id="missionPips" class="pips"></div>
+    </div>
+  </div>
+
+  <!-- top right: badges, sound, pause -->
+  <div id="topRight">
+    <div class="card score"><span class="s-icon">🏅</span><span id="badgeCount">0/11</span></div>
+    <button id="btnPause" class="chip" aria-label="Pause">⏸</button>
+  </div>
+
+  <div id="scanMeter">
+    <span class="s-icon">🔎</span>
+    <div id="scanPips" class="meter"></div>
+  </div>
+
+  <div id="toast"></div>
+  <div id="chevron">🤖</div>
+  <div id="markers"></div>
+
+  <!-- left: the movement stick -->
+  <div id="stickZone">
+    <div id="stick"><div id="knob"></div></div>
+    <div id="stickHint">Slide to walk</div>
+  </div>
+
+  <!-- right: actions -->
+  <div id="actions">
+    <!-- build controls, only while building; part of the same stack as the
+         action buttons so the two can never overlap on a narrow screen -->
+    <div id="buildBar">
+      <div id="swatches">
+        <button id="swatch0" class="swatch s0 sel" aria-label="Block">🟦</button>
+        <button id="swatch1" class="swatch s1" aria-label="Bouncy block">🟪</button>
+        <button id="swatch2" class="swatch s2" aria-label="Flat plank">🟨</button>
+      </div>
+      <button id="btnPlace" class="btn place" aria-label="Place a block">＋</button>
+      <button id="btnRemove" class="btn remove" aria-label="Take a block away">－</button>
+      <button id="btnDone" class="btn done" aria-label="Finished building">✓</button>
+    </div>
+    <div id="gadgetRow">
+      <button id="btnG1" class="btn gadget hidden" aria-label="Clue Sniffer">🔎</button>
+      <button id="btnG2" class="btn gadget hidden" aria-label="Bounce Boots">🦿</button>
+      <button id="btnG3" class="btn gadget hidden" aria-label="Magnet Mitt">🧲</button>
+    </div>
+    <div id="mainRow">
+      <button id="btnBuild" class="btn build hidden" aria-label="Build">🧱</button>
+      <button id="btnJump" class="btn jump" aria-label="Jump">⤴</button>
+      <button id="btnAction" class="btn action" aria-label="Do it"><span id="actionIcon">👋</span></button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ------------------------------------------------------------ overlays -->
+
+<div id="overlayStart" class="overlay show">
+  <div class="panel">
+    <div class="logo">
+      <span class="lb b1"></span><span class="lb b2"></span><span class="lb b3"></span>
+    </div>
+    <h1>Bobble Squad</h1>
+    <p class="sub">Bumbleblock Bay</p>
+    <p id="kitLabel" aria-hidden="true">🧢</p>
+    <div id="kitPick" role="group" aria-label="Choose your bobble hat colour">
+      <button class="kit sel" aria-label="Yellow hat"><span class="k k0"></span></button>
+      <button class="kit" aria-label="Green hat"><span class="k k1"></span></button>
+      <button class="kit" aria-label="Orange hat"><span class="k k2"></span></button>
+      <button class="kit" aria-label="Pink hat"><span class="k k3"></span></button>
+    </div>
+    <button id="btnPlay" class="big">▶</button>
+    <p class="tip">Slide your left thumb to walk. Drag anywhere else to look.</p>
+  </div>
+</div>
+
+<div id="overlayPause" class="overlay">
+  <div class="panel">
+    <h2>Paused</h2>
+    <button id="btnResume" class="big">▶</button>
+    <button id="btnSound" class="row">🔊  Sound is on</button>
+    <button id="btnHome" class="row">🏠  Back to the square</button>
+    <button id="btnWipe" class="row quiet">🧹  Start again</button>
+    <div id="wipeConfirm">
+      <p>Forget all badges and missions?</p>
+      <button id="btnWipeYes" class="row danger">Yes, start again</button>
+      <button id="btnWipeNo" class="row">No, keep playing</button>
+    </div>
+  </div>
+</div>
+
+<div id="rotateHint">
+  <div class="panel">
+    <div class="rot">🔄</div>
+    <p>Turn your tablet sideways</p>
+  </div>
+</div>
+
+<div id="fatal">
+  <div class="panel">
+    <h2>Oh dear</h2>
+    <p>This game needs WebGL, which this browser did not switch on.</p>
+    <p class="detail"></p>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script src="audio.js"></script>
+<script src="input.js"></script>
+<script src="world.js"></script>
+<script src="missions.js"></script>
+<script src="game.js"></script>
+<script>
+  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* offline is best-effort */ });
+    });
+  }
+</script>
+</body>
+</html>

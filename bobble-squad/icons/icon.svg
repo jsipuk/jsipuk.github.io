@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Bobble Squad">
+  <rect width="160" height="160" rx="34" fill="#12b6a6"/>
+  <g>
+    <rect x="21" y="92" width="36" height="44" rx="7" fill="#ff7f60"/>
+    <rect x="21" y="128" width="36" height="8" rx="4" fill="#d1573b"/>
+    <rect x="31" y="85" width="16" height="8" rx="3" fill="#ff7f60"/>
+
+    <rect x="62" y="60" width="36" height="76" rx="7" fill="#fffdf6"/>
+    <rect x="62" y="128" width="36" height="8" rx="4" fill="#d8d4c6"/>
+    <rect x="72" y="53" width="16" height="8" rx="3" fill="#fffdf6"/>
+
+    <rect x="103" y="76" width="36" height="60" rx="7" fill="#ffc93c"/>
+    <rect x="103" y="128" width="36" height="8" rx="4" fill="#d99b12"/>
+    <rect x="113" y="69" width="16" height="8" rx="3" fill="#ffc93c"/>
+  </g>
+</svg>
