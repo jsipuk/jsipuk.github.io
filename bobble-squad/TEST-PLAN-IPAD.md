@@ -3,7 +3,7 @@
 Everything in Phase 1 was tested in a desktop browser with simulated touch.
 **Nothing has ever run on an iPad.** This plan is the first real-device pass.
 
-There are 54 checks. A full pass takes about 60–80 minutes. The 20 marked
+There are 54 checks. A full pass takes about 60–80 minutes. The 22 marked
 **SMOKE** are the ones to do first — about 20 minutes on their own. If any of
 those fail, stop and report, because the rest will probably fail too.
 
@@ -71,7 +71,7 @@ mission step took.
 | ID | Do this | Should happen | |
 | --- | --- | --- | --- |
 | C1 | In landscape, check the joystick, ⭐, ⤴, 🧱, gadgets, mission card and 🏅 counter | Nothing overlaps anything else; every button fully on screen | **SMOKE** |
-| C2 | Rotate to portrait while playing | A "turn your tablet sideways" card appears; the game carries on behind it | |
+| C2 | Rotate to portrait while playing, then try to walk and press things | A small "turn your tablet sideways" card appears — and **the game is still fully playable**; the card must not swallow taps | **SMOKE** |
 | C3 | Rotate back to landscape | Controls return to the right places, nothing left stretched or off-screen | |
 
 ## D · Touch controls
@@ -171,7 +171,7 @@ mission step took.
 | ID | Do this | Should happen | |
 | --- | --- | --- | --- |
 | O1 | Force-quit mid-mission and relaunch | Same mission step, same badges, same gadgets, same hat | **SMOKE** |
-| O2 | Pause → Start again → confirm | Everything resets; nothing else on the iPad is affected | |
+| O2 | Pause → Start again → Yes | Both buttons visible without scrolling; everything resets to a fresh game | **SMOKE** |
 
 ## P · With a child (the important part)
 
@@ -208,4 +208,4 @@ something by hand:
 
 ---
 
-*54 checks · 20 smoke · sections A–O are the software, section P is the game.*
+*54 checks · 22 smoke · sections A–O are the software, section P is the game.*

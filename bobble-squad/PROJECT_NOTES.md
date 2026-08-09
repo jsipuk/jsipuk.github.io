@@ -19,8 +19,9 @@ vertices in 36 frustum-culled buffers · 20 `drawArrays` calls per frame · 18
 interactables · 11 triggers · 16 movers · 2 build zones · smallest touch target
 54 px.
 
-Test suites, all green: 69 node checks (`node test/run.js`) · 40-check browser
-playthrough · systems suite · offline/desktop suite · 5-viewport layout suite.
+Test suites, all green: 76 node checks (`node test/run.js`) · 95 browser checks
+at five screen sizes (`node test/browser.js`) · 40-check playthrough · systems ·
+offline/desktop · layout.
 
 **Phase 2 is designed, not built.** See `PHASE2-PLAN.md`.
 
@@ -82,6 +83,21 @@ checks; the iPad pass itself has not happened yet.
   first-hint timing is currently a guess.
 
 ---
+
+## Bugs found on a real device
+
+**Found on an iPhone, none of which any automated check could see, because all
+of them were layout.** All three are fixed and now covered by
+`test/browser.js`, which runs at two phone sizes and three tablet sizes.
+
+| Reported as | Actually was | Fix |
+| --- | --- | --- |
+| "Start again doesn't seem to reset everything" | The confirmation was *added below* the pause menu, so on a phone-height screen the panel outgrew the display and "Yes, start again" sat off screen. The reset was never running. | The confirmation now **replaces** the menu, and the panels are compacted below 560px of height |
+| (not reported — found while reproducing) | The rotate-your-tablet card was a full-screen overlay that swallowed every touch. In portrait the game was **completely unplayable** — you could not even press play | It is now a small floating card with `pointer-events: none` |
+| (not reported — found while reproducing) | On a phone in portrait the objective card ran underneath the badge counter, and a message covered both | Card capped to the room actually available; messages drop below the top row on narrow screens |
+
+The lesson worth keeping: `test/run.js` had 76 green checks and the game had
+three visible bugs on a phone. Geometry needs a browser at the real size.
 
 ## Playtest observations
 

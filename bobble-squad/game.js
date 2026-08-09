@@ -591,7 +591,10 @@
       setPaused(false);
     });
     $('btnWipe').addEventListener('click', function () {
-      $('wipeConfirm').classList.toggle('show');
+      var on = !$('wipeConfirm').classList.contains('show');
+      $('wipeConfirm').classList.toggle('show', on);
+      // swap the menu out for the question so the panel never outgrows a phone
+      $('overlayPause').querySelector('.panel').classList.toggle('confirming', on);
     });
     $('btnWipeYes').addEventListener('click', function () {
       wipe();
@@ -599,6 +602,7 @@
     });
     $('btnWipeNo').addEventListener('click', function () {
       $('wipeConfirm').classList.remove('show');
+      $('overlayPause').querySelector('.panel').classList.remove('confirming');
     });
 
     var kits = document.querySelectorAll('#kitPick .kit');
@@ -656,7 +660,10 @@
   function setPaused(p) {
     BS.paused = p;
     dom.overlayPause.classList.toggle('show', p);
-    if (!p) $('wipeConfirm').classList.remove('show');
+    if (!p) {
+      $('wipeConfirm').classList.remove('show');
+      dom.overlayPause.querySelector('.panel').classList.remove('confirming');
+    }
   }
   BS.setPaused = setPaused;
 

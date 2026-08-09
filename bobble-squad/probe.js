@@ -829,6 +829,15 @@
     });
     b.appendChild(cp);
 
+    var stop = el('button', 'pk-big grey', '⏹  Stop recording and hide 🐞');
+    stop.addEventListener('click', function () {
+      st.armed = false;
+      save();
+      ui.fab.classList.remove('on');
+      closeKit();
+    });
+    b.appendChild(stop);
+
     var reset = el('button', 'pk-big grey', 'Clear all test results');
     reset.addEventListener('click', function () {
       if (reset.dataset.sure) {

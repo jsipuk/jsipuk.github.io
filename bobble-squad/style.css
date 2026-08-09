@@ -513,10 +513,38 @@ body {
 .row.quiet { background: #97a1b8; box-shadow: 0 6px 0 #6f7890; }
 .row.danger { background: var(--coral); box-shadow: 0 6px 0 var(--coral-dark); }
 
-#wipeConfirm { display: none; margin-top: 14px; }
+/* The confirmation REPLACES the menu rather than being added below it. On a
+ * phone-sized screen the panel used to grow past the bottom of the display and
+ * the "yes" button sat off-screen, so "Start again" looked like it did nothing. */
+#wipeConfirm { display: none; margin-top: 4px; }
 #wipeConfirm.show { display: block; }
+.panel.confirming #btnResume,
+.panel.confirming #btnSound,
+.panel.confirming #btnHome,
+.panel.confirming #btnWipe { display: none; }
 
-#rotateHint .rot { font-size: 62px; animation: spinHint 2.4s infinite ease-in-out; }
+/* A nudge, not a wall. This used to be a full-screen overlay that swallowed
+ * every touch, which made the game completely unplayable in portrait — you
+ * could not even press play. It floats, and it never takes a tap. */
+#rotateHint {
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+  z-index: 18;
+}
+#rotateHint .panel {
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-radius: 24px;
+  max-width: min(86vw, 340px);
+  background: rgba(255, 253, 246, .95);
+}
+#rotateHint p { margin: 0; font-size: 17px; text-align: left; }
+#rotateHint .rot { font-size: 38px; flex: none; animation: spinHint 2.4s infinite ease-in-out; }
 @keyframes spinHint {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(90deg); }
@@ -546,8 +574,61 @@ body {
 
 /* Portrait still plays; the hint just suggests turning round. */
 @media (orientation: portrait) {
-  #missionCard { max-width: 78vw; }
   #actions { bottom: calc(var(--safe-b) + 16px); }
+}
+
+/* Phone-width screens. The mission card used to grow until it ran underneath
+ * the badge counter, so both are trimmed and the card is capped at whatever
+ * room is genuinely left beside the right-hand cluster. */
+@media (max-width: 560px) {
+  #missionCard { max-width: calc(100vw - 208px); }
+  .card { padding: 6px 12px 6px 8px; gap: 8px; }
+  .m-icon { width: 42px; height: 42px; font-size: 26px; border-radius: 13px; }
+  .m-text { font-size: 17px; }
+  .pips { gap: 5px; margin-top: 4px; }
+  .pips i { width: 12px; height: 12px; border-radius: 4px; }
+  .score { font-size: 19px; padding: 6px 12px; }
+  .s-icon { font-size: 21px; }
+  .chip { width: 54px; height: 54px; font-size: 23px; border-radius: 17px; }
+  #topRight { gap: 8px; }
+  #scanMeter { padding: 6px 11px; }
+}
+
+/* Phone-height screens: the menus have to fit without scrolling, because a
+ * child will not discover that a panel scrolls. Touch targets stay at 46px or
+ * more, which is the smallest that still works for small hands. */
+@media (max-height: 560px) {
+  .panel { padding: 16px 20px 20px; border-radius: 26px; }
+  .panel h1 { font-size: 32px; }
+  .panel h2 { font-size: 26px; margin-bottom: 10px; }
+  .panel .sub { font-size: 17px; }
+  .panel p { font-size: 16px; }
+  .panel .tip { font-size: 14px; margin-top: 10px; }
+  .logo { height: 42px; gap: 5px; }
+  .lb { border-radius: 7px; }
+  .b1 { width: 24px; height: 22px; }
+  .b2 { width: 24px; height: 36px; }
+  .b3 { width: 24px; height: 29px; }
+  #kitLabel { font-size: 22px; margin-top: 10px; }
+  #kitPick { gap: 10px; margin: 6px 0 0; }
+  .kit { width: 56px; height: 56px; border-radius: 18px; }
+  .k { width: 28px; height: 28px; }
+  .big { width: 108px; height: 62px; font-size: 32px; margin-top: 10px; border-radius: 22px; }
+  .row { padding: 13px 16px; font-size: 18px; margin-top: 9px; border-radius: 18px; }
+}
+
+/* On a phone the toast is nearly as wide as the screen, so at the top it sat
+ * straight over the objective card and the badge counter. Drop it below the
+ * top row, and drop the sniffer meter below that. */
+@media (max-width: 900px) {
+  #toast {
+    top: calc(var(--safe-t) + 74px);
+    font-size: 20px;
+    padding: 9px 18px;
+    gap: 9px;
+  }
+  #toast .ti { font-size: 26px; }
+  #scanMeter { top: calc(var(--safe-t) + 140px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

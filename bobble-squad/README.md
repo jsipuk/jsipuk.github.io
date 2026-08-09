@@ -136,8 +136,14 @@ world builds, that every mission target and interactable referenced by
 heights, and that the service worker's asset list matches the files on disk.
 
 ```
-node test/run.js
+node test/run.js                                  # no browser needed
+npx http-server . -p 8099 -c-1 & node test/browser.js   # needs Playwright
 ```
+
+`test/browser.js` exists because three visible bugs reached a phone while
+`test/run.js` was fully green — all three were geometry, which a node test
+cannot see. It runs the layout, the pause menu and the whole "Start again"
+flow at two phone sizes and three tablet sizes.
 
 The gameplay itself was tested by driving a real browser: all three missions
 from beginning to end using only touch input, offline with networking
