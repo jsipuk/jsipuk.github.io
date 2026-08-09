@@ -121,12 +121,31 @@ var listed = [];
 sw.replace(/'\.\/([^']*)'/g, function (_, f) { if (f) listed.push(f); });
 
 ['index.html', 'style.css', 'engine.js', 'audio.js', 'input.js', 'world.js',
-  'missions.js', 'game.js', 'manifest.webmanifest'].forEach(function (f) {
+  'missions.js', 'game.js', 'probe.js', 'manifest.webmanifest'].forEach(function (f) {
     check('sw.js precaches ' + f, listed.indexOf(f) >= 0);
   });
 listed.forEach(function (f) {
   check('precached file ' + f + ' exists on disk', fs.existsSync(path.join(ROOT, f)));
 });
+
+section('Test Kit matches the written test plan');
+var probeSrc = fs.readFileSync(path.join(ROOT, 'probe.js'), 'utf8');
+var planSrc = fs.readFileSync(path.join(ROOT, 'TEST-PLAN-IPAD.md'), 'utf8');
+var probeIds = [];
+probeSrc.replace(/\n\s*\['([A-P]\d+)',/g, function (_, id) { probeIds.push(id); });
+var planIds = [];
+planSrc.replace(/^\| ([A-P]\d+) \|/gm, function (_, id) { planIds.push(id); });
+check('the Test Kit carries some checks', probeIds.length > 40, probeIds.length + ' cases');
+check('the plan and the Test Kit list the same checks',
+  probeIds.join(',') === planIds.join(','),
+  'probe.js has ' + probeIds.length + ', the plan has ' + planIds.length +
+  (probeIds.join(',') === planIds.join(',') ? '' :
+    '; only in probe: ' + probeIds.filter(function (i) { return planIds.indexOf(i) < 0; }).join(' ') +
+    '; only in plan: ' + planIds.filter(function (i) { return probeIds.indexOf(i) < 0; }).join(' ')));
+check('every check ID is unique',
+  probeIds.length === probeIds.filter(function (v, i, a) { return a.indexOf(v) === i; }).length);
+check('the Test Kit never sends anything anywhere',
+  !/fetch\(|XMLHttpRequest|navigator\.sendBeacon|WebSocket/.test(probeSrc));
 
 var html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 var css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8');

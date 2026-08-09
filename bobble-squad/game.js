@@ -1147,6 +1147,7 @@
       teleport(lastSafe.x, lastSafe.y, lastSafe.z);
       BS.toast('☁️', 'Whoops!', 1.6);
       global.BSAudio.play('reset');
+      BS.emit('respawn', { x: lastSafe.x, y: lastSafe.y, z: lastSafe.z });
     }
 
     checkTriggers(dt);

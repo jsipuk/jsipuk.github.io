@@ -24,6 +24,12 @@ playthrough · systems suite · offline/desktop suite · 5-viewport layout suite
 
 **Phase 2 is designed, not built.** See `PHASE2-PLAN.md`.
 
+**A Test Kit ships with the game** (`probe.js`): a monitored mode behind a
+long-press and a sum, carrying the 54-check iPad plan, recording frame rate,
+errors, falls, stuck spots, dead taps and hammered buttons, and exporting one
+self-contained HTML report. Nothing leaves the device. Verified by 34 browser
+checks; the iPad pass itself has not happened yet.
+
 ---
 
 ## Confirmed decisions
@@ -81,6 +87,12 @@ playthrough · systems suite · offline/desktop suite · 5-viewport layout suite
 
 *None yet. No child has played this.* Everything in the design that claims a
 child will do something is a hypothesis until this section has entries.
+
+The Test Kit is the intended way to fill this in: run the P section of
+`TEST-PLAN-IPAD.md` with a real 5–7-year-old, then paste the findings here.
+The automatic counters worth reading afterwards are **dead taps** (pressed ⭐
+with nothing there — confusion), **stuck** (45 seconds without moving) and
+**time on each objective**.
 
 ---
 

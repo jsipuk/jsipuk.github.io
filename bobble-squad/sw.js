@@ -22,6 +22,7 @@ var ASSETS = [
   './world.js',
   './missions.js',
   './game.js',
+  './probe.js',
   './manifest.webmanifest',
   './fonts/baloo-2-700-normal.woff2',
   './fonts/baloo-2-800-normal.woff2',
