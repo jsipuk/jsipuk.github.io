@@ -3,7 +3,7 @@
 Everything in Phase 1 was tested in a desktop browser with simulated touch.
 **Nothing has ever run on an iPad.** This plan is the first real-device pass.
 
-There are 54 checks. A full pass takes about 60–80 minutes. The 22 marked
+There are 58 checks. A full pass takes about 60–80 minutes. The 25 marked
 **SMOKE** are the ones to do first — about 20 minutes on their own. If any of
 those fail, stop and report, because the rest will probably fail too.
 
@@ -84,6 +84,7 @@ mission step took.
 | D4 | Walk with the left thumb while dragging the camera with the right | Both work at once, neither cancels the other | **SMOKE** |
 | D5 | Walk up to a doorbell, the fountain, a bird, the buggy | The ⭐ icon changes to match, and a small icon floats over the thing | |
 | D6 | Try to scroll, pinch-zoom, double-tap-zoom, or long-press for a menu | None of them happen; the page never moves | **SMOKE** |
+| D7 | Press 🗺, look at the map, press ✕ | Map fills the screen; you are the teal arrow pointing the way you face; ✕ returns you to exactly where you were | **SMOKE** |
 
 ## E · Camera
 
@@ -150,6 +151,8 @@ mission step took.
 | L1 | Try: trampolines, the musical steps, a doorbell, the noticeboard, the lookout lift, a bird | Every one does something immediately | **SMOKE** |
 | L2 | Find at least three badges | Each gives confetti and a noise, and the counter goes up | |
 | L3 | Deliberately jump off the tower, and off the map edge | Gentle whoops noise, put back on safe ground, nothing lost | |
+| L4 | Walk up to three different Bobbles and press ⭐ | Each turns to you, waves, and does something real: the Chief (🧢) points at your current job, the shopkeeper changes your hat colour, townsfolk joke or point at a nearby badge | **SMOKE** |
+| L5 | Open 🗺 after finding a badge, and after leaving the buggy somewhere | The gold badge and the buggy both appear in the right places | |
 
 ## M · Performance and stability
 
@@ -185,6 +188,7 @@ Do not point at anything. Just watch and answer these afterwards.
 | P3 | Did they complete mission 1 without help? If not, where exactly did they stall? | |
 | P4 | Did they wander off and explore things that were not the mission? | |
 | P5 | What did they try that did not work? (Tapping the world? Tapping a robot on screen? Anything they expected to be a button?) | |
+| P6 | Did they find the map on their own? Did it help when they got lost, or did they ignore it? | |
 
 ---
 
@@ -208,4 +212,4 @@ something by hand:
 
 ---
 
-*54 checks · 22 smoke · sections A–O are the software, section P is the game.*
+*58 checks · 25 smoke · sections A–O are the software, section P is the game.*

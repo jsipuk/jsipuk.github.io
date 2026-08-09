@@ -19,9 +19,9 @@ vertices in 36 frustum-culled buffers · 20 `drawArrays` calls per frame · 18
 interactables · 11 triggers · 16 movers · 2 build zones · smallest touch target
 54 px.
 
-Test suites, all green: 76 node checks (`node test/run.js`) · 95 browser checks
-at five screen sizes (`node test/browser.js`) · 40-check playthrough · systems ·
-offline/desktop · layout.
+Test suites, all green: 76 node checks (`node test/run.js`) · 130 browser checks
+at five screen sizes (`node test/browser.js`) · playthrough · systems ·
+offline/desktop · layout · Test Kit · new-feature suite.
 
 **Phase 2 is designed, not built.** See `PHASE2-PLAN.md`.
 
@@ -98,6 +98,24 @@ of them were layout.** All three are fixed and now covered by
 
 The lesson worth keeping: `test/run.js` had 76 green checks and the game had
 three visible bugs on a phone. Geometry needs a browser at the real size.
+
+## Self-review before going live
+
+A pass over graphics, world placement and the levels, with the fixes applied.
+
+| Found | Why it mattered | Fixed by |
+| --- | --- | --- |
+| **Pressing a person did nothing.** The action played a *duck quack* and puffed six specks 2.6 units over their head. Every NPC carried a `line` field that was never read — dialogue I designed and never built | The hand icon promises a greeting. Offering an action that does nothing teaches a child the button is a lie | Bobbles turn, wave, pop a picture bubble, and each has a real job: hints, hat colours, badge pointers |
+| **No way to know where anything is** | A block town at eye level is a maze of similar boxes, and a child who walks the wrong way has no way back | The map, plus four landmarks tall enough to see over the rooftops |
+| **Trampolines and the musical steps were flat mats** | They read as carpet. Nothing about the silhouette said "stand on me" | Trampolines on legs with frames and chevrons; keys raised with white tops in a dark surround, under an arch |
+| **Trees were three fat green slabs** | At any distance they were walls of green, not trees | Trunk left visible, canopy steps inwards three times |
+| **The paddling pool was ten cubes in a ring** | Read as scattered litter | Continuous rim, one clear water surface |
+| **Roofs were featureless slabs** | Badges are up there; arriving at an empty plane is a let-down | Vents, tanks and aerials |
+| **The lookout could not look out** | Its own posts and rails filled the view | Thinner posts at the corners, lower rails |
+| **The Squad pole was planted in the plaza** | It loomed over the fountain and shed detached cubes into mid-air | Moved onto the café roof where it belongs |
+
+Still open, deliberately: the sky is a flat colour; the buggy cannot climb to
+the deck; free play after mission three is thin (badges only).
 
 ## Playtest observations
 

@@ -74,6 +74,7 @@
     this.water = [];
     this.places = {};
     this.decoAnim = [];
+    this.landmarks = [];
   }
 
   World.prototype._bucket = function (x, z) {
@@ -212,12 +213,33 @@
     return this;
   };
 
+  /* A tree, not a green slab. The trunk stays visible and the canopy steps
+   * inwards three times, which is what makes a box read as foliage. */
   World.prototype.tree = function (x, z, scale, leafCol) {
     var s = scale || 1;
-    this.b(x - 0.5, 0, z - 0.5, 1, 3 * s, 1, C.wood);
     var lc = leafCol || C.grassDark;
-    this.b(x - 2, 2.6 * s, z - 2, 4, 2.2 * s, 4, lc, { tint: 0.06 });
-    this.b(x - 1.4, 2.6 * s + 2.2 * s, z - 1.4, 2.8, 1.4 * s, 2.8, lc, { tint: 0.16 });
+    var h = 3.2 * s;
+    this.b(x - 0.4, 0, z - 0.4, 0.8, h, 0.8, C.wood);
+    this.b(x - 0.6, h - 0.45, z - 0.6, 1.2, 0.45, 1.2, C.woodDark);
+    this.b(x - 1.8, h, z - 1.8, 3.6, 1.2 * s, 3.6, lc, { tint: -0.04 });
+    this.b(x - 1.25, h + 1.2 * s, z - 1.25, 2.5, 1.0 * s, 2.5, lc, { tint: 0.08 });
+    this.b(x - 0.65, h + 2.2 * s, z - 0.65, 1.3, 0.75 * s, 1.3, lc, { tint: 0.2 });
+    return this;
+  };
+
+  /* Every building gets something on the roof. A child climbs up there for a
+   * badge, and an empty slab is a disappointing place to arrive. */
+  World.prototype.roofStuff = function (x, z, w, d, h, seed) {
+    var r = rnd(seed * 977 + 13);
+    var top = h + 1.2;
+    this.b(x + 1, top, z + 1, 1.6, 1.1, 1.6, C.metalDark);            // vent
+    this.b(x + 0.7, top + 1.1, z + 0.7, 2.2, 0.3, 2.2, C.metal);
+    this.b(x + w - 3.2, top, z + d - 3, 2.2, 1.4, 2.2, C.metal, { tint: -0.05 });
+    this.b(x + w - 2.9, top + 1.4, z + d - 2.7, 1.6, 0.4, 1.6, C.teal, { tint: 0.1 });
+    if (r() > 0.4) {                                                  // aerial
+      this.b(x + w * 0.5, top, z + d * 0.5, 0.3, 2.6, 0.3, C.metalDark);
+      this.b(x + w * 0.5 - 0.5, top + 2.6, z + d * 0.5 - 0.5, 1.3, 0.3, 1.3, C.coral);
+    }
     return this;
   };
 
@@ -263,10 +285,10 @@
     /* ---- framing hills, so the neighbourhood has an edge ---------------- */
     for (i = -60; i < 60; i += 4) {
       var hN = 3 + Math.round(Math.abs(Math.sin(i * 0.21)) * 4);
-      w.b(i, 0, -60, 4, hN, 8, C.grassDark, { tint: 0.05 });
-      w.b(i, 0, 52, 4, hN, 8, C.grassDark, { tint: 0.05 });
-      w.b(-60, 0, i, 8, hN, 4, C.grassDark, { tint: 0.05 });
-      w.b(52, 0, i, 8, hN, 4, C.grassDark, { tint: 0.05 });
+      w.b(i, 0, -60, 4, hN, 8, C.grassDark, { tint: 0.05, tag: 'hill' });
+      w.b(i, 0, 52, 4, hN, 8, C.grassDark, { tint: 0.05, tag: 'hill' });
+      w.b(-60, 0, i, 8, hN, 4, C.grassDark, { tint: 0.05, tag: 'hill' });
+      w.b(52, 0, i, 8, hN, 4, C.grassDark, { tint: 0.05, tag: 'hill' });
     }
     // invisible fence, so nobody can squeeze through a hill seam
     w.blocker(-64, 0, -64, 128, 24, 4);
@@ -313,6 +335,7 @@
 
     /* ---- the Wonky Waffle café, and the hatch underneath it ------------- */
     w.building({ x: -12, z: -28, w: 16, d: 11, h: 6, col: C.lemon, roof: C.roofB, door: 'south' });
+    w.roofStuff(-12, -28, 16, 11, 6, 3);
     // deliberately wonky chimney and an oversized waffle-shaped sign
     w.b(-9, 6.6, -25, 2, 3, 2, C.roofB, { tint: -0.1 });
     w.b(-9.4, 9.4, -25.4, 2.8, 0.8, 2.8, C.dark);
@@ -475,24 +498,48 @@
       travel: -4.3, speed: 2.4
     });
 
-    // three trampolines, in a row, increasing in height
+    /* Three trampolines. They used to be flat pink mats lying on the grass and
+     * read as carpet; now they stand on legs with a bright frame and chevrons
+     * pointing up, so the silhouette says "jump on me" from across the park. */
     var tramp = [[-28, -6], [-33, -10], [-28, -14]];
     for (i = 0; i < tramp.length; i++) {
-      w.b(tramp[i][0] - 2.5, 0, tramp[i][1] - 2.5, 5, 1, 5, C.metalDark);
-      w.b(tramp[i][0] - 2.2, 1, tramp[i][1] - 2.2, 4.4, 0.35, 4.4, C.berry, { tint: 0.12, tag: 'tramp' });
+      var tx = tramp[i][0], tz = tramp[i][1];
+      var frameCol = [C.coral, C.orange, C.berry][i];
+      for (j = 0; j < 4; j++) {
+        w.b(tx + (j & 1 ? 1.9 : -2.5), 0, tz + (j & 2 ? 1.9 : -2.5), 0.6, 1.15, 0.6, C.metalDark);
+      }
+      w.b(tx - 2.7, 1.15, tz - 2.7, 5.4, 0.42, 0.8, frameCol);
+      w.b(tx - 2.7, 1.15, tz + 1.9, 5.4, 0.42, 0.8, frameCol);
+      w.b(tx - 2.7, 1.15, tz - 1.9, 0.8, 0.42, 3.8, frameCol);
+      w.b(tx + 1.9, 1.15, tz - 1.9, 0.8, 0.42, 3.8, frameCol);
+      w.b(tx - 1.9, 1.2, tz - 1.9, 3.8, 0.3, 3.8, C.berry, { tint: 0.14, tag: 'tramp' });
+      w.b(tx - 1.3, 1.5, tz - 0.9, 2.6, 0.1, 0.45, C.white, { pass: true });
+      w.b(tx - 0.9, 1.5, tz - 0.1, 1.8, 0.1, 0.45, C.white, { pass: true });
+      w.b(tx - 0.5, 1.5, tz + 0.7, 1.0, 0.1, 0.45, C.white, { pass: true });
       w.triggers.push({
-        kind: 'bounce', x: tramp[i][0], y: 1.35, z: tramp[i][1], rx: 2.4, rz: 2.4,
+        kind: 'bounce', x: tx, y: 1.5, z: tz, rx: 2.1, rz: 2.1,
         power: 15 + i * 2.5
       });
     }
 
-    // musical steps: eight coloured pads that sing when stepped on
+    /* The musical staircase. It was eight flat pads that looked like a rainbow
+     * rug; now the keys stand proud with white tops in a dark frame, so it
+     * reads as an instrument you walk on. An arch over it makes it findable. */
     var noteCols = [C.coral, C.orange, C.lemon, C.mint, C.teal, C.sky, C.lilac, C.berry];
+    w.b(-46.8, 0, -2.8, 21.6, 0.35, 5.6, C.woodDark, { tint: -0.05 });
     for (i = 0; i < 8; i++) {
-      w.b(-46 + i * 2.6, 0, -2, 2.4, 0.4, 4, noteCols[i], { tint: 0.08, tag: 'note' });
+      var kx = -46 + i * 2.6;
+      w.b(kx, 0.35, -2, 2.4, 0.55, 4, noteCols[i], { tint: 0.04, tag: 'note' });
+      w.b(kx + 0.15, 0.9, -1.8, 2.1, 0.14, 3.6, C.white, { tint: -0.02 });
       w.triggers.push({
-        kind: 'note', x: -46 + i * 2.6 + 1.2, y: 0.4, z: 0, rx: 1.2, rz: 2, note: i
+        kind: 'note', x: kx + 1.2, y: 1.04, z: 0, rx: 1.2, rz: 2, note: i
       });
+    }
+    w.b(-47.6, 0, -3.6, 1, 6, 1, C.teal, { tint: -0.05 });
+    w.b(-25.6, 0, -3.6, 1, 6, 1, C.teal, { tint: -0.05 });
+    w.b(-47.6, 6, -3.6, 23, 1, 1, C.yellow);
+    for (i = 0; i < 5; i++) {
+      w.b(-44 + i * 4, 5.2, -3.5, 1.2, 0.9, 0.5, noteCols[(i * 2) % 8], { pass: true, tint: 0.1 });
     }
 
     // climbing frame: a stepped pyramid, every step a single jump apart
@@ -529,17 +576,17 @@
      * a child can stand on that is not a rooftop. */
     var LX = -20, LZ = 2;
     for (i = 0; i < 4; i++) {
-      w.b(LX + (i & 1 ? 3 : -4), 0, LZ + (i & 2 ? 3 : -4), 1, 9, 1, C.metalDark);
+      w.b(LX + (i & 1 ? 3.4 : -4), 0, LZ + (i & 2 ? 3.4 : -4), 0.6, 9, 0.6, C.metalDark);
     }
     w.b(LX - 4.6, 9, LZ - 4.6, 10.2, 0.7, 3, C.metal, { tint: 0.05 });
     w.b(LX - 4.6, 9, LZ + 2.6, 10.2, 0.7, 3, C.metal, { tint: 0.05 });
     w.b(LX - 4.6, 9, LZ - 1.6, 3, 0.7, 4.2, C.metal, { tint: 0.05 });
     w.b(LX + 2.6, 9, LZ - 1.6, 3, 0.7, 4.2, C.metal, { tint: 0.05 });
     // waist-high rail so the deck reads as a safe place to stand
-    w.b(LX - 4.8, 9.7, LZ - 4.8, 10.6, 1.1, 0.6, C.yellow, { tint: 0.05 });
-    w.b(LX - 4.8, 9.7, LZ + 5.2, 10.6, 1.1, 0.6, C.yellow, { tint: 0.05 });
-    w.b(LX - 4.8, 9.7, LZ - 4.2, 0.6, 1.1, 9.4, C.yellow, { tint: 0.05 });
-    w.b(LX + 5.2, 9.7, LZ - 4.2, 0.6, 1.1, 9.4, C.yellow, { tint: 0.05 });
+    w.b(LX - 4.8, 9.7, LZ - 4.8, 10.6, 0.75, 0.45, C.yellow, { tint: 0.05 });
+    w.b(LX - 4.8, 9.7, LZ + 5.35, 10.6, 0.75, 0.45, C.yellow, { tint: 0.05 });
+    w.b(LX - 4.8, 9.7, LZ - 4.35, 0.45, 0.75, 9.7, C.yellow, { tint: 0.05 });
+    w.b(LX + 5.35, 9.7, LZ - 4.35, 0.45, 0.75, 9.7, C.yellow, { tint: 0.05 });
     w.places.lookout = { x: LX, y: 9.7, z: LZ };
     w.movers.push({
       id: 'lookout-platform', kind: 'lift-platform',
@@ -553,10 +600,15 @@
     w.b(LX + 3.7, 0, LZ + 3.7, 1, 1.6, 1, C.coral);
     w.badges.push({ id: 'b11', x: LX + 3.4, y: 10.6, z: LZ - 3.4, hint: 'the lookout deck' });
 
-    // duck pond edging (a dry paddling circle) with waddler statues around it
-    for (i = 0; i < 10; i++) {
-      var pa = i * Math.PI / 5;
-      w.b(-40 + Math.cos(pa) * 5 - 0.8, 0, -8 + Math.sin(pa) * 5 - 0.8, 1.6, 0.6, 1.6, C.sky, { tint: 0.06 });
+    /* The paddling pool. It used to be ten cubes in a ring that read as litter;
+     * now the rim is continuous and the water inside is one clear surface. */
+    w.b(-45.5, -0.15, -13.5, 11, 0.3, 11, C.sky, { pass: true, tint: 0.14 });
+    w.b(-46.2, 0, -14.2, 12.4, 0.75, 1.4, C.pave2);
+    w.b(-46.2, 0, -3.8, 12.4, 0.75, 1.4, C.pave2);
+    w.b(-46.2, 0, -12.8, 1.4, 0.75, 9, C.pave2);
+    w.b(-34.8, 0, -12.8, 1.4, 0.75, 9, C.pave2);
+    for (i = 0; i < 4; i++) {
+      w.b(-44 + i * 3, 0.16, -12 + (i % 2) * 5, 1.6, 0.1, 1.6, C.white, { pass: true, tint: -0.03 });
     }
 
     /* ---- Sherbet Street: houses and two enterable shops ----------------- */
@@ -595,6 +647,7 @@
      * back from the Build Yard deck so the chase camera never ends up inside
      * its roof while you are building the bridge. */
     w.building({ x: 6, z: -32, w: 13, d: 10, h: 6, col: C.lilac, roof: C.roofC, door: 'south' });
+    w.roofStuff(6, -32, 13, 10, 6, 7);
     for (i = 0; i < 5; i++) {
       w.b(7.5 + (i % 3) * 3.6, 0, -30.6 - (i % 2) * 0.2, 2.4, 1.2 + (i % 3) * 0.6, 2.4,
         [C.coral, C.mint, C.sky, C.lemon, C.berry][i], { tag: 'boxstack' });
@@ -738,6 +791,57 @@
       var cw = 7 + R() * 8;
       w.decoAnim.push({ kind: 'cloud', x: cx2, y: cy2, z: cz2, w: cw, h: 2.2, d: 5 + R() * 5, drift: 0.25 + R() * 0.3 });
     }
+
+    /* ---- landmarks you can steer by ------------------------------------ */
+
+    /* A block town at eye level is a maze of similar boxes. These four are
+     * tall enough to see over the rooftops from anywhere, so "I am lost" turns
+     * into "the lighthouse is that way". They double as the map's icons. */
+
+    /* The Squad pole: a giant bobble hat, mounted on the café roof rather than
+     * planted in the plaza, where an earlier version loomed over the fountain
+     * and shed little cubes into mid-air. */
+    w.b(-0.7, 7.2, -22.7, 1.4, 10.6, 1.4, C.metalDark);
+    w.b(-2.4, 17.8, -24.4, 4.8, 1.3, 4.8, C.teal, { tint: 0.04 });
+    w.b(-1.9, 19.1, -23.9, 3.8, 1.7, 3.8, C.yellow);
+    w.b(-1.4, 20.8, -23.4, 2.8, 1.1, 2.8, C.yellow, { tint: 0.12 });
+    w.b(-1.0, 21.9, -23.0, 2.0, 2.0, 2.0, C.coral);
+
+    // The harbour lighthouse: red and white bands, a lamp room that glows.
+    for (i = 0; i < 7; i++) {
+      w.b(-25.4 - i * 0.12, i * 2, 43.6 - i * 0.12, 4.4 + i * 0.24, 2, 4.4 + i * 0.24,
+        i % 2 ? C.coral : C.white, { tint: 0.02 });
+    }
+    w.b(-26.4, 14, 42.6, 6, 0.7, 6, C.metalDark);
+    w.b(-25.6, 14.7, 43.4, 4.4, 2.6, 4.4, C.lemon, { tint: 0.22 });
+    w.b(-26.4, 17.3, 42.6, 6, 0.8, 6, C.roofB);
+    w.b(-24.8, 18.1, 44.2, 2.8, 1.6, 2.8, C.roofB, { tint: 0.12 });
+
+    // The park balloon, on a long tether over the playground.
+    w.b(-24.5, 0, -9.5, 1, 1.2, 1, C.woodDark);
+    for (i = 0; i < 6; i++) w.b(-24.15, 1.2 + i * 1.7, -9.15, 0.3, 1.7, 0.3, C.white, { pass: true });
+    w.b(-27, 11.4, -12, 6, 5, 6, C.berry, { tint: 0.04 });
+    w.b(-26.2, 16.4, -11.2, 4.4, 1.6, 4.4, C.berry, { tint: 0.16 });
+    w.b(-25.4, 10.2, -10.4, 2.8, 1.2, 2.8, C.berry, { tint: -0.12 });
+
+    // Bunting along Sherbet Street, strung between the lamp posts.
+    var buntCols = [C.coral, C.lemon, C.mint, C.sky, C.lilac];
+    for (x = -40; x < 40; x += 2) {
+      w.b(x, 4.05, 18.5, 1.3, 0.9, 0.25,
+        buntCols[Math.abs(Math.round(x / 2)) % 5], { pass: true, tint: 0.06 });
+    }
+
+    w.landmarks = [
+      { x: 0, z: -22, icon: '🎩', name: 'Squad HQ' },
+      { x: 0, z: 0, icon: '⛲', name: 'Bobbin Square' },
+      { x: -24, z: -11, icon: '🎈', name: 'Giggle Park' },
+      { x: -25, z: 44, icon: '🗼', name: 'Harbour' },
+      { x: 44, z: -5, icon: '🏗️', name: 'Build Yard' },
+      { x: 20, z: 13, icon: '🚙', name: 'Buggy Bay' },
+      { x: 0, z: 22, icon: '🏘️', name: 'Sherbet Street' },
+      { x: -20, z: 2, icon: '🔭', name: 'Lookout' },
+      { x: 12, z: -27, icon: '👒', name: 'Hat & Boot Shop' }
+    ];
 
     /* ---- where the player starts --------------------------------------- */
     w.places.spawn = { x: 0, y: 0.2, z: 9 };

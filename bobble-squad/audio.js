@@ -143,7 +143,23 @@
       tone({ freq: 520, to: 380, dur: 0.13, vol: 0.32, type: 'sawtooth' });
       tone({ freq: 460, to: 300, dur: 0.12, vol: 0.24, type: 'sawtooth', delay: 0.15 });
     },
-    reset: function () { tone({ freq: 700, to: 400, dur: 0.3, vol: 0.24, type: 'sine' }); }
+    reset: function () { tone({ freq: 700, to: 400, dur: 0.3, vol: 0.24, type: 'sine' }); },
+    /* People say hello; only the birds quack. The two were the same sound
+     * until somebody pointed out that pressing a person did nothing. */
+    hello: function () {
+      tone({ freq: 620, to: 780, dur: 0.13, vol: 0.30, type: 'triangle' });
+      tone({ freq: 880, dur: 0.16, vol: 0.26, type: 'triangle', delay: 0.13 });
+    },
+    laugh: function () {
+      [720, 640, 700, 600].forEach(function (f, i) {
+        tone({ freq: f, to: f * 0.85, dur: 0.09, vol: 0.24, type: 'triangle', delay: i * 0.1 });
+      });
+    },
+    hint: function () {
+      tone({ freq: 520, to: 1040, dur: 0.18, vol: 0.26, type: 'sine' });
+      tone({ freq: 1040, dur: 0.22, vol: 0.20, type: 'triangle', delay: 0.16 });
+    },
+    map: function () { tone({ freq: 380, to: 620, dur: 0.16, vol: 0.22, type: 'triangle' }); }
   };
 
   global.BSAudio = {

@@ -130,7 +130,7 @@ async function main() {
 
     /* ---- HUD controls must not overlap or run off screen ---- */
     var layout = await page.evaluate(function () {
-      var ids = ['missionCard', 'topRight', 'btnAction', 'btnJump', 'stick', 'buildBar', 'gadgetRow'];
+      var ids = ['missionCard', 'topRight', 'btnMap', 'btnPause', 'btnAction', 'btnJump', 'stick', 'buildBar', 'gadgetRow'];
       var boxes = ids.map(function (id) {
         var e = document.getElementById(id);
         var r = e ? e.getBoundingClientRect() : null;
@@ -179,6 +179,60 @@ async function main() {
     check('a message does not cover the objective or the badges',
       toast.length === 0, 'covers ' + toast.join(' and '));
     check('smallest visible touch target is at least 46px', layout.smallest >= 46, layout.smallest + 'px');
+
+    /* ---- the map opens, draws, and gives the game back ---- */
+    await press(page, '#btnMap');
+    await page.waitForTimeout(450);
+    var map = await page.evaluate(function () {
+      var c = document.getElementById('mapCanvas');
+      var r = c.getBoundingClientRect();
+      var g = c.getContext('2d');
+      var d = g.getImageData(0, 0, c.width, c.height).data;
+      var seen = {};
+      for (var i = 0; i < d.length; i += 4 * 131) seen[d[i] + ',' + d[i + 1] + ',' + d[i + 2]] = 1;
+      var close = document.getElementById('btnMapClose').getBoundingClientRect();
+      return {
+        open: window.BS.isMapOpen(), paused: window.BS.paused,
+        colours: Object.keys(seen).length,
+        onScreen: r.right <= window.innerWidth + 1 && r.bottom <= window.innerHeight + 1 &&
+          r.left >= -1 && r.top >= -1,
+        ratio: +(r.width / r.height).toFixed(2),
+        closeSize: Math.round(close.width)
+      };
+    });
+    check('the map opens and pauses the game', map.open && map.paused, JSON.stringify(map));
+    check('the map is drawn, not blank', map.colours > 6, map.colours + ' colours');
+    check('the map fits on screen and keeps its shape', map.onScreen && map.ratio > 1.0 && map.ratio < 1.4,
+      'ratio ' + map.ratio);
+    check('the map close button is a usable size', map.closeSize >= 46, map.closeSize + 'px');
+    await press(page, '#btnMapClose');
+    await page.waitForTimeout(350);
+    check('closing the map gives the game back',
+      await page.evaluate(function () { return !window.BS.isMapOpen() && !window.BS.paused; }));
+
+    /* ---- pressing a Bobble does something visible ---- */
+    var bobble = await page.evaluate(async function () {
+      var a = window.BS.actor('walker1');
+      window.BS.teleport(a.x + 1.5, a.y + 0.3, a.z + 1.5);
+      await new Promise(function (r) { setTimeout(r, 400); });
+      var el = document.getElementById('btnAction');
+      var r0 = el.getBoundingClientRect();
+      var o = {
+        pointerId: 41, clientX: r0.left + 10, clientY: r0.top + 10,
+        bubbles: true, cancelable: true, pointerType: 'touch'
+      };
+      el.dispatchEvent(new PointerEvent('pointerdown', o));
+      el.dispatchEvent(new PointerEvent('pointerup', o));
+      await new Promise(function (r) { setTimeout(r, 400); });
+      var n = window.BS.actor('walker1');
+      return {
+        waved: n.wave > 0,
+        faced: n.faceUntil > window.BS.t,
+        bubble: document.querySelectorAll('.marker.bubble').length
+      };
+    });
+    check('pressing a Bobble makes them wave', bobble.waved, JSON.stringify(bobble));
+    check('pressing a Bobble shows a speech bubble', bobble.bubble > 0);
 
     /* ---- Start again: the whole flow, on screen, and it really resets ---- */
     await page.evaluate(function () {

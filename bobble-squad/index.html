@@ -32,6 +32,7 @@
   <!-- top right: badges, sound, pause -->
   <div id="topRight">
     <div class="card score"><span class="s-icon">🏅</span><span id="badgeCount">0/11</span></div>
+    <button id="btnMap" class="chip map" aria-label="Map">🗺</button>
     <button id="btnPause" class="chip" aria-label="Pause">⏸</button>
   </div>
 
@@ -112,6 +113,14 @@
       <button id="btnWipeNo" class="row">No, keep playing</button>
     </div>
   </div>
+</div>
+
+<div id="mapOverlay">
+  <div class="map-head">
+    <span class="map-title">🗺</span>
+    <button id="btnMapClose" class="chip" aria-label="Close the map">✕</button>
+  </div>
+  <div class="map-frame"><canvas id="mapCanvas"></canvas></div>
 </div>
 
 <div id="rotateHint">

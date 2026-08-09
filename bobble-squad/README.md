@@ -34,6 +34,27 @@ Street and its mooing doorbells, the harbour with a jetty and paddling depth
 water, Buggy Bay with the Puttabout, and the Build Yard with the tower.
 Underneath: a secret tunnel from HQ to a vault under the park.
 
+## The map
+
+🗺 in the top corner opens a map of the whole town, drawn from the same
+`surfaceAt()` that builds the ground, so it can never disagree with the world.
+It shows where you are (an arrow pointing the way you face), where you are
+going, the buildings, the buggy, and the badges you have **already** found.
+The ones still hidden stay hidden — a map that gives away the secrets would
+take the game away with them. The game pauses while it is open.
+
+## Talking to a Bobble
+
+Everyone in town does something when you press ⭐ at them. They turn to face
+you and wave, a picture bubble pops over their head, and then:
+
+- **Captain Pom (🧢)** points at your current job and lights up the marker.
+  He is the way out of being lost.
+- **The shopkeeper** changes your bobble hat colour, free, forever, for fun.
+- **Townsfolk** joke, hop about, or point at a badge if there is one nearby —
+  which makes every Bobble in the town an optional hint you never have to take.
+- **Grumbo** does an apologetic little dance.
+
 ## Notes on how it behaves
 
 A few decisions that are easy to undo by accident:
@@ -59,6 +80,13 @@ A few decisions that are easy to undo by accident:
   last safe patch of ground you stood on, with a puff and a cheerful noise.
 - **Building only works on the marked coloured squares.** The build button
   hides itself everywhere else, so the town cannot be scribbled over.
+- **Anything a child can use has a silhouette that says so.** The trampolines
+  stand on legs with a bright frame and chevrons; the musical staircase has
+  white key tops in a dark surround and an arch over it. Both were flat mats
+  on the grass at first and read as carpet.
+- **Four things are tall enough to see over the rooftops** — the bobble-hat
+  pole on the café, the harbour lighthouse, the park balloon and the crane.
+  They are the difference between "I am lost" and "the lighthouse is that way".
 
 ## How it works offline
 

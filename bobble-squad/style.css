@@ -253,10 +253,32 @@ body {
   box-shadow: 0 4px 0 rgba(36, 48, 74, .2), 0 0 0 4px rgba(18, 182, 166, .35);
 }
 .marker.off { display: none; }
+.marker.goal.flare {
+  box-shadow: 0 4px 0 var(--sun-dark), 0 0 0 14px rgba(255, 201, 60, .45);
+}
+.chip.map.on { background: var(--teal); box-shadow: 0 6px 0 var(--teal-dark); }
 
 @keyframes bounceMark {
   0%, 100% { margin-top: 0; }
   50% { margin-top: -9px; }
+}
+
+.marker.bubble {
+  width: auto;
+  min-width: 58px;
+  height: 58px;
+  padding: 0 14px;
+  border-radius: 20px;
+  font-size: 30px;
+  background: var(--paper);
+  box-shadow: 0 5px 0 rgba(36, 48, 74, .22), 0 0 0 4px rgba(255, 255, 255, .5);
+  animation: popBubble .28s cubic-bezier(.2, 1.6, .5, 1);
+  display: grid;
+}
+
+@keyframes popBubble {
+  from { transform: translate(-50%, -50%) scale(.4); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
 #chevron {
@@ -431,6 +453,46 @@ body {
 .remove { background: var(--coral); box-shadow: 0 6px 0 var(--coral-dark); }
 .done { background: var(--grape); box-shadow: 0 6px 0 var(--grape-dark); }
 
+/* ------------------------------------------------------------- the map */
+
+#mapOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  display: none;
+  flex-direction: column;
+  background: rgba(24, 44, 66, .82);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  padding: max(10px, var(--safe-t)) max(10px, var(--safe-r)) max(10px, var(--safe-b)) max(10px, var(--safe-l));
+}
+#mapOverlay.show { display: flex; }
+
+.map-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  padding: 2px 4px 8px;
+}
+.map-title { font-size: 34px; }
+
+/* The paper is the shape of the town, so a wide screen shows dark margins
+ * rather than acres of empty green. drawMap() sizes it. */
+.map-frame {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+#mapCanvas {
+  border-radius: 26px;
+  background: var(--paper);
+  box-shadow: 0 8px 0 rgba(16, 26, 44, .3);
+  touch-action: none;
+  display: block;
+}
+
 /* -------------------------------------------------------------- overlays */
 
 .overlay, #rotateHint, #fatal {
@@ -581,7 +643,8 @@ body {
  * the badge counter, so both are trimmed and the card is capped at whatever
  * room is genuinely left beside the right-hand cluster. */
 @media (max-width: 560px) {
-  #missionCard { max-width: calc(100vw - 208px); }
+  .m-text { display: none; }
+  #missionCard { max-width: calc(100vw - 268px); }
   .card { padding: 6px 12px 6px 8px; gap: 8px; }
   .m-icon { width: 42px; height: 42px; font-size: 26px; border-radius: 13px; }
   .m-text { font-size: 17px; }

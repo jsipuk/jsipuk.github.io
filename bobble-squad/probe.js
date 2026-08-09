@@ -14,7 +14,7 @@
  *   - times a button was hammered (probably not responding)
  *   - orientation changes and the size of the safe-area insets
  *
- * It also carries the 54-check iPad test plan so results can be ticked off on
+ * It also carries the 58-check iPad test plan so results can be ticked off on
  * the device itself, and marking a check as failed grabs a screenshot of the
  * 3D view plus the exact on-screen position of every HUD control.
  *
@@ -73,6 +73,7 @@
     ['D4', 'Walk with the left thumb and drag the camera with the right', 'Both work at once', 1],
     ['D5', 'Walk up to a doorbell, the fountain, a bird, the buggy', 'Action icon changes, small icon floats over the thing', 0],
     ['D6', 'Try to scroll, pinch, double-tap zoom, long-press for a menu', 'None of them happen, the page never moves', 1],
+    ['D7', 'Press the map button, look at it, close it again', 'Map fills the screen, you are an arrow on it, close returns you to play', 1],
 
     ['E1', 'Drag around, look up and down', 'Smooth, never flips or sticks at the limits', 0],
     ['E2', 'Walk in a straight line without touching the camera', 'Camera swings behind you after about a second', 0],
@@ -107,6 +108,8 @@
     ['L1', 'Try trampolines, musical steps, a doorbell, the noticeboard, the lift, a bird', 'Every one does something immediately', 1],
     ['L2', 'Find at least three badges', 'Confetti and a noise each time, counter goes up', 0],
     ['L3', 'Jump off the tower, and off the edge of the map', 'Gentle noise, put back on safe ground, nothing lost', 0],
+    ['L4', 'Walk up to three different Bobbles and press the hand button', 'Each one turns, waves, and does something: the Chief points at your job, the shopkeeper changes your hat, townsfolk joke or point at a badge', 1],
+    ['L5', 'Open the map after finding a badge and after driving somewhere', 'The badge and the buggy both show up in the right places', 0],
 
     ['M1', 'Stand in the busy square and turn on the spot', 'Smooth, no stutter as things come into view', 1],
     ['M2', 'Play continuously for 20 minutes', 'No slowdown building up, no crash, no reload', 0],
@@ -122,7 +125,8 @@
     ['P2', 'Did they work out the camera, or get lost facing the wrong way?', 'Worked it out', 0],
     ['P3', 'Did they finish mission 1 unaided? If not, where exactly did they stall?', 'Finished it', 0],
     ['P4', 'Did they wander off and explore things that were not the mission?', 'Yes', 0],
-    ['P5', 'What did they try that did not work?', 'Note anything they expected to be a button', 0]
+    ['P5', 'What did they try that did not work?', 'Note anything they expected to be a button', 0],
+    ['P6', 'Did they find the map on their own, and did it help when lost?', 'Used it without being told', 0]
   ];
 
   /* ------------------------------------------------------------- state */
