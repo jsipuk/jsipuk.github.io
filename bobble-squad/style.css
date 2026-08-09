@@ -1,0 +1,556 @@
+/* Bobble Squad — interface.
+ *
+ * Its own look: fat rounded bricks with a solid bottom edge so every control
+ * reads as a physical toy button, a teal / sunshine / coral palette, and one
+ * chunky rounded typeface. Nothing here is smaller than a five-year-old's
+ * fingertip: the smallest touch target is 60px, most are 76–104px.
+ *
+ * Everything is positioned from the safe-area insets so the controls clear an
+ * iPad's rounded corners and home indicator.
+ */
+
+@font-face {
+  font-family: 'Bobble';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/baloo-2-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Bobble';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('fonts/baloo-2-800-normal.woff2') format('woff2');
+}
+
+:root {
+  --teal: #12b6a6;
+  --teal-dark: #0b8578;
+  --sun: #ffc93c;
+  --sun-dark: #d99b12;
+  --coral: #ff7f60;
+  --coral-dark: #d1573b;
+  --grape: #7b6be0;
+  --grape-dark: #5748b5;
+  --ink: #24304a;
+  --paper: #fffdf6;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #8fd8f2;
+  font-family: 'Bobble', 'Trebuchet MS', system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+#hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ------------------------------------------------------------- the brick */
+
+/* The one button shape the whole game uses: a solid slab with a darker edge
+ * underneath that squashes when pressed. */
+.btn, .chip, .row, .big, .swatch, .kit {
+  font-family: inherit;
+  font-weight: 800;
+  border: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+  color: #fff;
+  background: var(--teal);
+  box-shadow: 0 6px 0 var(--teal-dark), 0 10px 18px rgba(20, 40, 70, .28);
+  transition: transform .06s ease, box-shadow .06s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active, .btn.down, .chip:active, .row:active, .big:active, .swatch:active, .kit:active {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--teal-dark), 0 4px 8px rgba(20, 40, 70, .3);
+}
+
+.hidden { display: none !important; }
+
+/* ------------------------------------------------------------- top cards */
+
+.card {
+  pointer-events: none;
+  background: rgba(255, 253, 246, .94);
+  border-radius: 22px;
+  box-shadow: 0 5px 0 rgba(36, 48, 74, .18), 0 10px 20px rgba(20, 40, 70, .18);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 10px;
+}
+
+#missionCard {
+  position: absolute;
+  top: calc(var(--safe-t) + 12px);
+  left: calc(var(--safe-l) + 12px);
+  max-width: min(52vw, 380px);
+}
+
+.m-icon {
+  font-size: 34px;
+  line-height: 1;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  background: var(--sun);
+  border-radius: 16px;
+  box-shadow: 0 4px 0 var(--sun-dark);
+  flex: none;
+}
+
+.m-text {
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pips { display: flex; gap: 6px; margin-top: 5px; }
+.pips i {
+  width: 15px; height: 15px; border-radius: 5px;
+  background: #d8dce6;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .08);
+}
+.pips i.on { background: var(--teal); box-shadow: inset 0 -3px 0 var(--teal-dark); }
+
+#topRight {
+  position: absolute;
+  top: calc(var(--safe-t) + 12px);
+  right: calc(var(--safe-r) + 12px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score { font-size: 24px; padding: 8px 16px; }
+.s-icon { font-size: 26px; }
+
+.chip {
+  width: 60px; height: 60px;
+  border-radius: 20px;
+  font-size: 26px;
+  background: var(--grape);
+  box-shadow: 0 6px 0 var(--grape-dark), 0 10px 18px rgba(20, 40, 70, .28);
+  display: grid; place-items: center;
+}
+.chip:active { box-shadow: 0 1px 0 var(--grape-dark); }
+
+/* ------------------------------------------------------- sniffer meter */
+
+#scanMeter {
+  position: absolute;
+  top: calc(var(--safe-t) + 88px);
+  right: calc(var(--safe-r) + 12px);
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 253, 246, .94);
+  border-radius: 20px;
+  padding: 8px 14px;
+  box-shadow: 0 5px 0 rgba(36, 48, 74, .18);
+}
+#scanMeter.show { display: flex; }
+.meter { display: flex; gap: 5px; align-items: flex-end; }
+.meter i {
+  width: 12px; border-radius: 4px; background: #d8dce6;
+}
+.meter i:nth-child(1) { height: 12px; }
+.meter i:nth-child(2) { height: 18px; }
+.meter i:nth-child(3) { height: 24px; }
+.meter i:nth-child(4) { height: 30px; }
+.meter i.on { background: var(--coral); }
+
+/* ------------------------------------------------------------- messages */
+
+#toast {
+  position: absolute;
+  top: calc(var(--safe-t) + 14px);
+  left: 50%;
+  transform: translate(-50%, -140%);
+  background: var(--paper);
+  border-radius: 24px;
+  padding: 12px 26px;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 6px 0 rgba(36, 48, 74, .18), 0 12px 26px rgba(20, 40, 70, .22);
+  opacity: 0;
+  transition: transform .28s cubic-bezier(.2, 1.5, .5, 1), opacity .2s;
+  white-space: nowrap;
+  max-width: 92vw;
+}
+#toast.show { transform: translate(-50%, 0); opacity: 1; }
+#toast .ti { font-size: 34px; }
+
+/* --------------------------------------------------------- world markers */
+
+#markers { position: absolute; inset: 0; }
+
+.marker {
+  position: absolute;
+  left: 0; top: 0;
+  width: 56px; height: 56px;
+  display: none;
+  place-items: center;
+  font-size: 30px;
+  border-radius: 50%;
+  background: rgba(255, 253, 246, .95);
+  box-shadow: 0 4px 0 rgba(36, 48, 74, .2);
+}
+.marker.goal, .marker.near { display: grid; }
+.marker.goal {
+  background: var(--sun);
+  box-shadow: 0 4px 0 var(--sun-dark), 0 0 0 6px rgba(255, 201, 60, .35);
+  animation: bounceMark 1s infinite ease-in-out;
+}
+.marker.near {
+  width: 46px; height: 46px; font-size: 24px;
+  box-shadow: 0 4px 0 rgba(36, 48, 74, .2), 0 0 0 4px rgba(18, 182, 166, .35);
+}
+.marker.off { display: none; }
+
+@keyframes bounceMark {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -9px; }
+}
+
+#chevron {
+  position: absolute;
+  left: 0; top: 0;
+  width: 68px; height: 68px;
+  display: none;
+  place-items: center;
+  font-size: 34px;
+  border-radius: 50%;
+  background: var(--sun);
+  box-shadow: 0 5px 0 var(--sun-dark), 0 0 0 8px rgba(255, 201, 60, .3);
+  animation: bounceMark 1s infinite ease-in-out;
+}
+#chevron.show { display: grid; }
+
+/* ------------------------------------------------------------ the stick */
+
+#stickZone {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(42vw, 420px);
+  height: min(62vh, 460px);
+  pointer-events: none;
+}
+
+#stick {
+  position: absolute;
+  left: calc(var(--safe-l) + 22px);
+  bottom: calc(var(--safe-b) + 24px);
+  width: 124px; height: 124px;
+  border-radius: 50%;
+  background: rgba(255, 253, 246, .38);
+  border: 5px solid rgba(255, 253, 246, .7);
+  opacity: .75;
+}
+#stick.active { position: fixed; left: 0; top: 0; bottom: auto; opacity: 1; }
+
+#knob {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 66px; height: 66px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 5px 0 var(--teal-dark), 0 8px 16px rgba(20, 40, 70, .3);
+  transform: translate(-50%, -50%);
+}
+
+#stickHint {
+  position: absolute;
+  left: calc(var(--safe-l) + 22px);
+  bottom: calc(var(--safe-b) + 158px);
+  width: 124px;
+  text-align: center;
+  color: #fff;
+  font-size: 15px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, .4);
+  opacity: .85;
+  animation: fadeHint 1s 12s forwards;
+}
+@keyframes fadeHint { to { opacity: 0; } }
+
+/* ----------------------------------------------------------- action pad */
+
+#actions {
+  position: absolute;
+  right: calc(var(--safe-r) + 18px);
+  bottom: calc(var(--safe-b) + 20px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+}
+
+#gadgetRow, #mainRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.btn {
+  display: grid;
+  place-items: center;
+  border-radius: 26px;
+  line-height: 1;
+}
+
+.action {
+  width: 104px; height: 104px;
+  border-radius: 34px;
+  font-size: 44px;
+  background: var(--coral);
+  box-shadow: 0 8px 0 var(--coral-dark), 0 12px 22px rgba(20, 40, 70, .3);
+}
+.action:active, .action.down { box-shadow: 0 2px 0 var(--coral-dark); }
+.action.idle { opacity: .62; }
+
+.jump {
+  width: 86px; height: 86px;
+  font-size: 40px;
+  background: var(--sun);
+  color: var(--ink);
+  box-shadow: 0 7px 0 var(--sun-dark), 0 12px 20px rgba(20, 40, 70, .28);
+}
+.jump:active, .jump.down { box-shadow: 0 2px 0 var(--sun-dark); }
+
+.build {
+  width: 76px; height: 76px;
+  font-size: 32px;
+  background: var(--grape);
+  box-shadow: 0 7px 0 var(--grape-dark), 0 12px 20px rgba(20, 40, 70, .28);
+}
+.build:active, .build.down { box-shadow: 0 2px 0 var(--grape-dark); }
+.build.on { background: var(--teal); box-shadow: 0 7px 0 var(--teal-dark); }
+
+.gadget {
+  width: 72px; height: 72px;
+  font-size: 30px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 6px 0 #cdd3e0, 0 10px 18px rgba(20, 40, 70, .22);
+}
+.gadget:active, .gadget.down { box-shadow: 0 1px 0 #cdd3e0; }
+.gadget.on {
+  background: var(--teal);
+  color: #fff;
+  box-shadow: 0 6px 0 var(--teal-dark), 0 0 0 5px rgba(18, 182, 166, .32);
+}
+
+/* ------------------------------------------------------------ build bar */
+
+/* The build bar lives inside the action stack, above the gadget row, so on
+ * any screen size it simply pushes the other controls down instead of
+ * landing on top of them. */
+#buildBar {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 253, 246, .95);
+  border-radius: 30px;
+  padding: 10px 14px;
+  box-shadow: 0 6px 0 rgba(36, 48, 74, .18), 0 12px 26px rgba(20, 40, 70, .22);
+  pointer-events: auto;
+}
+#buildBar.show { display: flex; animation: popIn .22s cubic-bezier(.2, 1.4, .5, 1); }
+
+@keyframes popIn {
+  from { transform: translateY(18px) scale(.94); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+#swatches { display: flex; gap: 8px; }
+.swatch {
+  width: 62px; height: 62px;
+  border-radius: 20px;
+  font-size: 28px;
+  background: #e9ecf3;
+  color: var(--ink);
+  box-shadow: 0 5px 0 #c8cedd;
+  display: grid; place-items: center;
+}
+.swatch.sel { box-shadow: 0 5px 0 #c8cedd, 0 0 0 5px var(--teal); }
+
+.place, .remove, .done {
+  width: 72px; height: 72px;
+  border-radius: 24px;
+  font-size: 38px;
+}
+.place { background: var(--teal); box-shadow: 0 6px 0 var(--teal-dark); }
+.remove { background: var(--coral); box-shadow: 0 6px 0 var(--coral-dark); }
+.done { background: var(--grape); box-shadow: 0 6px 0 var(--grape-dark); }
+
+/* -------------------------------------------------------------- overlays */
+
+.overlay, #rotateHint, #fatal {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  place-items: center;
+  background: rgba(24, 44, 66, .55);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  padding: max(16px, var(--safe-t)) max(16px, var(--safe-r)) max(16px, var(--safe-b)) max(16px, var(--safe-l));
+}
+.overlay.show, #rotateHint.show, #fatal.show { display: grid; }
+
+.panel {
+  background: var(--paper);
+  border-radius: 34px;
+  padding: 26px 30px 30px;
+  text-align: center;
+  max-width: min(92vw, 460px);
+  max-height: 92vh;
+  overflow: auto;
+  box-shadow: 0 10px 0 rgba(36, 48, 74, .18), 0 24px 50px rgba(10, 20, 40, .35);
+  pointer-events: auto;
+}
+
+.panel h1 { font-size: 44px; margin: 4px 0 0; font-weight: 800; letter-spacing: -.5px; }
+.panel h2 { font-size: 34px; margin: 0 0 16px; }
+.panel .sub { margin: 0 0 6px; font-size: 22px; color: var(--teal-dark); }
+.panel .tip { font-size: 17px; color: #5d6880; margin: 16px 0 0; line-height: 1.35; }
+.panel p { font-size: 19px; line-height: 1.4; }
+.panel .detail { font-size: 14px; color: #8a93a8; word-break: break-word; }
+
+/* the mark: three stacked bricks, drawn in CSS so nothing is fetched */
+.logo { display: flex; justify-content: center; gap: 6px; align-items: flex-end; height: 62px; }
+.lb { display: block; border-radius: 9px; }
+.b1 { width: 34px; height: 34px; background: var(--coral); box-shadow: 0 5px 0 var(--coral-dark); }
+.b2 { width: 34px; height: 52px; background: var(--teal); box-shadow: 0 5px 0 var(--teal-dark); }
+.b3 { width: 34px; height: 42px; background: var(--sun); box-shadow: 0 5px 0 var(--sun-dark); }
+
+#kitLabel { font-size: 30px; margin: 18px 0 0; line-height: 1; }
+#kitPick { display: flex; justify-content: center; gap: 12px; margin: 8px 0 4px; }
+.kit {
+  width: 66px; height: 66px;
+  border-radius: 22px;
+  background: #e9ecf3;
+  box-shadow: 0 5px 0 #c8cedd;
+  display: grid; place-items: center;
+}
+.kit.sel { box-shadow: 0 5px 0 #c8cedd, 0 0 0 5px var(--teal); }
+.k { width: 34px; height: 34px; border-radius: 50%; display: block; }
+.k0 { background: var(--sun); }
+.k1 { background: #80e8c8; }
+.k2 { background: var(--coral); }
+.k3 { background: #f67aa6; }
+
+.big {
+  width: 130px; height: 96px;
+  margin: 18px auto 0;
+  display: grid;
+  place-items: center;
+  border-radius: 30px;
+  font-size: 46px;
+  background: var(--teal);
+  box-shadow: 0 8px 0 var(--teal-dark);
+}
+
+.row {
+  display: block;
+  width: 100%;
+  margin: 12px 0 0;
+  padding: 16px 18px;
+  border-radius: 22px;
+  font-size: 21px;
+  text-align: left;
+  background: var(--grape);
+  box-shadow: 0 6px 0 var(--grape-dark);
+}
+.row.quiet { background: #97a1b8; box-shadow: 0 6px 0 #6f7890; }
+.row.danger { background: var(--coral); box-shadow: 0 6px 0 var(--coral-dark); }
+
+#wipeConfirm { display: none; margin-top: 14px; }
+#wipeConfirm.show { display: block; }
+
+#rotateHint .rot { font-size: 62px; animation: spinHint 2.4s infinite ease-in-out; }
+@keyframes spinHint {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(90deg); }
+}
+
+/* --------------------------------------------------------- small screens */
+
+@media (max-height: 480px) {
+  .action { width: 88px; height: 88px; font-size: 38px; }
+  .jump { width: 74px; height: 74px; font-size: 34px; }
+  .build, .gadget { width: 64px; height: 64px; font-size: 26px; }
+  #stick { width: 108px; height: 108px; }
+  #knob { width: 58px; height: 58px; }
+  .m-text { font-size: 19px; }
+  .m-icon { width: 44px; height: 44px; font-size: 28px; }
+  .swatch { width: 54px; height: 54px; }
+  .place, .remove, .done { width: 62px; height: 62px; font-size: 32px; }
+}
+
+/* On anything narrower than a landscape tablet the build bar would run into
+ * the action cluster, so it sits above it instead of beside it. */
+@media (max-width: 900px) {
+  .swatch { width: 54px; height: 54px; font-size: 24px; }
+  .place, .remove, .done { width: 62px; height: 62px; font-size: 32px; }
+  #buildBar { gap: 8px; padding: 8px 12px; }
+}
+
+/* Portrait still plays; the hint just suggests turning round. */
+@media (orientation: portrait) {
+  #missionCard { max-width: 78vw; }
+  #actions { bottom: calc(var(--safe-b) + 16px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker.goal, #chevron, #rotateHint .rot, #buildBar.show { animation: none; }
+  #toast { transition: opacity .2s; }
+}
