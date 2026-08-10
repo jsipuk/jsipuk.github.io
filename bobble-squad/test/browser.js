@@ -255,6 +255,46 @@ async function main() {
     });
     check('the pause menu fits without scrolling', fits);
 
+    /* ---- quick help: the objective and what every button does ---- */
+    await page.click('#btnHelp');
+    await page.waitForTimeout(300);
+    var help = await page.evaluate(function () {
+      var p = document.querySelector('#overlayPause .panel');
+      var back = document.getElementById('btnHelpBack').getBoundingClientRect();
+      var chips = [].map.call(document.querySelectorAll('.help-grid .hc'), function (e) {
+        var r = e.getBoundingClientRect();
+        return { w: Math.round(r.width), onScreen: r.bottom <= window.innerHeight + 1 && r.top >= -1 };
+      });
+      return {
+        showing: p.classList.contains('helping'),
+        menuHidden: getComputedStyle(document.getElementById('pauseMenu')).display === 'none',
+        goal: document.getElementById('helpGoalText').textContent,
+        chips: chips.length,
+        allChipsOnScreen: chips.every(function (c) { return c.onScreen; }),
+        fits: p.scrollHeight <= p.clientHeight + 2,
+        backOnScreen: back.top >= 0 && back.bottom <= window.innerHeight,
+        backTall: Math.round(back.height)
+      };
+    });
+    check('help opens and replaces the menu', help.showing && help.menuHidden, JSON.stringify(help));
+    check('help states the current objective', /robot/i.test(help.goal), help.goal);
+    check('help shows every control', help.chips === 6, help.chips + ' controls');
+    check('the help panel fits without scrolling', help.fits && help.allChipsOnScreen);
+    check('the help back button is on screen and usable', help.backOnScreen && help.backTall >= 40,
+      help.backTall + 'px');
+    await page.click('#btnHelpBack');
+    await page.waitForTimeout(250);
+    check('help closes back to the menu', await page.evaluate(function () {
+      return !document.querySelector('#overlayPause .panel').classList.contains('helping');
+    }));
+
+    /* ---- the build number is on show ---- */
+    var ver = await page.evaluate(function () {
+      var e = document.getElementById('verLine');
+      return { text: e.textContent, shown: e.getBoundingClientRect().height > 0 };
+    });
+    check('the pause menu shows the version', ver.shown && /v\d/.test(ver.text), ver.text);
+
     await page.click('#btnWipe');
     await page.waitForTimeout(250);
     var reachable = await page.evaluate(function () {

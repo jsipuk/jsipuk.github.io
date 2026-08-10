@@ -43,6 +43,20 @@ going, the buildings, the buggy, and the badges you have **already** found.
 The ones still hidden stay hidden — a map that gives away the secrets would
 take the game away with them. The game pauses while it is open.
 
+## The pause menu
+
+⏸ gives four fat buttons in a 2×2 grid — **Help**, sound, back to the square,
+and Start again — plus the version number along the bottom, so a bug report
+says which build it came from.
+
+**Help** replaces the menu rather than growing below it. It shows the job you
+are on right now in a yellow card, then the six controls as miniature copies
+of the real buttons, each one styled and coloured exactly like the thing it
+is describing. A child who cannot read the words can still match the shapes.
+Everything is on one screen at any size — "Start again" once had its own
+confirm button below the fold on a phone, which is how the reset came to look
+broken, and nothing in this panel is allowed to repeat that.
+
 ## Talking to a Bobble
 
 Everyone in town does something when you press ⭐ at them. They turn to face
@@ -170,8 +184,12 @@ npx http-server . -p 8099 -c-1 & node test/browser.js   # needs Playwright
 
 `test/browser.js` exists because three visible bugs reached a phone while
 `test/run.js` was fully green — all three were geometry, which a node test
-cannot see. It runs the layout, the pause menu and the whole "Start again"
-flow at two phone sizes and three tablet sizes.
+cannot see. It runs the layout, the pause menu, the help panel, the map and
+the whole "Start again" flow at two phone sizes and three tablet sizes.
+
+`test/run.js` also asserts that the version in `game.js` and the service
+worker's cache name agree, because a shipped build whose cache name did not
+change is a build nobody receives.
 
 The gameplay itself was tested by driving a real browser: all three missions
 from beginning to end using only touch input, offline with networking

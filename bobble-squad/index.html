@@ -102,16 +102,40 @@
 
 <div id="overlayPause" class="overlay">
   <div class="panel">
-    <h2>Paused</h2>
+    <h2 id="pauseTitle">Paused</h2>
     <button id="btnResume" class="big">▶</button>
-    <button id="btnSound" class="row">🔊  Sound is on</button>
-    <button id="btnHome" class="row">🏠  Back to the square</button>
-    <button id="btnWipe" class="row quiet">🧹  Start again</button>
+
+    <div id="pauseMenu">
+      <button id="btnHelp" class="row"><span class="ri">❓</span><span>Help</span></button>
+      <button id="btnSound" class="row"><span class="ri" id="soundIcon">🔊</span><span id="soundLabel">Sound on</span></button>
+      <button id="btnHome" class="row"><span class="ri">🏠</span><span>Square</span></button>
+      <button id="btnWipe" class="row quiet"><span class="ri">🧹</span><span>Start again</span></button>
+    </div>
+
+    <!-- what to do now, and what every button does -->
+    <div id="helpPanel">
+      <div class="help-goal">
+        <span id="helpGoalIcon">🤖</span>
+        <span id="helpGoalText">Look around</span>
+      </div>
+      <div class="help-grid">
+        <div class="hc"><span class="hk k-stick"></span><span>Slide to walk</span></div>
+        <div class="hc"><span class="hk k-look">👆</span><span>Drag to look</span></div>
+        <div class="hc"><span class="hk k-action">👋</span><span>Do things</span></div>
+        <div class="hc"><span class="hk k-jump">⤴</span><span>Jump</span></div>
+        <div class="hc"><span class="hk k-build">🧱</span><span>Build</span></div>
+        <div class="hc"><span class="hk k-map">🗺</span><span>Map</span></div>
+      </div>
+      <button id="btnHelpBack" class="row"><span class="ri">◀</span><span>Back</span></button>
+    </div>
+
     <div id="wipeConfirm">
       <p>Forget all badges and missions?</p>
       <button id="btnWipeYes" class="row danger">Yes, start again</button>
       <button id="btnWipeNo" class="row">No, keep playing</button>
     </div>
+
+    <p id="verLine" class="ver"></p>
   </div>
 </div>
 

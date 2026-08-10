@@ -113,6 +113,8 @@ A pass over graphics, world placement and the levels, with the fixes applied.
 | **Roofs were featureless slabs** | Badges are up there; arriving at an empty plane is a let-down | Vents, tanks and aerials |
 | **The lookout could not look out** | Its own posts and rails filled the view | Thinner posts at the corners, lower rails |
 | **The Squad pole was planted in the plaza** | It loomed over the fountain and shed detached cubes into mid-air | Moved onto the café roof where it belongs |
+| **Pause offered no way to re-read the controls** | The controls are taught once, in a toast, at the start. A child who put the iPad down for a week had nowhere to look | A Help panel on pause: the current objective plus six control chips drawn as miniatures of the real buttons |
+| **No build identity anywhere in the game** | A bug report saying "it did the thing" is unanswerable without knowing which build | Version on the pause panel, and a node check that the service worker cache name carries it |
 
 Still open, deliberately: the sky is a flat colour; the buggy cannot climb to
 the deck; free play after mission three is thin (badges only).

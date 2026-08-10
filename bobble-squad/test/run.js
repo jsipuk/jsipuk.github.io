@@ -152,6 +152,15 @@ var css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8');
 var remote = (html + css + gameSrc + missionSrc).match(/https?:\/\/(?!www\.w3\.org)[^\s"'()]+/g) || [];
 var offenders = remote.filter(function (u) { return u.indexOf('jsip.uk') < 0; });
 check('no remote URLs anywhere in the shipped code', offenders.length === 0, offenders.join(', '));
+
+/* The pause menu shows a version; the service worker's cache name is what
+ * actually decides which build a device runs. If they drift, a tester reports
+ * against a build that is not the one on their iPad. */
+var ver = (gameSrc.match(/var VERSION = '([^']+)'/) || [])[1];
+var cacheName = (sw.match(/var CACHE = '([^']+)'/) || [])[1];
+check('the game declares a version', !!ver, ver);
+check('the service worker cache name carries that version',
+  !!ver && !!cacheName && cacheName.indexOf('-' + ver) >= 0, cacheName);
 check('no remote font services', !/fonts\.(googleapis|gstatic)/.test(html + css));
 
 // every script the page loads must be precached

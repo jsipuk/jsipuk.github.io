@@ -10,7 +10,7 @@
  * Bump CACHE whenever a shipped file changes, or returning devices keep the
  * old build.
  */
-var CACHE = 'bobble-squad-1.1.0';
+var CACHE = 'bobble-squad-1.2.0';
 
 var ASSETS = [
   './',

@@ -32,7 +32,13 @@
     { name: 'plank', col: C.lemon, h: 0.35, icon: '🟨' }
   ];
 
+  /* Shown in the pause menu so a tester can say which build they are on.
+   * test/run.js checks this matches the service worker's cache name — the
+   * cache is what actually decides which build a device is running. */
+  var VERSION = '1.2';
+
   var BS = {
+    VERSION: VERSION,
     ready: false,
     paused: false,
     started: false,
@@ -561,7 +567,8 @@
       'toast', 'overlayStart', 'overlayPause', 'rotateHint', 'scanMeter', 'scanPips',
       'buildBar', 'btnAction', 'actionIcon', 'btnJump', 'btnBuild', 'btnPause',
       'btnG1', 'btnG2', 'btnG3', 'gadgetRow', 'btnPlace', 'btnRemove', 'btnDone',
-      'swatches', 'hud', 'btnMap', 'mapOverlay', 'mapCanvas', 'btnMapClose'].forEach(function (id) { dom[id] = $(id); });
+      'swatches', 'hud', 'btnMap', 'mapOverlay', 'mapCanvas', 'btnMapClose',
+      'btnHelp', 'btnHelpBack', 'helpPanel', 'helpGoalIcon', 'helpGoalText', 'verLine'].forEach(function (id) { dom[id] = $(id); });
   }
 
   function wireButtons() {
@@ -602,6 +609,10 @@
     }, { passive: false });
 
     $('btnResume').addEventListener('click', function () { setPaused(false); });
+
+    dom.btnHelp.addEventListener('click', function () { showHelp(true); });
+    dom.btnHelpBack.addEventListener('click', function () { showHelp(false); });
+    dom.verLine.textContent = 'Bobble Squad  v' + VERSION;
     $('btnSound').addEventListener('click', function () {
       global.BSAudio.setEnabled(!global.BSAudio.isEnabled());
       refreshSoundBtn();
@@ -652,7 +663,22 @@
 
   function refreshSoundBtn() {
     var on = global.BSAudio.isEnabled();
-    $('btnSound').textContent = on ? '🔊  Sound is on' : '🔇  Sound is off';
+    $('soundIcon').textContent = on ? '🔊' : '🔇';
+    $('soundLabel').textContent = on ? 'Sound on' : 'Sound off';
+  }
+
+  /* Quick help. It replaces the menu rather than sitting under it, for the
+   * same reason the "start again" question does: a phone screen is short and
+   * a child will not scroll a panel they cannot see the bottom of. */
+  function showHelp(on) {
+    var panel = dom.overlayPause.querySelector('.panel');
+    panel.classList.toggle('helping', on);
+    if (!on) return;
+    var mi = null;
+    try { mi = global.BSMissions.current(); } catch (e) { /* not ready yet */ }
+    dom.helpGoalIcon.textContent = mi ? mi.icon : '🏅';
+    dom.helpGoalText.textContent = mi ? mi.text : 'Have a look around';
+    global.BSAudio.play('click');
   }
 
   function refreshSwatches() {
@@ -684,7 +710,9 @@
     dom.overlayPause.classList.toggle('show', p);
     if (!p) {
       $('wipeConfirm').classList.remove('show');
-      dom.overlayPause.querySelector('.panel').classList.remove('confirming');
+      var panel = dom.overlayPause.querySelector('.panel');
+      panel.classList.remove('confirming');
+      panel.classList.remove('helping');
     }
   }
   BS.setPaused = setPaused;

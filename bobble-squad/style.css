@@ -578,12 +578,100 @@ body {
 /* The confirmation REPLACES the menu rather than being added below it. On a
  * phone-sized screen the panel used to grow past the bottom of the display and
  * the "yes" button sat off-screen, so "Start again" looked like it did nothing. */
+/* The pause menu is a two-by-two grid rather than a stack of full-width bars.
+ * A phone in landscape is 390px tall; four stacked rows plus the resume button
+ * simply do not fit, and a child will not discover that a panel scrolls. */
+#pauseMenu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+#pauseMenu .row,
+#btnHelpBack {
+  margin: 0;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.15;
+}
+.ri { font-size: 26px; line-height: 1.1; }
+
+.ver {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: #97a1b8;
+  letter-spacing: .02em;
+}
+
+/* ------------------------------------------------------------ quick help */
+
+#helpPanel { display: none; }
+/* give the grid a definite width so it can lay out three across on a tablet
+   instead of collapsing to two in a panel sized by its own contents */
+.panel.helping { width: min(92vw, 440px); }
+.panel.helping #helpPanel { display: block; }
+.panel.helping #pauseMenu,
+.panel.helping #btnResume,
+.panel.helping #pauseTitle,
+.panel.helping .ver { display: none; }
+
+.help-goal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  background: var(--sun);
+  border-radius: 20px;
+  padding: 10px 16px;
+  box-shadow: 0 5px 0 var(--sun-dark);
+  font-size: 20px;
+  color: var(--ink);
+}
+.help-goal span:first-child { font-size: 30px; }
+
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+  gap: 10px;
+  margin: 14px 0 4px;
+}
+.hc {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  font-size: 14px;
+  line-height: 1.15;
+  color: #5d6880;
+  text-align: center;
+}
+/* little copies of the real buttons, so the picture matches the thing */
+.hk {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+  color: #fff;
+}
+.k-stick { background: var(--teal); border-radius: 50%; box-shadow: 0 3px 0 var(--teal-dark); }
+.k-look { background: #e9ecf3; color: var(--ink); box-shadow: 0 3px 0 #c8cedd; }
+.k-action { background: var(--coral); box-shadow: 0 3px 0 var(--coral-dark); }
+.k-jump { background: var(--sun); color: var(--ink); box-shadow: 0 3px 0 var(--sun-dark); }
+.k-build { background: var(--grape); box-shadow: 0 3px 0 var(--grape-dark); }
+.k-map { background: var(--grape); box-shadow: 0 3px 0 var(--grape-dark); }
+
+#btnHelpBack { width: 100%; margin-top: 10px; }
+
 #wipeConfirm { display: none; margin-top: 4px; }
 #wipeConfirm.show { display: block; }
 .panel.confirming #btnResume,
-.panel.confirming #btnSound,
-.panel.confirming #btnHome,
-.panel.confirming #btnWipe { display: none; }
+.panel.confirming #pauseMenu,
+.panel.confirming .ver { display: none; }
 
 /* A nudge, not a wall. This used to be a full-screen overlay that swallowed
  * every touch, which made the game completely unplayable in portrait — you
@@ -678,6 +766,15 @@ body {
   .k { width: 28px; height: 28px; }
   .big { width: 108px; height: 62px; font-size: 32px; margin-top: 10px; border-radius: 22px; }
   .row { padding: 13px 16px; font-size: 18px; margin-top: 9px; border-radius: 18px; }
+  #pauseMenu { gap: 8px; margin-top: 10px; }
+  #pauseMenu .row, #btnHelpBack { padding: 8px 6px; font-size: 14px; }
+  .ri { font-size: 22px; }
+  .ver { margin-top: 10px; font-size: 12px; }
+  .help-goal { font-size: 17px; padding: 8px 12px; }
+  .help-goal span:first-child { font-size: 25px; }
+  .help-grid { grid-template-columns: repeat(auto-fit, minmax(78px, 1fr)); gap: 7px; margin: 10px 0 2px; }
+  .hk { width: 34px; height: 34px; font-size: 17px; border-radius: 11px; }
+  .hc { font-size: 12px; }
 }
 
 /* On a phone the toast is nearly as wide as the screen, so at the top it sat
