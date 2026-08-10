@@ -32,7 +32,13 @@
     { name: 'plank', col: C.lemon, h: 0.35, icon: '🟨' }
   ];
 
+  /* Shown in the pause menu so a tester can say which build they are on.
+   * test/run.js checks this matches the service worker's cache name — the
+   * cache is what actually decides which build a device is running. */
+  var VERSION = '1.2';
+
   var BS = {
+    VERSION: VERSION,
     ready: false,
     paused: false,
     started: false,
@@ -271,10 +277,21 @@
     // body
     B.boxT(_m, 0, 0.75 * s, 0, 0.25 * s, 0.25 * s, 0.16 * s, c.shirt);
     B.boxT(_m, 0, 1.01 * s, 0, 0.27 * s, 0.05 * s, 0.18 * s, c.collar || shade(c.shirt, 0.78));
-    // arms, swinging opposite the legs
+    /* Arms swing opposite the legs. A waving Bobble throws the right arm up
+     * and flaps it; a pointing one holds it out straight towards whatever it
+     * is pointing at. Both are what make "press me" feel answered. */
     var arms = [[-0.31, -sw], [0.31, sw]];
+    var waveAmt = opt.wave > 0 ? Math.min(1, opt.wave * 1.6) : 0;
     for (i = 0; i < 2; i++) {
-      M4.trs(_tmp, arms[i][0] * s, 0.96 * s, 0, 0, arms[i][1], 0);
+      var ang = arms[i][1];
+      var roll = 0;
+      if (i === 1 && waveAmt > 0) {
+        ang = -2.4 + Math.sin(BS.t * 14) * 0.45;
+        roll = -0.5 * waveAmt;
+      } else if (i === 1 && opt.point) {
+        ang = -1.5;
+      }
+      M4.trs(_tmp, arms[i][0] * s, 0.96 * s, 0, 0, ang, roll);
       M4.multiply(_lm, _m, _tmp);
       B.boxT(_lm, 0, -0.16 * s, 0, 0.072 * s, 0.16 * s, 0.09 * s, c.shirt);
       B.boxT(_lm, 0, -0.37 * s, 0, 0.072 * s, 0.06 * s, 0.09 * s, c.skin);
@@ -407,6 +424,7 @@
   var lastSafe = { x: 0, y: 0.2, z: 10 };
   var toastUntil = 0;
   var lookIdleTime = 0;
+  var hudSafeTop = 150;
   var noteCooldown = {};
   var dom = {};
 
@@ -549,7 +567,8 @@
       'toast', 'overlayStart', 'overlayPause', 'rotateHint', 'scanMeter', 'scanPips',
       'buildBar', 'btnAction', 'actionIcon', 'btnJump', 'btnBuild', 'btnPause',
       'btnG1', 'btnG2', 'btnG3', 'gadgetRow', 'btnPlace', 'btnRemove', 'btnDone',
-      'swatches', 'hud'].forEach(function (id) { dom[id] = $(id); });
+      'swatches', 'hud', 'btnMap', 'mapOverlay', 'mapCanvas', 'btnMapClose',
+      'btnHelp', 'btnHelpBack', 'helpPanel', 'helpGoalIcon', 'helpGoalText', 'verLine'].forEach(function (id) { dom[id] = $(id); });
   }
 
   function wireButtons() {
@@ -575,12 +594,25 @@
       })(i);
     }
 
+    dom.btnMap.addEventListener('pointerdown', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      setMap(!mapOpen);
+    }, { passive: false });
+    dom.btnMapClose.addEventListener('pointerdown', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      setMap(false);
+    }, { passive: false });
+
     dom.btnPause.addEventListener('pointerdown', function (e) {
       e.preventDefault(); e.stopPropagation();
       setPaused(!BS.paused);
     }, { passive: false });
 
     $('btnResume').addEventListener('click', function () { setPaused(false); });
+
+    dom.btnHelp.addEventListener('click', function () { showHelp(true); });
+    dom.btnHelpBack.addEventListener('click', function () { showHelp(false); });
+    dom.verLine.textContent = 'Bobble Squad  v' + VERSION;
     $('btnSound').addEventListener('click', function () {
       global.BSAudio.setEnabled(!global.BSAudio.isEnabled());
       refreshSoundBtn();
@@ -591,7 +623,10 @@
       setPaused(false);
     });
     $('btnWipe').addEventListener('click', function () {
-      $('wipeConfirm').classList.toggle('show');
+      var on = !$('wipeConfirm').classList.contains('show');
+      $('wipeConfirm').classList.toggle('show', on);
+      // swap the menu out for the question so the panel never outgrows a phone
+      $('overlayPause').querySelector('.panel').classList.toggle('confirming', on);
     });
     $('btnWipeYes').addEventListener('click', function () {
       wipe();
@@ -599,6 +634,7 @@
     });
     $('btnWipeNo').addEventListener('click', function () {
       $('wipeConfirm').classList.remove('show');
+      $('overlayPause').querySelector('.panel').classList.remove('confirming');
     });
 
     var kits = document.querySelectorAll('#kitPick .kit');
@@ -627,7 +663,22 @@
 
   function refreshSoundBtn() {
     var on = global.BSAudio.isEnabled();
-    $('btnSound').textContent = on ? '🔊  Sound is on' : '🔇  Sound is off';
+    $('soundIcon').textContent = on ? '🔊' : '🔇';
+    $('soundLabel').textContent = on ? 'Sound on' : 'Sound off';
+  }
+
+  /* Quick help. It replaces the menu rather than sitting under it, for the
+   * same reason the "start again" question does: a phone screen is short and
+   * a child will not scroll a panel they cannot see the bottom of. */
+  function showHelp(on) {
+    var panel = dom.overlayPause.querySelector('.panel');
+    panel.classList.toggle('helping', on);
+    if (!on) return;
+    var mi = null;
+    try { mi = global.BSMissions.current(); } catch (e) { /* not ready yet */ }
+    dom.helpGoalIcon.textContent = mi ? mi.icon : '🏅';
+    dom.helpGoalText.textContent = mi ? mi.text : 'Have a look around';
+    global.BSAudio.play('click');
   }
 
   function refreshSwatches() {
@@ -654,9 +705,15 @@
   };
 
   function setPaused(p) {
+    if (!p && mapOpen) setMap(false);
     BS.paused = p;
     dom.overlayPause.classList.toggle('show', p);
-    if (!p) $('wipeConfirm').classList.remove('show');
+    if (!p) {
+      $('wipeConfirm').classList.remove('show');
+      var panel = dom.overlayPause.querySelector('.panel');
+      panel.classList.remove('confirming');
+      panel.classList.remove('helping');
+    }
   }
   BS.setPaused = setPaused;
 
@@ -667,6 +724,12 @@
     if (w * h * dpr * dpr > 4.6e6) dpr = Math.min(dpr, 1.5);
     R.resize(w, h, dpr);
     dom.rotateHint.classList.toggle('show', h > w * 1.06);
+    /* Where a speech bubble is allowed to start. offsetTop ignores transforms,
+     * so it gives the toast's real resting place even while it is hidden — but
+     * its HEIGHT is useless here because the toast is empty at startup, so a
+     * fixed allowance covers the tallest it ever gets. The toast drops down the
+     * screen on narrow layouts and the bubble has to clear it. */
+    hudSafeTop = Math.max(150, (dom.toast.offsetTop || 0) + 100);
   }
 
   /* ------------------------------------------------------------- actions */
@@ -751,9 +814,7 @@
       return;
     }
     if (t.kind === 'npc') {
-      global.BSAudio.play('quack');
-      puff(t.npc.x, t.npc.y + 2.6, t.npc.z, 6, C.white, { spread: 0.5, up: 2, life: 0.8 });
-      BS.emit('npc', t.npc);
+      talkTo(t.npc);
       return;
     }
     if (t.kind === 'waddler') {
@@ -764,6 +825,88 @@
     }
     useInteractable(t);
   }
+
+  /* Pressing a Bobble used to play a duck quack and puff six white specks two
+   * and a half units above their head, which read as nothing happening at all.
+   * Now they turn to you, wave, and every one of them actually does something:
+   * the Chief points at your objective, the shopkeeper restyles your hat, and
+   * the townsfolk hand out jokes, high fives and directions to nearby badges. */
+  function talkTo(npc) {
+    npc.wave = 1.4;
+    npc.faceUntil = BS.t + 3.5;
+    var role = npc.line || 'hello';
+
+    if (role === 'chief') {
+      var mi = global.BSMissions.current();
+      bubble(npc, mi ? mi.icon : '🏅', 3.4);
+      global.BSAudio.play('hint');
+      if (mi && mi.target) {
+        BS.hintPulse = BS.t + 5;
+        for (var k = 0; k < 14; k++) {
+          puff(mi.target.x, mi.target.y + 1 + k * 0.5, mi.target.z, 1, C.yellow,
+            { spread: 0.6, up: 1.2, life: 1.6, grav: -1, size: 0.22 });
+        }
+      }
+      BS.toast(mi ? mi.icon : '🏅', mi ? mi.text : 'Find the badges', 3.5);
+      BS.emit('npc', npc);
+      return;
+    }
+
+    if (role === 'shop') {
+      BS.playerColour = (BS.playerColour + 1) % PLAYER_KITS.length;
+      bubble(npc, '🎩', 2.6);
+      global.BSAudio.play('pick');
+      confetti(player.x, player.y + 1.6, player.z, 14);
+      BS.toast('🎩', 'New hat!', 2);
+      save();
+      BS.emit('npc', npc);
+      return;
+    }
+
+    if (role === 'grumbo') {
+      npc.hop = 1;
+      bubble(npc, ['🙃', '🫧', '🤗', '🎉'][Math.floor(Math.random() * 4)], 2.6);
+      global.BSAudio.play('laugh');
+      confetti(npc.x, npc.y + 2, npc.z, 12);
+      BS.emit('npc', npc);
+      return;
+    }
+
+    /* Townsfolk. If a badge the player has not found is nearby they point at
+     * it, which turns every Bobble into a soft, optional hint system. */
+    var near = null, nearD = 900;
+    for (var i = 0; i < world.badges.length; i++) {
+      var bg = world.badges[i];
+      if (BS.badgesFound[bg.id]) continue;
+      var d = dist2(npc.x, npc.y, npc.z, bg.x, bg.y, bg.z);
+      if (d < nearD) { nearD = d; near = bg; }
+    }
+    if (near && nearD < 900 && Math.random() < 0.6) {
+      npc.point = { x: near.x, y: near.y, z: near.z, until: BS.t + 4 };
+      bubble(npc, '🏅', 3.2);
+      global.BSAudio.play('hint');
+      for (var j = 0; j < 10; j++) {
+        puff(near.x, near.y + j * 0.35, near.z, 1, C.gold,
+          { spread: 0.5, up: 1, life: 1.4, grav: -1, size: 0.2 });
+      }
+    } else {
+      var greets = ['👋', '😄', '🎉', '🍩', '🐤', '⭐'];
+      bubble(npc, greets[Math.floor(Math.random() * greets.length)], 2.4);
+      global.BSAudio.play(Math.random() < 0.4 ? 'laugh' : 'hello');
+      npc.hop = 1;
+      puff(npc.x, npc.y + 2.1, npc.z, 8, C.yellow, { spread: 0.7, up: 2.4, life: 0.9, size: 0.13 });
+    }
+    BS.emit('npc', npc);
+  }
+
+  /* A speech bubble is a DOM chip pinned over a head — the world is drawn from
+   * untextured boxes, so there is nowhere to put a picture in 3D. */
+  var bubbles = [];
+  function bubble(actor, icon, secs) {
+    bubbles.push({ actor: actor, icon: icon, until: BS.t + (secs || 2.5) });
+    if (bubbles.length > 4) bubbles.shift();
+  }
+  BS.bubble = bubble;
 
   function useInteractable(it) {
     switch (it.kind) {
@@ -1147,6 +1290,7 @@
       teleport(lastSafe.x, lastSafe.y, lastSafe.z);
       BS.toast('☁️', 'Whoops!', 1.6);
       global.BSAudio.play('reset');
+      BS.emit('respawn', { x: lastSafe.x, y: lastSafe.y, z: lastSafe.z });
     }
 
     checkTriggers(dt);
@@ -1239,6 +1383,15 @@
         if (pd < 64) a.yaw = lerpAngle(a.yaw, Math.atan2(player.x - a.x, player.z - a.z), Math.min(1, dt * 3));
         a.walk *= Math.pow(0.05, dt);
       }
+      // whoever you just spoke to stops wandering and looks at you
+      if (a.faceUntil > BS.t) {
+        a.yaw = lerpAngle(a.yaw, Math.atan2(player.x - a.x, player.z - a.z), Math.min(1, dt * 8));
+        a.timer = Math.max(a.timer || 0, 0.6);
+        a.tx = a.x; a.tz = a.z;
+      }
+      if (a.wave > 0) a.wave = Math.max(0, a.wave - dt);
+      if (a.hop > 0) a.hop = Math.max(0, a.hop - dt * 1.8);
+      if (a.point && a.point.until < BS.t) a.point = null;
     }
 
     for (i = 0; i < actors.waddlers.length; i++) {
@@ -1396,7 +1549,9 @@
     for (i = 0; i < actors.npcs.length; i++) {
       var n = actors.npcs[i];
       if (n.hidden) continue;
-      drawChar(B, n.kit, n.x, n.y, n.z, n.yaw, n.walk, { scale: n.scale });
+      var hop = n.hop > 0 ? Math.abs(Math.sin(n.hop * Math.PI * 2)) * 0.45 : 0;
+      drawChar(B, n.kit, n.x, n.y + hop, n.z, n.yaw, n.walk,
+        { scale: n.scale, wave: n.wave, point: n.point });
     }
     for (i = 0; i < actors.waddlers.length; i++) drawWaddler(B, actors.waddlers[i]);
     drawBuggy(B, buggy);
@@ -1464,6 +1619,203 @@
     blend.box(x - s / 2, gy + 0.03, z - s / 2, s, 0.02, s, [20, 30, 50], { alpha: Math.round(90 * drop) });
   }
 
+  /* ------------------------------------------------------------- the map */
+
+  /* A block town at eye level is a maze of similar boxes, and a five-year-old
+   * who walks the wrong way has no way back. The map is drawn straight from
+   * the same surfaceAt() the ground is built from, so it can never disagree
+   * with the world, and it only ever shows things the child already knows
+   * about: where they are, where they are going, and the badges they have
+   * already found. Unfound badges stay secret. */
+  var mapOpen = false;
+
+  function setMap(open) {
+    mapOpen = open && BS.started;
+    dom.mapOverlay.classList.toggle('show', mapOpen);
+    dom.btnMap.classList.toggle('on', mapOpen);
+    if (mapOpen) {
+      mapWasPaused = !!BS.paused;
+      setPaused(true);
+      drawMap();
+      global.BSAudio.play('map');
+    } else if (!mapWasPaused) {
+      setPaused(false);
+    }
+  }
+  var mapWasPaused = false;
+  BS.setMap = setMap;
+  BS.isMapOpen = function () { return mapOpen; };
+
+  var MAP_COLS = {
+    grass: '#7ecb6a', water: '#5fbde8', sand: '#f0d79c',
+    road: '#a8aebd', pave: '#e2e4ee', dirt: '#c6a074'
+  };
+
+  /* The bounds worth showing: the town, not the empty grass around it. */
+  var MAP_X0 = -54, MAP_X1 = 54, MAP_Z0 = -38, MAP_Z1 = 54;
+
+  function drawMap() {
+    var cv = dom.mapCanvas;
+    var frame = cv.parentNode.getBoundingClientRect();
+    if (frame.width < 20 || frame.height < 20) return;
+
+    // fit the paper to the town's own proportions inside whatever room there is
+    var spanX = MAP_X1 - MAP_X0, spanZ = MAP_Z1 - MAP_Z0;
+    var fit = Math.min(frame.width / spanX, frame.height / spanZ);
+    var W = Math.round(spanX * fit), H = Math.round(spanZ * fit);
+    cv.style.width = W + 'px';
+    cv.style.height = H + 'px';
+
+    var dpr = Math.min(global.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    var g = cv.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    var pad = 6;
+    var scale = Math.min((W - pad * 2) / spanX, (H - pad * 2) / spanZ);
+    var ox = W / 2 - (MAP_X0 + spanX / 2) * scale;
+    var oz = H / 2 - (MAP_Z0 + spanZ / 2) * scale;
+    function sx(x) { return ox + x * scale; }
+    function sz(z) { return oz + z * scale; }
+    var big = Math.min(W, H) > 520;
+
+    g.clearRect(0, 0, W, H);
+    g.fillStyle = MAP_COLS.grass;
+    g.fillRect(0, 0, W, H);
+
+    // the ground, sampled from the very function that built the real thing
+    var step = 2, cell = step * scale + 1, x, z, i;
+    for (x = MAP_X0; x < MAP_X1; x += step) {
+      for (z = MAP_Z0; z < MAP_Z1; z += step) {
+        var m = global.BSWorld.surfaceAt(x + step / 2, z + step / 2);
+        g.fillStyle = MAP_COLS[m] || MAP_COLS.grass;
+        g.fillRect(sx(x), sz(z), cell, cell);
+      }
+    }
+
+    /* Building footprints. Without these the map is a colour wash and a child
+     * cannot tell a street from a field — anything tall enough to be a wall,
+     * a tree or a tower gets a shadow. */
+    g.fillStyle = 'rgba(58,62,84,.30)';
+    var sol = world.solids;
+    for (i = 0; i < sol.length; i++) {
+      var so = sol[i];
+      if (so.y1 < 3.2 || so.tag === 'edge' || so.tag === 'hill') continue;
+      if (so.x1 < MAP_X0 || so.x0 > MAP_X1 || so.z1 < MAP_Z0 || so.z0 > MAP_Z1) continue;
+      g.fillRect(sx(so.x0), sz(so.z0), (so.x1 - so.x0) * scale, (so.z1 - so.z0) * scale);
+    }
+
+    // blocks the player built, so their own bridge is on their own map
+    g.fillStyle = 'rgba(18,182,166,.9)';
+    for (i = 0; i < BS.blocks.length; i++) {
+      g.fillRect(sx(BS.blocks[i].x), sz(BS.blocks[i].z), Math.max(3, scale), Math.max(3, scale));
+    }
+
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+
+    // landmark pins
+    var lm = world.landmarks || [];
+    var pinR = big ? 17 : 13;
+    for (i = 0; i < lm.length; i++) {
+      var L = lm[i];
+      g.fillStyle = 'rgba(255,253,246,.95)';
+      g.strokeStyle = 'rgba(36,48,74,.18)';
+      g.lineWidth = 3;
+      g.beginPath();
+      g.arc(sx(L.x), sz(L.z), pinR, 0, 6.284);
+      g.fill();
+      g.stroke();
+      g.font = (pinR + 5) + 'px system-ui, sans-serif';
+      g.fillText(L.icon, sx(L.x), sz(L.z) + 1);
+    }
+
+    // badges already found. The ones still hidden stay hidden.
+    for (i = 0; i < world.badges.length; i++) {
+      var bg = world.badges[i];
+      if (!BS.badgesFound[bg.id]) continue;
+      g.fillStyle = '#ffd042';
+      g.strokeStyle = '#fffdf6';
+      g.lineWidth = 3;
+      g.beginPath();
+      g.arc(sx(bg.x), sz(bg.z), big ? 8 : 6, 0, 6.284);
+      g.fill();
+      g.stroke();
+    }
+
+    // the buggy, in case it got left somewhere odd
+    g.fillStyle = '#ff7f60';
+    g.strokeStyle = '#fffdf6';
+    g.lineWidth = 3;
+    g.beginPath();
+    g.arc(sx(buggy.x), sz(buggy.z), big ? 13 : 10, 0, 6.284);
+    g.fill();
+    g.stroke();
+    g.font = (big ? 16 : 12) + 'px system-ui, sans-serif';
+    g.fillText('\uD83D\uDE99', sx(buggy.x), sz(buggy.z) + 1);
+
+    // where you are going
+    var mi = global.BSMissions.current();
+    if (mi && mi.target) {
+      var tx = sx(mi.target.x), tz = sz(mi.target.z);
+      var pulse = (big ? 24 : 19) + Math.sin(Date.now() / 260) * 5;
+      g.strokeStyle = '#ffc93c';
+      g.lineWidth = 6;
+      g.beginPath();
+      g.arc(tx, tz, pulse, 0, 6.284);
+      g.stroke();
+      g.fillStyle = '#ffc93c';
+      g.strokeStyle = '#fffdf6';
+      g.lineWidth = 3;
+      g.beginPath();
+      g.arc(tx, tz, big ? 16 : 13, 0, 6.284);
+      g.fill();
+      g.stroke();
+      g.font = (big ? 20 : 16) + 'px system-ui, sans-serif';
+      g.fillText(mi.icon, tx, tz + 1);
+    }
+
+    /* And you: a big arrow pointing the way you are actually facing. It is the
+     * one thing on here a child has to find instantly, so it is drawn last,
+     * largest, and with a white ring so it never disappears into the town. */
+    var px = sx(player.x), pz = sz(player.z);
+    var ar = big ? 1 : 0.78;
+    g.save();
+    g.translate(px, pz);
+    g.beginPath();
+    g.fillStyle = 'rgba(255,255,255,.55)';
+    g.arc(0, 0, 24 * ar, 0, 6.284);
+    g.fill();
+    g.rotate(-player.yaw + Math.PI);
+    g.fillStyle = '#12b6a6';
+    g.strokeStyle = '#fffdf6';
+    g.lineWidth = 4 * ar;
+    g.lineJoin = 'round';
+    g.beginPath();
+    g.moveTo(0, -19 * ar);
+    g.lineTo(14 * ar, 15 * ar);
+    g.lineTo(0, 8 * ar);
+    g.lineTo(-14 * ar, 15 * ar);
+    g.closePath();
+    g.fill();
+    g.stroke();
+    g.restore();
+
+    // underground the arrow would otherwise look like a lie
+    if (player.y < -4) {
+      g.fillStyle = 'rgba(36,48,74,.92)';
+      var bw = 210, bh = 46;
+      g.beginPath();
+      if (g.roundRect) g.roundRect(W / 2 - bw / 2, H - bh - 12, bw, bh, 16);
+      else g.rect(W / 2 - bw / 2, H - bh - 12, bw, bh);
+      g.fill();
+      g.font = '21px system-ui, sans-serif';
+      g.fillStyle = '#fff';
+      g.fillText('\uD83C\uDF00  underground', W / 2, H - bh / 2 - 12);
+    }
+  }
+
   /* ------------------------------------------------------------------ HUD */
 
   var markerPool = [];
@@ -1510,7 +1862,7 @@
       var onScreen = !p.behind && p.x > 40 && p.x < R.cssW - 40 && p.y > 40 && p.y < R.cssH - 40;
       if (onScreen) {
         var el = getMarker(used++);
-        el.className = 'marker goal';
+        el.className = 'marker goal' + (BS.hintPulse > BS.t ? ' flare' : '');
         el.style.transform = 'translate(-50%,-50%) translate(' + p.x + 'px,' + p.y + 'px)';
         el.textContent = mission.icon;
         dom.chevron.classList.remove('show');
@@ -1544,6 +1896,23 @@
     }
     dom.actionIcon.textContent = icon;
     dom.btnAction.classList.toggle('idle', !t);
+
+    // speech bubbles pinned over whoever is talking
+    for (i = bubbles.length - 1; i >= 0; i--) {
+      if (bubbles[i].until < BS.t) { bubbles.splice(i, 1); continue; }
+      var a = bubbles[i].actor;
+      var bp = project(a.x, a.y + 2.55 * (a.scale || 1), a.z);
+      if (bp.behind) continue;
+      /* Stand nose to nose with a Bobble and their head is off the top of the
+       * screen, taking the bubble with it. Keep it inside the play area and
+       * below the objective card, the badge counter and any message. */
+      var bx = clamp(bp.x, 80, R.cssW - 80);
+      var by = clamp(bp.y - 26, hudSafeTop, Math.max(hudSafeTop + 10, R.cssH - 150));
+      var be = getMarker(used++);
+      be.className = 'marker bubble';
+      be.style.transform = 'translate(-50%,-50%) translate(' + bx + 'px,' + by + 'px)';
+      be.textContent = bubbles[i].icon;
+    }
 
     for (i = used; i < markerPool.length; i++) markerPool[i].className = 'marker off';
 
@@ -1618,6 +1987,7 @@
       BS.t += dt;
 
       if (input.pressed('pause')) setPaused(true);
+      if (input.pressed('map')) setMap(!mapOpen);
       if (input.pressed('action')) doAction();
       if (input.pressed('build')) setBuildMode(!buildMode);
       if (input.pressed('gadget1') && BS.gadgets.sniffer) useSniffer();
@@ -1642,6 +2012,7 @@
       // keep the world alive behind the menus so it never looks frozen
       BS.t += dt * 0.25;
       updateCamera(dt);
+      if (mapOpen) drawMap();
     }
 
     render();

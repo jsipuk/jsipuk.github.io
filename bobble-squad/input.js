@@ -134,10 +134,11 @@
     Space: 'jump', KeyE: 'action', Enter: 'action', KeyB: 'build',
     Digit1: 'gadget1', Digit2: 'gadget2', Digit3: 'gadget3',
     KeyQ: 'gadget1', KeyR: 'gadget2', KeyF: 'gadget3',
-    Escape: 'pause', KeyP: 'pause'
+    Escape: 'pause', KeyP: 'pause',
+    KeyM: 'map', Tab: 'map'
   };
   var SWALLOW = {
-    Space: 1, ArrowUp: 1, ArrowDown: 1, ArrowLeft: 1, ArrowRight: 1
+    Space: 1, Tab: 1, ArrowUp: 1, ArrowDown: 1, ArrowLeft: 1, ArrowRight: 1
   };
 
   Input.prototype._placeStick = function (x, y, active) {

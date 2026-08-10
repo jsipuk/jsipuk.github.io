@@ -121,18 +121,46 @@ var listed = [];
 sw.replace(/'\.\/([^']*)'/g, function (_, f) { if (f) listed.push(f); });
 
 ['index.html', 'style.css', 'engine.js', 'audio.js', 'input.js', 'world.js',
-  'missions.js', 'game.js', 'manifest.webmanifest'].forEach(function (f) {
+  'missions.js', 'game.js', 'probe.js', 'manifest.webmanifest'].forEach(function (f) {
     check('sw.js precaches ' + f, listed.indexOf(f) >= 0);
   });
 listed.forEach(function (f) {
   check('precached file ' + f + ' exists on disk', fs.existsSync(path.join(ROOT, f)));
 });
 
+section('Test Kit matches the written test plan');
+var probeSrc = fs.readFileSync(path.join(ROOT, 'probe.js'), 'utf8');
+var planSrc = fs.readFileSync(path.join(ROOT, 'TEST-PLAN-IPAD.md'), 'utf8');
+var probeIds = [];
+probeSrc.replace(/\n\s*\['([A-P]\d+)',/g, function (_, id) { probeIds.push(id); });
+var planIds = [];
+planSrc.replace(/^\| ([A-P]\d+) \|/gm, function (_, id) { planIds.push(id); });
+check('the Test Kit carries some checks', probeIds.length > 40, probeIds.length + ' cases');
+check('the plan and the Test Kit list the same checks',
+  probeIds.join(',') === planIds.join(','),
+  'probe.js has ' + probeIds.length + ', the plan has ' + planIds.length +
+  (probeIds.join(',') === planIds.join(',') ? '' :
+    '; only in probe: ' + probeIds.filter(function (i) { return planIds.indexOf(i) < 0; }).join(' ') +
+    '; only in plan: ' + planIds.filter(function (i) { return probeIds.indexOf(i) < 0; }).join(' ')));
+check('every check ID is unique',
+  probeIds.length === probeIds.filter(function (v, i, a) { return a.indexOf(v) === i; }).length);
+check('the Test Kit never sends anything anywhere',
+  !/fetch\(|XMLHttpRequest|navigator\.sendBeacon|WebSocket/.test(probeSrc));
+
 var html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 var css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8');
 var remote = (html + css + gameSrc + missionSrc).match(/https?:\/\/(?!www\.w3\.org)[^\s"'()]+/g) || [];
 var offenders = remote.filter(function (u) { return u.indexOf('jsip.uk') < 0; });
 check('no remote URLs anywhere in the shipped code', offenders.length === 0, offenders.join(', '));
+
+/* The pause menu shows a version; the service worker's cache name is what
+ * actually decides which build a device runs. If they drift, a tester reports
+ * against a build that is not the one on their iPad. */
+var ver = (gameSrc.match(/var VERSION = '([^']+)'/) || [])[1];
+var cacheName = (sw.match(/var CACHE = '([^']+)'/) || [])[1];
+check('the game declares a version', !!ver, ver);
+check('the service worker cache name carries that version',
+  !!ver && !!cacheName && cacheName.indexOf('-' + ver) >= 0, cacheName);
 check('no remote font services', !/fonts\.(googleapis|gstatic)/.test(html + css));
 
 // every script the page loads must be precached
