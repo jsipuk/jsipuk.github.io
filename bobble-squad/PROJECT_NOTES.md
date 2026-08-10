@@ -99,6 +99,53 @@ of them were layout.** All three are fixed and now covered by
 The lesson worth keeping: `test/run.js` had 76 green checks and the game had
 three visible bugs on a phone. Geometry needs a browser at the real size.
 
+---
+
+## Open bugs — reported, not yet fixed
+
+### B1 · The buggy steers backwards (v1.2)
+
+**Reported:** "why does the car drive the opposite of the controls? left and
+right seem inverted." Push the stick right and the Puttabout turns left.
+
+**Not yet fixed. Do not fix by guessing the sign — read this first.**
+
+Confirmed by reading the code; not yet reproduced in a browser. There are two
+opposite yaw conventions in `game.js` and the buggy is on the wrong one:
+
+| | Forward vector | At yaw 0 |
+| --- | --- | --- |
+| Player (`game.js:1211`) | `(-sin yaw, -cos yaw)` | −Z |
+| Buggy (`game.js:1012`) | `(+sin yaw, +cos yaw)` | +Z |
+
+They are exact negatives of each other. The follow camera papers over it at
+`game.js:1460` with `want = buggy.yaw + Math.PI` — that `+ Math.PI` **is** the
+bug, still visible. It puts the camera on the correct side, so driving *looks*
+right, but it means screen-right is −X while `buggy.yaw += steer` (`game.js:1009`)
+turns the buggy toward +X. Push right, turn left.
+
+Things to check before touching it, because a naive sign flip will break two
+of them:
+
+- `buggy.roll` at `game.js:1010` is derived from the same `steer` and leans the
+  body into the turn. Flip the steering without flipping the roll and the buggy
+  leans the wrong way — which is subtle enough to ship by accident.
+- Reverse already re-inverts steering (`buggy.speed < 0 ? -1 : 1`, same line).
+  Reversing must stay correct after the fix.
+- Exit position uses `(cos yaw, −sin yaw)` at `game.js:983` — a *third*
+  convention. Check the player still steps out beside the buggy, not into a wall.
+- `player.yaw = buggy.yaw` at `game.js:1039` copies a buggy yaw straight onto a
+  player yaw across the two conventions. Worth checking which way the driver is
+  facing when the buggy is drawn.
+
+The cleanest fix is probably to put the buggy on the player's convention and
+delete the `+ Math.PI`, rather than to flip one sign in isolation.
+
+**No test would have caught this.** `test/browser.js` and the playthrough
+harness both assert only that the buggy *moves* and *arrives*. Whatever the
+fix, it needs a check that asserts the sign — "steer right, and the world's
+heading changes in the direction the player pushed" — not just displacement.
+
 ## Self-review before going live
 
 A pass over graphics, world placement and the levels, with the fixes applied.
