@@ -146,6 +146,57 @@ harness both assert only that the buggy *moves* and *arrives*. Whatever the
 fix, it needs a check that asserts the sign — "steer right, and the world's
 heading changes in the direction the player pushed" — not just displacement.
 
+### B2 · Badge b9 (Buggy Bay roof) cannot be reached (v1.2)
+
+**Reported:** "seemingly impossible to get the last badge", with a map
+screenshot. Matching the screenshot against a rendered reference confirms the
+objective ring is on **b9, the Buggy Bay roof** — every other badge was
+already found.
+
+**Not yet fixed.**
+
+The badge is fine. Placed on the roof, it collects normally. **The stairs are
+the bug.** `world.js:670`:
+
+```js
+// roof access ladder-of-blocks up the outside (kid-friendly stairs)
+for (i = 0; i < 5; i++) w.b(25.2, i * 1.2, 9 + i * 0.9, 2, 1.2, 2.2, C.metal, …);
+```
+
+Each riser is **1.2**. `STEP_UP` is **1.05**. They miss being walkable by 0.15
+of a unit. The comment says "kid-friendly stairs" — the intent was clearly to
+walk up them, and you cannot.
+
+What is left is a five-hop precision climb onto shelves only **0.9 deep**
+(each step is 2.2 deep but the next one eats 1.3 of it). Measured in the real
+game, driving the real touch stick:
+
+| | Result |
+| --- | --- |
+| Walk into each of the 5 risers | **0 of 5 climbed** — height never changes |
+| Jump at each riser from the shelf below | Only the first one lands; the rest drop you to the ground |
+| Same again with Bounce Boots on | No better — boots overshoot a 0.9-deep shelf |
+| Player placed directly on the roof | Badge collects immediately, so b9 itself is correct |
+
+**Same bug, second site.** `world.js:689` builds the Build Yard scaffold with
+**1.9** risers under the comment "scaffold steps you can walk straight up".
+1.9 is above `STEP_UP` *and* above the 1.73 jump apex, so that one is
+Boots-only whether or not it was meant to be. Badge b8 sits on top of it. It
+is reachable — boots clear 5.64 — so it is a nastier difficulty spike than a
+blocker, but the comment is still describing something the geometry does not do.
+
+**The fix is one number in each loop** — bring both risers to 1.0, under
+`STEP_UP`, adding steps to keep the same total height. Do not raise `STEP_UP`
+to meet them: it is 1.05 precisely so that one block is climbable and two are
+not, and moving it would silently make half the town's parapets walkable.
+
+**Why nothing caught it.** `test/run.js` asserts only that a badge has ground
+beneath it — a badge on an unreachable roof passes. The missing check is a
+walkability flood fill from spawn, and the general rule it should encode:
+**any riser a player is meant to walk up must be ≤ `STEP_UP`.** That single
+assertion over every stacked-box staircase in `world.js` would have caught
+both of these at build time.
+
 ## Self-review before going live
 
 A pass over graphics, world placement and the levels, with the fixes applied.
