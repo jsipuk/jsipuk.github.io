@@ -1,0 +1,17 @@
+{
+  "name": "Invent Together",
+  "short_name": "Invent Together",
+  "description": "A child-led idea discovery form for inventing something together.",
+  "start_url": "/invent-together/",
+  "scope": "/invent-together/",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#f7f5ef",
+  "icons": [
+    {
+      "src": "inventor-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

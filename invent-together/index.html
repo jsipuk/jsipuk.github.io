@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invent Something With Me</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="A child-led idea discovery form for inventing an app, website or game together. Draw, imagine, decide and capture the first idea.">
+<meta name="theme-color" content="#f7f5ef">
+<meta name="apple-mobile-web-app-title" content="Invent Together">
+<!-- Private family tool: keep it out of search engines. The bundle's own
+     robots.txt cannot be used here, because robots.txt is only honoured at
+     the site root and this page is a subdirectory of jsip.uk. -->
+<meta name="robots" content="noindex, nofollow">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jsip.uk/invent-together/">
+<meta property="og:title" content="What should we make?">
+<meta property="og:description" content="A child-led idea discovery form for inventing something together. Draw, imagine, decide and turn the idea into a tiny first build.">
+<meta property="og:image" content="https://jsip.uk/invent-together/inventor-share-card.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="What should we make? Child-led inventor interview">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What should we make?">
+<meta name="twitter:description" content="A child-led idea discovery form for inventing something together.">
+<meta name="twitter:image" content="https://jsip.uk/invent-together/inventor-share-card.png">
+
+<link rel="icon" type="image/png" href="inventor-icon.png">
+<link rel="apple-touch-icon" href="inventor-icon.png">
+<link rel="manifest" href="site.webmanifest">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge">Inventor Interview</div>
+    <h1>What should we make?</h1>
+    <p class="lead">
+      Use this while talking together. The child supplies the ideas. The grown-up types.
+      There are no wrong answers.
+    </p>
+    <div class="header-actions">
+      <button type="button" class="share-button" id="shareButton">Share this</button>
+    </div>
+  </header>
+
+  <form id="ideaForm" autocomplete="off" spellcheck="false" novalidate>
+    <section>
+      <h2>1. Pick a starting direction</h2>
+      <p class="help">Give a few choices, but leave room for a completely new idea.</p>
+      <div class="choices">
+        <label class="choice">
+          <input type="radio" name="direction" value="Creatures">
+          <span>Creatures <small class="tiny">Invent strange animals, monsters or beings</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="direction" value="Numbers">
+          <span>Numbers <small class="tiny">Counting, shapes, patterns or number adventures</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="direction" value="Machines">
+          <span>Machines <small class="tiny">Robots, vehicles, inventions or contraptions</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="direction" value="Something completely different">
+          <span>Something else <small class="tiny">A brand-new idea</small></span>
+        </label>
+      </div>
+
+      <label for="bigIdea">What do you want to make?</label>
+      <textarea id="bigIdea" placeholder="Write his answer as closely as possible..."></textarea>
+    </section>
+
+    <section>
+      <h2>2. The first thing in the world</h2>
+      <p class="help">Ask him to draw it on paper first if possible.</p>
+
+      <div class="row">
+        <div>
+          <label for="thingName">What is it called?</label>
+          <input id="thingName" type="text" placeholder="Exact name">
+        </div>
+        <div>
+          <label for="thingType">What is it?</label>
+          <input id="thingType" type="text" placeholder="Creature, robot, person, object...">
+        </div>
+      </div>
+
+      <label for="appearance">What does it look like?</label>
+      <textarea id="appearance" placeholder="Colours, shape, number of legs, wheels, eyes, size..."></textarea>
+
+      <label for="special">What is special about it?</label>
+      <textarea id="special" placeholder="Powers, skills, funny behaviour, surprising facts..."></textarea>
+
+      <label for="home">Where does it live / belong?</label>
+      <input id="home" type="text" placeholder="Forest, moon, bedroom, underwater city...">
+    </section>
+
+    <section>
+      <h2>3. What do you actually do?</h2>
+      <p class="help">This turns a character or idea into something playable or interactive.</p>
+
+      <label for="playerDoes">What should the person using it do?</label>
+      <textarea id="playerDoes" placeholder="Collect things, solve puzzles, build, explore, race, count..."></textarea>
+
+      <label for="goal">How do you know you've done well?</label>
+      <textarea id="goal" placeholder="Reach somewhere, solve something, make something, help someone..."></textarea>
+
+      <label for="challenge">What makes it tricky?</label>
+      <textarea id="challenge" placeholder="Obstacles, puzzles, choices, limited items, silly mistakes..."></textarea>
+
+      <label for="reward">What should happen when you succeed?</label>
+      <textarea id="reward" placeholder="Animation, new area, badge, funny sound, new creation..."></textarea>
+    </section>
+
+    <section>
+      <h2>4. Make it feel like his</h2>
+
+      <label for="world">What kind of world should it have?</label>
+      <textarea id="world" placeholder="Describe the place, mood and things in it..."></textarea>
+
+      <div class="row">
+        <div>
+          <label for="funny">Should it be...</label>
+          <select id="funny">
+            <option value="">Choose together</option>
+            <option>Funny</option>
+            <option>Exciting</option>
+            <option>Calm</option>
+            <option>Tricky</option>
+            <option>Silly</option>
+            <option>A bit spooky</option>
+            <option>A mixture</option>
+          </select>
+        </div>
+        <div>
+          <label for="difficulty">How hard?</label>
+          <select id="difficulty">
+            <option value="">Choose together</option>
+            <option>Very easy</option>
+            <option>Easy</option>
+            <option>Gets harder</option>
+            <option>Tricky</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="sounds">What noises or sounds should it make?</label>
+      <textarea id="sounds" placeholder="Let him make the noises if he wants. Write them down!"></textarea>
+
+      <label for="mustHave">What absolutely HAS to be in it?</label>
+      <textarea id="mustHave" placeholder="The one thing we must not forget..."></textarea>
+    </section>
+
+    <section>
+      <h2>5. Learning, if it fits naturally</h2>
+      <p class="help">Optional. Don't force an educational mechanic if it makes the idea less fun.</p>
+
+      <div class="choices">
+        <label class="choice">
+          <input type="checkbox" name="learning" value="Counting">
+          <span>Counting</span>
+        </label>
+        <label class="choice">
+          <input type="checkbox" name="learning" value="Adding and subtracting">
+          <span>Adding / subtracting</span>
+        </label>
+        <label class="choice">
+          <input type="checkbox" name="learning" value="Reading and words">
+          <span>Reading / words</span>
+        </label>
+        <label class="choice">
+          <input type="checkbox" name="learning" value="Shapes and patterns">
+          <span>Shapes / patterns</span>
+        </label>
+        <label class="choice">
+          <input type="checkbox" name="learning" value="Problem solving">
+          <span>Problem solving</span>
+        </label>
+        <label class="choice">
+          <input type="checkbox" name="learning" value="No learning goal needed">
+          <span>Just make something</span>
+        </label>
+      </div>
+
+      <label for="learningIdea">Any ideas for how learning could fit?</label>
+      <textarea id="learningIdea" placeholder="For example: the creature needs 7 berries and has 4..."></textarea>
+    </section>
+
+    <section>
+      <h2>6. Grown-up notes</h2>
+      <p class="help">Capture things he says that don't fit anywhere else. These may become the best bits.</p>
+
+      <label for="quotes">Exact quotes / funny phrases</label>
+      <textarea id="quotes" placeholder='For example: "No, it shoots spaghetti, not lasers."'></textarea>
+
+      <label for="extra">Anything else?</label>
+      <textarea id="extra" placeholder="Extra ideas, observations, drawings made, things he got excited about..."></textarea>
+
+      <div class="note">
+        Keep the first build tiny. One idea, one screen, one interaction is enough.
+      </div>
+    </section>
+
+    <section>
+      <h2>7. Capture the brief</h2>
+      <p class="help">Generate a clean summary to paste straight back into ChatGPT or Codex.</p>
+
+      <div class="actions">
+        <button type="button" class="primary" id="generateButton">✦ Generate our idea</button>
+        <button type="button" class="secondary" id="copyButton">Copy summary</button>
+        <button type="button" class="secondary" id="downloadButton">Save as text</button>
+        <button type="button" class="danger" id="clearButton">Clear form</button>
+      </div>
+
+      <div id="summary" class="summary-box">Your captured discovery brief will appear here.</div>
+    </section>
+  </form>
+
+  <footer>
+    <strong>Private by design.</strong> Your answers stay on this device. Nothing you type is uploaded, persistently stored by this page, analysed or sent to AI.
+    The form only creates a local summary when you ask it to.
+  </footer>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
