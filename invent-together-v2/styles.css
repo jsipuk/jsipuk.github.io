@@ -1,0 +1,479 @@
+/* Invent Together V2.
+   The visual language is deliberately kept close to V1 so a side-by-side
+   review compares the mechanics, not the paint. New styling here exists to
+   support new behaviour: focus rings, chips, progress, tabs and the poster. */
+
+@property --a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes rotateGlow {
+  to { --a: 360deg; }
+}
+
+:root{
+  --bg:#f7f5ef;
+  --card:#ffffff;
+  --text:#171717;
+  --muted:#5f5f5f;
+  --line:#dedbd3;
+  --accent:#245c46;
+  --accent-soft:#e7f0eb;
+  --warn:#8b5a2b;
+  --danger:#7a3028;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.45;
+}
+
+/* Every interactive thing gets a visible focus ring. V1's choice controls
+   had none, because the real input is opacity:0 and the ring was drawn on it. */
+:where(button, input, textarea, select, a):focus-visible{
+  outline:3px solid var(--accent);
+  outline-offset:2px;
+}
+
+.beta-strip{
+  background:#173d31;
+  color:#eaf3ee;
+  font-size:.9rem;
+  padding:9px 14px;
+  text-align:center;
+}
+.beta-strip a{color:#b9e2cf}
+.beta-strip strong{color:#fff}
+
+.wrap{
+  width:min(760px, calc(100% - 28px));
+  margin:0 auto;
+  padding:28px 0 60px;
+}
+header{margin-bottom:20px}
+h1{font-size:clamp(2rem,7vw,3.8rem);line-height:.95;margin:0 0 14px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:620px}
+.badge{
+  display:inline-block;
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-weight:700;
+  border-radius:999px;
+  padding:6px 10px;
+  margin-bottom:14px;
+}
+section{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:20px;
+  margin:14px 0;
+}
+h2{font-size:1.35rem;margin:0 0 6px}
+.help{color:var(--muted);font-size:.94rem;margin:0 0 14px}
+label{display:block;font-weight:700;margin:14px 0 7px}
+input[type="text"], textarea, select{
+  width:100%;
+  border:1.5px solid var(--line);
+  border-radius:12px;
+  padding:12px 13px;
+  font:inherit;
+  color:var(--text);
+  background:#fff;
+}
+textarea{min-height:92px;resize:vertical}
+
+/* Guidance that stays put. In V1 this text lived in placeholders and
+   vanished on the first keystroke, exactly when it was most useful. */
+.hint{
+  color:var(--muted);
+  font-size:.86rem;
+  margin:6px 0 0;
+}
+
+/* Tappable answer words. The child can operate these; the adult still
+   types the real answer. */
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:10px;
+}
+.chip{
+  border:1.5px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  border-radius:999px;
+  padding:9px 14px;
+  font:inherit;
+  font-size:.94rem;
+  font-weight:700;
+  min-height:44px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .15s ease, border-color .15s ease, transform .12s ease;
+}
+.chip:hover{background:var(--accent-soft);border-color:#bcd4c8}
+.chip:active{transform:scale(.96)}
+.chip.just-added{background:var(--accent-soft);border-color:var(--accent)}
+
+.choices{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.choice input{position:absolute;opacity:0;width:1px;height:1px}
+.choice span{
+  display:block;
+  position:relative;
+  isolation:isolate;
+  border:1.5px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  font-weight:700;
+  min-height:62px;
+  cursor:pointer;
+  background:#fff;
+  transition:background .2s ease, color .2s ease, box-shadow .2s ease, transform .16s ease;
+}
+/* The fix for V1's invisible keyboard focus. */
+.choice input:focus-visible + span{
+  outline:3px solid var(--accent);
+  outline-offset:3px;
+}
+.choice input:checked + span{
+  --a: 0deg;
+  color:#31594c;
+  background:
+    linear-gradient(#f4f8f5, #f4f8f5) padding-box,
+    conic-gradient(from var(--a), #8fb6a6, #b9c8b5, #9eb8c1, #a7c3b5, #8fb6a6) border-box;
+  border:1.5px solid transparent;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.45) inset,
+    0 0 10px rgba(111,151,137,.10);
+  animation:rotateGlow 6s linear infinite;
+}
+.choice input:checked + span::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-3px;
+  border-radius:16px;
+  background:conic-gradient(from var(--a),
+    rgba(143,182,166,.02), rgba(158,184,193,.12), rgba(185,200,181,.07),
+    rgba(167,195,181,.11), rgba(143,182,166,.02));
+  filter:blur(6px);
+  opacity:.55;
+  pointer-events:none;
+  animation:rotateGlow 6s linear infinite;
+}
+.choice input:checked + span:active{transform:scale(.99)}
+.tiny{font-size:.86rem;color:var(--muted);font-weight:400;display:block;margin-top:3px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.note{
+  border-left:4px solid var(--warn);
+  padding-left:12px;
+  color:#5f4a35;
+  margin-top:10px;
+}
+
+/* ---- mode switch + progress ---- */
+.statusbar{
+  position:sticky;
+  top:0;
+  z-index:5;
+  background:var(--bg);
+  border-bottom:1px solid var(--line);
+  padding:12px 0;
+  margin-bottom:6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px 18px;
+  align-items:center;
+  justify-content:space-between;
+}
+.mode-switch{display:flex;gap:6px;background:#eae7df;border-radius:999px;padding:4px}
+.mode{
+  border:0;
+  background:transparent;
+  color:#4a4a4a;
+  border-radius:999px;
+  padding:9px 14px;
+  font:inherit;
+  font-size:.92rem;
+  font-weight:700;
+  min-height:44px;
+  cursor:pointer;
+}
+.mode.is-on{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.09)}
+.progress{flex:1;min-width:180px}
+.progress-track{height:8px;background:#e6e2da;border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .3s ease}
+.progress-text{margin:6px 0 0;font-size:.84rem;color:var(--muted)}
+
+/* Quick mode hides the optional questions rather than the whole form, so the
+   five that carry most of the signal are all that is on screen. */
+body.mode-quick [data-optional]{display:none}
+body.mode-quick .row{grid-template-columns:1fr}
+body:not(.mode-quick) .reveal-bar{display:none}
+
+.reveal-bar{margin:14px 0}
+.wide{width:100%;justify-content:center;text-align:center}
+.wide small{display:block;font-weight:400;font-size:.84rem;opacity:.75;margin-top:2px}
+
+/* ---- buttons ---- */
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+button{
+  appearance:none;
+  border:0;
+  border-radius:12px;
+  padding:12px 16px;
+  font:inherit;
+  font-weight:800;
+  min-height:44px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.primary{
+  --a: 0deg;
+  position:relative;
+  isolation:isolate;
+  color:#fff;
+  background:
+    linear-gradient(#173d31, #173d31) padding-box,
+    conic-gradient(from var(--a), #8e69ff, #4dd8ff, #5f78ff, #d45cff, #ff7bc1, #8e69ff) border-box;
+  border:2px solid transparent;
+  border-radius:14px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.05) inset,
+    0 0 18px rgba(111,98,255,.22),
+    0 0 34px rgba(212,92,255,.12);
+  animation:rotateGlow 3.5s linear infinite;
+  transition:transform .16s ease, box-shadow .2s ease;
+}
+.primary::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-7px;
+  border-radius:18px;
+  background:conic-gradient(from var(--a),
+    rgba(142,105,255,.05), rgba(77,216,255,.32), rgba(95,120,255,.18),
+    rgba(212,92,255,.32), rgba(255,123,193,.18), rgba(142,105,255,.05));
+  filter:blur(12px);
+  opacity:.68;
+  animation:rotateGlow 3.5s linear infinite;
+  pointer-events:none;
+}
+.primary:hover{transform:translateY(-1px)}
+.primary:active{transform:translateY(0) scale(.985)}
+
+/* The glow has done its attracting once the form is under way. Stopping it
+   saves a continuous repaint for the rest of the session. */
+body.settled .primary,
+body.settled .primary::after,
+body.settled .choice input:checked + span,
+body.settled .choice input:checked + span::after{
+  animation:none;
+}
+body.settled .primary::after{opacity:.4}
+
+.secondary{background:#ece9e2;color:#222}
+.share-button{background:#ece9e2;color:#222;border:1px solid var(--line)}
+.share-button:hover{background:#e5e1d8}
+.linky{
+  background:none;
+  border:0;
+  padding:8px 0;
+  font:inherit;
+  font-weight:700;
+  font-size:.92rem;
+  color:var(--muted);
+  text-decoration:underline;
+  text-underline-offset:3px;
+  cursor:pointer;
+  min-height:44px;
+}
+.danger-link{color:var(--danger)}
+
+.status{
+  margin:12px 0 0;
+  font-size:.92rem;
+  font-weight:700;
+  color:var(--accent);
+  min-height:1.2em;
+}
+.status.is-warn{color:var(--warn)}
+
+/* ---- results ---- */
+.results{margin-top:18px;scroll-margin-top:104px}
+.tabs{display:flex;gap:6px;background:#eae7df;border-radius:999px;padding:4px;margin-bottom:14px}
+.tab{
+  flex:1;
+  border:0;
+  background:transparent;
+  color:#4a4a4a;
+  border-radius:999px;
+  padding:11px 14px;
+  font:inherit;
+  font-weight:800;
+  cursor:pointer;
+}
+.tab.is-on{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.09)}
+
+.summary-box{
+  white-space:pre-wrap;
+  background:#111;
+  color:#f5f5f5;
+  border-radius:14px;
+  padding:16px;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:.9rem;
+  min-height:120px;
+  overflow-x:auto;
+}
+
+/* ---- the poster: the output the child gets ---- */
+.poster{
+  background:
+    radial-gradient(circle at 18% 12%, #fff6dc 0%, transparent 42%),
+    radial-gradient(circle at 84% 82%, #e2f0e9 0%, transparent 46%),
+    #fffdf6;
+  border:3px solid var(--accent);
+  border-radius:24px;
+  padding:34px 26px;
+  text-align:center;
+}
+.poster-eyebrow{
+  margin:0 0 10px;
+  font-size:.88rem;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+}
+.poster-name{
+  margin:0 0 8px;
+  font-size:clamp(2.1rem,9vw,3.6rem);
+  line-height:1.02;
+  color:#14352a;
+  overflow-wrap:anywhere;
+}
+.poster-by{margin:0 0 20px;font-size:1.05rem;color:var(--muted)}
+.poster-quote{
+  margin:0 0 22px;
+  padding:16px 18px;
+  background:#fff;
+  border:2px dashed #bcd4c8;
+  border-radius:16px;
+  font-size:clamp(1.1rem,4.4vw,1.5rem);
+  line-height:1.35;
+  color:#14352a;
+  overflow-wrap:anywhere;
+}
+.poster-facts{
+  margin:0;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:12px;
+  text-align:left;
+}
+.poster-facts>div{
+  background:#fff;
+  border:1.5px solid var(--line);
+  border-radius:16px;
+  padding:14px 16px;
+}
+.poster-facts dt{
+  font-size:.78rem;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:5px;
+}
+.poster-facts dd{margin:0;font-size:1.06rem;overflow-wrap:anywhere}
+.poster-foot{margin:22px 0 0;font-size:.84rem;color:var(--muted)}
+
+/* ---- draft + clear ---- */
+.danger-zone{
+  margin-top:26px;
+  padding:18px 20px;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.draft-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.switch{display:flex;align-items:flex-start;gap:12px;margin:0;font-weight:400;cursor:pointer;flex:1;min-width:230px}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch-ui{
+  flex:0 0 auto;
+  width:50px;
+  height:30px;
+  border-radius:999px;
+  background:#d9d5cc;
+  position:relative;
+  transition:background .18s ease;
+  margin-top:2px;
+}
+.switch-ui::after{
+  content:"";
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.24);
+  transition:transform .18s ease;
+}
+.switch input:checked + .switch-ui{background:var(--accent)}
+.switch input:checked + .switch-ui::after{transform:translateX(20px)}
+.switch input:focus-visible + .switch-ui{outline:3px solid var(--accent);outline-offset:3px}
+.switch-text{font-weight:700}
+.switch-text small{display:block;font-weight:400;font-size:.84rem;color:var(--muted);margin-top:3px}
+
+footer{
+  color:var(--muted);
+  font-size:.86rem;
+  text-align:center;
+  margin-top:18px;
+}
+footer strong{color:var(--text)}
+
+@media (max-width:600px){
+  .choices,.row{grid-template-columns:1fr}
+  section{padding:17px}
+  /* On a phone the switch and progress need two rows, and a sticky bar that
+     tall would eat an eighth of the screen for the whole session. */
+  .statusbar{position:static;gap:10px}
+  .results{scroll-margin-top:12px}
+  .mode-switch{width:100%}
+  .mode{flex:1}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .primary,
+  .primary::after,
+  .choice input:checked + span,
+  .choice input:checked + span::after{animation:none}
+  *{transition:none !important}
+}
+
+/* Printing the poster is the point of the print button: everything else goes. */
+@media print{
+  .beta-strip, .statusbar, form, .tabs, .actions, .danger-zone, footer,
+  header .header-actions, .status{display:none !important}
+  body{background:#fff}
+  .wrap{width:100%;padding:0}
+  .poster{border-color:#245c46;break-inside:avoid;padding:24px}
+}

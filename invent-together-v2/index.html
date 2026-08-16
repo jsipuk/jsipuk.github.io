@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invent Together</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="A child-led idea discovery form for inventing an app, website or game together. Draw, imagine, decide and capture the first idea.">
+<meta name="theme-color" content="#f7f5ef">
+<meta name="apple-mobile-web-app-title" content="Invent Together">
+<meta name="robots" content="noindex, nofollow">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jsip.uk/invent-together-v2/">
+<meta property="og:title" content="Invent Together">
+<meta property="og:description" content="A child-led idea discovery form for inventing something together. Draw, imagine, decide and turn the idea into a tiny first build.">
+<meta property="og:image" content="https://jsip.uk/invent-together-v2/inventor-share-card.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Invent Together — child-led inventor interview">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Invent Together">
+<meta name="twitter:description" content="A child-led idea discovery form for inventing something together.">
+<meta name="twitter:image" content="https://jsip.uk/invent-together-v2/inventor-share-card.png">
+
+<link rel="icon" type="image/png" href="inventor-icon.png">
+<link rel="apple-touch-icon" href="inventor-icon.png">
+<link rel="manifest" href="site.webmanifest">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="beta-strip" role="note">
+  <strong>V2 beta.</strong> Being reviewed side by side against
+  <a href="/invent-together/">the current version</a>. Nothing here is final.
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="badge">Invent Together</div>
+    <h1>What should we make?</h1>
+    <p class="lead">
+      Use this while talking together. The child supplies the ideas. The grown-up types.
+      There are no wrong answers.
+    </p>
+    <div class="header-actions">
+      <button type="button" class="share-button" data-action="share">Share this</button>
+    </div>
+  </header>
+
+  <div class="statusbar" id="statusbar">
+    <div class="mode-switch" role="group" aria-label="How many questions to show">
+      <button type="button" class="mode is-on" data-mode="quick" aria-pressed="true">Quick &middot; 5 questions</button>
+      <button type="button" class="mode" data-mode="full" aria-pressed="false">Full &middot; everything</button>
+    </div>
+    <div class="progress">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <p class="progress-text" id="progressText">Nothing answered yet</p>
+    </div>
+  </div>
+
+  <form id="ideaForm" autocomplete="off" novalidate>
+
+    <section>
+      <h2>1. Who is inventing?</h2>
+      <p class="help">Optional, but it puts their name on the poster at the end.</p>
+      <label for="inventor">The inventor's name</label>
+      <input id="inventor" type="text" data-essential>
+      <p class="hint">First name is plenty.</p>
+    </section>
+
+    <section>
+      <h2>2. Pick a starting direction</h2>
+      <p class="help">Read these out. Let them press the one they want.</p>
+      <div class="choices">
+        <label class="choice">
+          <input type="radio" name="direction" value="Creatures" data-essential>
+          <span>Creatures <small class="tiny">Strange animals, monsters or beings</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="direction" value="Numbers">
+          <span>Numbers <small class="tiny">Counting, shapes, patterns or number adventures</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="direction" value="Machines">
+          <span>Machines <small class="tiny">Robots, vehicles, inventions or contraptions</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="direction" value="Something completely different">
+          <span>Something else <small class="tiny">A brand-new idea</small></span>
+        </label>
+      </div>
+
+      <label for="bigIdea">What do you want to make?</label>
+      <textarea id="bigIdea" data-essential></textarea>
+      <p class="hint">Write their answer as closely as you can. Their words, not tidied up.</p>
+    </section>
+
+    <section>
+      <h2>3. The first thing in the world</h2>
+      <p class="help">Ask them to draw it on paper first if you can.</p>
+
+      <div class="row">
+        <div>
+          <label for="thingName">What is it called?</label>
+          <input id="thingName" type="text" data-essential>
+          <p class="hint">The exact name, however odd.</p>
+        </div>
+        <div data-optional>
+          <label for="thingType">What is it?</label>
+          <input id="thingType" type="text">
+          <p class="hint">Creature, robot, person, object…</p>
+        </div>
+      </div>
+
+      <label for="appearance">What does it look like?</label>
+      <textarea id="appearance" data-essential></textarea>
+      <p class="hint">Colours, shape, number of legs, wheels, eyes, size.</p>
+      <div class="chips" data-chips-for="appearance" aria-label="Tap to add words">
+        <button type="button" class="chip">red</button>
+        <button type="button" class="chip">blue</button>
+        <button type="button" class="chip">green</button>
+        <button type="button" class="chip">rainbow</button>
+        <button type="button" class="chip">stripy</button>
+        <button type="button" class="chip">spotty</button>
+        <button type="button" class="chip">furry</button>
+        <button type="button" class="chip">shiny</button>
+        <button type="button" class="chip">tiny</button>
+        <button type="button" class="chip">enormous</button>
+        <button type="button" class="chip">two legs</button>
+        <button type="button" class="chip">six legs</button>
+        <button type="button" class="chip">wings</button>
+        <button type="button" class="chip">wheels</button>
+        <button type="button" class="chip">one big eye</button>
+        <button type="button" class="chip">lots of eyes</button>
+        <button type="button" class="chip">horns</button>
+        <button type="button" class="chip">a long tail</button>
+      </div>
+
+      <div data-optional>
+        <label for="special">What is special about it?</label>
+        <textarea id="special"></textarea>
+        <p class="hint">Powers, skills, funny behaviour, surprising facts.</p>
+        <div class="chips" data-chips-for="special" aria-label="Tap to add words">
+          <button type="button" class="chip">can fly</button>
+          <button type="button" class="chip">super fast</button>
+          <button type="button" class="chip">invisible</button>
+          <button type="button" class="chip">very strong</button>
+          <button type="button" class="chip">glows in the dark</button>
+          <button type="button" class="chip">breathes underwater</button>
+          <button type="button" class="chip">makes things grow</button>
+          <button type="button" class="chip">tells jokes</button>
+          <button type="button" class="chip">never sleeps</button>
+          <button type="button" class="chip">eats something odd</button>
+        </div>
+      </div>
+
+      <div data-optional>
+        <label for="home">Where does it live?</label>
+        <input id="home" type="text">
+        <p class="hint">Forest, moon, bedroom, underwater city…</p>
+        <div class="chips" data-chips-for="home" aria-label="Tap to add words">
+          <button type="button" class="chip">a forest</button>
+          <button type="button" class="chip">the moon</button>
+          <button type="button" class="chip">under the sea</button>
+          <button type="button" class="chip">a cave</button>
+          <button type="button" class="chip">a city</button>
+          <button type="button" class="chip">the clouds</button>
+          <button type="button" class="chip">a volcano</button>
+          <button type="button" class="chip">my bedroom</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. What do you actually do?</h2>
+      <p class="help">This turns a character into something you can play.</p>
+
+      <label for="playerDoes">What does the person playing it do?</label>
+      <textarea id="playerDoes" data-essential></textarea>
+      <p class="hint">Collect things, solve puzzles, build, explore, race, count.</p>
+      <div class="chips" data-chips-for="playerDoes" aria-label="Tap to add words">
+        <button type="button" class="chip">collect things</button>
+        <button type="button" class="chip">explore</button>
+        <button type="button" class="chip">build</button>
+        <button type="button" class="chip">race</button>
+        <button type="button" class="chip">solve puzzles</button>
+        <button type="button" class="chip">find hidden things</button>
+        <button type="button" class="chip">look after it</button>
+        <button type="button" class="chip">feed it</button>
+        <button type="button" class="chip">jump over things</button>
+        <button type="button" class="chip">count things</button>
+      </div>
+
+      <div data-optional>
+        <label for="goal">How do you know you have done well?</label>
+        <textarea id="goal"></textarea>
+        <p class="hint">Reach somewhere, solve something, make something, help someone.</p>
+      </div>
+
+      <div data-optional>
+        <label for="challenge">What makes it tricky?</label>
+        <textarea id="challenge"></textarea>
+        <p class="hint">Obstacles, puzzles, choices, limited items, silly mistakes.</p>
+      </div>
+
+      <div data-optional>
+        <label for="reward">What happens when you succeed?</label>
+        <textarea id="reward"></textarea>
+        <p class="hint">Animation, new area, badge, funny sound, new creation.</p>
+      </div>
+    </section>
+
+    <section data-optional>
+      <h2>5. Make it feel like theirs</h2>
+
+      <label for="world">What kind of world should it have?</label>
+      <textarea id="world"></textarea>
+      <p class="hint">The place, the mood, and the things in it.</p>
+
+      <div class="row">
+        <div>
+          <label for="funny">Should it be…</label>
+          <select id="funny">
+            <option value="">Choose together</option>
+            <option>Funny</option>
+            <option>Exciting</option>
+            <option>Calm</option>
+            <option>Tricky</option>
+            <option>Silly</option>
+            <option>A bit spooky</option>
+            <option>A mixture</option>
+          </select>
+        </div>
+        <div>
+          <label for="difficulty">How hard?</label>
+          <select id="difficulty">
+            <option value="">Choose together</option>
+            <option>Very easy</option>
+            <option>Easy</option>
+            <option>Gets harder</option>
+            <option>Tricky</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="sounds">What noises should it make?</label>
+      <textarea id="sounds"></textarea>
+      <p class="hint">Let them make the noises. Write them down exactly.</p>
+
+      <label for="mustHave">What absolutely HAS to be in it?</label>
+      <textarea id="mustHave"></textarea>
+      <p class="hint">The one thing you must not forget.</p>
+    </section>
+
+    <section data-optional>
+      <h2>6. Learning, if it fits naturally</h2>
+      <p class="help">Optional. Do not force an educational mechanic if it makes the idea less fun.</p>
+
+      <div class="choices">
+        <label class="choice"><input type="checkbox" name="learning" value="Counting"><span>Counting</span></label>
+        <label class="choice"><input type="checkbox" name="learning" value="Adding and subtracting"><span>Adding / subtracting</span></label>
+        <label class="choice"><input type="checkbox" name="learning" value="Reading and words"><span>Reading / words</span></label>
+        <label class="choice"><input type="checkbox" name="learning" value="Shapes and patterns"><span>Shapes / patterns</span></label>
+        <label class="choice"><input type="checkbox" name="learning" value="Problem solving"><span>Problem solving</span></label>
+        <label class="choice"><input type="checkbox" name="learning" value="No learning goal needed"><span>Just make something</span></label>
+      </div>
+
+      <label for="learningIdea">Any ideas for how learning could fit?</label>
+      <textarea id="learningIdea"></textarea>
+      <p class="hint">For example: the creature needs 7 berries and has 4.</p>
+    </section>
+
+    <section data-optional data-grownup>
+      <h2>7. Grown-up notes</h2>
+      <p class="help">Things said along the way that do not fit anywhere else. These are often the best bits.</p>
+
+      <label for="quotes">Exact quotes and funny phrases</label>
+      <textarea id="quotes"></textarea>
+      <p class="hint">Word for word. One of these goes on the poster.</p>
+
+      <label for="extra">Anything else?</label>
+      <textarea id="extra"></textarea>
+      <p class="hint">Extra ideas, observations, drawings made, things they got excited about.</p>
+
+      <div class="note">
+        Keep the first build tiny. One idea, one screen, one interaction is enough.
+      </div>
+    </section>
+
+    <div class="reveal-bar" id="revealBar">
+      <button type="button" class="secondary wide" data-action="reveal">
+        Show the rest of the questions
+        <small>12 more, all optional</small>
+      </button>
+    </div>
+
+    <section id="captureSection">
+      <h2 id="captureHeading">8. Make the invention</h2>
+      <p class="help">Two things come out of this: a poster for them, and a brief for you.</p>
+
+      <div class="actions">
+        <button type="button" class="primary" data-action="generate">&#10022; Make our invention</button>
+      </div>
+
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </section>
+  </form>
+
+  <div id="results" class="results" hidden>
+    <div class="tabs" role="tablist" aria-label="What came out">
+      <button type="button" class="tab is-on" id="tabPoster" role="tab" aria-selected="true" aria-controls="panelPoster">For them</button>
+      <button type="button" class="tab" id="tabBrief" role="tab" aria-selected="false" aria-controls="panelBrief">For the grown-up</button>
+    </div>
+
+    <div id="panelPoster" role="tabpanel" aria-labelledby="tabPoster">
+      <div class="poster" id="poster">
+        <p class="poster-eyebrow" id="posterEyebrow">An invention</p>
+        <h2 class="poster-name" id="posterName">&nbsp;</h2>
+        <p class="poster-by" id="posterBy"></p>
+        <blockquote class="poster-quote" id="posterQuote" hidden></blockquote>
+        <dl class="poster-facts" id="posterFacts"></dl>
+        <p class="poster-foot">Invented together &middot; <span id="posterDate"></span></p>
+      </div>
+      <div class="actions">
+        <button type="button" class="primary" data-action="readaloud" id="readButton">&#9835; Read it back</button>
+        <button type="button" class="secondary" data-action="print">Print the poster</button>
+      </div>
+      <p class="status" id="posterStatus" role="status" aria-live="polite"></p>
+    </div>
+
+    <div id="panelBrief" role="tabpanel" aria-labelledby="tabBrief" hidden>
+      <div id="summary" class="summary-box"></div>
+      <div class="actions">
+        <button type="button" class="secondary" data-action="copy">Copy the brief</button>
+        <button type="button" class="secondary" data-action="download">Save as text</button>
+      </div>
+      <p class="status" id="briefStatus" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="danger-zone">
+    <div class="draft-row">
+      <label class="switch">
+        <input type="checkbox" id="draftToggle">
+        <span class="switch-ui" aria-hidden="true"></span>
+        <span class="switch-text">
+          Keep a draft on this device
+          <small id="draftState">Off. Nothing is stored. Closing this page loses the answers.</small>
+        </span>
+      </label>
+      <button type="button" class="linky" data-action="deletedraft" id="deleteDraft" hidden>Delete the draft</button>
+    </div>
+    <button type="button" class="linky danger-link" data-action="clear">Start a new invention</button>
+  </div>
+
+  <footer>
+    <strong>Private by design.</strong> Answers stay on this device. Nothing typed here is uploaded,
+    analysed or sent to AI. A draft is only stored if you switch it on above, and you can delete it at any time.
+  </footer>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>

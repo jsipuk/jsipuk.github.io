@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invent Together — A/B</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'none'; connect-src 'none'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="inventor-icon.png">
+<link rel="stylesheet" href="compare.css">
+</head>
+<body>
+
+<div class="bar">
+  <h1>Invent Together — A/B<small>Side-by-side review · nothing here is live</small></h1>
+  <div class="spacer"></div>
+  <div class="legend">
+    <span><span class="dot a"></span>A — current</span>
+    <span><span class="dot b"></span>B — V2 beta</span>
+  </div>
+  <div class="group" id="viewGroup" role="group" aria-label="Which version to show">
+    <button type="button" data-view="both" class="on">Both</button>
+    <button type="button" data-view="solo-a">A only</button>
+    <button type="button" data-view="solo-b">B only</button>
+  </div>
+  <div class="group" id="widthGroup" role="group" aria-label="Simulated device width">
+    <button type="button" data-w="390" class="on">Phone</button>
+    <button type="button" data-w="768">Tablet</button>
+    <button type="button" data-w="0">Fill</button>
+  </div>
+  <div class="group">
+    <button type="button" id="syncBtn" aria-pressed="false">Reload both</button>
+  </div>
+</div>
+
+<div class="stage" id="stage">
+  <div class="pane pane-a">
+    <div class="pane-head"><span class="dot a"></span>A — current <span class="path">/invent-together/</span>
+      <a href="/invent-together/" target="_blank" rel="noopener">Open full ↗</a></div>
+    <div class="frame-hold" id="holdA"><iframe id="frameA" src="/invent-together/" title="Version A — the current page"></iframe></div>
+  </div>
+  <div class="pane pane-b">
+    <div class="pane-head"><span class="dot b"></span>B — V2 beta <span class="path">/invent-together-v2/</span>
+      <a href="/invent-together-v2/" target="_blank" rel="noopener">Open full ↗</a></div>
+    <div class="frame-hold" id="holdB"><iframe id="frameB" src="/invent-together-v2/" title="Version B — the V2 beta"></iframe></div>
+  </div>
+</div>
+
+<div class="notes">
+  <h2>What changed, and what to look for</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Finding</th><th>A — current</th><th>B — V2 beta</th><th>Try it</th></tr></thead>
+    <tbody>
+      <tr><td class="k">01 Data loss</td><td class="v-a">No guard, no draft</td><td class="v-b">Unload guard + opt-in draft</td><td>Type, then reload each side</td></tr>
+      <tr><td class="k">02 Child output</td><td class="v-a">Brief only</td><td class="v-b">Poster + read aloud</td><td>Fill 5 answers, press Make</td></tr>
+      <tr><td class="k">03 Focus ring</td><td class="v-a">Invisible on 10 controls</td><td class="v-b">3px ring on the visible chip</td><td>Tab to the direction choices</td></tr>
+      <tr><td class="k">04 Empty output</td><td class="v-a">544-char empty brief</td><td class="v-b">Refuses, explains</td><td>Press Generate on a blank form</td></tr>
+      <tr><td class="k">05 Copy</td><td class="v-a">7 × his/him/he</td><td class="v-b">Neutral throughout</td><td>Read the hints</td></tr>
+      <tr><td class="k">06 Naming</td><td class="v-a">5 names</td><td class="v-b">One: Invent Together</td><td>Check the tab titles</td></tr>
+      <tr><td class="k">07 Prompts</td><td class="v-a">Placeholders, vanish</td><td class="v-b">Persistent hints</td><td>Type into any field</td></tr>
+      <tr><td class="k">08 Announcement</td><td class="v-a">Silent</td><td class="v-b">aria-live + scroll</td><td>Generate on each side</td></tr>
+      <tr><td class="k">09 Length</td><td class="v-a">5,334px, 19 fields</td><td class="v-b">3,681px quick, 5 fields</td><td>Scroll both to the bottom</td></tr>
+      <tr><td class="k">10 Filename</td><td class="v-a">Always the same name</td><td class="v-b">name-YYYY-MM-DD.txt</td><td>Save as text on each</td></tr>
+      <tr><td class="k">11 Feedback</td><td class="v-a">5 browser alerts</td><td class="v-b">Inline status line</td><td>Press Copy on each</td></tr>
+      <tr><td class="k">12 Clear</td><td class="v-a">Beside the fun button</td><td class="v-b">Moved to the foot</td><td>Look at the action row</td></tr>
+      <tr><td class="k">13 Brief opening</td><td class="v-a">No instruction</td><td class="v-b">Leads with the task</td><td>Compare the first line</td></tr>
+      <tr><td class="k">16 Glow</td><td class="v-a">Animates forever</td><td class="v-b">Stops after first input</td><td>Type anything in B</td></tr>
+      <tr><td class="k">17 Offline</td><td class="v-a">No service worker</td><td class="v-b">Caches 7 files</td><td>Reload with the network off</td></tr>
+      <tr><td class="k">New</td><td class="v-a">—</td><td class="v-b">Tappable answer chips</td><td>The words under "looks like"</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<script src="compare.js" defer></script>
+</body>
+</html>
