@@ -1,11 +1,12 @@
 // Workout complete — the reflection screen. Two things only: how hard it felt,
 // and anything worth remembering (spec §25).
 import { h, fill, icon, formatDuration, debounce } from "../utils.js";
-import { sessionCounts, sessionDurationSeconds, DIFFICULTY_WORDS } from "../models.js";
+import { sessionCounts, sessionDurationSeconds } from "../models.js";
 import { subscribe } from "../state.js";
 import * as session from "../session.js";
 import * as router from "../router.js";
 import { header, iconButton } from "../../components/header.js";
+import { createEffortRating } from "../../components/rating.js";
 import { toast, confirmSheet } from "../../components/controls.js";
 
 export function render() {
@@ -26,42 +27,12 @@ export function render() {
   // Autosave the note as it is typed, so closing the app cannot lose it.
   noteField.addEventListener("input", debounce(() => session.setWorkoutNote(noteField.value), 300));
 
-  const ratingWord = h("div", { class: "rating-word", text: DIFFICULTY_WORDS[live.difficulty] || "Tap to rate" });
-  const unsubscribe = subscribe(() => paintRating());
-  const ratingRow = h("div", { class: "rating", role: "group", "aria-label": "How hard did it feel?" });
-
-  /**
-   * A five-star scale: every star up to the rating is filled, the rest are
-   * outlines. Shape carries the meaning, so it does not rely on colour.
-   */
-  function paintRating() {
-    const current = session.getSession();
-    const value = current ? current.difficulty : null;
-    const buttons = [];
-    for (let star = 1; star <= 5; star += 1) {
-      const filled = value !== null && star <= value;
-      buttons.push(
-        h(
-          "button",
-          {
-            class: "rating-btn",
-            type: "button",
-            dataset: { value: String(star) },
-            "aria-pressed": String(filled),
-            "aria-label": `${star} of 5, ${DIFFICULTY_WORDS[star]}`,
-            onclick: () => {
-              session.setDifficulty(star);
-              if (navigator.vibrate) navigator.vibrate(10);
-            },
-          },
-          icon(filled ? "star-filled" : "star", 34),
-          h("span", { class: "rating-num", text: String(star) })
-        )
-      );
-    }
-    fill(ratingRow, buttons);
-    ratingWord.textContent = DIFFICULTY_WORDS[value] || "Tap to rate";
-  }
+  const rating = createEffortRating({
+    value: live.difficulty,
+    onChange: (value) => session.setDifficulty(value),
+  });
+  // The session is the source of truth (Undo elsewhere can change it).
+  const unsubscribe = subscribe(() => rating.setValue(session.getSession()?.difficulty ?? null));
 
   function save() {
     const current = session.getSession();
@@ -110,8 +81,7 @@ export function render() {
         "div",
         {},
         h("div", { class: "field-label", text: "How hard did it feel?" }),
-        ratingRow,
-        ratingWord
+        rating.el
       ),
       h(
         "div",
@@ -147,6 +117,5 @@ export function render() {
     );
   }
 
-  paintRating();
   return { el: root, destroy: unsubscribe };
 }

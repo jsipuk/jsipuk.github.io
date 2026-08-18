@@ -4,16 +4,20 @@
 //   workouts      { id, name, ... }            workout plans, exercises embedded
 //   sessions      { id, workoutId, ... }       finished workouts (history)
 //   activeSession { id: "current", ... }       the one in-progress workout
+//   activities    { id, activityType, ... }     other activities (swim, class…)
 //   settings      { key, value }               one row per setting
 //   images        { id, blob, type }           user-supplied exercise images
+//
+// Version 2 added `activities`. The upgrade below only ever creates stores
+// that are missing, so an existing database keeps everything it already had.
 //
 // If IndexedDB is unavailable (private browsing on some iOS builds), we fall
 // back to an in-memory store so the app still runs. `db.persistent` is false in
 // that case and app.js warns the user that nothing will be saved.
 
 const DB_NAME = "gym-by-john";
-const DB_VERSION = 1;
-export const STORES = ["workouts", "sessions", "activeSession", "settings", "images"];
+const DB_VERSION = 2;
+export const STORES = ["workouts", "sessions", "activities", "activeSession", "settings", "images"];
 
 let dbPromise = null;
 let memory = null; // Map<storeName, Map<key, value>> when IndexedDB is unusable.
@@ -23,6 +27,7 @@ export const db = { persistent: true };
 const KEY_PATHS = {
   workouts: "id",
   sessions: "id",
+  activities: "id",
   activeSession: "id",
   settings: "key",
   images: "id",
@@ -53,7 +58,7 @@ function open() {
       for (const name of STORES) {
         if (!idb.objectStoreNames.contains(name)) {
           const store = idb.createObjectStore(name, { keyPath: KEY_PATHS[name] });
-          if (name === "sessions") store.createIndex("startedAt", "startedAt");
+          if (name === "sessions" || name === "activities") store.createIndex("startedAt", "startedAt");
         }
       }
     };

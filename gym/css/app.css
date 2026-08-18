@@ -132,6 +132,14 @@ body {
   font-weight: 650;
   font-size: 0.9rem;
 }
+.log-activity {
+  color: var(--text-muted);
+  font-weight: 600;
+  border: 1px dashed var(--border);
+}
+.log-activity svg { color: var(--primary); }
+.log-activity:active { background: var(--surface); }
+
 .last-session {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -466,6 +474,18 @@ body {
   color: var(--text-muted);
   margin-top: var(--gap);
 }
+.row-glyph {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+}
+.row-glyph svg { width: 20px; height: 20px; }
+
 .detail-list { font-variant-numeric: tabular-nums; }
 .detail-sets {
   font-size: 0.9rem;

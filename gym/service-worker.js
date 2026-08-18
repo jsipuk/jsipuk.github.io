@@ -6,7 +6,7 @@
 // - Everything else: cache first, refreshed in the background.
 //
 // Bump CACHE when files change so old copies are cleared out.
-const CACHE = "gym-by-john-v1.0.1";
+const CACHE = "gym-by-john-v1.1.0";
 
 const PRECACHE = [
   "./",
@@ -21,10 +21,12 @@ const PRECACHE = [
   "assets/icons/icon-512.png",
   "assets/icons/icon-maskable-512.png",
   "assets/icons/no-image.svg",
+  "components/activity-sheet.js",
   "components/controls.js",
   "components/exercise-screen.js",
   "components/header.js",
   "components/image.js",
+  "components/rating.js",
   "components/rest-timer.js",
   "components/workout-menu.js",
   "css/app.css",
@@ -37,6 +39,7 @@ const PRECACHE = [
   "js/db.js",
   "js/models.js",
   "js/router.js",
+  "js/screens/activity-detail.js",
   "js/screens/backup.js",
   "js/screens/exercise-editor.js",
   "js/screens/exercise-history.js",

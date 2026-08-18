@@ -64,7 +64,8 @@ export function render() {
             { class: "list", role: "list", style: { margin: "12px 0" } },
             [
               [`${result.counts.workouts}`, "workouts"],
-              [`${result.counts.sessions}`, "sessions in history"],
+              [`${result.counts.sessions}`, "gym sessions"],
+              [`${result.counts.activities}`, "other activities"],
               [`${result.counts.images}`, "images"],
             ].map(([value, label]) =>
               h(
@@ -150,7 +151,8 @@ export function render() {
         "div",
         { class: "group" },
         countRow("Workouts", state.workouts.length),
-        countRow("Sessions in history", state.sessions.length),
+        countRow("Gym sessions", state.sessions.length),
+        countRow("Other activities", state.activities.length),
         countRow("Workout in progress", state.session ? "Yes" : "No")
       )
     )
