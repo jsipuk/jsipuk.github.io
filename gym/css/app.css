@@ -1,0 +1,598 @@
+/* App shell and per-screen layout. */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--background);
+  color: var(--text);
+  overscroll-behavior-y: none;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+#screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Standard scrolling body for a screen. */
+.screen-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--gap) var(--page-x) var(--gap-lg);
+  padding-left: max(var(--page-x), var(--safe-left));
+  padding-right: max(var(--page-x), var(--safe-right));
+}
+.screen-body > * + * { margin-top: var(--gap); }
+
+/* ---------- Header ---------- */
+.app-header {
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(var(--tap), auto) 1fr minmax(var(--tap), auto);
+  align-items: center;
+  gap: var(--gap-xs);
+  padding: var(--gap-xs) var(--gap-xs);
+  padding-top: calc(var(--safe-top) + var(--gap-xs));
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+}
+.app-header .header-title {
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-header .header-sub {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.header-plain { border-bottom: 0; }
+
+/* ---------- Tab bar ---------- */
+.tabbar {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border);
+  background: var(--background);
+  padding-bottom: var(--safe-bottom);
+}
+.tabbar[hidden] { display: none; }
+.tab {
+  display: flex;
+  text-decoration: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--tabbar-h);
+  padding: 6px 2px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  color: var(--text-muted);
+}
+.tab svg { width: 24px; height: 24px; }
+.tab[aria-current="page"] { color: var(--primary); }
+
+/* ---------- Today ---------- */
+.today-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding-top: var(--gap-sm);
+}
+.today-hero img { width: 34px; height: 34px; }
+.today-hero h1 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.today-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.today-card h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.today-card .plan-line {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  margin-top: 2px;
+}
+.today-actions { margin-top: var(--gap); display: grid; gap: var(--gap-sm); }
+.resume-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+  font-weight: 650;
+  font-size: 0.9rem;
+}
+.last-session {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap-sm);
+  text-align: center;
+}
+.stat {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 10px 6px;
+}
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 650;
+}
+
+/* ---------- Workout overview / quick menu ---------- */
+.overview-head {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.item-row .row-title { font-weight: 650; }
+.item-row.is-current {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.item-row.is-complete .row-title { color: var(--text-muted); }
+.item-index {
+  flex: none;
+  width: 22px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Active exercise ---------- */
+.ex-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--gap-sm) var(--page-x) var(--gap-sm);
+  padding-left: max(var(--page-x), var(--safe-left));
+  padding-right: max(var(--page-x), var(--safe-right));
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+/* The body scrolls, so nothing inside it may be squeezed as content grows —
+   without this the exercise image collapses once a set list appears. The
+   figure is the one exception: on a short phone it gives up height first,
+   down to a floor, so that weight and reps stay above the fold. */
+.ex-body > * { flex: none; }
+.ex-body .field { margin-bottom: 0; }
+.ex-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.ex-figure {
+  position: relative;
+  flex: 0 1 auto;
+  width: 100%;
+  min-height: 92px;
+  height: clamp(92px, 22dvh, 200px);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  padding: 0;
+}
+.ex-figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.ex-figure .expand-hint {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.ex-figure .expand-hint svg { width: 18px; height: 18px; }
+
+.ex-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+  flex-wrap: wrap;
+}
+.ex-target {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.ex-target strong {
+  color: var(--text);
+  font-weight: 750;
+}
+.set-line {
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.set-history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs);
+}
+.set-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--success);
+  background: var(--success-soft);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.set-chip svg { width: 15px; height: 15px; color: var(--success); }
+
+.ex-actions {
+  flex: none;
+  display: grid;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--page-x);
+  padding-left: max(var(--page-x), var(--safe-left));
+  padding-right: max(var(--page-x), var(--safe-right));
+  padding-bottom: calc(var(--safe-bottom) + var(--gap-sm));
+  border-top: 1px solid var(--border);
+  background: var(--background);
+}
+.nav-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap-sm);
+}
+.nav-row .btn { min-height: 50px; }
+
+/* Short screens (iPhone SE and the minis): trim the trimmings, never the
+   weight and reps controls. */
+@media (max-height: 740px) {
+  .ex-title { font-size: 1.35rem; }
+  .ex-body { gap: var(--gap-xs); }
+  .stepper-btn,
+  .stepper-value { min-height: 58px; }
+  .stepper-num { font-size: 2rem; }
+}
+
+/* ---------- Rest timer ---------- */
+.rest-panel {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap);
+  border-radius: var(--radius);
+  border: 1px solid var(--primary);
+  background: var(--primary-soft);
+}
+.rest-label {
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.rest-time {
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.rest-actions { display: flex; gap: var(--gap-xs); }
+.rest-actions .btn { min-height: 44px; padding: 8px 12px; font-size: 0.9rem; }
+.rest-ring {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  transform: rotate(-90deg);
+}
+.rest-ring circle { fill: none; stroke-width: 6; stroke-linecap: round; }
+.rest-ring .track { stroke: var(--border); }
+.rest-ring .value { stroke: var(--primary); transition: stroke-dashoffset 0.3s linear; }
+
+/* Floating bar shown on screens other than the resting exercise. */
+.rest-bar {
+  position: fixed;
+  left: max(var(--page-x), var(--safe-left));
+  right: max(var(--page-x), var(--safe-right));
+  bottom: calc(var(--bottom-inset, var(--safe-bottom)) + 10px);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: 8px 8px 8px var(--gap);
+  border-radius: var(--radius);
+  background: var(--text);
+  color: var(--background);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+.rest-bar .rest-bar-time {
+  font-size: 1.3rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.rest-bar .rest-bar-label {
+  flex: 1;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.rest-bar button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  background: rgba(127, 127, 127, 0.35);
+  color: var(--background);
+}
+/* ---------- Stage (warm-up / cool-down) ---------- */
+.stage-duration {
+  font-size: 2.4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.stage-instructions {
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+/* ---------- Completion / reflection ---------- */
+.complete-hero {
+  text-align: center;
+  padding: var(--gap) 0 0;
+}
+.complete-badge {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto var(--gap-sm);
+  border-radius: 50%;
+  background: var(--success-soft);
+  color: var(--success);
+}
+.complete-hero h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.complete-hero p { color: var(--text-muted); }
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap-sm);
+  text-align: center;
+}
+.rating {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--gap-xs);
+}
+/* Five stars: outline until earned, filled once the rating reaches them. */
+.rating-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 62px;
+  padding: 8px 2px;
+  border-radius: var(--radius);
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  transition: transform 0.12s ease, color 0.12s ease;
+}
+.rating-btn svg { width: 34px; height: 34px; }
+.rating-btn .rating-num {
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.rating-btn[aria-pressed="true"] {
+  color: var(--primary);
+  transform: scale(1.04);
+}
+.rating-btn:active { transform: scale(0.94); }
+.rating-word {
+  text-align: center;
+  font-weight: 650;
+  min-height: 1.4em;
+  color: var(--text-muted);
+}
+
+/* ---------- History ---------- */
+.history-day {
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: var(--gap);
+}
+.detail-list { font-variant-numeric: tabular-nums; }
+.detail-sets {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.note-block {
+  white-space: pre-wrap;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--gap-sm) var(--gap);
+  font-size: 0.95rem;
+}
+
+/* ---------- Editors ---------- */
+.editor-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.editor-item .row { flex: 1; }
+.reorder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Full-size tap targets, but visually light so they do not compete with the
+   exercise rows they sit beside. */
+.reorder button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 44px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+}
+.reorder button:active { background: var(--surface-2); }
+.reorder button:disabled { opacity: 0.25; }
+.reorder svg { width: 16px; height: 16px; }
+.image-picker {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+.image-preview {
+  width: 108px;
+  height: 72px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+}
+.image-preview img { width: 100%; height: 100%; object-fit: contain; }
+
+/* ---------- Enlarged image viewer ---------- */
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+}
+.viewer-body {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--gap);
+}
+.viewer-body img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* ---------- Splash ---------- */
+#splash {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  gap: var(--gap);
+  background: var(--background);
+  transition: opacity 0.25s ease;
+}
+#splash.is-hidden { opacity: 0; pointer-events: none; }
+#splash .splash-inner { text-align: center; }
+#splash img { width: 96px; margin: 0 auto var(--gap-sm); }
+#splash .splash-name {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+#splash .splash-tag {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Wider screens: keep the app phone-width and centred. */
+@media (min-width: 620px) {
+  #app {
+    max-width: 520px;
+    margin: 0 auto;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .rest-bar,
+  .toast-stack,
+  .sheet {
+    max-width: 520px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(520px, 100%);
+  }
+  .rest-bar { width: min(488px, calc(100% - 32px)); }
+
+  /* The centring transform would be clobbered by the default slide-up
+     keyframes, so use a variant that keeps the horizontal offset. */
+  .sheet { animation-name: sheet-up-centred; }
+  @keyframes sheet-up-centred {
+    from { transform: translate(-50%, 14px); opacity: 0; }
+    to { transform: translateX(-50%); opacity: 1; }
+  }
+}

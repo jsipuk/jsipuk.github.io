@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Warm-up image placeholder">
+  <g fill="none" stroke="#9aa0a6" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="770" cy="300" r="58"/>
+    <path d="M770 358 v230"/>
+    <path d="M770 400 l-150 90"/>
+    <path d="M770 400 l150 -60 l60 -110"/>
+    <path d="M770 588 l-110 210"/>
+    <path d="M770 588 l130 200"/>
+  </g>
+  <text x="800" y="900" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        font-size="62" font-weight="600" fill="#9aa0a6" letter-spacing="2">WARM UP</text>
+</svg>

@@ -1,0 +1,93 @@
+/* Design tokens.
+   The <html> element always carries data-theme="system" | "light" | "dark",
+   written by js/theme handling in app.js from the saved setting. "system"
+   resolves through the media query below, so there is never a flash of the
+   wrong palette and no :not() gymnastics. */
+:root {
+  /* Light palette (also the fallback if scripting is unavailable). */
+  --background: #ffffff;
+  --surface: #f5f5f6;
+  --surface-2: #ebebee;
+  --text: #111111;
+  --text-muted: #62636a;
+  --border: #dcdce1;
+  --border-strong: #1a1a1a;
+  --primary: #d71920;
+  --primary-text: #ffffff;
+  --primary-soft: rgba(215, 25, 32, 0.10);
+  --success: #4f8a63;
+  --success-soft: rgba(79, 138, 99, 0.14);
+  --focus: #d71920;
+  --overlay: rgba(17, 17, 17, 0.45);
+  --shadow-card: 0 1px 2px rgba(17, 17, 17, 0.06);
+  --shadow-sheet: 0 -8px 32px rgba(17, 17, 17, 0.18);
+  --scrim-top: rgba(255, 255, 255, 0);
+  --scrim-bottom: rgba(255, 255, 255, 0.92);
+
+  /* Metrics */
+  --tap: 48px;            /* minimum comfortable target, above the 44px floor */
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --gap-xs: 6px;
+  --gap-sm: 10px;
+  --gap: 16px;
+  --gap-lg: 24px;
+  --page-x: 16px;
+  --tabbar-h: 58px;
+
+  /* Safe areas (iPhone notch and home indicator) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  color-scheme: light;
+}
+
+/* Dark palette, shared by an explicit choice and by "system" in the dark. */
+html[data-theme="dark"] {
+  --background: #0d0d0f;
+  --surface: #1a1a1e;
+  --surface-2: #26262c;
+  --text: #f3f3f5;
+  --text-muted: #a1a1ab;
+  --border: #33333b;
+  --border-strong: #55555f;
+  --primary: #e5262d;
+  --primary-text: #ffffff;
+  --primary-soft: rgba(229, 38, 45, 0.16);
+  --success: #6ea87c;
+  --success-soft: rgba(110, 168, 124, 0.18);
+  --focus: #ff5f66;
+  --overlay: rgba(0, 0, 0, 0.6);
+  --shadow-card: none;
+  --shadow-sheet: 0 -8px 32px rgba(0, 0, 0, 0.5);
+  --scrim-top: rgba(13, 13, 15, 0);
+  --scrim-bottom: rgba(13, 13, 15, 0.94);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] {
+    --background: #0d0d0f;
+    --surface: #1a1a1e;
+    --surface-2: #26262c;
+    --text: #f3f3f5;
+    --text-muted: #a1a1ab;
+    --border: #33333b;
+    --border-strong: #55555f;
+    --primary: #e5262d;
+    --primary-text: #ffffff;
+    --primary-soft: rgba(229, 38, 45, 0.16);
+    --success: #6ea87c;
+    --success-soft: rgba(110, 168, 124, 0.18);
+    --focus: #ff5f66;
+    --overlay: rgba(0, 0, 0, 0.6);
+    --shadow-card: none;
+    --shadow-sheet: 0 -8px 32px rgba(0, 0, 0, 0.5);
+    --scrim-top: rgba(13, 13, 15, 0);
+    --scrim-bottom: rgba(13, 13, 15, 0.94);
+    color-scheme: dark;
+  }
+}
