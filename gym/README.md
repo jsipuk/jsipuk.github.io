@@ -4,6 +4,10 @@ A private, offline gym workout app for iPhone. Plan a workout once, then walk
 into the gym and train without having to remember the routine, the weight, the
 reps, or how the app works.
 
+Swims and classes can be logged in a few seconds too, so they sit alongside gym
+sessions in one chronological history. The app records that they happened; it
+does not try to track them.
+
 It is a Progressive Web App: plain HTML, CSS and JavaScript, no build step, no
 framework, no server, no account. Everything you record stays in IndexedDB on
 your device.
@@ -97,6 +101,8 @@ gym/
 │   ├── exercise-screen.js   the active exercise screen
 │   ├── workout-menu.js      the item list and the one-tap quick menu
 │   ├── rest-timer.js        inline rest panel and the floating rest bar
+│   ├── rating.js            the 1-5 effort stars, shared by both places that rate
+│   ├── activity-sheet.js    logging or editing another activity
 │   └── image.js             image references and the placeholder fallback
 │
 ├── assets/
@@ -117,15 +123,21 @@ is never interrupted.
 
 ## IndexedDB structure
 
-Database `gym-by-john`, version 1:
+Database `gym-by-john`, version 2:
 
 | Store | Key | Contents |
 | --- | --- | --- |
 | `workouts` | `id` | Workout plans, with their exercises embedded |
 | `sessions` | `id` | Finished workouts (History) |
+| `activities` | `id` | Other activities — swims, classes, five-a-side |
 | `activeSession` | `"current"` | The one workout in progress, if any |
 | `settings` | `key` | One row per setting |
 | `images` | `id` | Exercise images, stored as blobs |
+
+Version 2 added `activities`. The upgrade only ever creates stores that are
+missing, so an existing database keeps every workout, session and setting it
+already had. Verified by building a version 1 database, opening the new app
+against it, and checking everything survived.
 
 ### Workout
 
@@ -169,6 +181,24 @@ Database `gym-by-john`, version 1:
 The warm-up and cool-down live in the same `items` array as the exercises, so
 Previous/Next is simple index arithmetic and the quick menu is one list.
 
+### Other activity
+
+```js
+{
+  id, recordType: "activity",
+  activityType: "swim",          // swim | fitness-class | circuits | cardio | sport | other
+  startedAt,                     // defaults to now, editable
+  durationMinutes: 40,
+  difficulty: 3,                 // 1-5, or null
+  note: "",
+  createdAt, updatedAt
+}
+```
+
+Kept in its own store rather than bent into the session model: a swim has
+nothing to do with sets, targets or rest timers, and forcing it in would grow
+the workout model fields it does not need. History merges the two for display.
+
 Targets are **copied into the session** when it starts. "Change target today"
 and "Add a set" therefore change today only and can never leak back into the
 saved plan.
@@ -193,6 +223,31 @@ saved plan.
   same pass.
 
 ---
+
+## Other activities
+
+**Today → Log other activity**, underneath Start Workout and deliberately
+quieter than it. The sheet asks four things and nothing else:
+
+- **Activity** — Swim, Fitness Class, Circuits, Cardio, Sport, Other. The last
+  one used is preselected, so logging the same thing weekly is two taps.
+- **Duration** in minutes, stepping in fives, or tap the number to type it.
+- **When** — defaults to now, editable. Forget Wednesday's swim until Thursday
+  and it still lands in the right place in History.
+- **How hard it felt** — the same five-star control the gym reflection uses.
+- An optional short note.
+
+Save is pinned to the bottom of the sheet, so it never scrolls out of reach.
+The whole thing takes a few seconds.
+
+Activities appear in History alongside gym sessions, distinguished by a small
+leading glyph rather than a separate visual language. Tapping one opens a plain
+detail view — activity, date, duration, difficulty, notes — with Edit and
+Delete, and deleting offers an Undo like everything else.
+
+What it deliberately does not do: distances, lengths, strokes, pace, GPS, heart
+rate, calories, class names, timers, training load, goals, or any analytics. It
+records that the activity happened. The gym workout remains the point of the app.
 
 ## Adding exercise artwork
 
@@ -237,14 +292,16 @@ Removing an attached image falls back to the folder, then to the placeholder.
 
 **Settings → Backup and restore.**
 
-*Export* writes one JSON file containing every workout, every session, your
-settings, and every stored image inlined as a data URL. On iPhone this opens
+*Export* writes one JSON file containing every workout, every gym session,
+every logged activity, your settings, and every stored image inlined as a data
+URL. On iPhone this opens
 the Share sheet (so you can drop it into Files or iCloud Drive); elsewhere it
 downloads.
 
 *Import* reads the file, then checks it before touching anything: the schema
-version, the shape of each list, and every workout, session, setting and image
-in it. If any check fails you get a plain list of what is wrong and **your
+version, the shape of each list, and every workout, session, activity, setting
+and image in it. A version 1 backup, made before activities existed, still
+imports cleanly — it simply has none. If any check fails you get a plain list of what is wrong and **your
 current data is left exactly as it was**. Only a fully valid backup gets as far
 as the confirmation sheet, which shows what it contains before replacing what
 is on the device.
@@ -305,6 +362,8 @@ The six scenarios in the specification were driven through a real browser
 | D — application closes | Relaunching offers Resume workout and restores the session byte for byte |
 | E — offline | Loads and logs a full workout with the network disabled |
 | F — dark mode | Every screen readable, preference survives a restart |
+| Other activity | Log a swim in four taps, appears in History in the right chronological place, survives a restart, and round-trips through a backup |
+| Schema upgrade | A version 1 database opened by the new app becomes version 2 with the activities store added and every existing workout, session and setting intact |
 
 ### Screen sizes
 
@@ -332,4 +391,4 @@ scaled to 130%.
 
 ---
 
-Version 1.0.1.
+Version 1.1.0.

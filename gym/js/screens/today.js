@@ -6,6 +6,7 @@ import * as session from "../session.js";
 import * as router from "../router.js";
 import { header } from "../../components/header.js";
 import { menuSheet, emptyState, toast } from "../../components/controls.js";
+import { logActivityButton } from "../../components/activity-sheet.js";
 import { PLACEHOLDERS } from "../../components/image.js";
 
 export function render() {
@@ -131,6 +132,10 @@ export function render() {
                 onclick: createFirstWorkout,
               }),
             }),
+
+        // Secondary to Start Workout, and deliberately quiet: this app is a
+        // gym companion first, and other activities are just record-keeping.
+        logActivityButton(),
 
         lastSession ? lastSessionCard(lastSession) : null
       )

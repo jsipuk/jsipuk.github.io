@@ -14,6 +14,7 @@ import * as workoutEditorScreen from "./screens/workout-editor.js";
 import * as exerciseEditorScreen from "./screens/exercise-editor.js";
 import * as historyScreen from "./screens/history.js";
 import * as historyDetailScreen from "./screens/history-detail.js";
+import * as activityDetailScreen from "./screens/activity-detail.js";
 import * as exerciseHistoryScreen from "./screens/exercise-history.js";
 import * as settingsScreen from "./screens/settings.js";
 import * as backupScreen from "./screens/backup.js";
@@ -28,6 +29,7 @@ const screens = {
   "exercise-editor": exerciseEditorScreen,
   history: historyScreen,
   "history-detail": historyDetailScreen,
+  "activity-detail": activityDetailScreen,
   "exercise-history": exerciseHistoryScreen,
   settings: settingsScreen,
   backup: backupScreen,
@@ -53,6 +55,7 @@ const TAB_FOR_ROUTE = {
   "exercise-editor": "workouts",
   history: "history",
   "history-detail": "history",
+  "activity-detail": "history",
   "exercise-history": "history",
   settings: "settings",
   backup: "settings",

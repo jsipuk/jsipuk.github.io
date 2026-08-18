@@ -1,7 +1,7 @@
 // Shapes of the things the app stores, plus the small rules that go with them.
 import { uid } from "./utils.js";
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const DEFAULT_SETTINGS = {
   appearance: "system", // system | light | dark
@@ -206,6 +206,49 @@ export const DIFFICULTY_WORDS = {
   4: "Hard",
   5: "Very hard",
 };
+
+/* ---------------------------------------------------------------------------
+ * Other activities
+ *
+ * A swim or a fitness class is not a guided workout, so it gets its own small
+ * record rather than being bent into the session model. All it records is that
+ * the activity happened: type, when, how long, how hard, and an optional note.
+ * ------------------------------------------------------------------------- */
+
+export const ACTIVITY_TYPES = [
+  { value: "swim", label: "Swim" },
+  { value: "fitness-class", label: "Fitness Class" },
+  { value: "circuits", label: "Circuits" },
+  { value: "cardio", label: "Cardio" },
+  { value: "sport", label: "Sport" },
+  { value: "other", label: "Other" },
+];
+
+export function activityLabel(type) {
+  const match = ACTIVITY_TYPES.find((option) => option.value === type);
+  return match ? match.label : "Activity";
+}
+
+export function makeActivity({
+  activityType = "other",
+  startedAt = new Date().toISOString(),
+  durationMinutes = 30,
+  difficulty = null,
+  note = "",
+} = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: uid(),
+    recordType: "activity",
+    activityType,
+    startedAt,
+    durationMinutes,
+    difficulty,
+    note,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
 
 /** Human summary of a target, e.g. "3 sets x 8-12 reps". */
 export function targetText(item) {

@@ -367,6 +367,12 @@ button.row-switch { cursor: pointer; }
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
+.sheet-footer {
+  flex: none;
+  padding: var(--gap-sm) var(--gap) 0;
+  border-top: 1px solid var(--border);
+  background: var(--background);
+}
 .sheet-grabber {
   width: 40px;
   height: 4px;

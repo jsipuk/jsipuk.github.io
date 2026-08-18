@@ -16,13 +16,14 @@ const openSheets = [];
  * Bottom sheet. `build(close)` returns the body content, so the content can
  * dismiss the sheet itself.
  */
-export function openSheet({ title, build, full = false, onClose } = {}) {
+export function openSheet({ title, build, buildFooter, full = false, onClose } = {}) {
   const scrim = h("div", { class: "scrim" });
   const sheet = h("section", {
     class: `sheet${full ? " sheet-full" : ""}`,
     role: "dialog",
     "aria-modal": "true",
     "aria-label": title || "Options",
+    tabindex: "-1",
   });
 
   const entry = { scrim, sheet, onClose };
@@ -38,15 +39,21 @@ export function openSheet({ title, build, full = false, onClose } = {}) {
   const content = build ? build(close) : null;
   if (content) body.append(content);
 
-  sheet.append(head, body);
+  // An optional footer sits outside the scrolling area, so a primary action
+  // stays put however long the form is.
+  const footerContent = buildFooter ? buildFooter(close) : null;
+  const footer = footerContent ? h("div", { class: "sheet-footer" }, footerContent) : null;
+
+  sheet.append(head, body, footer);
   scrim.addEventListener("click", close);
   overlayRoot().append(scrim, sheet);
   openSheets.push(entry);
   document.body.style.overflow = "hidden";
 
-  // Focus the first control so keyboard and VoiceOver users land inside.
-  const focusable = sheet.querySelector("input, textarea, button:not([aria-label='Close'])");
-  (focusable || sheet).focus?.();
+  // Move focus into the dialog for keyboard and VoiceOver users, but onto the
+  // sheet itself: focusing the first field would pop a keyboard or a date
+  // wheel over the very options the user came to tap.
+  sheet.focus?.();
 
   return { close, sheet, body };
 }

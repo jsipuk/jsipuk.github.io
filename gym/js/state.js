@@ -9,6 +9,7 @@ export const state = {
   settings: { ...DEFAULT_SETTINGS },
   workouts: [],
   sessions: [],      // finished sessions, newest first
+  activities: [],    // other activities (swim, class…), newest first
   session: null,     // the active session, or null
   storagePersistent: true,
 };
@@ -43,17 +44,19 @@ export function flushWrites() {
  * ------------------------------------------------------------------------- */
 export async function init() {
   await db.ready();
-  const [settingRows, workouts, sessions, active] = await Promise.all([
+  const [settingRows, workouts, sessions, activities, active] = await Promise.all([
     db.getAll("settings"),
     db.getAll("workouts"),
     db.getAll("sessions"),
+    db.getAll("activities"),
     db.get("activeSession", "current"),
   ]);
 
   const stored = Object.fromEntries(settingRows.map((row) => [row.key, row.value]));
   state.settings = { ...DEFAULT_SETTINGS, ...stored };
   state.workouts = workouts.filter((w) => !w.archived).sort((a, b) => a.sortOrder - b.sortOrder);
-  state.sessions = sessions.sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
+  state.sessions = sessions.sort(newestFirst);
+  state.activities = activities.sort(newestFirst);
   state.session = active && active.data ? active.data : null;
   state.storagePersistent = db.db.persistent;
   state.ready = true;
@@ -149,6 +152,7 @@ export function clearActiveSession() {
 /** Moves a finished session into history. */
 export function commitSession(session) {
   state.sessions.unshift(session);
+  state.sessions.sort(newestFirst);
   state.session = null;
   emit();
   return enqueue(async () => {
@@ -167,9 +171,44 @@ export function removeSession(id) {
 
 export function restoreSession(session) {
   state.sessions.push(session);
-  state.sessions.sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
+  state.sessions.sort(newestFirst);
   emit();
   return enqueue(() => db.put("sessions", session));
+}
+
+function newestFirst(a, b) {
+  return new Date(b.startedAt) - new Date(a.startedAt);
+}
+
+/* ---------------------------------------------------------------------------
+ * Other activities
+ *
+ * Deliberately separate from sessions: a swim has nothing to do with sets and
+ * rest timers, and keeping them apart stops the workout model growing fields
+ * it does not need. History merges the two for display.
+ * ------------------------------------------------------------------------- */
+
+export function saveActivity(activity) {
+  activity.updatedAt = new Date().toISOString();
+  const index = state.activities.findIndex((a) => a.id === activity.id);
+  if (index === -1) state.activities.push(activity);
+  else state.activities[index] = activity;
+  state.activities.sort(newestFirst);
+  emit();
+  return enqueue(() => db.put("activities", activity));
+}
+
+export function getActivity(id) {
+  return state.activities.find((a) => a.id === id) || null;
+}
+
+/** Returns the removed record so an Undo can put it straight back. */
+export function removeActivity(id) {
+  const removed = getActivity(id);
+  state.activities = state.activities.filter((a) => a.id !== id);
+  emit();
+  enqueue(() => db.del("activities", id));
+  return removed;
 }
 
 /* ---------------------------------------------------------------------------
@@ -244,17 +283,18 @@ async function downscale(file) {
  * Whole-app operations (backup and reset live in storage.js and use these)
  * ------------------------------------------------------------------------- */
 export async function readEverything() {
-  const [workouts, sessions, settings, images] = await Promise.all([
+  const [workouts, sessions, activities, settings, images] = await Promise.all([
     db.getAll("workouts"),
     db.getAll("sessions"),
+    db.getAll("activities"),
     db.getAll("settings"),
     db.getAll("images"),
   ]);
-  return { schemaVersion: SCHEMA_VERSION, workouts, sessions, settings, images };
+  return { schemaVersion: SCHEMA_VERSION, workouts, sessions, activities, settings, images };
 }
 
-export async function replaceEverything({ workouts, sessions, settings, images }) {
-  await db.replaceAll({ workouts, sessions, settings, images });
+export async function replaceEverything({ workouts, sessions, activities, settings, images }) {
+  await db.replaceAll({ workouts, sessions, activities, settings, images });
   await db.del("activeSession", "current");
   for (const url of urlCache.values()) URL.revokeObjectURL(url);
   urlCache.clear();
@@ -268,6 +308,7 @@ export async function resetEverything() {
   state.settings = { ...DEFAULT_SETTINGS };
   state.workouts = [];
   state.sessions = [];
+  state.activities = [];
   state.session = null;
   emit();
 }

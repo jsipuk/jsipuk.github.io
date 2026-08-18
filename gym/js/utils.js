@@ -84,6 +84,7 @@ const PATHS = {
   calendar: "M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
   chart: "M4 20V9M10 20V4M16 20v-7M22 20H2",
   add: "M12 8v8M8 12h8M12 21a9 9 0 100-18 9 9 0 000 18z",
+  waves: "M3 9c1.8-1.8 3.6-1.8 5.4 0s3.6 1.8 5.4 0 3.6-1.8 5.4 0M3 15c1.8-1.8 3.6-1.8 5.4 0s3.6 1.8 5.4 0 3.6-1.8 5.4 0",
   star: "M12 3.8 14.29 9.24 20.18 9.74 15.71 13.61 17.05 19.36 12 16.3 6.95 19.36 8.29 13.61 3.82 9.74 9.71 9.24Z",
 };
 
@@ -309,6 +310,23 @@ export function haptic(pattern = 12) {
 
 export function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/** ISO timestamp -> the value an <input type="datetime-local"> expects. */
+export function toDateTimeLocal(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** The inverse. The value is local time, so build the Date from its parts. */
+export function fromDateTimeLocal(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value || "");
+  if (!match) return null;
+  const [, year, month, day, hours, minutes] = match.map(Number);
+  const date = new Date(year, month - 1, day, hours, minutes);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 /**

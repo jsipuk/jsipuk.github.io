@@ -41,6 +41,7 @@ export async function buildBackup() {
     exportedAt: new Date().toISOString(),
     workouts: data.workouts,
     sessions: data.sessions,
+    activities: data.activities,
     settings: data.settings,
     images,
   };
@@ -99,7 +100,7 @@ export function validateBackup(raw) {
     errors.push(`The backup is version ${raw.schemaVersion}; this app understands up to ${SCHEMA_VERSION}.`);
   }
 
-  const arrays = ["workouts", "sessions", "settings", "images"];
+  const arrays = ["workouts", "sessions", "activities", "settings", "images"];
   for (const key of arrays) {
     if (raw[key] !== undefined && !Array.isArray(raw[key])) errors.push(`"${key}" should be a list.`);
   }
@@ -107,6 +108,8 @@ export function validateBackup(raw) {
 
   const workouts = raw.workouts || [];
   const sessions = raw.sessions || [];
+  // Absent in version 1 backups, which must still import cleanly.
+  const activities = raw.activities || [];
   const settings = raw.settings || [];
   const images = raw.images || [];
 
@@ -119,6 +122,15 @@ export function validateBackup(raw) {
     if (!isObject(session) || typeof session.id !== "string") errors.push(`Session ${index + 1} has no id.`);
     else if (!Array.isArray(session.items)) errors.push(`Session ${index + 1} has no items.`);
     else if (typeof session.startedAt !== "string") errors.push(`Session ${index + 1} has no start time.`);
+  });
+  activities.forEach((activity, index) => {
+    if (!isObject(activity) || typeof activity.id !== "string") errors.push(`Activity ${index + 1} has no id.`);
+    else if (typeof activity.activityType !== "string") errors.push(`Activity ${index + 1} has no type.`);
+    else if (typeof activity.startedAt !== "string" || Number.isNaN(Date.parse(activity.startedAt))) {
+      errors.push(`Activity ${index + 1} has no usable date.`);
+    } else if (typeof activity.durationMinutes !== "number" || !Number.isFinite(activity.durationMinutes)) {
+      errors.push(`Activity ${index + 1} has no duration.`);
+    }
   });
   settings.forEach((row, index) => {
     if (!isObject(row) || typeof row.key !== "string") errors.push(`Setting ${index + 1} is malformed.`);
@@ -138,11 +150,12 @@ export function validateBackup(raw) {
     counts: {
       workouts: workouts.length,
       sessions: sessions.length,
+      activities: activities.length,
       images: images.length,
       settings: settings.length,
     },
     exportedAt: raw.exportedAt || null,
-    data: { workouts, sessions, settings, images },
+    data: { workouts, sessions, activities, settings, images },
   };
 }
 
@@ -167,6 +180,7 @@ export async function applyBackup(validated) {
   await replaceEverything({
     workouts: validated.data.workouts,
     sessions: validated.data.sessions,
+    activities: validated.data.activities,
     settings: validated.data.settings,
     images,
   });
