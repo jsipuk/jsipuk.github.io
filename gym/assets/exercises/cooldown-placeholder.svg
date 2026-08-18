@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Cool-down image placeholder">
+  <g fill="none" stroke="#9aa0a6" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="640" cy="470" r="58"/>
+    <path d="M698 500 h250"/>
+    <path d="M760 500 l40 -150"/>
+    <path d="M800 350 l120 40"/>
+    <path d="M948 500 l90 120"/>
+  </g>
+  <text x="800" y="900" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        font-size="62" font-weight="600" fill="#9aa0a6" letter-spacing="2">COOL DOWN</text>
+</svg>
