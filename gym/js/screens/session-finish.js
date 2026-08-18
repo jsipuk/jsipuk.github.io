@@ -28,40 +28,39 @@ export function render() {
 
   const ratingWord = h("div", { class: "rating-word", text: DIFFICULTY_WORDS[live.difficulty] || "Tap to rate" });
   const unsubscribe = subscribe(() => paintRating());
-  let ratingRow;
+  const ratingRow = h("div", { class: "rating", role: "group", "aria-label": "How hard did it feel?" });
 
+  /**
+   * A five-star scale: every star up to the rating is filled, the rest are
+   * outlines. Shape carries the meaning, so it does not rely on colour.
+   */
   function paintRating() {
     const current = session.getSession();
-    if (!current || !ratingRow) return;
-    for (const button of ratingRow.children) {
-      button.setAttribute("aria-pressed", String(Number(button.dataset.value) === current.difficulty));
-    }
-    ratingWord.textContent = DIFFICULTY_WORDS[current.difficulty] || "Tap to rate";
-  }
-
-  function buildRating() {
-    ratingRow = h("div", { class: "rating", role: "group", "aria-label": "How hard did it feel?" });
-    for (let value = 1; value <= 5; value += 1) {
-      ratingRow.append(
+    const value = current ? current.difficulty : null;
+    const buttons = [];
+    for (let star = 1; star <= 5; star += 1) {
+      const filled = value !== null && star <= value;
+      buttons.push(
         h(
           "button",
           {
             class: "rating-btn",
             type: "button",
-            dataset: { value: String(value) },
-            "aria-pressed": String(live.difficulty === value),
-            "aria-label": `${value} of 5, ${DIFFICULTY_WORDS[value]}`,
+            dataset: { value: String(star) },
+            "aria-pressed": String(filled),
+            "aria-label": `${star} of 5, ${DIFFICULTY_WORDS[star]}`,
             onclick: () => {
-              session.setDifficulty(value);
+              session.setDifficulty(star);
               if (navigator.vibrate) navigator.vibrate(10);
             },
           },
-          icon("arm", 30),
-          h("span", { class: "rating-num", text: String(value) })
+          icon(filled ? "star-filled" : "star", 34),
+          h("span", { class: "rating-num", text: String(star) })
         )
       );
     }
-    return ratingRow;
+    fill(ratingRow, buttons);
+    ratingWord.textContent = DIFFICULTY_WORDS[value] || "Tap to rate";
   }
 
   function save() {
@@ -111,7 +110,7 @@ export function render() {
         "div",
         {},
         h("div", { class: "field-label", text: "How hard did it feel?" }),
-        buildRating(),
+        ratingRow,
         ratingWord
       ),
       h(
@@ -148,5 +147,6 @@ export function render() {
     );
   }
 
+  paintRating();
   return { el: root, destroy: unsubscribe };
 }

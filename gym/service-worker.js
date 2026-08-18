@@ -6,11 +6,12 @@
 // - Everything else: cache first, refreshed in the background.
 //
 // Bump CACHE when files change so old copies are cleared out.
-const CACHE = "gym-by-john-v1.0.0";
+const CACHE = "gym-by-john-v1.0.1";
 
 const PRECACHE = [
   "./",
   "assets/exercises/cooldown-placeholder.svg",
+  "assets/exercises/manifest.json",
   "assets/exercises/placeholder.svg",
   "assets/exercises/warmup-placeholder.svg",
   "assets/icons/apple-touch-icon.png",
@@ -53,7 +54,8 @@ const PRECACHE = [
   "js/storage.js",
   "js/timer.js",
   "js/utils.js",
-  "manifest.webmanifest",];
+  "manifest.webmanifest",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

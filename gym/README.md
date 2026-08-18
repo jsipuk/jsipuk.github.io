@@ -99,9 +99,12 @@ gym/
 │   ├── rest-timer.js        inline rest panel and the floating rest bar
 │   └── image.js             image references and the placeholder fallback
 │
-└── assets/
-    ├── icons/               app icons and UI placeholders
-    └── exercises/           exercise, warm-up and cool-down placeholders
+├── assets/
+│   ├── icons/               app icons and UI placeholders
+│   └── exercises/           your artwork, the placeholders, and manifest.json
+│
+└── tools/
+    └── sync-assets.mjs      regenerates the artwork manifest and precache list
 ```
 
 Screens are plain modules that export `render(params)` and return
@@ -191,28 +194,44 @@ saved plan.
 
 ---
 
-## Adding exercise images later
+## Adding exercise artwork
 
-An exercise's `image` is a single string reference, and there are two kinds:
+Name the file after the exercise, drop it in `assets/exercises/`, and the app
+uses it. Nothing in the workout data changes.
 
-- `"idb:<uuid>"` — an image the user added, stored as a blob in the `images`
-  store. Large photos are scaled to 1600px on their longest edge before saving.
-- `"assets/exercises/bench-press.svg"` — a plain path, for artwork shipped with
-  the app.
+| Exercise name | File |
+| --- | --- |
+| Bench Press | `bench-press.png` |
+| Incline Dumbbell Press | `incline-dumbbell-press.png` |
+| Cable Fly | `cable-fly.png` |
+| Warm Up | `warm-up.png` |
 
-So when the illustrated diagrams are ready:
+Lower case, spaces become hyphens, punctuation and accents are ignored, `&`
+becomes "and". `.png`, `.jpg`, `.webp`, `.svg` and `.gif` all work. Landscape at
+roughly 16:10 suits the exercise screen best; images are shown with
+`object-fit: contain`, so nothing is ever cropped. The exercise editor prints
+the exact filename it is looking for, so you never have to guess.
 
-1. Drop the files into `assets/exercises/`.
-2. Add them to the `PRECACHE` list in `service-worker.js` and bump `CACHE`.
-3. Point each exercise at its file — either through the editor's image picker,
-   or by setting `exercise.image` to the path.
+After adding, renaming or deleting files:
 
-Nothing in the workout logic needs to change. When no image is set, the
-placeholders in `components/image.js` are used (`PLACEHOLDERS.exercise`,
-`.warmup`, `.cooldown`), which are neutral grey line art that works on both the
-light and the dark background.
+```bash
+node tools/sync-assets.mjs
+```
 
----
+That regenerates `assets/exercises/manifest.json` (the name-to-file map the app
+reads at launch) and the `PRECACHE` list in `service-worker.js` (so the artwork
+works offline). Then bump `CACHE` in `service-worker.js` so installed copies
+pick the change up. `--check` verifies without writing, for CI.
+
+### Which picture wins
+
+1. An image attached in the app through the exercise editor — stored as a blob
+   in IndexedDB on that device, and included in a backup export.
+2. Artwork in `assets/exercises/` whose filename matches the exercise name.
+3. The placeholder.
+
+Removing an attached image falls back to the folder, then to the placeholder.
+`assets/exercises/README.md` keeps a copy of these rules beside the files.
 
 ## Export and import
 
@@ -265,9 +284,11 @@ is on the device.
 - **Routine actions have no confirmation dialogue.** Deleting an exercise or a
   set gives you an Undo toast instead. Only genuinely destructive, unrecoverable
   actions (discard this workout, reset the app) ask first.
-- **The effort rating uses a vector arm**, drawn in `utils.js`, rather than the
-  platform emoji, so it matches the rest of the interface and can be replaced in
-  one place when the illustration pack lands.
+- **The effort rating is five stars**, filled up to the score and outlined
+  beyond it, so 3 out of 5 reads as three filled stars and two empty ones. The
+  shape carries the meaning rather than the colour, and the word ("Moderate")
+  sits underneath. The star is drawn in `utils.js`, so swapping it for
+  something else is a one-place change.
 
 ---
 
@@ -285,6 +306,25 @@ The six scenarios in the specification were driven through a real browser
 | E — offline | Loads and logs a full workout with the network disabled |
 | F — dark mode | Every screen readable, preference survives a restart |
 
+### Screen sizes
+
+The exercise screen was measured on every iPhone size still in wide use, with
+the Dynamic Island and home-indicator insets applied. On all of them the name,
+picture, target, current set, weight, reps and Complete Set fit without
+scrolling, and no control sits under either inset:
+
+| Device | CSS points | Result |
+| --- | --- | --- |
+| iPhone SE (2nd/3rd gen) | 375 × 667 | fits, no scroll |
+| iPhone 13 mini | 375 × 812 | fits, no scroll |
+| iPhone 13 / 14 / 15 | 390 × 844 | fits, no scroll |
+| iPhone 16 | 393 × 852 | fits, no scroll |
+| **iPhone 16 Pro** | **402 × 874** (2622 × 1206 at 3×) | fits, no scroll |
+| iPhone 16 Pro Max | 440 × 956 | fits, no scroll |
+
+On a short screen the picture gives up height first, down to a floor, so the
+weight and reps controls are never the thing that gets pushed off.
+
 Accessibility was checked in the same pass: every control has an accessible
 name, every field has a label, nothing has a tap target under 44px, Tab and
 Enter and Escape work throughout, and nothing overflows horizontally with text
@@ -292,4 +332,4 @@ scaled to 130%.
 
 ---
 
-Version 1.0.0.
+Version 1.0.1.

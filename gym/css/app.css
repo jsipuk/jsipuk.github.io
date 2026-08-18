@@ -194,8 +194,11 @@ body {
   gap: var(--gap-sm);
 }
 /* The body scrolls, so nothing inside it may be squeezed as content grows —
-   without this the exercise image collapses once a set list appears. */
+   without this the exercise image collapses once a set list appears. The
+   figure is the one exception: on a short phone it gives up height first,
+   down to a floor, so that weight and reps stay above the fold. */
 .ex-body > * { flex: none; }
+.ex-body .field { margin-bottom: 0; }
 .ex-title {
   font-size: 1.6rem;
   font-weight: 800;
@@ -205,8 +208,10 @@ body {
 }
 .ex-figure {
   position: relative;
+  flex: 0 1 auto;
   width: 100%;
-  height: clamp(104px, 24dvh, 210px);
+  min-height: 92px;
+  height: clamp(92px, 22dvh, 200px);
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
@@ -293,6 +298,16 @@ body {
   gap: var(--gap-sm);
 }
 .nav-row .btn { min-height: 50px; }
+
+/* Short screens (iPhone SE and the minis): trim the trimmings, never the
+   weight and reps controls. */
+@media (max-height: 740px) {
+  .ex-title { font-size: 1.35rem; }
+  .ex-body { gap: var(--gap-xs); }
+  .stepper-btn,
+  .stepper-value { min-height: 58px; }
+  .stepper-num { font-size: 2rem; }
+}
 
 /* ---------- Rest timer ---------- */
 .rest-panel {
@@ -410,30 +425,31 @@ body {
   grid-template-columns: repeat(5, 1fr);
   gap: var(--gap-xs);
 }
+/* Five stars: outline until earned, filled once the rating reaches them. */
 .rating-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 10px 2px;
+  min-height: 62px;
+  padding: 8px 2px;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--background);
+  border: 0;
+  background: transparent;
   color: var(--text-muted);
-  transition: transform 0.12s ease, background-color 0.12s ease;
+  transition: transform 0.12s ease, color 0.12s ease;
 }
-.rating-btn svg { width: 30px; height: 30px; }
+.rating-btn svg { width: 34px; height: 34px; }
 .rating-btn .rating-num {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .rating-btn[aria-pressed="true"] {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-text);
-  transform: scale(1.06);
+  color: var(--primary);
+  transform: scale(1.04);
 }
+.rating-btn:active { transform: scale(0.94); }
 .rating-word {
   text-align: center;
   font-weight: 650;

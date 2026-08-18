@@ -7,7 +7,7 @@ import { state, saveWorkout, getWorkout, saveImageFile, deleteImage } from "../s
 import * as router from "../router.js";
 import { header, iconButton, backButton } from "../../components/header.js";
 import { stepper, chipRow, openNumberPad, menuSheet, toast, confirmSheet } from "../../components/controls.js";
-import { imageEl, forgetImage, PLACEHOLDERS } from "../../components/image.js";
+import { imageEl, forgetImage, bundledArtwork, expectedArtworkName, PLACEHOLDERS } from "../../components/image.js";
 
 export function render({ workoutId, itemId }) {
   const workout = getWorkout(workoutId);
@@ -64,6 +64,9 @@ export function render({ workoutId, itemId }) {
   const nameInput = textInput(target.name, "Name", (value) => {
     target.name = value;
     save();
+    // The artwork is matched from the name, so the picker's advice changes
+    // as it is typed. Only the image block repaints, so the caret stays put.
+    paintImage();
   });
   const instructionsInput = textArea(target.instructions, "Technique or setup notes shown during the workout", (value) => {
     target.instructions = value;
@@ -91,6 +94,7 @@ export function render({ workoutId, itemId }) {
                 ? PLACEHOLDERS.warmup
                 : PLACEHOLDERS.cooldown
               : PLACEHOLDERS.exercise,
+            name: target.name,
           })
         ),
         h(
@@ -119,11 +123,23 @@ export function render({ workoutId, itemId }) {
             : null
         )
       ),
-      h("p", {
-        class: "field-hint",
-        text: "Landscape images work best. Stored on this device only.",
-      })
+      h("p", { class: "field-hint", text: artworkHint() })
     );
+  }
+
+  /** Explains which picture is in use, and how to supply one. */
+  function artworkHint() {
+    if (target.image) {
+      return target.image.startsWith("idb:")
+        ? "Your own image, stored on this device only. Remove it to fall back to the app's artwork."
+        : `Using ${target.image}.`;
+    }
+    const matched = bundledArtwork(target.name);
+    if (matched) return `Using ${matched}, matched to the name above.`;
+    const expected = expectedArtworkName(target.name);
+    return expected
+      ? `No artwork yet. Add ${expected} to assets/exercises and it will be used automatically. Landscape, roughly 16:10, works best.`
+      : "Name this first, then artwork can be matched to it automatically.";
   }
 
   function paintSets() {

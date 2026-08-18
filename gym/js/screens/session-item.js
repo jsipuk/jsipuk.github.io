@@ -118,6 +118,7 @@ function createStageScreen(itemId) {
           imageEl(current.image, {
             alt: `${current.name} image`,
             placeholder: current.type === "warmup" ? PLACEHOLDERS.warmup : PLACEHOLDERS.cooldown,
+            name: current.name,
           })
         ),
         h(

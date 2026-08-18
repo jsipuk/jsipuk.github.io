@@ -5,6 +5,7 @@ import * as router from "./router.js";
 import * as timer from "./timer.js";
 import { closeAllSheets, toast } from "../components/controls.js";
 import { mountGlobalRestBar } from "../components/rest-timer.js";
+import { loadBundledArtwork } from "../components/image.js";
 import { APP_VERSION } from "./app-info.js";
 
 import * as todayScreen from "./screens/today.js";
@@ -189,7 +190,9 @@ async function registerServiceWorker() {
  * Boot
  * ------------------------------------------------------------------------- */
 async function boot() {
-  await init();
+  // The artwork manifest is a few hundred bytes and decides which picture each
+  // exercise shows, so it is worth waiting for before the first paint.
+  await Promise.all([init(), loadBundledArtwork()]);
   applyTheme();
 
   // Ask the browser not to evict our data when storage runs low.

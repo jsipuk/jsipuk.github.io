@@ -95,7 +95,11 @@ export function createExerciseScreen(itemId) {
           "aria-label": "View the exercise image larger",
           onclick: openViewer,
         },
-        imageEl(current.image, { alt: `${current.name} guide image`, placeholder: PLACEHOLDERS.exercise }),
+        imageEl(current.image, {
+          alt: `${current.name} guide image`,
+          placeholder: PLACEHOLDERS.exercise,
+          name: current.name,
+        }),
         h("span", { class: "expand-hint" }, icon("expand"))
       ),
       h(
@@ -389,7 +393,11 @@ export function createExerciseScreen(itemId) {
         title: current.name,
         right: iconButton("close", "Close image", () => viewer.remove()),
       }),
-      h("div", { class: "viewer-body" }, imageEl(current.image, { alt: `${current.name} guide image` }))
+      h(
+        "div",
+        { class: "viewer-body" },
+        imageEl(current.image, { alt: `${current.name} guide image`, name: current.name })
+      )
     );
     document.getElementById("overlays").append(viewer);
   }

@@ -84,6 +84,7 @@ const PATHS = {
   calendar: "M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
   chart: "M4 20V9M10 20V4M16 20v-7M22 20H2",
   add: "M12 8v8M8 12h8M12 21a9 9 0 100-18 9 9 0 000 18z",
+  star: "M12 3.8 14.29 9.24 20.18 9.74 15.71 13.61 17.05 19.36 12 16.3 6.95 19.36 8.29 13.61 3.82 9.74 9.71 9.24Z",
 };
 
 // Filled glyphs, described as composed shapes so a recognisable silhouette
@@ -100,6 +101,9 @@ const FILLED = {
     { rect: [11.8, 2.8, 8.6, 6.6, 2.8] },
   ],
   dot: [{ circle: [12, 12, 6] }],
+  "star-filled": [
+    { path: "M12 3.8 14.29 9.24 20.18 9.74 15.71 13.61 17.05 19.36 12 16.3 6.95 19.36 8.29 13.61 3.82 9.74 9.71 9.24Z" },
+  ],
 };
 
 /** An inline SVG icon element. `size` is in px. */
@@ -129,6 +133,12 @@ export function icon(name, size = 24) {
 
 function filledShape(shape) {
   const ns = "http://www.w3.org/2000/svg";
+  if (shape.path) {
+    const node = document.createElementNS(ns, "path");
+    node.setAttribute("d", shape.path);
+    node.setAttribute("fill", "currentColor");
+    return node;
+  }
   if (shape.tube) {
     // A thick round-capped stroke, used for limb-like shapes.
     const [d, width] = shape.tube;
@@ -299,6 +309,21 @@ export function haptic(pattern = 12) {
 
 export function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
+ * "Incline Dumbbell Press" -> "incline-dumbbell-press".
+ * Used to match an exercise to a file in assets/exercises. Must stay in step
+ * with the same function in tools/sync-assets.mjs.
+ */
+export function slugify(name) {
+  return String(name || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 /** Escapes nothing — we never inject HTML — but keeps text tidy for display. */
