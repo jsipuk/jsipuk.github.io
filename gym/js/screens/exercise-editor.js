@@ -2,7 +2,7 @@
 // Fields save as they change; the dynamic controls repaint in place so that
 // typing in a text box is never interrupted.
 import { h, fill, icon, formatNumber, formatClock, debounce } from "../utils.js";
-import { makeExercise, WEIGHT_INCREMENTS, REST_PRESETS } from "../models.js";
+import { duplicateExercise, WEIGHT_INCREMENTS, REST_PRESETS } from "../models.js";
 import { state, saveWorkout, getWorkout, saveImageFile, deleteImage } from "../state.js";
 import * as router from "../router.js";
 import { header, iconButton, backButton } from "../../components/header.js";
@@ -437,7 +437,7 @@ export function render({ workoutId, itemId }) {
               label: "Duplicate",
               icon: "copy",
               onSelect: () => {
-                const copy = makeExercise({ ...target, name: `${target.name} copy`, sortOrder: workout.exercises.length });
+                const copy = duplicateExercise(target, { name: `${target.name} copy`, sortOrder: workout.exercises.length });
                 workout.exercises.push(copy);
                 saveWorkout(workout);
                 toast("Exercise duplicated");

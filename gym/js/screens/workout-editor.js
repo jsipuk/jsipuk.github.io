@@ -1,7 +1,7 @@
 // Workout editor. Changes save as you make them — there is no Save button to
 // forget about, and no dialog between you and a small correction.
 import { h, fill, icon, formatNumber, debounce } from "../utils.js";
-import { makeExercise, duplicateWorkout } from "../models.js";
+import { makeExercise, duplicateExercise, duplicateWorkout } from "../models.js";
 import { state, saveWorkout, archiveWorkout, restoreWorkout, updateSettings, getWorkout } from "../state.js";
 import * as session from "../session.js";
 import * as router from "../router.js";
@@ -225,7 +225,7 @@ export function render({ workoutId }) {
           label: "Duplicate",
           icon: "copy",
           onSelect: () => {
-            const copy = makeExercise({ ...exercise, name: `${exercise.name} copy`, sortOrder: exercise.sortOrder + 0.5 });
+            const copy = duplicateExercise(exercise, { name: `${exercise.name} copy`, sortOrder: exercise.sortOrder + 0.5 });
             workout.exercises.push(copy);
             workout.exercises.sort((a, b) => a.sortOrder - b.sortOrder).forEach((item, position) => { item.sortOrder = position; });
             saveWorkout(workout);

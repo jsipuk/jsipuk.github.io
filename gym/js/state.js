@@ -1,7 +1,7 @@
 // The single place the rest of the app reads from and writes to.
 // Screens subscribe, mutate through these helpers, and never touch db.js.
 import * as db from "./db.js";
-import { DEFAULT_SETTINGS, SCHEMA_VERSION } from "./models.js";
+import { DEFAULT_SETTINGS, SCHEMA_VERSION, ensureUniqueIds } from "./models.js";
 import { uid } from "./utils.js";
 
 export const state = {
@@ -52,6 +52,11 @@ export async function init() {
     db.get("activeSession", "current"),
   ]);
 
+  // Repair data written by a build that duplicated exercises without giving
+  // the copy a new id. Runs over archived workouts too, so restoring one later
+  // cannot reintroduce the clash.
+  await repairDuplicateIds(workouts, active);
+
   const stored = Object.fromEntries(settingRows.map((row) => [row.key, row.value]));
   state.settings = { ...DEFAULT_SETTINGS, ...stored };
   state.workouts = workouts.filter((w) => !w.archived).sort((a, b) => a.sortOrder - b.sortOrder);
@@ -61,6 +66,40 @@ export async function init() {
   state.storagePersistent = db.db.persistent;
   state.ready = true;
   emit();
+}
+
+/**
+ * Two exercises sharing an id made them indistinguishable: Next went to the
+ * screen you were already on, so the workout could not be advanced past them,
+ * and the copy showed the original's sets. Ids are made unique across every
+ * workout, which also stops one exercise's history appearing under another.
+ */
+async function repairDuplicateIds(workouts, active) {
+  const seen = new Set();
+  const repaired = [];
+  for (const workout of workouts) {
+    const ordered = [...workout.exercises].sort((a, b) => a.sortOrder - b.sortOrder);
+    let changed = false;
+    for (const exercise of ordered) {
+      if (!exercise.id || seen.has(exercise.id)) {
+        exercise.id = uid();
+        changed = true;
+      }
+      seen.add(exercise.id);
+    }
+    if (changed) repaired.push(workout);
+  }
+  if (repaired.length) {
+    console.info(`Repaired duplicate exercise ids in ${repaired.length} workout(s)`);
+    await db.putMany("workouts", repaired);
+  }
+
+  // A workout in progress carries its own copy of the items, so fix that too
+  // rather than leaving the user stuck mid-session.
+  if (active && active.data && ensureUniqueIds(active.data.items)) {
+    console.info("Repaired duplicate item ids in the active session");
+    await db.put("activeSession", active);
+  }
 }
 
 /* ---------------------------------------------------------------------------
