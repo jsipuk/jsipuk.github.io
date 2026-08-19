@@ -6,7 +6,7 @@
 // - Everything else: cache first, refreshed in the background.
 //
 // Bump CACHE when files change so old copies are cleared out.
-const CACHE = "gym-by-john-v1.3.0";
+const CACHE = "gym-by-john-v1.3.1";
 
 const PRECACHE = [
   "./",

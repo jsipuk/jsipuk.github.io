@@ -136,7 +136,13 @@ Database `gym-by-john`, version 2:
 
 Version 2 added `activities`. The upgrade only ever creates stores that are
 missing, so an existing database keeps every workout, session and setting it
-already had. Verified by building a version 1 database, opening the new app
+already had.
+
+On load the app also repairs any duplicated exercise that was saved without its
+own id — a bug in 1.3.0 and earlier, where the copy shared the original's id
+and the workout could not be advanced past the pair. The first of a colliding
+pair keeps its id, so its history stays attached, and the copy is given a new
+one. A workout in progress is repaired the same way. Verified by building a version 1 database, opening the new app
 against it, and checking everything survived.
 
 ### Workout
@@ -411,4 +417,4 @@ scaled to 130%.
 
 ---
 
-Version 1.3.0.
+Version 1.3.1.

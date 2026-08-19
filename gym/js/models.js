@@ -37,6 +37,39 @@ export function makeExercise(partial = {}) {
   };
 }
 
+/**
+ * A copy of an exercise with a fresh id.
+ *
+ * Spreading the original through makeExercise() carried its id across, which
+ * left two exercises in a workout indistinguishable: navigation could not tell
+ * them apart and the copy mirrored the original's sets. Always go through here.
+ */
+export function duplicateExercise(exercise, overrides = {}) {
+  return {
+    ...structuredClone(exercise),
+    id: uid(),
+    ...overrides,
+  };
+}
+
+/**
+ * Guarantees every item in a list has its own id, renaming later collisions.
+ * The first occurrence keeps its id, so whatever history is attached to it
+ * stays attached.
+ */
+export function ensureUniqueIds(items) {
+  const seen = new Set();
+  let changed = false;
+  for (const item of items) {
+    if (!item.id || seen.has(item.id)) {
+      item.id = uid();
+      changed = true;
+    }
+    seen.add(item.id);
+  }
+  return changed;
+}
+
 export function makeStage(type) {
   return {
     name: type === "warmup" ? "Warm Up" : "Cool Down",
@@ -142,6 +175,7 @@ export function buildSessionItems(workout) {
 
 export function makeSession(workout, { unit = "kg" } = {}) {
   const items = buildSessionItems(workout);
+  ensureUniqueIds(items);
   return {
     id: uid(),
     workoutId: workout.id,
