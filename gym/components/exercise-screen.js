@@ -7,7 +7,7 @@ import { state, subscribe } from "../js/state.js";
 import * as session from "../js/session.js";
 import * as router from "../js/router.js";
 import { header, iconButton } from "./header.js";
-import { imageEl, PLACEHOLDERS } from "./image.js";
+import { imageEl, openImageViewer, PLACEHOLDERS } from "./image.js";
 import { createRestPanel } from "./rest-timer.js";
 import { openQuickMenu } from "./workout-menu.js";
 import {
@@ -386,20 +386,7 @@ export function createExerciseScreen(itemId) {
 
   function openViewer() {
     const current = item();
-    const viewer = h(
-      "div",
-      { class: "viewer", role: "dialog", "aria-modal": "true", "aria-label": `${current.name} image` },
-      header({
-        title: current.name,
-        right: iconButton("close", "Close image", () => viewer.remove()),
-      }),
-      h(
-        "div",
-        { class: "viewer-body" },
-        imageEl(current.image, { alt: `${current.name} guide image`, name: current.name })
-      )
-    );
-    document.getElementById("overlays").append(viewer);
+    openImageViewer({ ref: current.image, name: current.name, placeholder: PLACEHOLDERS.exercise });
   }
 
   function openInfo() {

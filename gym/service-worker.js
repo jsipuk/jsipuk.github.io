@@ -6,13 +6,21 @@
 // - Everything else: cache first, refreshed in the background.
 //
 // Bump CACHE when files change so old copies are cleared out.
-const CACHE = "gym-by-john-v1.1.0";
+const CACHE = "gym-by-john-v1.2.0";
 
 const PRECACHE = [
   "./",
+  "assets/exercises/cable-split-row.webp",
+  "assets/exercises/cool-down.webp",
   "assets/exercises/cooldown-placeholder.svg",
+  "assets/exercises/dumbbell-lat-raise.webp",
+  "assets/exercises/dumbbell-press.webp",
+  "assets/exercises/glute-bridge.webp",
+  "assets/exercises/goblet-box-squat.webp",
+  "assets/exercises/leg-curl.webp",
   "assets/exercises/manifest.json",
   "assets/exercises/placeholder.svg",
+  "assets/exercises/warm-up-row.webp",
   "assets/exercises/warmup-placeholder.svg",
   "assets/icons/apple-touch-icon.png",
   "assets/icons/empty-state.svg",

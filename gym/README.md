@@ -267,6 +267,15 @@ roughly 16:10 suits the exercise screen best; images are shown with
 `object-fit: contain`, so nothing is ever cropped. The exercise editor prints
 the exact filename it is looking for, so you never have to guess.
 
+Warm-ups and cool-downs match on their name too, so a stage called "Warm Up Row"
+looks for `warm-up-row.png`.
+
+**Keep the files small.** Everything here is precached so it works offline, so
+the folder's total size is downloaded on install. The bundled artwork is WebP at
+about 1600px on the long edge and roughly 100 KB each; the same pictures as PNG
+were 1.3 MB each, twelve times larger, for no visible difference. Re-encode
+before committing if a file is much over 200 KB.
+
 After adding, renaming or deleting files:
 
 ```bash
@@ -286,6 +295,11 @@ pick the change up. `--check` verifies without writing, for CI.
 3. The placeholder.
 
 Removing an attached image falls back to the folder, then to the placeholder.
+
+Tapping a picture opens it full screen, where tapping again zooms it to fill the
+height — about three times the fitted size on a phone — and you drag to look
+around. Coaching diagrams carry small print that a fitted 16:10 image on a
+portrait screen cannot show legibly, which is what the zoom is for.
 `assets/exercises/README.md` keeps a copy of these rules beside the files.
 
 ## Export and import
@@ -391,4 +405,4 @@ scaled to 130%.
 
 ---
 
-Version 1.1.0.
+Version 1.2.0.

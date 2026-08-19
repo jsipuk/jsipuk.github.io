@@ -554,14 +554,46 @@ body {
 }
 .viewer-body {
   flex: 1;
+  min-height: 0;
   display: grid;
   place-items: center;
   padding: var(--gap);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.viewer-surface {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 0;
 }
 .viewer-body img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+/* Zoomed: the picture fills the height and overflows the width, which is what
+   makes the small print on a coaching diagram readable on a phone. */
+.viewer-body.is-zoomed {
+  place-items: start;
+  padding: 0;
+}
+.viewer-body.is-zoomed .viewer-surface,
+.viewer-body.is-zoomed img {
+  max-width: none;
+  max-height: none;
+}
+.viewer-body.is-zoomed img {
+  height: calc(100dvh - 180px);
+  width: auto;
+}
+.viewer-hint {
+  flex: none;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: var(--gap-sm) var(--gap);
+  padding-bottom: calc(var(--safe-bottom) + var(--gap-sm));
 }
 
 /* ---------- Splash ---------- */

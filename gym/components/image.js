@@ -3,6 +3,7 @@
 // so a re-render never flashes the placeholder.
 import { h, slugify } from "../js/utils.js";
 import { imageURL } from "../js/state.js";
+import { header, iconButton } from "./header.js";
 
 const resolved = new Map();
 
@@ -75,4 +76,64 @@ export function imageEl(ref, { alt = "", placeholder = PLACEHOLDERS.exercise, na
 /** Drops a cached URL after the underlying image is replaced or removed. */
 export function forgetImage(ref) {
   resolved.delete(ref);
+}
+
+/**
+ * Full-screen look at an exercise picture.
+ *
+ * A 16:10 diagram fitted to a portrait phone is barely bigger than the
+ * thumbnail, which makes the small print on a real coaching diagram useless.
+ * So the viewer has two states: fit to the screen, and fit to the height —
+ * which on a phone makes the picture about three times wider than the screen,
+ * readable, and pannable with an ordinary drag.
+ */
+export function openImageViewer({ ref, name, placeholder = PLACEHOLDERS.exercise }) {
+  const img = imageEl(ref, { alt: `${name} guide image`, placeholder, name });
+  const body = h("div", { class: "viewer-body" });
+  let zoomed = false;
+
+  const surface = h(
+    "button",
+    {
+      class: "viewer-surface",
+      type: "button",
+      "aria-label": "Zoom in",
+      onclick: () => setZoom(!zoomed),
+    },
+    img
+  );
+  body.append(surface);
+
+  const zoomButton = iconButton("expand", "Zoom in", () => setZoom(!zoomed));
+  const hint = h("p", { class: "viewer-hint", text: "Tap the picture to zoom in" });
+
+  function setZoom(next) {
+    zoomed = next;
+    body.classList.toggle("is-zoomed", zoomed);
+    surface.setAttribute("aria-label", zoomed ? "Fit to screen" : "Zoom in");
+    zoomButton.setAttribute("aria-label", zoomed ? "Fit to screen" : "Zoom in");
+    hint.textContent = zoomed ? "Drag to look around" : "Tap the picture to zoom in";
+    if (zoomed) {
+      // Start in the middle rather than at the left edge.
+      requestAnimationFrame(() => {
+        body.scrollLeft = (body.scrollWidth - body.clientWidth) / 2;
+      });
+    } else {
+      body.scrollTo(0, 0);
+    }
+  }
+
+  const viewer = h(
+    "div",
+    { class: "viewer", role: "dialog", "aria-modal": "true", "aria-label": `${name} image` },
+    header({
+      title: name,
+      left: zoomButton,
+      right: iconButton("close", "Close image", () => viewer.remove()),
+    }),
+    body,
+    hint
+  );
+  document.getElementById("overlays").append(viewer);
+  return viewer;
 }

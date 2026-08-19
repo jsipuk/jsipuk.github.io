@@ -1,3 +1,12 @@
 {
-  "images": {}
+  "images": {
+    "cable-split-row": "assets/exercises/cable-split-row.webp",
+    "cool-down": "assets/exercises/cool-down.webp",
+    "dumbbell-lat-raise": "assets/exercises/dumbbell-lat-raise.webp",
+    "dumbbell-press": "assets/exercises/dumbbell-press.webp",
+    "glute-bridge": "assets/exercises/glute-bridge.webp",
+    "goblet-box-squat": "assets/exercises/goblet-box-squat.webp",
+    "leg-curl": "assets/exercises/leg-curl.webp",
+    "warm-up-row": "assets/exercises/warm-up-row.webp"
+  }
 }
