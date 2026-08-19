@@ -6,7 +6,7 @@ import { subscribe } from "../state.js";
 import * as session from "../session.js";
 import * as router from "../router.js";
 import { header, iconButton } from "../../components/header.js";
-import { imageEl, PLACEHOLDERS } from "../../components/image.js";
+import { imageEl, openImageViewer, PLACEHOLDERS } from "../../components/image.js";
 import { createExerciseScreen } from "../../components/exercise-screen.js";
 import { openQuickMenu } from "../../components/workout-menu.js";
 import { createRestPanel } from "../../components/rest-timer.js";
@@ -113,13 +113,24 @@ function createStageScreen(itemId) {
         { class: "ex-body" },
         h("h1", { class: "ex-title", text: current.name }),
         h(
-          "div",
-          { class: "ex-figure" },
+          "button",
+          {
+            class: "ex-figure",
+            type: "button",
+            "aria-label": "View the image larger",
+            onclick: () =>
+              openImageViewer({
+                ref: current.image,
+                name: current.name,
+                placeholder: current.type === "warmup" ? PLACEHOLDERS.warmup : PLACEHOLDERS.cooldown,
+              }),
+          },
           imageEl(current.image, {
             alt: `${current.name} image`,
             placeholder: current.type === "warmup" ? PLACEHOLDERS.warmup : PLACEHOLDERS.cooldown,
             name: current.name,
-          })
+          }),
+          h("span", { class: "expand-hint" }, icon("expand"))
         ),
         h(
           "div",
