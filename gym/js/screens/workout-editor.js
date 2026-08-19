@@ -7,6 +7,7 @@ import * as session from "../session.js";
 import * as router from "../router.js";
 import { header, iconButton, backButton } from "../../components/header.js";
 import { menuSheet, toast, confirmSheet, textSheet } from "../../components/controls.js";
+import { openArtworkPicker } from "../../components/artwork-picker.js";
 
 export function render({ workoutId }) {
   const root = h("div", { class: "screen" });
@@ -197,11 +198,22 @@ export function render({ workoutId }) {
     update();
   }
 
+  /**
+   * Start from the artwork rather than a blank name: choosing the picture sets
+   * the name and pins the image, so there is nothing to spell correctly.
+   */
   function addExercise(workout) {
-    const exercise = makeExercise({ sortOrder: workout.exercises.length });
-    workout.exercises.push(exercise);
-    saveWorkout(workout);
-    router.go(router.paths.exerciseEditor(workout.id, exercise.id));
+    const create = (partial) => {
+      const exercise = makeExercise({ sortOrder: workout.exercises.length, ...partial });
+      workout.exercises.push(exercise);
+      saveWorkout(workout);
+      router.go(router.paths.exerciseEditor(workout.id, exercise.id));
+    };
+    openArtworkPicker({
+      title: "Add an exercise",
+      onSelect: (choice) => create({ name: choice.label, image: choice.file }),
+      blank: { label: "Something else", onSelect: () => create({}) },
+    });
   }
 
   function exerciseMenu(workout, exercise, index) {
