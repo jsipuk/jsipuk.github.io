@@ -254,6 +254,12 @@ records that the activity happened. The gym workout remains the point of the app
 Name the file after the exercise, drop it in `assets/exercises/`, and the app
 uses it. Nothing in the workout data changes.
 
+You never have to remember those names, though: **Add exercise** lists the
+artwork with thumbnails, and picking one fills in the name and attaches the
+picture. "Something else" is there for an exercise with no artwork, and an
+exercise that already exists can be given a picture with **Choose artwork** in
+its editor — useful when its name does not match a file.
+
 | Exercise name | File |
 | --- | --- |
 | Bench Press | `bench-press.png` |
@@ -405,4 +411,4 @@ scaled to 130%.
 
 ---
 
-Version 1.2.0.
+Version 1.3.0.

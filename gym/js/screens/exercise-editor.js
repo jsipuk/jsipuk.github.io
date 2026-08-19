@@ -7,7 +7,8 @@ import { state, saveWorkout, getWorkout, saveImageFile, deleteImage } from "../s
 import * as router from "../router.js";
 import { header, iconButton, backButton } from "../../components/header.js";
 import { stepper, chipRow, openNumberPad, menuSheet, toast, confirmSheet } from "../../components/controls.js";
-import { imageEl, forgetImage, bundledArtwork, expectedArtworkName, PLACEHOLDERS } from "../../components/image.js";
+import { imageEl, forgetImage, bundledArtwork, expectedArtworkName, bundledArtworkList, PLACEHOLDERS } from "../../components/image.js";
+import { openArtworkPicker } from "../../components/artwork-picker.js";
 
 export function render({ workoutId, itemId }) {
   const workout = getWorkout(workoutId);
@@ -100,10 +101,36 @@ export function render({ workoutId, itemId }) {
         h(
           "div",
           { style: { display: "grid", gap: "8px", flex: "1" } },
+          bundledArtworkList().length
+            ? h("button", {
+                class: "btn btn-outline",
+                type: "button",
+                text: "Choose artwork",
+                onclick: () =>
+                  openArtworkPicker({
+                    title: "Choose artwork",
+                    onSelect: (choice) => {
+                      const previous = target.image;
+                      target.image = choice.file;
+                      // An unnamed exercise takes the picture's name too.
+                      if (!target.name.trim()) {
+                        target.name = choice.label;
+                        nameInput.value = choice.label;
+                      }
+                      saveNow();
+                      if (previous && previous.startsWith("idb:")) {
+                        forgetImage(previous);
+                        deleteImage(previous);
+                      }
+                      paintImage();
+                    },
+                  }),
+              })
+            : null,
           h("button", {
             class: "btn btn-outline",
             type: "button",
-            text: target.image ? "Replace image" : "Add image",
+            text: target.image ? "Use my own photo" : "Upload a photo",
             onclick: () => fileInput.click(),
           }),
           target.image
@@ -130,9 +157,11 @@ export function render({ workoutId, itemId }) {
   /** Explains which picture is in use, and how to supply one. */
   function artworkHint() {
     if (target.image) {
-      return target.image.startsWith("idb:")
-        ? "Your own image, stored on this device only. Remove it to fall back to the app's artwork."
-        : `Using ${target.image}.`;
+      if (target.image.startsWith("idb:")) {
+        return "Your own photo, stored on this device only. Remove it to fall back to the app's artwork.";
+      }
+      const known = bundledArtworkList().find((choice) => choice.file === target.image);
+      return known ? `Using the ${known.label} artwork.` : `Using ${target.image}.`;
     }
     const matched = bundledArtwork(target.name);
     if (matched) return `Using ${matched}, matched to the name above.`;

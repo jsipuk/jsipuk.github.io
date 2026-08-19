@@ -44,7 +44,10 @@ export function openSheet({ title, build, buildFooter, full = false, onClose } =
   const footerContent = buildFooter ? buildFooter(close) : null;
   const footer = footerContent ? h("div", { class: "sheet-footer" }, footerContent) : null;
 
-  sheet.append(head, body, footer);
+  // append(null) would insert the literal text "null", so only append a real
+  // footer.
+  sheet.append(head, body);
+  if (footer) sheet.append(footer);
   scrim.addEventListener("click", close);
   overlayRoot().append(scrim, sheet);
   openSheets.push(entry);

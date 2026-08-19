@@ -31,6 +31,25 @@ export function bundledArtwork(name) {
   return bundled.get(slugify(name)) || null;
 }
 
+/** "dumbbell-lat-raise" -> "Dumbbell Lat Raise" */
+export function titleFromSlug(slug) {
+  return String(slug)
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+/**
+ * Everything in assets/exercises, ready to choose from. Sorted by name so the
+ * list reads the same every time.
+ */
+export function bundledArtworkList() {
+  return [...bundled.entries()]
+    .map(([slug, file]) => ({ slug, file, label: titleFromSlug(slug) }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
 /** The filename this item would need, so the editor can tell the user. */
 export function expectedArtworkName(name) {
   const slug = slugify(name);

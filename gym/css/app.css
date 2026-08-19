@@ -527,6 +527,18 @@ body {
 .reorder button:active { background: var(--surface-2); }
 .reorder button:disabled { opacity: 0.25; }
 .reorder svg { width: 16px; height: 16px; }
+.artwork-thumb {
+  flex: none;
+  width: 84px;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+}
+.artwork-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.artwork-row { gap: var(--gap-sm); }
+
 .image-picker {
   display: flex;
   align-items: center;
