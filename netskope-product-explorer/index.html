@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Netskope One Product Explorer — an unofficial personal reference</title>
-<meta name="description" content="A personal, unofficial reference to the Netskope One product suite, compiled from public product pages. Not a Netskope publication.">
-<meta name="robots" content="noindex">
-<!-- Fonts are served from this site. No runtime request leaves the page. -->
-<link rel="stylesheet" href="/fonts/fonts.css">
+<meta name="description" content="Interactive explorer for the Netskope One product suite — 36 products across 8 categories, built for sales and technical evaluation.">
+<meta name="author" content="John Saunders">
+<meta name="app-version" content="2.0.0">
+<meta name="last-modified" content="2026-08-21">
+<title>Netskope One — Product Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --ns-teal: #00A7CE;
@@ -80,17 +82,6 @@
     letter-spacing: -0.02em;
   }
   .logo-text span { color: var(--ns-teal); }
-  .disclaimer {
-    margin-top: 12px;
-    padding: 9px 12px;
-    border-left: 3px solid var(--ns-orange);
-    background: var(--ns-orange-light);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    font-size: 12.5px;
-    line-height: 1.55;
-    max-width: 62ch;
-  }
-  .disclaimer a { color: inherit; }
   .topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.12); }
   .topbar-title { font-size: 13px; color: rgba(255,255,255,0.55); font-weight: 400; }
   .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
@@ -336,7 +327,6 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    overflow: hidden;
     margin-top: 8px;
     margin-bottom: 28px;
     animation: slideDown 0.2s ease;
@@ -507,24 +497,74 @@
     flex-shrink: 0;
   }
 
-  /* PACKAGE TIER BADGES */
-  .badge-tier {
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 2px 6px;
-    border-radius: 4px;
-    display: inline-block;
-    cursor: help;
-  }
-  .badge-tier.tier-prime { background: rgba(0,167,206,0.12); color: #0076a8; border: 1px solid rgba(0,167,206,0.3); }
-  .badge-tier.tier-max   { background: rgba(255,131,0,0.12); color: #c76600; border: 1px solid rgba(255,131,0,0.3); }
-  .badge-tier.tier-api   { background: rgba(123,79,212,0.12); color: #6339b5; border: 1px solid rgba(123,79,212,0.3); }
-  .pc-tiers { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
-
   /* DETAIL PANEL ACCENT */
   .detail-panel { border-top: 3px solid var(--dp-accent-color, var(--ns-teal)); }
+
+  /* ADD-ON CHIPS */
+  .dp-addons { grid-column: 1 / -1; margin-top: 4px; padding-top: 16px; border-top: 1px dashed var(--border); }
+  .dp-addons h4 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-3); margin-bottom: 10px; }
+  .addon-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .addon-chip {
+    position: relative;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-2);
+    border: 1.5px dashed var(--border-strong);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .addon-chip:hover, .addon-chip.tip-active {
+    border-color: var(--ns-teal);
+    border-style: solid;
+    background: var(--ns-teal-light);
+    color: var(--ns-navy);
+  }
+  .addon-chip:focus-visible {
+    outline: 2px solid var(--ns-teal);
+    outline-offset: 2px;
+  }
+  .addon-chip .ac-plus { font-weight: 700; color: var(--ns-teal); }
+  .addon-tip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(calc(-50% + var(--tip-shift, 0px))) translateY(4px);
+    width: max-content;
+    max-width: 240px;
+    background: var(--ns-navy);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.5;
+    font-weight: 400;
+    padding: 9px 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,43,73,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 20;
+    text-align: left;
+    white-space: normal;
+  }
+  .addon-tip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: calc(50% - var(--tip-shift, 0px));
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--ns-navy);
+  }
+  .addon-chip:hover .addon-tip,
+  .addon-chip.tip-active .addon-tip {
+    opacity: 1;
+    transform: translateX(calc(-50% + var(--tip-shift, 0px))) translateY(0);
+  }
 
   /* KEYBOARD HINT */
   .kbd-hint {
@@ -563,17 +603,42 @@
     .dp-actions { flex-direction: row; flex-wrap: wrap; }
     .search-box input { width: 120px; }
   }
+
+  /* PRINT VIEW */
+  #print-view { display: none; }
+  @media print {
+    @page { margin: 16mm 14mm; }
+    body { background: #fff; }
+    .topbar, .sidebar, footer, .hero-strip, #detail-panel, #product-area { display: none !important; }
+    .layout { display: block !important; }
+    .main { padding: 0 !important; overflow: visible !important; }
+    #print-view { display: block !important; }
+
+    .pv-title { font-size: 20px; font-weight: 700; color: #002B49; margin-bottom: 2px; }
+    .pv-subtitle { font-size: 11px; color: #666; margin-bottom: 20px; }
+    .pv-cat { font-size: 15px; font-weight: 700; color: #002B49; margin-top: 22px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1.5px solid #002B49; break-after: avoid; }
+    .pv-cat:first-of-type { margin-top: 0; }
+    .pv-product { margin-bottom: 12px; break-inside: avoid; padding-left: 2px; }
+    .pv-product-name { font-size: 12.5px; font-weight: 600; color: #111; display: inline; }
+    .pv-new { font-size: 8px; font-weight: 700; color: #00A7CE; border: 1px solid #00A7CE; border-radius: 3px; padding: 1px 4px; margin-left: 5px; vertical-align: middle; }
+    .pv-desc { font-size: 10.5px; color: #333; line-height: 1.5; margin: 2px 0 3px; }
+    .pv-features { font-size: 9.5px; color: #555; }
+    .pv-features b { color: #333; }
+    .pv-addons { font-size: 9.5px; color: #0E7490; margin-top: 2px; }
+    .pv-addons b { color: #333; }
+    .pv-footer { margin-top: 24px; padding-top: 8px; border-top: 1px solid #ccc; font-size: 9px; color: #888; }
+  }
 </style>
 </head>
 <body>
 
 <!-- TOP NAV -->
 <nav class="topbar">
-  <a class="logo" href="/">
-    <span class="logo-text">JSIP<span>.UK</span></span>
+  <a class="logo" href="https://www.netskope.com/products" target="_blank">
+    <img src="data:image/png;base64,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" alt="Netskope" style="height:26px;width:auto">
   </a>
   <div class="topbar-divider"></div>
-  <span class="topbar-title">Netskope One Product Explorer</span>
+  <span class="topbar-title">Product Explorer</span>
   <div class="topbar-right">
     <div class="search-box">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="m11 11 2.5 2.5" stroke-linecap="round"/></svg>
@@ -595,7 +660,6 @@
       <div class="hero-text">
         <h1>Netskope One Platform</h1>
         <p>The industry's leading SSE and SASE platform — now with AgentSkope agentic operations and a full AI security suite, built natively on a single cloud.</p>
-        <p class="disclaimer">A personal reference built by John Saunders from Netskope's public product pages. Not a Netskope publication, not endorsed by Netskope, and not an authoritative source. For anything that matters, use <a href="https://www.netskope.com/products" target="_blank" rel="noopener">netskope.com</a>.</p>
       </div>
       <div class="hero-stats">
         <div class="hero-stat">
@@ -620,9 +684,16 @@
 
 <footer>
   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1" stroke-linecap="round"/></svg>
-  Last updated May 2026 &nbsp;·&nbsp; Created by John Saunders &nbsp;·&nbsp;
+  Last updated August 2026 &nbsp;·&nbsp; <span id="footer-version">v1.1.0</span> &nbsp;·&nbsp; Created by John Saunders &nbsp;·&nbsp;
   <a href="https://www.netskope.com/products" target="_blank">netskope.com/products ↗</a>
+  &nbsp;·&nbsp;
+  <button id="print-btn" onclick="window.print()" style="background:none;border:none;color:var(--ns-teal);cursor:pointer;font-size:12px;font-family:inherit;padding:0;text-decoration:none;display:inline-flex;align-items:center;gap:4px" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4V1h6v3M3 9h6v2H3V9zM1.5 4h9a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H9V7H3v2H1.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/></svg>
+    Print / Save as PDF
+  </button>
 </footer>
+
+<div id="print-view"></div>
 
 <script>
 const CAT_META = {
@@ -637,6 +708,15 @@ const CAT_META = {
   "Analytics":              { color: "#D97706", bg: "rgba(217,119,6,0.1)", icon: "◇" }
 };
 
+// ——————————————————————
+// VERSIONING POLICY (semver: MAJOR.MINOR.PATCH)
+//   PATCH (x.x.N) — small fixes: typo, bug, single-product update
+//   MINOR (x.N.0) — bigger updates: new feature, several products added/changed
+//   MAJOR (N.0.0) — full product review or major structural addition (e.g. new category)
+// Bump this constant on every change that ships. Footer reads from it automatically.
+// ——————————————————————
+const APP_VERSION = "2.0.0";
+
 const PRODUCTS = [
   {name:"SASE",              cat:"Converged",     icon:"🔐",
    desc:"Netskope One SASE combines market-leading SSE and SD-WAN to protect users, apps, and data everywhere with AI-powered zero trust security — fast, reliable access from any location or device, including IoT, at scale.",
@@ -647,7 +727,7 @@ const PRODUCTS = [
   {name:"SSE",               cat:"Converged",     icon:"🛡️",
    desc:"Netskope One Security Service Edge (SSE) consolidates critical security services in one platform — securing access to web, cloud, and private apps from anywhere with a data-centric, AI-powered approach.",
    features:["Cloud-delivered","AI-powered enforcement","Data-centric approach","Hybrid workforce ready","Zero trust inline"],
-   related:["SASE","Next Gen SWG","ZTNA"],
+   related:["SASE","Next Gen SWG","ZTNA / Private Access"],
    url:"https://www.netskope.com/products/security-service-edge"},
 
   {name:"Converged Access",  cat:"Converged",     icon:"↔️",
@@ -656,12 +736,6 @@ const PRODUCTS = [
    related:["SASE","Secure SD-WAN","Endpoint SD-WAN"],
    url:"https://www.netskope.com/products/converged-access"},
 
-  {name:"Converged Gateway", cat:"Converged",     icon:"🚪", isNew:true,
-   desc:"A single converged gateway unifying security and networking enforcement in one place — simplifying architecture with one gateway for all traffic, users, and locations.",
-   features:["Unified enforcement point","Security + networking","Simplified architecture","One gateway, all traffic","SASE-native"],
-   related:["Converged Access","SASE","SSE"],
-   url:"https://www.netskope.com/products/converged-gateway"},
-
   {name:"Unified Data Security",cat:"Converged",  icon:"🗄️",
    desc:"Re-imagine how you protect your organization's data in the AI era — the most comprehensive, unified data security in a single platform combining DLP, DSPM, CASB, and SSPM.",
    features:["Unified DLP","DSPM","CASB integration","SSPM","AI-era data protection"],
@@ -669,52 +743,52 @@ const PRODUCTS = [
    url:"https://www.netskope.com/products/data-security"},
 
   {name:"AgentSkope",        cat:"AgentSkope",    icon:"🧠", isNew:true,
-   desc:"Netskope One AgentSkope enables agentic operation of Netskope One — automating onerous processes for policy admins, NetOps, and SecOps teams, freeing skilled staff to focus on what matters. A unified foundation with consistent security, privacy, and GRC controls for every agent.",
-   features:["Agentic operations platform","Persona automation","Unified GRC controls","SIEM ingestion cost reduction","Agent Library catalog"],
-   related:["Netskope DLP AISecOps Agent","Netskope DEM Insights Agent","AI Command Center"],
-   url:"https://www.netskope.com/netskope-one/agentskope"},
+   desc:"Announced 5 May 2026. Netskope One AgentSkope is the architectural foundation for deploying Netskope AI agents that execute end-to-end SOC and NOC workflows — including first-of-kind agentic DLP analysis and insider-threat triage. Provides shared GRC, privacy and security controls plus agent-utilisation telemetry across the platform.",
+   features:["6 launch agents","First-of-kind agentic DLP","First-of-kind insider-threat triage","Unified GRC + privacy controls","Agent utilisation tracking","Natural-language ops"],
+   related:["AI Gateway","Agentic Broker","AI Guardrails","DLP","DSPM"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
 
   {name:"Netskope DLP AISecOps Agent", cat:"AgentSkope", icon:"🧪", isNew:true,
-   desc:"Mimics the actions of a security operations analyst to execute end-to-end data protection workflows — applying contextualized risk assessments, intelligent triage and investigation, and agentic risk remediation.",
-   features:["End-to-end DLP workflows","Contextual risk assessment","Intelligent triage","Agentic remediation","Add-on license"],
-   related:["AgentSkope","DLP","Netskope Insider Threat AISecOps Agent"],
-   url:"https://www.netskope.com/netskope-one/agentskope/dlp-aisecops-agent"},
+   desc:"First-of-its-kind agentic DLP analysis (announced 5 May 2026). Mimics a security operations analyst to execute end-to-end data protection workflows — contextualised risk assessments, intelligent triage and investigation, and agentic risk remediation. One global professional-services beta customer uses it to analyse millions of alerts, convert them into automatically-investigated cases, and free their team for critical work.",
+   features:["First-of-kind agentic DLP","Contextualised risk assessment","Intelligent triage & investigation","Agentic risk remediation","Eliminates low-value incident time"],
+   related:["AgentSkope","DLP","DSPM","Unified Data Security"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
 
   {name:"Netskope Insider Threat AISecOps Agent", cat:"AgentSkope", icon:"🕵️", isNew:true,
-   desc:"Automates insider threat detection and investigation workflows — correlating user behaviour, data movement, and risk signals to surface and triage insider risk like a dedicated analyst.",
-   features:["Insider risk detection","Behavioural correlation","Automated investigation","Analyst persona automation","Add-on license"],
-   related:["AgentSkope","Netskope DLP AISecOps Agent","Advanced Analytics"],
-   url:"https://www.netskope.com/netskope-one/agentskope"},
+   desc:"First-of-its-kind insider-threat triage (announced 5 May 2026, currently in private preview). Combines DLP alerts with user behaviour data to identify malicious activity and protect against insider threats — surfacing the patterns a tired analyst would miss.",
+   features:["First-of-kind insider-threat triage","Combines DLP + UEBA signal","Malicious-activity detection","User behaviour correlation","Private preview"],
+   related:["AgentSkope","Netskope DLP AISecOps Agent","DLP"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
 
   {name:"Netskope Private Access AIOps Agent", cat:"AgentSkope", icon:"🛠️", isNew:true,
-   desc:"Automatically audits configurations for Netskope One Private Access — removing dormant settings and helping ensure access privileges are never left open.",
-   features:["Automated config audits","Dormant setting cleanup","Access privilege hygiene","ZTNA operations","Add-on license"],
+   desc:"Automatically audits configurations for Netskope One Private Access — removing dormant settings and helping ensure access privileges are never left open. Generates granular application segments and policies based on real user-consumption patterns.",
+   features:["Auto-audit NPA configurations","Remove dormant settings","Granular app segments","Usage-driven policies","Cuts audit fatigue"],
    related:["AgentSkope","ZTNA / Private Access","Universal ZTNA"],
-   url:"https://www.netskope.com/netskope-one/agentskope/npa-aiops-agent"},
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
 
   {name:"Netskope DEM Data Intelligence Agent", cat:"AgentSkope", icon:"💬", isNew:true,
-   desc:"Streamlines troubleshooting for user experience issues — transforming granular DEM telemetry and raw metrics into actionable insights via a natural language conversational interface.",
-   features:["Natural language queries","Telemetry to insights","UX troubleshooting","Conversational interface","Add-on license"],
+   desc:"Streamlines troubleshooting for user-experience issues by transforming granular DEM telemetry and raw metrics into actionable insights — through natural language in an easy-to-use conversational interface.",
+   features:["Conversational DEM analysis","Natural-language queries","Telemetry to insights","Root-cause acceleration","Reduces MTTR"],
    related:["AgentSkope","Digital Experience Mgmt","Netskope DEM Insights Agent"],
-   url:"https://www.netskope.com/netskope-one/agentskope/dem-data-intel-agent"},
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
 
   {name:"Netskope DEM Insights Agent", cat:"AgentSkope", icon:"📈", isNew:true,
-   desc:"Provides a high-level view of organizational digital health — correlating granular telemetry to surface critical incidents, macro-impacting trends, and performance bottlenecks. Included in DEM Level 3/4.",
-   features:["Org-wide digital health","Incident surfacing","Trend correlation","Performance bottlenecks","Included in DEM L3/4"],
+   desc:"Provides a high-level view of organisational digital health — correlating granular telemetry to surface critical incidents, macro-impacting trends and performance bottlenecks before they affect the business.",
+   features:["High-level digital health","Critical incident surfacing","Macro trend correlation","Performance bottleneck detection","Proactive alerting"],
    related:["AgentSkope","Digital Experience Mgmt","Netskope DEM Data Intelligence Agent"],
-   url:"https://www.netskope.com/netskope-one/agentskope"},
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
 
   {name:"Netskope CCI Insights Agent", cat:"AgentSkope", icon:"🔍", isNew:true,
-   desc:"Empowers SOC analysts to query complex risk attributes and compliance certifications across more than 85,000 cloud, AI, and SaaS applications using natural language — conversational interaction with app risk data. Included.",
-   features:["85,000+ apps covered","Natural language queries","Risk attribute lookup","Compliance certifications","Included"],
-   related:["AgentSkope","Cloud Inline Security","Advanced Analytics"],
-   url:"https://www.netskope.com/netskope-one/agentskope"},
+   desc:"Empowers SOC analysts to query complex risk attributes and compliance certifications across more than 85,000 cloud, AI and SaaS applications using natural language — enabling conversational interaction with app risk data.",
+   features:["Natural-language risk queries","85,000+ apps covered","Risk attribute exploration","Compliance certifications","Conversational app-risk data"],
+   related:["AgentSkope","Cloud Inline Security","CASB (API)","GenAI Security"],
+   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
 
   {name:"AI Command Center", cat:"AI Security",   icon:"🎛️", isNew:true,
-   desc:"A single pane of glass for your entire AI security posture — unified visibility, governance, and control across all AI usage, agents, models, and data flows in your organization.",
-   features:["Unified AI visibility","AI governance hub","Posture management","Cross-product AI control","Single pane of glass"],
-   related:["AI Gateway","Agentic Broker","AI Guardrails"],
-   url:"https://www.netskope.com/products/ai-command-center"},
+   desc:"The foundational layer beneath Netskope's AI Security products — a holistic view of AI usage and risk with centralised AI discovery, risk understanding, and remediation across every agent, MCP server, and AI-related data store in the enterprise.",
+   features:["AI asset inventory","Overview dashboard","Agentic registry (coming soon)","AI topology & explorer (coming soon)","Policy-based risk rules (coming soon)","Compliance benchmarking (coming soon)"],
+   related:["Agentic Broker","AI Gateway","AI Guardrails","AI Red Teaming"],
+   url:"https://www.netskope.com/products/ai-security"},
 
   {name:"Agentic Broker",    cat:"AI Security",   icon:"🤖", isNew:true,
    desc:"Secure and govern AI agents operating across your enterprise — visibility, control, and policy enforcement for every agentic AI action, workflow, and data interaction.",
@@ -723,8 +797,8 @@ const PRODUCTS = [
    url:"https://www.netskope.com/products/agentic-broker"},
 
   {name:"AI Gateway",        cat:"AI Security",   icon:"⚡", isNew:true,
-   desc:"A gateway for all AI traffic that gives your organization visibility and control over how employees use AI tools — without sacrificing speed or user experience.",
-   features:["AI traffic visibility","Access control","Data protection","Usage analytics","Shadow AI discovery"],
+   desc:"A gateway for all AI traffic, including MCP servers, that gives your organization visibility and control over how employees and agents use AI tools — without sacrificing speed or user experience. Install and host in your own VPC or data centre.",
+   features:["AI traffic visibility","MCP server support","Access control","Data protection","Usage analytics","Shadow AI discovery"],
    related:["Agentic Broker","AI Guardrails","GenAI Security"],
    url:"https://www.netskope.com/products/ai-gateway"},
 
@@ -746,13 +820,14 @@ const PRODUCTS = [
    related:["AI Gateway","AI Guardrails","Cloud Inline Security"],
    url:"https://www.netskope.com/products/securing-generative-ai"},
 
-  {name:"Next Gen SWG",      cat:"Web & Cloud",   icon:"🌐", tiers:["Prime","Max"], 
+  {name:"Next Gen SWG",      cat:"Web & Cloud",   icon:"🌐", 
    desc:"The foundation for SSE web and cloud inline security — a next-generation secure web gateway providing real-time threat and data protection for all web and cloud traffic.",
    features:["Inline threat detection","DLP inline","Cloud app controls","SSL inspection","Zero-day protection"],
    related:["Cloud Inline Security","Threat Protection","Remote Browser Isolation"],
+   addons:[{name:"Cert-Pinned App Inspection", desc:"Extends inline inspection to certificate-pinned applications that normally block TLS interception."}],
    url:"https://www.netskope.com/products/next-gen-swg"},
 
-  {name:"Cloud Inline Security",cat:"Web & Cloud",icon:"☁️", tiers:["Prime","Max"], 
+  {name:"Cloud Inline Security",cat:"Web & Cloud",icon:"☁️", 
    desc:"Netskope One CASB lets you confidently adopt cloud applications without sacrificing security — inline and out-of-band protection for managed and unmanaged cloud apps.",
    features:["Inline + API CASB","Shadow IT discovery","Policy enforcement","Managed/unmanaged apps","Real-time coaching"],
    related:["Next Gen SWG","CASB (API)","SSPM"],
@@ -762,6 +837,10 @@ const PRODUCTS = [
    desc:"Netskope One Private Access ensures secure, optimized access to all private apps from anywhere — combining ZTNA with Endpoint SD-WAN for best-in-class zero trust private application access. The cornerstone of VPN replacement.",
    features:["App-level zero trust","Continuous trust verification","Endpoint SD-WAN built-in","Replace VPN","Any app, any location"],
    related:["Endpoint SD-WAN","Universal ZTNA","SASE"],
+   addons:[
+     {name:"Universal Reverse Proxy", desc:"Clientless private app access via reverse proxy — no agent required for the end user."},
+     {name:"NPA Local Broker Pair", desc:"On-premises broker pair for routing private app traffic locally, for hybrid or latency-sensitive environments."}
+   ],
    url:"https://www.netskope.com/products/private-access"},
 
   {name:"Universal ZTNA",       cat:"ZTNA & Private Access", icon:"🛂",
@@ -776,49 +855,55 @@ const PRODUCTS = [
    related:["ZTNA / Private Access","Secure SD-WAN","Converged Access"],
    url:"https://www.netskope.com/products/endpoint-sd-wan"},
 
-  {name:"Firewall as a Service",cat:"Web & Cloud",icon:"🔥", tiers:["Max"], 
+  {name:"Firewall as a Service",cat:"Web & Cloud",icon:"🔥", 
    desc:"Netskope One Cloud Firewall delivers FWaaS for egress traffic in a SASE architecture — cloud-delivered, policy-driven firewall for all users and locations, no hardware required.",
    features:["Cloud-delivered FWaaS","SASE-integrated","Egress control","DNS security","IPS/IDS"],
    related:["Next Gen SWG","SASE","SSE"],
+   addons:[
+     {name:"DNS Security", desc:"Recursive DNS resolution with security filtering to block malicious and risky domains before a connection is even made."},
+     {name:"DNS Content Filtering", desc:"Category-based content filtering at the DNS layer, alongside DNS Security."},
+     {name:"IPS for Non-Web Traffic", desc:"Intrusion prevention extended to non-web protocols passing through the firewall."}
+   ],
    url:"https://www.netskope.com/products/firewall"},
 
   {name:"Enterprise Browser", cat:"Web & Cloud",  icon:"🖥️",
    desc:"Increase productivity and streamline secure access for unmanaged devices to websites, company applications, collaboration tools, and resources — no endpoint agent required.",
    features:["Unmanaged device access","Secure browsing","BYOD support","No agent required","Isolation built-in"],
-   related:["Remote Browser Isolation","ZTNA","Next Gen SWG"],
+   related:["Remote Browser Isolation","ZTNA / Private Access","Next Gen SWG"],
    url:"https://www.netskope.com/products/enterprise-browser"},
 
-  {name:"Remote Browser Isolation",cat:"Web & Cloud",icon:"🔒", tiers:["Max"], 
+  {name:"Remote Browser Isolation",cat:"Web & Cloud",icon:"🔒", 
    desc:"Netskope One RBI isolates uncategorized and risky websites, executing all browser code remotely — protecting endpoints from web-borne threats without impacting user experience.",
    features:["Remote code execution","Risky site isolation","Transparent experience","Integrated with SWG","Zero endpoint risk"],
    related:["Next Gen SWG","Enterprise Browser","Threat Protection"],
+   addons:[{name:"E2E Encrypted App Inspection", desc:"Inline inspection of end-to-end encrypted applications via isolation, without breaking encryption for the user."}],
    url:"https://www.netskope.com/products/remote-browser-isolation"},
 
-  {name:"Threat Protection",  cat:"Web & Cloud",  icon:"🛡️", tiers:["Prime","Max"], 
+  {name:"Threat Protection",  cat:"Web & Cloud",  icon:"🛡️", 
    desc:"High-efficacy threat detection and blocking for advanced malware (including ransomware) and phishing — inline, real-time, AI-powered protection built into the SSE platform.",
    features:["Anti-malware","Anti-phishing","Ransomware defense","AI threat detection","Zero-day protection"],
    related:["Next Gen SWG","Cloud Inline Security","Advanced Analytics"],
    url:"https://www.netskope.com/netskope-one/threat-protection"},
 
-  {name:"DLP",               cat:"Data Security", icon:"📂", tiers:["Prime","Max","API"], 
+  {name:"DLP",               cat:"Data Security", icon:"📂", 
    desc:"Unified, ML-enhanced data loss prevention for cloud, web, email, private apps, and devices — reduce the risk of data exfiltration across every channel from one policy engine.",
    features:["Multi-channel DLP","ML-enhanced detection","Cloud + endpoint","Policy automation","Exact Data Match"],
    related:["DSPM","Unified Data Security","Cloud Inline Security"],
    url:"https://www.netskope.com/products/data-loss-prevention"},
 
-  {name:"DSPM",              cat:"Data Security", icon:"🗺️", tiers:["API"], 
+  {name:"DSPM",              cat:"Data Security", icon:"🗺️", 
    desc:"Netskope One DSPM empowers security teams to discover, map, and protect sensitive data across cloud, on-premises, and hybrid environments — find data risk before it becomes a breach.",
    features:["Data discovery","Risk posture scoring","Cloud + on-prem","Compliance mapping","Auto-remediation"],
    related:["DLP","CASB (API)","Unified Data Security"],
    url:"https://www.netskope.com/products/data-security-posture-management"},
 
   {name:"Data Lineage",      cat:"Data Security", icon:"🧬", isNew:true,
-   desc:"Track the complete journey of your sensitive data — where it originated, how it's transformed, where it moves, and who touches it — giving you full provenance and context for data risk decisions.",
-   features:["Data provenance tracking","Movement visibility","Transformation history","Risk context","AI-era data governance"],
-   related:["DSPM","DLP","Unified Data Security"],
-   url:"https://www.netskope.com/security-defined/what-is-data-lineage"},
+   desc:"Netskope One Data Lineage monitors the provenance, lifecycle, and transformation of sensitive data across cloud, web, email, and AI environments — a verifiable digital breadcrumb trail that helps security teams identify insider threats and track data exfiltration.",
+   features:["Provenance tracking","Data lifecycle visibility","Transformation history","Insider-threat evidence","Exfiltration tracing"],
+   related:["DSPM","DLP","Netskope Insider Threat AISecOps Agent","Unified Data Security"],
+   url:"https://www.netskope.com/products/data-security"},
 
-  {name:"CASB (API)",        cat:"Data Security", icon:"🔗", tiers:["API"], 
+  {name:"CASB (API)",        cat:"Data Security", icon:"🔗", 
    desc:"Out-of-band CASB protection for sanctioned SaaS apps via API — visibility and control for data at rest in Microsoft 365, Salesforce, Google Workspace, and hundreds more.",
    features:["API-connected","Data at rest scanning","Compliance enforcement","SaaS app coverage","Misconfiguration detection"],
    related:["Cloud Inline Security","SSPM","DLP"],
@@ -834,6 +919,7 @@ const PRODUCTS = [
    desc:"Netskope One SD-WAN — a 100% SaaS-based converged connectivity platform for branches, remote users, and clouds — one platform, one software, one policy with full SASE integration.",
    features:["SaaS-based","SASE-native","High-performance","Zero trust integrated","Cloud-managed"],
    related:["SASE","Converged Access","Micro Branch"],
+   addons:[{name:"Bandwidth Control", desc:"Granular bandwidth shaping by application, category, or domain across the SD-WAN fabric."}],
    url:"https://www.netskope.com/products/sase-branch"},
 
   {name:"Micro Branch",      cat:"Networking",    icon:"📡",
@@ -845,16 +931,20 @@ const PRODUCTS = [
   {name:"Device Intelligence",cat:"Networking",   icon:"📱",
    desc:"Gain visibility into every device — IoT, unmanaged, and BYOD — and apply zero trust policies based on real device context, risk, and behavior.",
    features:["IoT discovery","Device profiling","Zero trust enforcement","Risk-based access","OT/IoT security"],
-   related:["ZTNA","Micro Branch","Advanced Analytics"],
+   related:["ZTNA / Private Access","Micro Branch","Advanced Analytics"],
    url:"https://www.netskope.com/products/device-intelligence"},
 
-  {name:"Advanced Analytics", cat:"Analytics",    icon:"📊", tiers:["Prime","Max"], 
+  {name:"Advanced Analytics", cat:"Analytics",    icon:"📊", 
    desc:"Transform security operations with data-driven insights — identify trends, zero in on areas of risk, and use evidence to take action with powerful analytics built natively into the platform.",
    features:["Custom dashboards","Risk trending","Behavioral analytics","Policy impact analysis","Threat intelligence"],
    related:["Digital Experience Mgmt","Threat Protection","DSPM"],
+   addons:[
+     {name:"Log Streaming", desc:"Streams transaction, alert, and event data directly to your SIEM or data lake for long-term retention and correlation."},
+     {name:"Cloud TAP", desc:"Full traffic packet captures for deep forensic investigation and threat hunting."}
+   ],
    url:"https://www.netskope.com/products/advanced-analytics"},
 
-  {name:"Digital Experience Mgmt",cat:"Analytics",icon:"😊", tiers:["Prime","Max"], 
+  {name:"Digital Experience Mgmt",cat:"Analytics",icon:"😊", 
    desc:"Proactive Digital Experience Management (P-DEM) gives IT teams end-to-end visibility into user experience quality across apps, networks, and devices — resolve issues before users notice.",
    features:["End-to-end visibility","Proactive alerting","App performance scoring","Remote user insights","Network path analysis"],
    related:["Advanced Analytics","Secure SD-WAN","Device Intelligence"],
@@ -951,7 +1041,8 @@ function renderMain() {
       p.name.toLowerCase().includes(q) ||
       p.cat.toLowerCase().includes(q) ||
       p.desc.toLowerCase().includes(q) ||
-      p.features.some(f=>f.toLowerCase().includes(q))
+      p.features.some(f=>f.toLowerCase().includes(q)) ||
+      (p.addons && p.addons.some(a=>a.name.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q)))
     );
   }
 
@@ -994,7 +1085,6 @@ function renderMain() {
           ${p.isNew ? '<span class="badge-new">New</span>' : ''}
         </div>
         <span class="pc-cat" style="background:${m.bg};color:${m.color}">${p.cat}</span>
-        ${tierBadges(p)}
         <span class="pc-arrow" style="color:${m.color}">→</span>
       `;
       card.onclick = () => { selectedProduct = p.name; renderDetail(p); renderCards(); };
@@ -1010,19 +1100,6 @@ function renderMain() {
       }
     }
   });
-}
-
-const TIER_INFO = {
-  "Prime": "Included in the Netskope One Prime package",
-  "Max":   "Included in the Netskope One Max package",
-  "API":   "Available via API deployment"
-};
-function tierBadges(p, inline) {
-  if(!p.tiers || !p.tiers.length) return '';
-  const badges = p.tiers.map(t =>
-    `<span class="badge-tier tier-${t.toLowerCase()}" title="${TIER_INFO[t]||t}">${t}</span>`
-  ).join('');
-  return `<div class="pc-tiers"${inline?' style="margin-top:10px"':''}>${badges}</div>`;
 }
 
 function renderCards() {
@@ -1062,7 +1139,6 @@ function buildDetailPanel(p) {
         </div>
         <div class="dp-cat" style="background:${m.bg};color:${m.color}">${p.cat}</div>
         <div class="dp-desc">${p.desc}</div>
-        ${tierBadges(p, true)}
       </div>
       <div class="dp-actions">
         <a class="btn-primary" href="${p.url}" target="_blank">
@@ -1092,6 +1168,21 @@ function buildDetailPanel(p) {
         <h4>Related products</h4>
         <div class="related-list">${relatedProds || '<p style="font-size:13px;color:var(--text-3)">—</p>'}</div>
       </div>
+      ${p.addons && p.addons.length ? `
+      <div class="dp-addons">
+        <h4>Available add-ons</h4>
+        <div class="addon-list">
+          ${p.addons.map((a,i) => `
+            <span class="addon-chip" tabindex="0" role="button" aria-label="${a.name} add-on: ${a.desc}"
+              onmouseenter="positionAddonTip(this)"
+              onclick="event.stopPropagation();positionAddonTip(this);this.classList.toggle('tip-active')"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();positionAddonTip(this);this.classList.toggle('tip-active')}"
+              onfocus="positionAddonTip(this)">
+              <span class="ac-plus">+</span>${a.name}
+              <span class="addon-tip">${a.desc}</span>
+            </span>`).join('')}
+        </div>
+      </div>` : ''}
     </div>
   `;
   return panel;
@@ -1134,6 +1225,32 @@ function selectProduct(name) {
   renderCards();
 }
 
+// Builds a flattened, category-grouped print/PDF view of the full catalogue —
+// independent of whatever filter or search is currently active on screen.
+function buildPrintView() {
+  const container = document.getElementById('print-view');
+  const cats = [...new Set(PRODUCTS.map(p=>p.cat))];
+  let html = `
+    <div class="pv-title">Netskope One — Product Suite</div>
+    <div class="pv-subtitle">${PRODUCTS.length} products across ${cats.length} categories &nbsp;·&nbsp; Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} &nbsp;·&nbsp; netskope.com/products</div>
+  `;
+  cats.forEach(cat => {
+    html += `<div class="pv-cat">${cat}</div>`;
+    PRODUCTS.filter(p=>p.cat===cat).forEach(p => {
+      html += `
+        <div class="pv-product">
+          <span class="pv-product-name">${p.icon} ${p.name}</span>
+          ${p.isNew ? '<span class="pv-new">NEW</span>' : ''}
+          <div class="pv-desc">${p.desc}</div>
+          <div class="pv-features"><b>Key capabilities:</b> ${p.features.join(', ')}</div>
+          ${p.addons && p.addons.length ? `<div class="pv-addons"><b>Add-ons:</b> ${p.addons.map(a=>a.name).join(', ')}</div>` : ''}
+        </div>`;
+    });
+  });
+  html += `<div class="pv-footer">Created by John Saunders &nbsp;·&nbsp; v${APP_VERSION} &nbsp;·&nbsp; netskope.com/products</div>`;
+  container.innerHTML = html;
+}
+
 function render() {
   renderSidebar();
   renderMain();
@@ -1150,6 +1267,29 @@ document.getElementById('search-input').addEventListener('input', function() {
 });
 
 // Keyboard shortcut: / to focus search, Escape to clear
+// Keep addon tooltips fully on-screen by shifting them off-center when near an edge
+function positionAddonTip(chip) {
+  const tip = chip.querySelector('.addon-tip');
+  if(!tip) return;
+  chip.style.setProperty('--tip-shift', '0px');
+  const rect = tip.getBoundingClientRect();
+  const pad = 12;
+  let shift = 0;
+  if(rect.left < pad) {
+    shift = pad - rect.left;
+  } else if(rect.right > window.innerWidth - pad) {
+    shift = (window.innerWidth - pad) - rect.right;
+  }
+  chip.style.setProperty('--tip-shift', shift + 'px');
+}
+
+// Dismiss addon tooltips when clicking elsewhere
+document.addEventListener('click', function(e) {
+  if(!e.target.closest('.addon-chip')) {
+    document.querySelectorAll('.addon-chip.tip-active').forEach(c => c.classList.remove('tip-active'));
+  }
+});
+
 document.addEventListener('keydown', function(e) {
   const input = document.getElementById('search-input');
   if(e.key === '/' && document.activeElement !== input) {
@@ -1178,6 +1318,8 @@ const totalCats = new Set(PRODUCTS.map(p=>p.cat)).size;
 document.getElementById('stat-products').textContent = totalProducts;
 document.getElementById('stat-cats').textContent = totalCats;
 document.getElementById('topbar-count').textContent = totalProducts + ' products';
+document.getElementById('footer-version').textContent = 'v' + APP_VERSION;
+buildPrintView();
 
 // Init
 render();
