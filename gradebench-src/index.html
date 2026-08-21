@@ -14,7 +14,28 @@
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <!--
+      The content inside #root is a fallback, not part of the app. React clears
+      the container on its first render, so in dev it is gone before paint. It
+      only ever stays visible where /src/main.jsx cannot load — i.e. if this
+      directory is served as static files, i.e. GitHub Pages. Without it that
+      case renders a blank navy page with no explanation.
+    -->
+    <div id="root">
+      <div style="max-width:34rem;margin:14vh auto;padding:0 1.5rem;color:#93A1B5;
+                  font:400 16px/1.6 'Inter',system-ui,-apple-system,sans-serif">
+        <h1 style="color:#F7F7F5;font-size:22px;font-weight:700;margin:0 0 .6rem">
+          Gradebench source
+        </h1>
+        <p style="margin:0 0 1rem">
+          This directory is the source for Gradebench, not a running copy of it. The app
+          needs a local server for its API key, so it can't run from static hosting.
+        </p>
+        <p style="margin:0">
+          <a href="/gradebench/" style="color:#00BFA6">What Gradebench is, and how to run it&nbsp;&rarr;</a>
+        </p>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

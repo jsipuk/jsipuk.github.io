@@ -25,7 +25,7 @@ const FAMILIES = [
   { pkg: 'nunito', name: 'Nunito', weights: [400, 600, 700, 800], italics: [400] },
   { pkg: 'cinzel', name: 'Cinzel', weights: [500, 600, 700], italics: [] },
   { pkg: 'eb-garamond', name: 'EB Garamond', weights: [400, 500, 600], italics: [400] },
-  { pkg: 'inter', name: 'Inter', weights: [400, 500, 600], italics: [] },
+  { pkg: 'inter', name: 'Inter', weights: [400, 500, 600, 700], italics: [] },
   { pkg: 'atkinson-hyperlegible', name: 'Atkinson Hyperlegible', weights: [400, 700], italics: [] },
   { pkg: 'fraunces', name: 'Fraunces', weights: [400, 600, 700], italics: [] },
   { pkg: 'karla', name: 'Karla', weights: [400, 500, 700], italics: [] },
