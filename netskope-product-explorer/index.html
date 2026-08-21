@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Interactive explorer for the Netskope One product suite — 36 products across 8 categories, built for sales and technical evaluation.">
 <meta name="author" content="John Saunders">
-<meta name="app-version" content="2.0.0">
+<meta name="app-version" content="2.0.2">
 <meta name="last-modified" content="2026-08-21">
 <title>Netskope One — Product Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -515,7 +515,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    cursor: pointer;
+    cursor: help;
     transition: var(--transition);
   }
   .addon-chip:hover, .addon-chip.tip-active {
@@ -715,7 +715,7 @@ const CAT_META = {
 //   MAJOR (N.0.0) — full product review or major structural addition (e.g. new category)
 // Bump this constant on every change that ships. Footer reads from it automatically.
 // ——————————————————————
-const APP_VERSION = "2.0.0";
+const APP_VERSION = "2.0.2";
 
 const PRODUCTS = [
   {name:"SASE",              cat:"Converged",     icon:"🔐",
@@ -1087,7 +1087,15 @@ function renderMain() {
         <span class="pc-cat" style="background:${m.bg};color:${m.color}">${p.cat}</span>
         <span class="pc-arrow" style="color:${m.color}">→</span>
       `;
-      card.onclick = () => { selectedProduct = p.name; renderDetail(p); renderCards(); };
+      card.onclick = () => {
+        if(selectedProduct === p.name) {
+          closeDetail();
+        } else {
+          selectedProduct = p.name;
+          renderDetail(p);
+          renderCards();
+        }
+      };
       grid.appendChild(card);
     });
 
