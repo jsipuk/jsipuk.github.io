@@ -113,7 +113,7 @@ the pair behaves like a d-pad rather than two islands.
 ## Architecture
 
 Vanilla ES modules, canvas 2D, no build step, no dependencies — matching the
-other projects on this site. A framework would add a toolchain and megabytes to
+kind of project. A framework would add a toolchain and megabytes to
 a game whose entire renderer is `fillRect`.
 
 Everything is drawn into a fixed **208 x ~370 pixel buffer** and blitted up with

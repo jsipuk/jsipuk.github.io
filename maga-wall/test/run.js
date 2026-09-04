@@ -780,6 +780,17 @@ section('Project wiring');
   check('the about screen names what it is not endorsed by',
     ui.includes('REPUBLICAN PARTY') && ui.includes('STATES GOVERNMENT'));
 
+  // This is a political parody with an audience unconnected to whoever built
+  // it. A handle baked into the binary, or into a URL, is not undoable later.
+  const shipped = readdirSync(join(ROOT, 'public/src'))
+    .filter((f) => f.endsWith('.js'))
+    .map((f) => readFileSync(join(ROOT, 'public/src', f), 'utf8')).join('\n')
+    + readFileSync(join(ROOT, 'public/index.html'), 'utf8')
+    + readFileSync(join(ROOT, 'public/manifest.webmanifest'), 'utf8');
+  const PERSONAL = /jsipuk|jsip\.uk|saunders|github\.io/i;
+  const hit = PERSONAL.exec(shipped);
+  check('no personal identifier ships in the game', !hit, hit ? 'found "' + hit[0] + '"' : '');
+
   const ent = readFileSync(join(ROOT, 'public/src/entitlement.js'), 'utf8');
   // The free local unlock must be reachable only from where the game is being
   // developed. Honouring a query flag here would hand the game away.

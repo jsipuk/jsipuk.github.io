@@ -8,7 +8,7 @@
  * keeps layout and hit-testing from ever drifting apart.
  */
 
-import { VW, TRIAL_RUNS } from './config.js';
+import { VW, TRIAL_RUNS, PUBLISHER } from './config.js';
 import { P } from './palette.js';
 import { text, textCentre, textWidth, pad } from './font.js';
 
@@ -150,7 +150,7 @@ export function drawBoot(c, vh, t, claiming) {
     return items;
   }
   const step = Math.min(3, Math.floor(t / 0.7));
-  if (step >= 0) textCentre(c, 'JSIPUK', VW / 2, vh / 2 - 30, P.textDim, 2, P.ink);
+  if (step >= 0) textCentre(c, PUBLISHER, VW / 2, vh / 2 - 30, P.textDim, 1, P.ink);
   if (step >= 1) textCentre(c, 'PRESENTS', VW / 2, vh / 2 - 12, P.textDim, 1, P.ink);
   if (step >= 2) {
     panel(c, 40, vh / 2 + 8, 128, 26);

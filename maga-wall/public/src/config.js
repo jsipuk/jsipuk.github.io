@@ -190,6 +190,14 @@ export const CRATE = {
   tapPad: 12,
 };
 
+/* ---- Branding ---------------------------------------------------------------
+ * The name on the boot screen. Deliberately a fictional label rather than a
+ * real person or handle: this game is a political parody aimed at an audience
+ * that has nothing to do with whoever built it, and tying the two together in
+ * the binary is not something you can undo later.
+ */
+export const PUBLISHER = 'EAGLE EYE SOFTWARE';
+
 /* ---- Entitlement ----------------------------------------------------------- */
 export const TRIAL_RUNS = 3;
 
