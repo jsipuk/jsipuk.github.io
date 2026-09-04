@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <rect width="32" height="32" fill="#12102a"/>
+  <rect x="0" y="0" width="32" height="9" fill="#2b1e4a"/>
+  <!-- eagle head, simplified to read at 32px -->
+  <rect x="20" y="3" width="6" height="4" fill="#f4f0e4"/>
+  <rect x="26" y="4" width="2" height="2" fill="#ffc13b"/>
+  <rect x="22" y="4" width="1" height="1" fill="#0a0812"/>
+  <!-- wall -->
+  <g fill="#b4552f">
+    <rect x="4" y="12" width="24" height="5"/><rect x="4" y="18" width="24" height="5"/>
+  </g>
+  <g fill="#d4a02a">
+    <rect x="4" y="24" width="24" height="5"/>
+  </g>
+  <g fill="#7a3418">
+    <rect x="4" y="16" width="24" height="1"/><rect x="4" y="22" width="24" height="1"/><rect x="4" y="28" width="24" height="1"/>
+    <rect x="10" y="12" width="1" height="4"/><rect x="20" y="12" width="1" height="4"/>
+    <rect x="15" y="18" width="1" height="4"/><rect x="25" y="18" width="1" height="4"/>
+    <rect x="10" y="24" width="1" height="4"/><rect x="20" y="24" width="1" height="4"/>
+  </g>
+  <!-- zombie peeking from the left -->
+  <rect x="0" y="17" width="4" height="6" fill="#6f9c4a"/>
+  <rect x="1" y="19" width="1" height="1" fill="#ffe14d"/>
+  <rect x="3" y="19" width="1" height="1" fill="#ffe14d"/>
+</svg>
