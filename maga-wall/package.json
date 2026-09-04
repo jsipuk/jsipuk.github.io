@@ -1,0 +1,12 @@
+{
+  "name": "maga-wall",
+  "private": true,
+  "type": "module",
+  "description": "Build The MAGA Wall — an 8-bit defensive-wall arcade game.",
+  "scripts": {
+    "dev": "node test/serve.js",
+    "dev:pay": "node test/serve.js --fake-stripe",
+    "test": "eslint . && node test/run.js && node test/api.js",
+    "lint": "eslint ."
+  }
+}

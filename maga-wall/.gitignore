@@ -1,0 +1,7 @@
+node_modules/
+.wrangler/
+.dev.vars
+*.local
+# Screenshots from browser test runs land here if a test is run from the project root.
+*.png
+!public/icons/*.png

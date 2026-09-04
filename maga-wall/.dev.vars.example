@@ -1,0 +1,7 @@
+# Copy to .dev.vars for `wrangler pages dev`. Never commit the real thing.
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PRICE_ID="price_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+LICENCE_SECRET="generate-with-openssl-rand-base64-48"
+PRICE_LABEL="$4.99"
+AUTOMATIC_TAX="false"

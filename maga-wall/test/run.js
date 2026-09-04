@@ -13,15 +13,18 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-import * as C from '../src/config.js';
-import { SHAPES, SHAPE_NAMES, makeDealer, bagWeights } from '../src/pieces.js';
-import { makeRng } from '../src/rng.js';
-import { noteFreq } from '../src/audio.js';
+import * as C from '../public/src/config.js';
+import { SHAPES, SHAPE_NAMES, makeDealer, bagWeights } from '../public/src/pieces.js';
+import { makeRng } from '../public/src/rng.js';
+import { noteFreq } from '../public/src/audio.js';
+import {
+  makeLicence, normaliseLicence, mintToken, readToken, safeEqual, hmacHex,
+} from '../functions/_lib.js';
 import {
   createGame, update, idx, solid, columnHeight, wallMass, maxWallHeight,
   tryMove, tryRotate, hardDrop, ghostY, pieceCells, launchEagle, eagleReady,
   tapScene, damageCell, displayScore, EMPTY, PERCH,
-} from '../src/sim.js';
+} from '../public/src/sim.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
@@ -657,20 +660,91 @@ section('Audio note table');
 }
 
 /* ========================================================================== */
+section('Licences and tokens');
+{
+  const SECRET = 'test-secret-not-a-real-one';
+
+  const keys = new Set();
+  let shaped = true;
+  let ambiguous = false;
+  for (let i = 0; i < 3000; i++) {
+    const k = makeLicence();
+    keys.add(k);
+    if (!/^MAGA(-[ACDEFGHJKMNPQRTUVWXYZ2346789]{4}){3}$/.test(k)) shaped = false;
+    // O/0, I/1, L, S/5 and B/8 are the characters people mistype off a screen.
+    if (/[OI1L05SB]/.test(k.slice(5))) ambiguous = true;
+  }
+  check('licence keys are uniformly shaped', shaped);
+  check('licence keys avoid visually ambiguous characters', !ambiguous);
+  check('licence keys do not collide', keys.size === 3000, keys.size + ' unique of 3000');
+
+  check('a licence key survives a round trip',
+    normaliseLicence('MAGA-ACDE-FGHJ-KMNP') === 'MAGA-ACDE-FGHJ-KMNP');
+  check('restore accepts what a human actually types',
+    normaliseLicence('  maga acde fghj kmnp ') === 'MAGA-ACDE-FGHJ-KMNP'
+    && normaliseLicence('magaacdefghjkmnp') === 'MAGA-ACDE-FGHJ-KMNP'
+    && normaliseLicence('MAGA_ACDE_FGHJ_KMNP') === 'MAGA-ACDE-FGHJ-KMNP');
+  check('restore rejects rubbish',
+    normaliseLicence('') === null && normaliseLicence('hello') === null
+    && normaliseLicence('MAGA-ACDE-FGHJ') === null
+    && normaliseLicence('NOPE-ACDE-FGHJ-KMNP') === null
+    && normaliseLicence(null) === null && normaliseLicence(undefined) === null);
+
+  const licence = makeLicence();
+  const token = await mintToken(SECRET, licence);
+  const readBack = await readToken(SECRET, token);
+  check('a minted token reads back as its licence',
+    readBack && readBack.licence === licence);
+
+  check('a token minted with another secret is rejected',
+    (await readToken('a-different-secret', token)) === null);
+
+  // The whole paywall rests on this: the payload must not be editable.
+  const [body, sig] = token.split('.');
+  const forgedBody = Buffer.from(JSON.stringify({ k: 'MAGA-AAAA-AAAA-AAAA', v: 1, iat: 0 }))
+    .toString('base64url');
+  check('a forged payload with a stolen signature is rejected',
+    (await readToken(SECRET, forgedBody + '.' + sig)) === null);
+  check('a flipped signature bit is rejected',
+    (await readToken(SECRET, body + '.' + (sig.slice(0, -1) + (sig.slice(-1) === 'a' ? 'b' : 'a')))) === null);
+  check('a truncated signature is rejected',
+    (await readToken(SECRET, body + '.' + sig.slice(0, 20))) === null);
+  check('a token with no signature at all is rejected',
+    (await readToken(SECRET, body)) === null
+    && (await readToken(SECRET, body + '.')) === null);
+  check('junk in the token slot is rejected',
+    (await readToken(SECRET, '')) === null
+    && (await readToken(SECRET, null)) === null
+    && (await readToken(SECRET, 'a.b.c')) === null
+    && (await readToken(SECRET, '!!!.???')) === null);
+
+  check('two licences never share a token', token !== await mintToken(SECRET, makeLicence()));
+
+  check('the comparison is length-safe',
+    safeEqual('abc', 'abc') && !safeEqual('abc', 'abcd')
+    && !safeEqual('abc', 'abd') && !safeEqual('', 'a') && safeEqual('', ''));
+
+  // Stripe webhook signatures use the same primitive; pin it against a known value.
+  check('HMAC-SHA256 matches a known vector',
+    (await hmacHex('key', 'The quick brown fox jumps over the lazy dog'))
+    === 'f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8');
+}
+
+/* ========================================================================== */
 section('Project wiring');
 {
-  const sw = readFileSync(join(ROOT, 'sw.js'), 'utf8');
-  const srcFiles = readdirSync(join(ROOT, 'src')).filter((f) => f.endsWith('.js'));
+  const sw = readFileSync(join(ROOT, 'public/sw.js'), 'utf8');
+  const srcFiles = readdirSync(join(ROOT, 'public/src')).filter((f) => f.endsWith('.js'));
   const missing = srcFiles.filter((f) => !sw.includes('./src/' + f));
   check('the service worker caches every source file', missing.length === 0, missing.join(', '));
 
-  const manifest = JSON.parse(readFileSync(join(ROOT, 'manifest.webmanifest'), 'utf8'));
+  const manifest = JSON.parse(readFileSync(join(ROOT, 'public/manifest.webmanifest'), 'utf8'));
   check('the manifest has the fields an install prompt needs',
     !!manifest.name && !!manifest.short_name && !!manifest.start_url
     && !!manifest.display && !!manifest.icons.length);
   check('the manifest is portrait and standalone-ish',
     manifest.orientation === 'portrait' && ['fullscreen', 'standalone'].includes(manifest.display));
-  const iconFiles = readdirSync(join(ROOT, 'icons'));
+  const iconFiles = readdirSync(join(ROOT, 'public/icons'));
   const iconsPresent = manifest.icons.every((i) => iconFiles.includes(i.src.replace('icons/', '')));
   check('every icon the manifest promises exists', iconsPresent, iconFiles.join(', '));
   check('a maskable icon is provided',
@@ -679,29 +753,51 @@ section('Project wiring');
     manifest.icons.some((i) => i.sizes === '192x192')
     && manifest.icons.some((i) => i.sizes === '512x512'));
 
-  const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+  const html = readFileSync(join(ROOT, 'public/index.html'), 'utf8');
   check('the page links the manifest and the entry module',
     html.includes('manifest.webmanifest') && html.includes('src/main.js'));
   check('the viewport is locked against pinch zoom',
     html.includes('user-scalable=no') && html.includes('viewport-fit=cover'));
 
-  const css = readFileSync(join(ROOT, 'style.css'), 'utf8');
+  const css = readFileSync(join(ROOT, 'public/style.css'), 'utf8');
   check('the page cannot scroll or rubber-band',
     css.includes('overflow: hidden') && css.includes('overscroll-behavior: none')
     && css.includes('touch-action: none'));
   check('the canvas is scaled without smoothing', css.includes('pixelated'));
 
   // Parody positioning has to be in the shipped text, not just in a comment.
-  const ui = readFileSync(join(ROOT, 'src/ui.js'), 'utf8');
+  const ui = readFileSync(join(ROOT, 'public/src/ui.js'), 'utf8');
+  // Every literal button label, checked against the narrowest button the code
+  // uses. "RESTORE PURCHASE" at scale 2 was 190px inside a 168px button.
+  const labels = [...ui.matchAll(/button\(c, items, '[a-z]+', [^,]+, '([^']+)'/g)].map((m) => m[1]);
+  const NARROW = 168;
+  const tooWide = labels.filter((l) => (l.length * 6 - 1) * 2 > NARROW - 10);
+  check('button labels are known to the fitter', labels.length >= 10, labels.length + ' labels');
+  check('over-long labels shrink instead of overflowing',
+    /while \(scale > 1 && textWidth\(label, scale\) > w - 10\) scale--/.test(ui),
+    tooWide.length ? 'relies on it for: ' + tooWide.join(', ') : 'none currently need it');
   check('the disclaimer is on the title screen', ui.includes('NOT AFFILIATED'));
   check('the about screen names what it is not endorsed by',
     ui.includes('REPUBLICAN PARTY') && ui.includes('STATES GOVERNMENT'));
 
-  const ent = readFileSync(join(ROOT, 'src/entitlement.js'), 'utf8');
-  check('entitlement is loudly marked as not production-ready',
-    ent.includes('NOTHING HERE TAKES MONEY'));
+  const ent = readFileSync(join(ROOT, 'public/src/entitlement.js'), 'utf8');
+  // The free local unlock must be reachable only from where the game is being
+  // developed. Honouring a query flag here would hand the game away.
+  const localHostFn = ent.slice(ent.indexOf('export function isLocalHost'),
+    ent.indexOf('export const isDevEnvironment'));
+  check('dev mode is decided by hostname, never by the query string',
+    /export const isDevEnvironment = isLocalHost/.test(ent)
+    && !/URLSearchParams|location\.search/.test(localHostFn)
+    && !/has\(.dev.\)/.test(ent),
+    localHostFn ? '' : 'isLocalHost not found');
+  check('the live override can only make payment stricter',
+    /forceLivePayments/.test(ent) && /isLocalHost\(\) && !forceLivePayments\(\)/.test(ent));
   check('entitlement and game data use separate storage keys',
     ent.includes('magawall.entitlement') && !ent.includes('magawall.scores'));
+  check('the client never holds a Stripe secret',
+    !/sk_live|sk_test|STRIPE_SECRET/.test(ent));
+  check('the service worker refuses to cache the payment API',
+    sw.includes("startsWith('/api/')"));
 }
 
 /* ========================================================================== */

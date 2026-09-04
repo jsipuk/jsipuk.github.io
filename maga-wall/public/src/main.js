@@ -10,7 +10,8 @@ import { createRenderer, reactToEvent } from './render.js';
 import { createInput, lockViewport } from './input.js';
 import { createAudio, EVENT_SFX } from './audio.js';
 import { loadSettings, saveSettings, loadScores, recordRun, countStart, resetScores, storageAvailable } from './storage.js';
-import { createEntitlement, devProvider, isDevEnvironment } from './entitlement.js';
+import { createEntitlement, pickProvider, devProvider } from './entitlement.js';
+import { askForText, promptOpen } from './prompt.js';
 import { createGame, update as stepSim, tapScene, launchEagle, displayScore } from './sim.js';
 import * as UI from './ui.js';
 import { P } from './palette.js';
@@ -21,13 +22,15 @@ const audio = createAudio();
 
 const settings = loadSettings();
 let scores = loadScores();
-const dev = isDevEnvironment();
+
 const storageOk = storageAvailable();
 
-const ent = createEntitlement({
-  provider: devProvider,           // swap here for a real provider; see entitlement.js
-  runsPlayed: () => loadScores().runs,
-});
+/* Real payments everywhere except a development machine. pickProvider decides
+ * from the hostname, never from the query string, so the free local unlock
+ * cannot be summoned on the live site. */
+const provider = pickProvider();
+const dev = provider === devProvider;
+const ent = createEntitlement({ provider, runsPlayed: () => loadScores().runs });
 
 /* -------------------------------------------------------------------------- */
 /* Screen state                                                               */
@@ -42,12 +45,28 @@ const S = {
   items: [],
   game: null,
   result: null,
-  busy: false,
+  busy: '',             // '' | 'buy' | 'restore'
+  claiming: false,      // redeeming a Stripe redirect; the boot screen holds
   error: '',
+  licence: null,
+  copied: false,
   banner: null,         // { msg, sub, life }
 };
 
-const isPlaying = () => S.screen === 'play';
+/** Price label from the edge; null until fetched, or if unconfigured. */
+let priceLabel = null;
+
+/**
+ * True from the moment the page loads until a Stripe redirect has been
+ * redeemed. Read synchronously, before any await, so there is no window in
+ * which the player can tap past the boot screen and miss their licence key.
+ */
+const returningFromCheckout = (() => {
+  try { return (new URLSearchParams(location.search).get('purchase') || '').startsWith('cs_'); }
+  catch { return false; }
+})();
+
+const isPlaying = () => S.screen === 'play' && !promptOpen();
 
 function go(screen) {
   S.prev = S.screen;
@@ -95,6 +114,9 @@ function activate(id) {
 
   switch (S.screen) {
     case 'boot':
+      // Tapping past the boot screen mid-claim would land the buyer on the
+      // title and they would never see their licence key.
+      if (S.claiming) break;
       go('title');
       break;
 
@@ -146,6 +168,11 @@ function activate(id) {
       else if (id === 'back') { audio.play('back'); go('title'); }
       break;
 
+    case 'unlocked':
+      if (id === 'copy') copyLicence();
+      else if (id === 'play') startRun();
+      break;
+
     default:
       break;
   }
@@ -153,31 +180,57 @@ function activate(id) {
 
 async function doPurchase() {
   if (S.busy) return;
-  S.busy = true;
+  S.busy = 'buy';
   S.error = '';
   try {
-    const ok = await ent.purchase();
-    if (ok) { audio.play('coin'); go('title'); }
+    const result = await ent.purchase();
+    if (result && result.unlocked) { audio.play('coin'); showUnlocked(); }
+    else if (result && result.pending) return;    // navigating to Stripe; stay busy
     else S.error = 'Purchase did not complete.';
   } catch (e) {
     S.error = e && e.message ? e.message : 'Purchase failed.';
-  } finally {
-    S.busy = false;
   }
+  S.busy = '';
 }
 
 async function doRestore() {
   if (S.busy) return;
-  S.busy = true;
+  const key = await askForText({
+    title: 'Restore purchase',
+    note: 'Enter the licence key from your purchase. It looks like MAGA-XXXX-XXXX-XXXX and is in your Stripe receipt.',
+    placeholder: 'MAGA-XXXX-XXXX-XXXX',
+  });
+  if (key === null) return;
+  if (!key) { S.error = 'Enter your licence key.'; return; }
+
+  S.busy = 'restore';
   S.error = '';
   try {
-    const ok = await ent.restore();
-    if (ok) { audio.play('coin'); go('title'); }
-    else S.error = 'No previous purchase found on this device.';
+    const result = await ent.restore(key);
+    if (result && result.unlocked) { audio.play('coin'); showUnlocked(); }
+    else S.error = (result && result.message) || 'That key was not recognised.';
   } catch (e) {
-    S.error = e && e.message ? e.message : 'Restore failed.';
-  } finally {
-    S.busy = false;
+    S.error = e && e.message ? e.message : 'Could not check that key.';
+  }
+  S.busy = '';
+}
+
+function showUnlocked() {
+  S.licence = ent.licence;
+  S.copied = false;
+  go(S.licence ? 'unlocked' : 'title');
+}
+
+async function copyLicence() {
+  if (!S.licence) return;
+  try {
+    await navigator.clipboard.writeText(S.licence);
+    S.copied = true;
+    audio.play('select');
+  } catch {
+    // Clipboard is blocked without a secure context or a user gesture chain.
+    // The key is on screen either way, which is what actually matters.
+    S.error = 'Copy blocked. Write the key down instead.';
   }
 }
 
@@ -216,12 +269,12 @@ const input = createInput(canvas, renderer, {
     for (const it of S.items) {
       if (x >= it.x && x < it.x + it.w && y >= it.y && y < it.y + it.h) { activate(it.id); return; }
     }
-    if (S.screen === 'boot') activate('any');
+    if (S.screen === 'boot' && !S.claiming) activate('any');
   },
   onUiKey: (key) => {
     audio.unlock();
     const n = S.items.length;
-    if (S.screen === 'boot') { activate('any'); return; }
+    if (S.screen === 'boot') { if (!S.claiming) activate('any'); return; }
     if (key === 'rotate') { S.sel = (S.sel - 1 + n) % n; audio.play('menu'); }
     else if (key === 'soft') { S.sel = (S.sel + 1) % n; audio.play('menu'); }
     else if (key === 'enter' || key === 'hard') { const it = S.items[S.sel]; if (it) activate(it.id); }
@@ -318,15 +371,16 @@ function frame(now) {
 
 function drawScreen(b, vh) {
   switch (S.screen) {
-    case 'boot': return UI.drawBoot(b, vh, S.t);
+    case 'boot': return UI.drawBoot(b, vh, S.t, S.claiming);
     case 'title': return UI.drawTitle(b, vh, S.t, S.sel, scores, ent);
     case 'how': return UI.drawHow(b, vh, S.page, S.sel);
-    case 'settings': return UI.drawSettings(b, vh, settings, S.sel, storageOk);
+    case 'settings': return UI.drawSettings(b, vh, settings, S.sel, storageOk, ent.licence);
     case 'about': return UI.drawAbout(b, vh, S.sel);
     case 'scores': return UI.drawScores(b, vh, scores, S.sel);
     case 'pause': return UI.drawPause(b, vh, S.sel);
     case 'gameover': return UI.drawGameOver(b, vh, S.game, S.result, S.sel);
-    case 'paywall': return UI.drawPaywall(b, vh, ent, S.sel, dev, S.busy, S.error);
+    case 'paywall': return UI.drawPaywall(b, vh, ent, S.sel, dev, S.busy, S.error, priceLabel);
+    case 'unlocked': return UI.drawUnlocked(b, vh, S.licence, S.sel, S.copied);
     default: return [];
   }
 }
@@ -357,10 +411,63 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+/* -------------------------------------------------------------------------- */
+/* Entitlement sync                                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Runs once on boot, off the critical path — the game is already playable
+ * while this is in flight, and every branch of it is allowed to fail.
+ *
+ * Two jobs: redeem a Stripe redirect if we have just come back from Checkout,
+ * and re-check any stored token against the edge so a revoked or refunded
+ * licence stops working.
+ */
+async function syncEntitlement() {
+  let params;
+  try { params = new URLSearchParams(location.search); } catch { return; }
+
+  try {
+    const result = await ent.sync(params);
+    if (result.claimed) {
+      audio.play('coin');
+      S.licence = ent.licence;
+      S.copied = false;
+      S.claiming = false;
+      go('unlocked');
+    } else if (result.error) {
+      S.claiming = false;
+      S.error = result.error;
+      go('paywall');
+    }
+  } catch {
+    /* Offline, or the API is not deployed. The cached entitlement stands. */
+  }
+  S.claiming = false;
+
+  // Never leave the session id in the address bar: it is single-use, but a
+  // shared or bookmarked URL that re-triggers a claim is just noise.
+  if (params.get('purchase')) {
+    try {
+      params.delete('purchase');
+      const qs = params.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+    } catch { /* not fatal */ }
+  }
+
+  if (!returningFromCheckout) {
+    try { priceLabel = await ent.price(); } catch { priceLabel = null; }
+  } else {
+    ent.price().then((p) => { priceLabel = p; }).catch(() => {});
+  }
+}
+
 audio.setMusic(settings.music);
 audio.setSfx(settings.sfx);
 fit();
+S.claiming = returningFromCheckout;
 requestAnimationFrame(frame);
+syncEntitlement();
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => {

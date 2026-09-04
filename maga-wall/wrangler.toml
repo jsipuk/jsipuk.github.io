@@ -1,0 +1,18 @@
+# Only needed for `wrangler pages dev` / `wrangler pages deploy` from the CLI.
+# Deploying through the Cloudflare dashboard (see DEPLOY.md) ignores this file.
+#
+# Secrets are NEVER put here. Set them in the Pages project, or locally in a
+# .dev.vars file, which .gitignore excludes.
+
+name = "maga-wall"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "public"
+
+[[kv_namespaces]]
+binding = "LICENCES"
+# Replace with your namespace id before using the CLI.
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+[vars]
+PRICE_LABEL = "$4.99"
+AUTOMATIC_TAX = "false"

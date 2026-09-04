@@ -1,0 +1,133 @@
+/* The page is only a frame for the canvas. Everything visible is drawn in JS,
+ * so this file exists to stop the browser doing anything helpful. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0812;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Keep the control bar clear of the home indicator on notched phones. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+#view {
+  display: block;
+  touch-action: none;
+  /* Nearest-neighbour scaling: the whole look depends on this. */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The game reads screen shake from its own settings; nothing to do in CSS,
+     but the preference is respected on first run by main.js. */
+}
+
+/* --- The licence-key dialog ------------------------------------------------
+ * The only DOM the game shows. Styled to match the canvas: hard edges, no
+ * gradients, chunky monospace. */
+
+.mw-prompt {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(10, 8, 18, 0.9);
+}
+
+.mw-prompt[hidden] { display: none; }
+
+.mw-prompt-box {
+  width: 100%;
+  max-width: 22rem;
+  padding: 1rem;
+  background: #1b1730;
+  border: 2px solid #6d5cb0;
+  box-shadow: 0 4px 0 #000;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #f4f0e4;
+}
+
+.mw-prompt-box h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  color: #ffd45c;
+  text-transform: uppercase;
+}
+
+.mw-prompt-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #9a91b8;
+}
+
+.mw-prompt input {
+  width: 100%;
+  padding: 0.6rem;
+  margin-bottom: 0.75rem;
+  font: inherit;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f4f0e4;
+  background: #0a0812;
+  border: 2px solid #453a6b;
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.mw-prompt input:focus {
+  outline: none;
+  border-color: #ffd45c;
+}
+
+.mw-prompt-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mw-prompt-row button {
+  flex: 1;
+  padding: 0.7rem 0.5rem;
+  font: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: #f4f0e4;
+  background: #2f2750;
+  border: 2px solid #6d5cb0;
+  border-radius: 0;
+  cursor: pointer;
+  /* A real button needs a real touch target. */
+  min-height: 44px;
+}
+
+.mw-prompt-row button[data-act="ok"] {
+  color: #0a0812;
+  background: #ffd45c;
+  border-color: #ffd45c;
+  font-weight: bold;
+}
+
+.mw-prompt-row button:active { transform: translateY(2px); }

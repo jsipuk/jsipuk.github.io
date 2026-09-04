@@ -4,7 +4,9 @@ An 8-bit arcade parody for phones. Falling blocks build a defensive wall; zombie
 chew through it from the left; an exaggerated pixel rally cheers from the right;
 a bald eagle occasionally carries one of the zombies away.
 
-Play it at `/maga-wall/`. No build step — open `index.html` from any static server.
+A standalone site: Cloudflare Pages serves `public/`, Cloudflare Pages Functions
+in `functions/api/` handle the $4.99 unlock through Stripe. No build step, no
+dependencies, no framework. See [DEPLOY.md](DEPLOY.md) to put it online.
 
 **This is satire.** It is not affiliated with, endorsed by or connected to Donald
 Trump, any political campaign, the Republican Party, any MAGA organisation, or
@@ -59,24 +61,33 @@ wave 2) which fully repairs every standing block.
 ## Running it
 
 ```
-python3 -m http.server 8099     # or any static server
-open http://127.0.0.1:8099/
+npm run dev          # game only; the paywall reports payments unconfigured
+npm run dev:pay      # adds a fake Stripe, so the whole purchase flow works
 ```
 
-Add `?dev=1` for developer mode (see [Paywall](#paywall)). Serving from
-`localhost` enables it automatically.
+Then open <http://127.0.0.1:8100/>. On a development machine the game uses a
+free local unlock; append `?pay=live` to exercise the real payment path instead.
+
+`wrangler pages dev public` runs the genuine Cloudflare stack and is what to use
+before shipping. `test/serve.js` exists so the flow is testable offline and in CI.
 
 ### Tests
 
 ```
-node test/run.js
+npm test             # 175 checks, no browser needed
 ```
 
-110 checks over the deterministic logic: piece geometry and rotation kicks at
-every column, grid boundaries, wall settling, sealing (including the exploit
-where zombie attrition used to pay the player), overbuild recovery, the zombie
-queue, climbing, breaches, the eagle state machine, scoring, run isolation,
-and whether the service worker still lists every source file.
+`test/run.js` (131) covers the deterministic game logic: piece geometry and
+rotation kicks at every column, grid boundaries, wall settling, sealing
+(including the exploit where zombie attrition used to pay the player), overbuild
+recovery, the zombie queue, climbing, breaches, the eagle state machine,
+scoring, run isolation, licence-token forgery, and whether the service worker
+still lists every source file.
+
+`test/api.js` (44) drives the payment endpoints as real HTTP against a fake
+Stripe and a fake KV: checkout creation, the claim exchange and its idempotency,
+licence validation and revocation, restore, webhook signature verification,
+replay and tampering.
 
 ---
 
@@ -111,21 +122,38 @@ pixel, so the result is real pixel art rather than a smooth drawing made blocky
 afterwards. 208 = 13 cells of 16px: 3 of zombie approach, 7 of wall, 3 of rally.
 
 ```
-src/
-  config.js       every balancing number, and the wave curves as pure functions
-  rng.js          seeded PRNG, so a run can be replayed in a test
-  pieces.js       shape definitions, rotation states, the shuffled-bag dealer
-  sim.js          the game. No canvas, no DOM, no timers, no audio.
-  palette.js      the whole colour set
-  font.js         a hand-drawn 5x7 bitmap font
-  sprites.js      character-grid pixel art, baked to canvases once at boot
-  render.js       all drawing; owns particles and popups
-  input.js        pointer + keyboard, auto-repeat, button layout
-  audio.js        chiptune synth and a step sequencer. No audio files.
-  storage.js      settings and high scores
-  entitlement.js  the payment boundary. Deliberately inert.
-  ui.js           title, how-to-play, settings, about, scores, pause, game over, paywall
-  main.js         boot, screen manager, frame loop. The only file that knows about the rest.
+public/                 the site, served as-is
+  index.html style.css sw.js manifest.webmanifest icons/
+  src/
+    config.js       every balancing number, and the wave curves as pure functions
+    rng.js          seeded PRNG, so a run can be replayed in a test
+    pieces.js       shape definitions, rotation states, the shuffled-bag dealer
+    sim.js          the game. No canvas, no DOM, no timers, no audio.
+    palette.js      the whole colour set
+    font.js         a hand-drawn 5x7 bitmap font
+    sprites.js      character-grid pixel art, baked to canvases once at boot
+    render.js       all drawing; owns particles and popups
+    input.js        pointer + keyboard, auto-repeat, button layout
+    audio.js        chiptune synth and a step sequencer. No audio files.
+    storage.js      settings and high scores
+    entitlement.js  the client half of the paywall
+    prompt.js       the one DOM dialog, for typing a licence key
+    ui.js           every screen that is not the game
+    main.js         boot, screen manager, frame loop. Knows about all the rest.
+
+functions/              Cloudflare Pages Functions, mounted at /api/*
+  _lib.js           licence keys, HMAC tokens, Stripe REST, the KV store
+  api/config.js     what the paywall should say
+  api/checkout.js   start a Stripe Checkout session
+  api/claim.js      exchange a finished session for a licence
+  api/licence.js    is this token still valid?
+  api/restore.js    unlock another device from the key
+  api/webhook.js    Stripe's own word that the payment completed
+
+test/
+  run.js            game logic and licence crypto
+  api.js            the payment endpoints, as real HTTP
+  serve.js          local dev server; mounts functions/ like Pages does
 ```
 
 The dependency direction is strict: `sim.js` imports only `config`, `rng` and
@@ -139,37 +167,51 @@ curve the tuning is aimed at, and the test suite asserts it stays monotonic.
 
 ---
 
-## Paywall
+## The paywall
 
-`src/entitlement.js` is an interface with a working shape and **no payment
-provider behind it**. It grants three free rounds, then shows a locked screen.
-The "unlock" writes a flag to `localStorage` that any user could set themselves.
+Three free rounds, then a one-off $4.99 unlock through Stripe Checkout.
 
-That is fine for a demo and is not fine for a paid release. Shipping this
-commercially needs, at minimum:
+```
+UNLOCK -> /api/checkout -> Stripe -> back to /?purchase=cs_...
+       -> /api/claim    -> licence key + HMAC token, stored locally
+every online boot:
+       -> /api/licence  -> still valid? if not, the game locks itself again
+another device:
+       -> /api/restore  -> the licence key exchanges for a fresh token
+```
 
-- a merchant account and a provider SDK (Stripe Checkout, Paddle, RevenueCat for
-  store-wrapped builds) with production credentials that must not live in this repo;
-- a server that creates the checkout session and records the purchase on the
-  provider's webhook;
-- a verification call on boot — client-side state must never be the source of truth;
-- restore-purchase backed by that same server, keyed on something the user can
-  present on a new device (an account login, or an emailed licence key);
-- consumer-law copy: price, what is being sold, refund and cancellation rights,
-  terms, privacy. UK/EU distance-selling rules apply.
+The token is an HMAC minted at the edge. The browser never sees the signing key,
+so it cannot forge one, and the test suite proves a swapped payload with a stolen
+signature is rejected.
 
-Swapping provider is one line in `main.js`. Purchase state lives under its own
-storage key (`magawall.entitlement.v1`), separate from scores
-(`magawall.scores.v1`) and settings, so payment logic can never corrupt save
-data — there is a test for it.
+**Offline, the game trusts its cached token.** It has to — a PWA that locks you
+out on a train is a worse product than one that can be cheated by somebody
+willing to edit `localStorage`. Any client-side game can be unlocked by a
+determined person. This design makes casual copying pointless and keeps the edge
+authoritative whenever it can be reached, which is the right trade at this price.
+
+Two things worth knowing:
+
+- Dev mode is decided by **hostname only**, never by the query string. An earlier
+  version honoured `?dev=1` anywhere, which meant anyone could append it to the
+  live site and take the free local unlock.
+- Purchase state lives under its own storage key (`magawall.entitlement.v1`),
+  separate from scores and settings, so payment logic cannot corrupt save data.
+  There is a test for it.
+
+Everything needing your credentials, plus tax and consumer-law obligations, is
+in [DEPLOY.md](DEPLOY.md).
 
 ## PWA
 
 `manifest.webmanifest` (portrait, fullscreen, 192/512/maskable icons) plus a
 cache-first service worker holding the whole shell, so the game runs offline
-after one visit. Verified in Chromium: the worker registers and caches 19
-entries. **Bump `VERSION` in `sw.js` whenever a shell file changes**, or
-returning players keep the old build.
+after one visit. The worker never caches `/api/*` — a stale licence check, or an
+`index.html` served in place of a failed API call, would be worse than no worker
+at all.
+
+**Bump `VERSION` in `public/sw.js` whenever a shell file changes**, or returning
+players keep the old build. This is the easiest thing here to forget.
 
 Not yet verified on a real iOS or Android home screen — see Known limitations.
 
@@ -226,6 +268,14 @@ The things a test runner cannot judge. Run through this on an actual phone.
 - [ ] Music and SFX toggles take effect immediately and persist.
 - [ ] Nothing clips or distorts when many events fire at once.
 
+**Buying it** (test mode, see DEPLOY.md)
+- [ ] The paywall shows the real price, not a placeholder.
+- [ ] Checkout opens, and cancelling returns you to the game still locked.
+- [ ] Paying returns you to WALL UNLOCKED with a licence key.
+- [ ] The key is also on the Settings screen afterwards.
+- [ ] COPY KEY works, or fails gracefully with the key still readable.
+- [ ] Restoring on a second device works with the key typed messily.
+
 **Lifecycle**
 - [ ] Backgrounding the tab pauses rather than quietly running on.
 - [ ] Rotating the device relays out cleanly.
@@ -244,6 +294,16 @@ The things a test runner cannot judge. Run through this on an actual phone.
 - **Not tested on physical hardware.** All browser verification was headless
   Chromium at several viewport sizes. Real iOS Safari, real touch latency and
   real audio behaviour are unverified.
-- **The paywall takes no money.** See above. It is a boundary, not a product.
-- **Not linked from the site homepage.** The game stands alone at `/maga-wall/`.
+- **The payment path has never seen a real card.** It is verified end to end
+  against a fake Stripe — purchase, claim, restore, revoke, webhook signatures —
+  but Stripe's own hosted Checkout page is not in that loop. Run the test-mode
+  checklist in DEPLOY.md before trusting it.
+- **The licence key is not emailed.** It is shown after purchase and on the
+  Settings screen. A buyer who clears their browser data and did not keep it
+  needs you to look it up in KV. Wiring the webhook to a mail provider is the
+  obvious next job.
+- **No account system, so a key can be shared.** Deliberate: accounts cost more
+  in support than they save in piracy at this price.
+- **Nothing legal is implemented.** No terms, no privacy notice, no refund
+  policy, no tax registration. All required before taking real money.
 - **No landscape layout.** Portrait only, by design; landscape letterboxes.

@@ -56,7 +56,10 @@ export function button(c, items, id, y, label, opts = {}) {
   c.fillRect(x, y + h - 1, w, 1);
   c.fillRect(x, y, 1, h);
   c.fillRect(x + w - 1, y, 1, h);
-  const scale = opts.scale || 2;
+  // Shrink rather than overflow. A label that does not fit is a bug the author
+  // will not notice on their own screen size, so the layout refuses to allow it.
+  let scale = opts.scale || 2;
+  while (scale > 1 && textWidth(label, scale) > w - 10) scale--;
   const ty = y + Math.round((h - 7 * scale) / 2);
   textCentre(c, label, x + w / 2, ty, dim ? P.textDim : sel ? P.white : P.text, scale, P.ink);
   if (sel) {
@@ -135,9 +138,17 @@ function attractStrip(c, y, t) {
 /* Screens                                                                    */
 /* -------------------------------------------------------------------------- */
 
-export function drawBoot(c, vh, t) {
+export function drawBoot(c, vh, t, claiming) {
   fill(c, P.ink, vh);
   const items = [];
+  if (claiming) {
+    // Straight back from Stripe. Say so, and do not offer a way past.
+    textCentre(c, 'UNLOCKING', VW / 2, vh / 2 - 20, P.gold, 2, P.ink);
+    const dots = '.'.repeat(1 + (Math.floor(t * 3) % 3));
+    textCentre(c, dots, VW / 2, vh / 2, P.gold, 2, P.ink);
+    textCentre(c, 'ONE MOMENT', VW / 2, vh / 2 + 20, P.textDim, 1, P.ink);
+    return items;
+  }
   const step = Math.min(3, Math.floor(t / 0.7));
   if (step >= 0) textCentre(c, 'JSIPUK', VW / 2, vh / 2 - 30, P.textDim, 2, P.ink);
   if (step >= 1) textCentre(c, 'PRESENTS', VW / 2, vh / 2 - 12, P.textDim, 1, P.ink);
@@ -271,7 +282,7 @@ export function drawHow(c, vh, page, sel) {
   return items;
 }
 
-export function drawSettings(c, vh, settings, sel, storageOk) {
+export function drawSettings(c, vh, settings, sel, storageOk, licence) {
   fill(c, P.ink, vh);
   const items = [];
   // 4 toggles + 2 buttons + the back button, centred as one block.
@@ -310,6 +321,11 @@ export function drawSettings(c, vh, settings, sel, storageOk) {
   if (!storageOk) {
     textCentre(c, 'STORAGE OFF: NOTHING SAVES', VW / 2, y + 2, P.danger, 1, P.ink);
     y += 12;
+  }
+  if (licence) {
+    textCentre(c, 'LICENCE KEY', VW / 2, y + 4, P.textDim, 1, P.ink);
+    textCentre(c, licence, VW / 2, y + 13, P.gold, 1, P.ink);
+    y += 24;
   }
   button(c, items, 'back', y + 8, 'BACK', { sel: sel === 6, h: 26, w: 176 });
   return items;
@@ -423,42 +439,88 @@ export function drawGameOver(c, vh, g, result, sel) {
   return items;
 }
 
-export function drawPaywall(c, vh, ent, sel, dev, busy, error) {
+export function drawPaywall(c, vh, ent, sel, dev, busy, message, price) {
   fill(c, P.ink, vh);
   const items = [];
-  const top = Math.max(16, Math.round((vh - 320) / 2) + 6);
+  const top = Math.max(16, Math.round((vh - 330) / 2) + 6);
   textCentre(c, 'THE WALL', VW / 2, top, P.gold, 3, P.ink);
   textCentre(c, 'IS LOCKED', VW / 2, top + 22, P.gold, 3, P.ink);
 
-  panel(c, 10, top + 52, VW - 20, 74);
+  panel(c, 10, top + 52, VW - 20, 66);
   lines(c, [
     'YOUR ' + TRIAL_RUNS + ' FREE ROUNDS ARE SPENT.',
     '',
-    'UNLOCK THE FULL GAME FOR',
-    'UNLIMITED ROUNDS, EVERY WAVE,',
-    'EVERY ZOMBIE AND THE EAGLE.',
+    'ONE PAYMENT. NO SUBSCRIPTION.',
+    'EVERY WAVE, FOREVER, ON ANY',
+    'DEVICE YOU RESTORE IT TO.',
   ], 16, top + 60, P.text, 9, 1);
 
-  let y = top + 136;
-  y = button(c, items, 'buy', y, dev ? 'DEV UNLOCK' : 'UNLOCK', { sel: sel === 0, h: 30, dim: busy });
-  y = button(c, items, 'restore', y, 'RESTORE PURCHASE', { sel: sel === 1, h: 24, dim: busy });
+  let y = top + 128;
+  const buyLabel = busy === 'buy' ? 'ONE MOMENT...'
+    : price ? 'UNLOCK  ' + price
+      : dev ? 'DEV UNLOCK' : 'UNLOCK';
+  y = button(c, items, 'buy', y, buyLabel, { sel: sel === 0, h: 32, dim: !!busy });
+  y = button(c, items, 'restore', y, busy === 'restore' ? 'CHECKING...' : 'ALREADY PAID?',
+    { sel: sel === 1, h: 24, dim: !!busy });
   y = button(c, items, 'back', y, 'BACK', { sel: sel === 2, h: 24 });
 
-  if (error) {
-    const chunks = wrap(error.toUpperCase(), 30);
-    lines(c, chunks.slice(0, 3), 8, y + 4, P.danger, 9, 1);
-  } else if (dev) {
+  if (message) {
+    const chunks = wrap(message.toUpperCase(), 32);
+    lines(c, chunks.slice(0, 4), 6, y + 6, P.danger, 9, 1);
+  } else if (dev && !price) {
     lines(c, [
-      'DEV BUILD: THIS UNLOCK IS',
-      'LOCAL ONLY AND TAKES NO',
-      'MONEY. SEE ENTITLEMENT.JS.',
-    ], 8, y + 4, P.textDim, 9, 1);
+      'DEV BUILD: THIS UNLOCK IS LOCAL',
+      'ONLY AND TAKES NO MONEY.',
+    ], 6, y + 6, P.textDim, 9, 1);
+  } else if (!price) {
+    lines(c, [
+      'PAYMENTS ARE NOT CONFIGURED ON',
+      'THIS DEPLOYMENT YET.',
+    ], 6, y + 6, P.textDim, 9, 1);
   } else {
     lines(c, [
-      'NO PAYMENT PROVIDER IS',
-      'CONFIGURED IN THIS BUILD.',
-    ], 8, y + 4, P.textDim, 9, 1);
+      'PAYMENT IS HANDLED BY STRIPE.',
+      'WE NEVER SEE YOUR CARD DETAILS.',
+    ], 6, y + 6, P.textDim, 9, 1);
   }
+  return items;
+}
+
+/**
+ * Shown once, straight after a successful purchase.
+ *
+ * The licence key is the only way to unlock a second device, and it exists
+ * nowhere else the buyer can easily find. So it gets a whole screen, drawn big,
+ * and the button below it says COPY rather than OK.
+ */
+export function drawUnlocked(c, vh, licence, sel, copied) {
+  fill(c, P.ink, vh);
+  const items = [];
+  const top = Math.max(20, Math.round((vh - 280) / 2));
+  textCentre(c, 'WALL', VW / 2, top, P.good, 3, P.ink);
+  textCentre(c, 'UNLOCKED', VW / 2, top + 22, P.good, 3, P.ink);
+
+  lines(c, [
+    'THANK YOU. EVERY WAVE IS YOURS.',
+  ], 10, top + 52, P.text, 9, 1);
+
+  panel(c, 8, top + 68, VW - 16, 52, P.gold);
+  textCentre(c, 'YOUR LICENCE KEY', VW / 2, top + 74, P.textDim, 1, P.ink);
+  if (licence) {
+    const parts = licence.split('-');
+    textCentre(c, parts.slice(0, 2).join('-'), VW / 2, top + 86, P.gold, 2, P.ink);
+    textCentre(c, parts.slice(2).join('-'), VW / 2, top + 100, P.gold, 2, P.ink);
+  }
+
+  lines(c, [
+    'KEEP THIS. IT IS HOW YOU UNLOCK',
+    'THE GAME ON ANOTHER PHONE. IT IS',
+    'ALSO ON THE SETTINGS SCREEN.',
+  ], 8, top + 126, P.textDim, 9, 1);
+
+  let y = top + 160;
+  y = button(c, items, 'copy', y, copied ? 'COPIED' : 'COPY KEY', { sel: sel === 0, h: 26 });
+  button(c, items, 'play', y, 'PLAY', { sel: sel === 1, h: 30 });
   return items;
 }
 
@@ -489,5 +551,6 @@ export function wrap(str, width) {
 }
 
 export const MENU_LENGTHS = {
-  title: 4, how: 2, settings: 7, about: 1, scores: 1, pause: 4, gameover: 3, paywall: 3,
+  title: 4, how: 2, settings: 7, about: 1, scores: 1,
+  pause: 4, gameover: 3, paywall: 3, unlocked: 2,
 };
