@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bellwood Station Panic</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#061e26;overflow:hidden}body{display:grid;place-items:center}canvas{display:block;image-rendering:pixelated;outline:none;box-shadow:0 12px 60px #0008}
+
+#shell{width:100%;height:100%;display:grid;place-items:center}#stage{width:100%;height:100%;min-width:0;min-height:0;display:grid;place-items:center}
+.touch-controls{display:none}body.touch{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);height:100dvh}
+body.touch #shell{grid-template-columns:148px minmax(0,1fr) 148px;gap:4px;padding:4px}
+body.touch .touch-controls{display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+#move-controls{grid-column:1;grid-row:1}body.touch #stage{grid-column:2;grid-row:1}#action-controls{grid-column:3;grid-row:1;flex-direction:column;gap:12px}
+#dpad{display:grid;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:2px}
+button{appearance:none;border:3px solid #fff0b9;border-radius:6px;background:#14505a;color:#fff0b9;min-height:46px;padding:6px;touch-action:none;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 0 #020e13}
+button:active,button.held{background:#805528;transform:translateY(2px);box-shadow:none}button:focus-visible{outline:3px solid #ffc94f;outline-offset:2px}button:disabled{opacity:.4}
+button canvas{box-shadow:none;max-width:100%;pointer-events:none}#action-controls button{width:138px;min-height:56px;display:grid;place-items:center}
+#up{grid-column:2;grid-row:1}#left{grid-column:1;grid-row:2}#right{grid-column:3;grid-row:2}#down{grid-column:2;grid-row:3}
+@media(orientation:portrait){body.touch #shell{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) 150px;gap:4px}body.touch #stage{grid-column:1 / -1;grid-row:1}#move-controls{grid-column:1;grid-row:2}#action-controls{grid-column:2;grid-row:2}}
+</style>
+</head>
+<body>
+<main id="shell"><section id="stage" aria-label="Game"><canvas id="game" width="480" height="360" tabindex="0" aria-label="Bellwood Station Panic. Move with WASD or arrow keys. Walk over six suitcases, press Space near the dog or conductor, then walk up into the marked train door. R retries the current level. Enter advances after boarding. Complete all five departures."></canvas></section>
+<nav id="move-controls" class="touch-controls" aria-label="Movement"><div id="dpad">
+<button id="up" data-direction="w" aria-label="Move up"></button><button id="left" data-direction="a" aria-label="Move left"></button><button id="right" data-direction="d" aria-label="Move right"></button><button id="down" data-direction="s" aria-label="Move down"></button>
+</div></nav>
+<nav id="action-controls" class="touch-controls" aria-label="Game actions"><button id="touch-action" aria-label="Interact"></button><button id="touch-retry" aria-label="Retry current level"></button></nav>
+</main>
+<script>
+'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const W=480,H=360,HUD=32,PANEL=280;
+// All world drawing is clipped between HUD and PANEL. All text uses our bitmap font.
+const C={ink:'#071f27',navy:'#0b3440',navy2:'#14505a',cream:'#fff0b9',cream2:'#fff8d7',white:'#fff7dd',gold:'#ffc94f',tan:'#df9b63',pink:'#ff9fba',mintDark:'#2d5e59',red:'#ca4d43',green:'#3e8970',brown:'#714326',water:'#4199be'};
+function px(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
+function box(x,y,w,h,b=C.ink,f=C.cream){px(x,y,w,h,b);px(x+2,y+2,w-4,h-4,f);}
+const FONT = {
+  A:["01110","10001","10001","11111","10001","10001","10001"],
+  B:["11110","10001","10001","11110","10001","10001","11110"],
+  C:["01111","10000","10000","10000","10000","10000","01111"],
+  D:["11110","10001","10001","10001","10001","10001","11110"],
+  E:["11111","10000","10000","11110","10000","10000","11111"],
+  F:["11111","10000","10000","11110","10000","10000","10000"],
+  G:["01111","10000","10000","10111","10001","10001","01111"],
+  H:["10001","10001","10001","11111","10001","10001","10001"],
+  I:["11111","00100","00100","00100","00100","00100","11111"],
+  J:["00111","00010","00010","00010","00010","10010","01100"],
+  K:["10001","10010","10100","11000","10100","10010","10001"],
+  L:["10000","10000","10000","10000","10000","10000","11111"],
+  M:["10001","11011","10101","10101","10001","10001","10001"],
+  N:["10001","11001","10101","10011","10001","10001","10001"],
+  O:["01110","10001","10001","10001","10001","10001","01110"],
+  P:["11110","10001","10001","11110","10000","10000","10000"],
+  Q:["01110","10001","10001","10001","10101","10010","01101"],
+  R:["11110","10001","10001","11110","10100","10010","10001"],
+  S:["01111","10000","10000","01110","00001","00001","11110"],
+  T:["11111","00100","00100","00100","00100","00100","00100"],
+  U:["10001","10001","10001","10001","10001","10001","01110"],
+  V:["10001","10001","10001","10001","10001","01010","00100"],
+  W:["10001","10001","10001","10101","10101","10101","01010"],
+  X:["10001","10001","01010","00100","01010","10001","10001"],
+  Y:["10001","10001","01010","00100","00100","00100","00100"],
+  Z:["11111","00001","00010","00100","01000","10000","11111"],
+  0:["01110","10001","10011","10101","11001","10001","01110"],
+  1:["00100","01100","00100","00100","00100","00100","01110"],
+  2:["01110","10001","00001","00010","00100","01000","11111"],
+  3:["11110","00001","00001","01110","00001","00001","11110"],
+  4:["10010","10010","10010","11111","00010","00010","00010"],
+  5:["11111","10000","10000","11110","00001","00001","11110"],
+  6:["01111","10000","10000","11110","10001","10001","01110"],
+  7:["11111","00001","00010","00100","01000","01000","01000"],
+  8:["01110","10001","10001","01110","10001","10001","01110"],
+  9:["01110","10001","10001","01111","00001","00001","11110"],
+  " ":["000","000","000","000","000","000","000"],
+  ".":["0","0","0","0","0","0","1"],
+  ",":["0","0","0","0","0","1","1"],
+  "!":["1","1","1","1","1","0","1"],
+  "?":["1110","0001","0001","0010","0100","0000","0100"],
+  ":":["0","1","0","0","0","1","0"],
+  "'":["1","1","0","0","0","0","0"],
+  "-":["0000","0000","0000","1111","0000","0000","0000"],
+  "/":["0001","0001","0010","0010","0100","0100","1000"],
+  "%":["10001","00010","00100","01000","10001","00000","00000"]
+};
+
+function drawPixelText(str, x, y, scale = 2, color = C.ink, shadow = null, align = "left") {
+  str = String(str).toUpperCase();
+  const width = measurePixelText(str, scale);
+
+  if (align === "center") x -= width / 2;
+  if (align === "right") x -= width;
+
+  if (shadow) drawPixelTextRaw(str, x + scale, y + scale, scale, shadow);
+  drawPixelTextRaw(str, x, y, scale, color);
+}
+
+function drawPixelTextRaw(str, x, y, scale, color) {
+  let cx = Math.round(x);
+  for (const ch of str) {
+    const glyph = FONT[ch] || FONT["?"];
+    for (let row = 0; row < glyph.length; row++) {
+      for (let col = 0; col < glyph[row].length; col++) {
+        if (glyph[row][col] === "1") {
+          px(cx + col * scale, y + row * scale, scale, scale, color);
+        }
+      }
+    }
+    cx += (glyph[0].length + 1) * scale;
+  }
+}
+
+function measurePixelText(str, scale = 2) {
+  str = String(str).toUpperCase();
+  let width = 0;
+  for (const ch of str) {
+    const glyph = FONT[ch] || FONT["?"];
+    width += (glyph[0].length + 1) * scale;
+  }
+  return width;
+}
+
+
+function drawDogPortrait(x, y) {
+  px(x + 2, y + 8, 18, 14, C.white);
+  px(x + 5, y + 2, 12, 13, C.white);
+  px(x + 1, y + 4, 5, 10, C.tan);
+  px(x + 16, y + 4, 5, 10, C.tan);
+  px(x + 7, y + 8, 2, 2, C.ink);
+  px(x + 14, y + 8, 2, 2, C.ink);
+  px(x + 10, y + 12, 4, 2, C.ink);
+  px(x + 6, y - 2, 7, 5, C.pink);
+}
+
+function drawPlayerPortrait(x, y) {
+  px(x + 3, y + 9, 18, 15, "#315d68");
+  px(x + 6, y + 3, 12, 10, "#f0b184");
+  px(x + 4, y, 16, 4, "#2e2520");
+  px(x + 7, y + 7, 3, 1, C.ink);
+  px(x + 14, y + 7, 3, 1, C.ink);
+  px(x + 9, y + 11, 7, 1, "#2e2520");
+}
+
+function drawConductorPortrait(x, y) {
+  px(x + 3, y + 9, 18, 15, C.navy);
+  px(x + 6, y + 3, 12, 10, "#df9e78");
+  px(x + 4, y, 16, 5, C.navy);
+  px(x + 8, y - 3, 8, 3, C.navy);
+  px(x + 7, y + 7, 2, 1, C.ink);
+  px(x + 15, y + 7, 2, 1, C.ink);
+}
+
+// Layout and collision geometry share the same coordinate system as the art.
+// Feet, not the player's head/body, determine ground collisions and boarding.
+const DOOR={x:430,y:148,w:26,h:62};
+const THRESHOLD={x:434,y:199,w:18,h:11};
+const TRAIN_SOLIDS=[{x:344,y:126,w:86,h:84},{x:456,y:126,w:24,h:84}];
+const player={x:230,y:245,moving:false}; // x = feet centre; y = feet baseline
+const dog={x:289,y:242},conductor={x:393,y:221};
+const touchDirections=new Map();
+const touchMode=matchMedia("(any-pointer: coarse)").matches || navigator.maxTouchPoints>0;
+const keys=new Set();let interact=false,state,started,departure,panic,bags,found,frame=0,cooldown,dialogue,doorInside=false;
+let passengers=[],bumpCooldown=0,levelIndex=0,conductorRelief=false;
+// Each departure changes route planning as well as pressure. Retries are deterministic.
+const LEVELS=[
+ {name:'Mind The Crowd',seconds:35,count:3,speed:32,startPanic:30,rise:1,bump:12,ordered:false,cross:0,briefing:'Six bags, 35 seconds. Bumps add 12 panic AND cost 2 seconds. Pet the dog to recover. Walk UP into the door.'},
+ {name:'Cross Traffic',seconds:30,count:5,speed:39,startPanic:35,rise:1.2,bump:14,ordered:false,cross:2,briefing:'Cross traffic! Blue-coated commuters cross the platform. Bags have moved. Bumps cost 2 seconds and 14 panic.'},
+ {name:'The Packing List',seconds:40,count:6,speed:43,startPanic:30,rise:1.2,bump:14,ordered:true,cross:2,briefing:'Collect numbered bags IN ORDER, 1 to 6. Gold marks the next bag. Plan your crossings. Bumps add 14 panic.'},
+ {name:'Wrong End Of The Platform',seconds:50,count:7,speed:47,startPanic:25,rise:1.2,bump:12,ordered:true,cross:3,briefing:'Follow bags 1 to 6 across the platform. Three crossing commuters! Bumps add 12 panic. Leave time for the dog.'},
+ {name:'Last Train Home',seconds:46,count:7,speed:51,startPanic:28,rise:1.3,bump:14,ordered:true,cross:4,briefing:'Last train. Bags 1 to 6, four crossing commuters. Bumps cost 14 panic and 2 seconds. Find gaps. No second train.'}
+];
+// Ordered routes deliberately require return trips; unnumbered levels allow free routing.
+const BAG_LAYOUTS=[
+ [[57,251],[124,233],[176,260],[258,219],[336,260],[408,253]],
+ [[35,218],[92,264],[170,219],[276,265],[355,220],[417,265]],
+ [[62,259],[349,222],[139,219],[411,259],[205,264],[300,218]],
+ [[405,263],[45,220],[330,220],[115,264],[378,245],[190,219]],
+ [[42,263],[408,220],[110,219],[359,263],[180,263],[303,220]]
+];
+// x, feet y, left bound, right bound, direction, coat, hat.
+const PATROLS=[
+ [77,228,35,225,1,C.green,C.ink],
+ [351,250,205,419,-1,C.pink,C.pink],
+ [30,266,20,185,1,'#9c7b4d',C.brown],
+ [310,218,245,365,1,'#b66b41',C.brown],
+ [155,241,50,330,-1,'#5d769f',C.navy],
+ [385,263,240,420,-1,'#9b6789','#603f60'],
+ [135,216,30,300,1,'#6b8872',C.ink]
+];
+const INTRO='Find six bags. Avoid passengers! SPACE pets the dog or talks. With six bags, walk UP into the open door.';
+const bagLines=['Luggage secured. Your socks believe in you.','Another bag. Mostly clothes. Some regrets.','A suitcase! Tiny bureaucracy applauds.','Packed with care. Carried with panic.','Bag rescued. The train is mildly impressed.','Found it. Your holiday is taking shape.'];
+const dogLines=['You pet the dog. A calmer you. Temporarily.','The dog wags. Your worries lose their luggage.','Soft ears. Deep breath. You can do this.','Dog morale deployed. Extremely effective.'];
+const missingLines=['Six bags, please. Even the suspicious one.','Still missing luggage. Check the whole platform.','Your train is ready. Your packing is not.'];
+const readyLines=['All six! Walk UP into the striped open door.','Bags accounted for. The open door is to my right.','Splendid. Through the marked doorway, please.'];
+let lastLine='';
+function randomLine(lines){const choices=lines.filter(s=>s!==lastLine);return lastLine=choices[Math.floor(Math.random()*choices.length)];}
+function say(text,who='YOU'){if(touchMode)text=text.replace(/SPACE/g,'INTERACT').replace(/ENTER:/g,'TAP BUTTON:').replace(/Press R/g,'Tap RETRY');dialogue={text,who};}
+// A retry reloads the current departure; only completion advances the campaign.
+function reset(){loadLevel(levelIndex);}
+function loadLevel(index){
+ levelIndex=Math.max(0,Math.min(LEVELS.length-1,index));
+ const level=LEVELS[levelIndex];
+ passengers=PATROLS.slice(0,level.count).map(([x,y,min,max,dir,coat,hat])=>({x,y,min,max,dir,coat,hat,speed:level.speed}));
+ // Crossing patrols occupy visible vertical lanes; none reaches the doorway.
+ const crossingX=[95,325,170,375];
+ passengers.forEach((n,i)=>{if(i>=level.count-level.cross){const j=i-(level.count-level.cross);n.axis='y';n.x=crossingX[j];n.y=j%2?263:218;n.min=216;n.max=267;n.dir=j%2?-1:1;n.coat='#548fb1';}});
+ state='playing';started=false;departure=level.seconds;panic=level.startPanic;found=0;conductorRelief=false;
+ cooldown=0;bumpCooldown=0;doorInside=false;frame=0;lastLine='';
+ clearInput();player.x=230;player.y=245;player.moving=false;
+ bags=BAG_LAYOUTS[levelIndex].map(([x,y],i)=>({x,y,color:[C.brown,C.green,C.brown,C.brown,C.red,'#17698d'][i],order:i+1,found:false}));
+ say(level.briefing);
+}
+function feet(x=player.x,y=player.y){return{x:x-4,y:y-4,w:8,h:4};}
+function overlaps(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+function near(p){return Math.hypot(player.x-p.x,player.y-p.y)<28;}
+function target(){return [dog,conductor].filter(near).sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y))[0];}
+function allowed(x,y){return x>=10&&x<=470&&y>=211&&y<=270&&!TRAIN_SOLIDS.some(r=>overlaps(feet(x,y),r)) || x>=438&&x<=448&&y>=203&&y<=211;}
+// Movement resolves axes separately. Only the narrow open doorway permits entry north of the platform.
+function move(dx,dy){const x=player.x+dx,y=player.y+dy;if(allowed(x,player.y))player.x=x;if(allowed(player.x,y))player.y=y;}
+function finish(win,text){
+ state=win?(levelIndex===LEVELS.length-1?'complete':'win'):'lose';
+ player.moving=false;clearInput();
+ if(win)text=`${state==='complete'?'All five departures caught!':'Departure complete!'} Time left: ${Math.ceil(departure)} seconds. Final panic: ${Math.ceil(panic)}%. ${state==='complete'?'ENTER: play again.':'ENTER: next level.'}`;
+ say(text,win?'CONDUCTOR':'YOU');
+}
+// Ground footprints give readable collisions without penalising mere head/sprite overlap.
+// Dense final levels grant 1.5 s of grace, preventing overlapping crowds from trapping the player.
+function passengerFootprint(p){return{x:p.x-7,y:p.y-10,w:14,h:10};}
+function updatePassengers(dt){
+ bumpCooldown=Math.max(0,bumpCooldown-dt);
+ if(!started)return; // Keep the opening instructions safe to read.
+ for(const n of passengers){
+  const axis=n.axis||'x';n[axis]+=n.dir*n.speed*dt;
+  if(n[axis]>=n.max){n[axis]=n.max;n.dir=-1;}
+  if(n[axis]<=n.min){n[axis]=n.min;n.dir=1;}
+  if(bumpCooldown<=0&&overlaps(passengerFootprint(player),passengerFootprint(n))){
+   panic=Math.min(100,panic+LEVELS[levelIndex].bump);departure=Math.max(0,departure-2);bumpCooldown=levelIndex>=3?1.5:.75;
+   say(`Bumped! ${LEVELS[levelIndex].bump} panic and 2 seconds lost. Watch for a gap.`);
+  }
+ }
+}
+function update(dt){frame+=dt*60;if(state!=='playing')return;
+ let dx=Number(held('d')||held('arrowright'))-Number(held('a')||held('arrowleft'));
+ let dy=Number(held('s')||held('arrowdown'))-Number(held('w')||held('arrowup'));
+ const oldX=player.x,oldY=player.y,len=Math.hypot(dx,dy);if(len)move(dx/len*72*dt,dy/len*72*dt);
+ player.moving=oldX!==player.x||oldY!==player.y;
+ if(player.moving&&!started){started=true;say(LEVELS[levelIndex].ordered?'Follow numbered bags IN ORDER. Gold marks your next bag. Bumps cost panic and time.':'Collect six bags. Avoid collisions: each costs panic and 2 seconds. SPACE pets or talks.');}
+ // Waiting to read the opening instructions costs neither time nor panic.
+ if(started){departure=Math.max(0,departure-dt);panic=Math.min(100,panic+dt*(player.moving?.72:1.2)*LEVELS[levelIndex].rise);}
+ cooldown=Math.max(0,cooldown-dt);
+ updatePassengers(dt);
+ if(departure<=0||panic>=100){finish(false,departure<=0?'The train has left. Your luggage enjoyed the outing. Press R to try again.':'Panic complete. Breathe, regroup, and press R to try again.');interact=false;return;}
+ for(const b of bags){if(!b.found&&(!LEVELS[levelIndex].ordered||b.order===found+1)&&overlaps(feet(),{x:b.x-8,y:b.y-7,w:16,h:12})){b.found=true;found++;panic=Math.max(0,panic-6);say(randomLine(bagLines)+(found===6?' All six! Head for the open door.':''));}}
+ if(interact){const t=target();if(t){started=true;if(t===dog){if(cooldown<=0){panic=Math.max(0,panic-22);cooldown=3;say(randomLine(dogLines),'DOG');}else say('Still wagging. Give me a moment, then pet again.','DOG');}else{panic=Math.max(0,Math.min(100,panic+(found===6?(conductorRelief?0:-8):3)));if(found===6)conductorRelief=true;say(randomLine(found===6?readyLines:missingLines),'CONDUCTOR');}}}
+ interact=false;
+ if(panic>=100){finish(false,'Panic complete. Breathe, regroup, and press R to try again.');return;}
+ const inside=overlaps(feet(),THRESHOLD);
+ // Edge-triggered: Space, nearby luggage and conductor proximity can NEVER board.
+ if(inside&&!doorInside&&player.moving){if(found===6)finish(true,'Train caught! Six bags, one happy dog, and you. Press R for another trip.');else{say('You need all six bags. Step back onto the platform and find the rest.','CONDUCTOR');player.y=214;}}
+ doorInside=overlaps(feet(),THRESHOLD);
+}
+function held(key){return keys.has(key)||[...touchDirections.values()].includes(key);}
+function clearInput(){keys.clear();touchDirections.clear();interact=false;document.querySelectorAll('.held').forEach(b=>b.classList.remove('held'));}
+function resize(){
+ clearInput();
+ const rect=document.getElementById('stage').getBoundingClientRect();
+ const fit=Math.min(rect.width/W,rect.height/H);
+ const scale=touchMode?fit:(fit>=1?Math.floor(fit):fit);
+ canvas.style.width=`${W*scale}px`;canvas.style.height=`${H*scale}px`;ctx.imageSmoothingEnabled=false;
+}
+// Draw button labels using the same embedded bitmap alphabet as the game.
+function buttonLabel(button,text){
+ if(button.dataset.label===text)return;
+ button.dataset.label=text;button.setAttribute('aria-label',text);
+ const label=document.createElement('canvas');label.width=measurePixelText(text,1);label.height=7;
+ label.style.width=`${label.width*2}px`;label.style.height='14px';label.setAttribute('aria-hidden','true');
+ const c=label.getContext('2d');c.fillStyle=C.cream;let x=0;
+ for(const ch of text){const glyph=FONT[ch]||FONT['?'];glyph.forEach((row,y)=>{[...row].forEach((v,i)=>{if(v==='1')c.fillRect(x+i,y,1,1);});});x+=glyph[0].length+1;}
+ button.replaceChildren(label);
+}
+function syncTouchControls(){
+ if(!touchMode)return;
+ const button=document.getElementById('touch-action');
+ const label=state==='win'?'NEXT LEVEL':state==='complete'?'PLAY AGAIN':state==='lose'?'RETRY':target()===dog?(cooldown>0?'REST':'PET'):target()===conductor?'TALK':'INTERACT';
+ buttonLabel(button,label);
+ button.disabled=state==='playing'&&(!target()||(target()===dog&&cooldown>0));
+}
+function setupTouch(){
+ if(!touchMode)return;
+ document.body.classList.add('touch');
+ const arrows={w:'UP',a:'LEFT',d:'RIGHT',s:'DOWN'};
+ document.querySelectorAll('[data-direction]').forEach(button=>{
+  button.setAttribute('aria-label','Move '+arrows[button.dataset.direction].toLowerCase());
+  const icon=document.createElement('canvas');icon.width=7;icon.height=7;icon.style.width='28px';icon.style.height='28px';icon.setAttribute('aria-hidden','true');
+  const c=icon.getContext('2d');c.fillStyle=C.cream;
+  const pattern=['0001000','0011100','0111110','1111111','0001000','0001000','0001000'];
+  pattern.forEach((row,y)=>[...row].forEach((v,x)=>{if(v!=='1')return;const d=button.dataset.direction;const point=d==='w'?[x,y]:d==='s'?[6-x,6-y]:d==='a'?[y,6-x]:[6-y,x];c.fillRect(...point,1,1);}));button.replaceChildren(icon);
+  button.addEventListener('pointerdown',e=>{
+   e.preventDefault();if(state!=='playing')return;
+   button.setPointerCapture(e.pointerId);touchDirections.set(e.pointerId,button.dataset.direction);button.classList.add('held');
+  });
+  const release=e=>{touchDirections.delete(e.pointerId);if(![...touchDirections.values()].includes(button.dataset.direction))button.classList.remove('held');};
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,release);
+ });
+ document.getElementById('touch-action').addEventListener('click',()=>{
+  if(state==='win')loadLevel(levelIndex+1);
+  else if(state==='complete')loadLevel(0);
+  else if(state==='lose')reset();
+  else if(target())interact=true;
+ });
+ const retry=document.getElementById('touch-retry');buttonLabel(retry,'RETRY');retry.addEventListener('click',reset);
+ document.querySelectorAll('.touch-controls').forEach(node=>node.addEventListener('contextmenu',e=>e.preventDefault()));
+}
+addEventListener('resize',resize);
+// Ignore auto-repeat after resets/transitions: held keys cannot start the next level.
+function onKeyDown(e){
+ const k=e.key.toLowerCase();
+ if(['enter',' ','arrowup','arrowdown','arrowleft','arrowright','w','a','s','d','r'].includes(k))e.preventDefault();
+ if(e.repeat)return;
+ if(k==='r'){reset();return;}
+ if(k==='enter'){
+  if(state==='win')loadLevel(levelIndex+1);
+  else if(state==='complete')loadLevel(0);
+  return;
+ }
+ if(state!=='playing')return;
+ if(k===' ')interact=true;
+ keys.add(k);
+}
+addEventListener('keydown',onKeyDown);
+addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
+addEventListener('blur',()=>{clearInput();});
+// No time jumps after changing tabs, and no sticky movement after focus loss.
+document.addEventListener('visibilitychange',()=>{clearInput();lastTime=performance.now();});
+function mountain(cx,peak,width,color){for(let y=peak;y<146;y+=2){const span=(y-peak)*width/(146-peak);px(cx-span/2,y,span,2,color);if(y<peak+12)px(cx-span/4,y,span/2,2,'#a3c5df');}}
+function plant(x,y){px(x-9,y-2,18,4,C.brown);px(x-7,y+2,14,13,C.tan);px(x-5,y+3,3,10,'#ffc16a');for(let i=0;i<5;i++){px(x-8+i*3,y-13-(i%3)*4,5,15,C.mintDark);px(x-7+i*3,y-14-(i%3)*4,3,6,i%2?'#8bb449':'#4f8f4e');}}
+function windowArt(x,y){box(x,y,29,43,C.brown,'#d58b44');box(x+4,y+4,21,33,C.ink,'#86c5e8');px(x+6,y+6,6,13,'#b4e2ed');px(x+14,y+4,2,33,C.ink);px(x+4,y+21,21,2,C.ink);px(x-2,y+39,33,6,C.mintDark);for(let i=0;i<7;i++){px(x+i*4,y+36-i%2*2,3,4,i%2?C.red:C.cream);}}
+function world(){
+ for(let y=32;y<158;y+=2){const t=(y-32)/126;px(0,y,W,2,`rgb(${Math.round(240+t*15)},${Math.round(117+t*87)},${Math.round(104+t*22)})`);}
+ [[21,60,62],[105,53,49],[315,58,38],[383,54,48]].forEach(([x,y,w])=>{px(x,y,w,3,C.cream);px(x+10,y-4,w-22,4,C.cream);px(x+20,y-8,12,4,C.cream);});
+ mountain(45,81,127,'#638dc2');mountain(108,102,115,'#709ac7');mountain(408,79,160,'#648cba');
+ px(0,143,480,60,C.water);for(let y=148;y<200;y+=7)for(let x=0;x<480;x+=31)px(x+(y%3)*5,y,19,2,'#69bbce');
+ for(let i=0;i<4;i++){const x=414+i*15,y=95-(i===1?18:0);px(x,y,12,34,'#edcf88');px(x+4,y+5,3,6,C.brown);for(let j=0;j<7;j++)px(x+6-j,y-8+j,j*2+1,1,C.red);}
+ for(let i=0;i<5;i++){const x=(52+i*73+frame*.12)%480;px(x,78+i%2*9,3,1,C.navy);px(x+3,79+i%2*9,2,1,C.navy);px(x+5,78+i%2*9,3,1,C.navy);}
+ // Platform first, then buildings and train: the paving never paints over the doorway.
+ px(0,198,480,75,'#e9bc77');for(let y=201;y<273;y+=12){px(0,y,480,1,'#c99259');for(let x=(y%24?0:-16);x<480;x+=32){px(x,y,1,12,'#cb965b');px(x+2,y+2,28,1,'#f9d291');}}
+ px(0,273,480,7,'#80584b');for(let x=0;x<480;x+=24)px(x,275,16,3,'#b57d5b');
+ // Station facade, stepped roof tiles and large readable station name.
+ px(137,91,204,109,'#d59b39');px(144,94,190,104,'#f5c65f');for(let x=151;x<332;x+=19)px(x,134,2,61,'#edb34d');
+ for(let y=0;y<44;y+=2){const half=y*2.5;px(239-half,36+y,half*2,3,'#9e3834');px(239-half+4,39+y,Math.max(0,half*2-8),2,'#dc6451');}
+ for(let y=0;y<34;y+=2){const half=y*2.7;px(239-half,47+y,half*2,2,y%6?'#5c9c81':'#438671');}
+ px(131,80,216,12,C.mintDark);px(134,80,210,3,'#6db197');
+ box(164,88,153,31,C.ink,C.cream2);px(168,92,2,23,C.gold);px(311,92,2,23,C.gold);drawPixelText('BELLWOOD',240,96,3,C.ink,null,'center');
+ for(const x of [140,326]){px(x,117,9,82,'#4b9278');px(x,117,3,82,'#82b39a');px(x-3,190,15,11,C.mintDark);}
+ windowArt(163,139);windowArt(283,139);
+ box(229,125,23,23,C.ink,C.cream2);px(239,130,2,9,C.ink);px(240,138,7,2,C.ink);
+ for(let y=178;y<193;y+=6){box(205,y,69,5,C.brown,'#bd7741');}px(202,193,75,5,C.brown);px(208,198,4,9,C.ink);px(268,198,4,9,C.ink);
+ plant(153,187);plant(323,187);
+ // Station furnishings and inset, non-floating signage.
+ px(79,156,4,50,C.brown);px(123,156,4,50,C.brown);box(74,122,58,65,C.brown,C.ink);drawPixelText('DEPARTS',80,129,1,C.cream);drawPixelText('NY 08:15',79,145,1,C.cream);drawPixelText('PAR 12:20',79,157,1,C.cream);drawPixelText('ON TIME',80,173,1,C.gold);
+ px(37,158,4,46,C.ink);box(3,126,66,34,C.ink,C.cream2);drawPixelText('TO',36,132,1,C.ink,null,'center');drawPixelText('EVERYWHERE',36,142,1,C.ink,null,'center');px(24,152,26,2,C.ink);px(47,150,3,6,C.ink);
+ px(13,85,4,125,C.ink);box(6,91,18,23,C.ink,C.cream);px(9,94,4,15,'#ffe29b');px(8,87,14,4,C.mintDark);px(11,82,8,5,C.mintDark);px(6,209,20,4,C.ink);plant(39,194);
+ box(98,196,12,17,C.mintDark,'#4b977f');px(102,195,7,3,C.ink);
+ train();
+}
+function train(){px(344,123,136,88,C.ink);px(344,119,136,6,'#923331');px(348,121,132,3,'#e97052');px(344,128,136,58,C.cream);px(344,177,136,30,C.red);px(345,180,135,2,'#f28160');
+ for(let x=350;x<426;x+=25){box(x,140,21,29,'#c99437',C.ink);px(x+3,143,15,22,'#397fb0');px(x+4,145,6,9,'#78b7d8');px(x+2,156,17,2,C.ink);}
+ drawPixelText('R.R.',357,189,1,C.cream);drawPixelText('17',464,189,1,C.cream);
+ // Door art is fixed to DOOR; no visual shake can detach its collision geometry.
+ box(DOOR.x-3,DOOR.y-3,DOOR.w+6,DOOR.h+4,'#862d32',C.gold);px(DOOR.x,DOOR.y,DOOR.w,DOOR.h,C.ink);px(DOOR.x+3,DOOR.y+3,DOOR.w-6,DOOR.h-8,'#103c42');px(452,169,2,23,C.gold);
+ box(427,128,33,14,C.ink,C.cream);drawPixelText('BOARD',443,132,1,C.ink,null,'center');
+ px(430,206,26,4,'#83b29d');for(let x=430;x<456;x+=6)px(x,210,3,4,C.gold);
+ px(441,217,4,5,C.ink);px(439,219,8,2,C.ink);px(442,215,2,2,C.ink);
+ // Optional geometry inspection: add #debug to the file URL.
+ if(location.hash==='#debug'){ctx.strokeStyle='#ff00e0';ctx.strokeRect(THRESHOLD.x+.5,THRESHOLD.y+.5,THRESHOLD.w,THRESHOLD.h);ctx.strokeStyle='#38ecfc';for(const r of TRAIN_SOLIDS)ctx.strokeRect(r.x+.5,r.y+.5,r.w,r.h);}
+}
+function human(x,y,coat,hat,isPlayer=false,walking=false){x=Math.round(x)-7;y=Math.round(y)-27;const step=(isPlayer&&player.moving||walking)?Math.floor(frame/7)%2:0;
+ px(x-1,y+26,18,3,'#bd8c5a');px(x+2,y+18,5,9,C.ink);px(x+9,y+18,5,9,C.ink);px(x,y+26-step,7,2,C.ink);px(x+9,y+25+step,7,2,C.ink);
+ px(x,y+9,16,12,C.ink);px(x+2,y+10,12,10,coat);px(x+6,y+10,4,10,C.cream);px(x+7,y+11,2,9,isPlayer?'#ba4939':'#7cbbb8');px(x-2,y+12,3,11,coat);px(x+15,y+12,3,11,coat);px(x-2,y+22,3,3,C.tan);px(x+15,y+22,3,3,C.tan);
+ box(x+2,y,12,11,C.ink,'#f1bd8c');px(x+4,y+4,2,2,C.ink);px(x+10,y+4,2,2,C.ink);px(x+2,y-3,12,4,hat);px(x,y,16,2,hat);if(!isPlayer){px(x+4,y-6,8,4,hat);px(x+4,y-2,8,1,C.gold);}else px(x+4,y-4,9,2,'#825135');}
+function dogSprite(){const x=dog.x-9,y=dog.y-18;px(x,y+17,23,3,'#bd8c5a');px(x+1,y+8,17,10,C.ink);px(x+3,y+8,13,9,C.white);px(x+2,y+16,4,3,C.white);px(x+13,y+16,4,3,C.white);box(x+3,y,13,12,C.ink,C.white);px(x,y+2,5,8,C.tan);px(x+14,y+2,5,8,C.tan);px(x+6,y+5,2,2,C.ink);px(x+11,y+5,2,2,C.ink);px(x+8,y+9,3,2,C.ink);px(x+7,y-5,5,5,C.pink);px(x+8,y-7,3,2,C.pink);px(x+18,y+9,3,5,C.tan);px(x+20,y+7+(Math.floor(frame/9)%2),2,4,C.tan);}
+function bag(b){const x=b.x-7,y=b.y-16;px(x-1,y+16,18,3,'#bd8c5a');box(x+3,y-4,9,5,C.ink,C.gold);box(x,y,16,17,C.ink,b.color);px(x+3,y+1,2,14,C.gold);px(x+11,y+1,2,14,C.gold);px(x+2,y+7,12,2,'#a7723b');px(x+3,y+7,2,2,C.cream);px(x+11,y+7,2,2,C.cream);
+ if(LEVELS[levelIndex].ordered){box(x+3,y-14,11,11,C.ink,b.order===found+1?C.gold:C.cream2);drawPixelText(b.order,x+6,y-12,1,C.ink);}
+}
+// PET / TALK are anchored interaction markers; every dialogue sentence stays below the world.
+function prompt(label,x,y,active){const w=measurePixelText(label,1)+12;box(x-w/2,y,w,14,C.ink,active?C.gold:C.cream2);drawPixelText(label,x,y+4,1,C.ink,null,'center');px(x-2,y+14,5,2,C.ink);px(x,y+16,1,2,C.ink);}
+function hud(){box(2,2,476,28,C.cream,C.ink);px(12,12,13,12,C.gold);px(15,8,7,4,C.gold);px(18,12,2,12,C.brown);drawPixelText(`BAGS ${found}/6`,35,11,2,C.cream);px(146,7,2,18,C.cream);drawPixelText(`TRAIN ${Math.ceil(departure)}`,160,11,2,departure<15?'#ff9974':C.cream);px(279,7,2,18,C.cream);drawPixelText('PANIC',291,11,2,C.cream);box(357,9,68,15,C.cream,C.navy2);for(let i=0;i<10;i++)px(361+i*6,12,5,9,i<Math.ceil(panic/10)?(panic>75?C.red:C.gold):C.navy);drawPixelText(`${Math.ceil(panic)}%`,468,11,2,C.cream,null,'right');}
+// Wrap by measured glyph widths, including long words. Hard cap is explicit ellipsis, never hidden overflow.
+function wrap(str,maxWidth,maxLines){const lines=[];let line='';for(const word of str.toUpperCase().split(/\s+/)){if(measurePixelText(line+(line?' ':'')+word,1)<=maxWidth){line+=(line?' ':'')+word;continue;}if(line){lines.push(line);line='';}for(const ch of word){if(measurePixelText(line+ch,1)>maxWidth){lines.push(line);line='';}line+=ch;}}if(line)lines.push(line);if(lines.length>maxLines){lines.length=maxLines;while(measurePixelText(lines[maxLines-1]+'...',1)>maxWidth)lines[maxLines-1]=lines[maxLines-1].slice(0,-1);lines[maxLines-1]+='...';}return lines;}
+function panel(){
+ box(2,282,476,76,C.cream,C.ink);
+ // Dedicated level strip. Portrait and dialogue retain their own clipped regions.
+ drawPixelText(`LEVEL ${levelIndex+1}/5`,11,287,1,C.gold);
+ drawPixelText(LEVELS[levelIndex].name,79,287,1,C.cream);
+ if(LEVELS[levelIndex].ordered&&found<6)drawPixelText(`NEXT BAG ${found+1}`,467,287,1,C.gold,null,'right');
+ box(7,297,466,56,C.ink,C.cream2);
+ px(11,301,58,48,C.mintDark);
+ ctx.save();ctx.beginPath();ctx.rect(11,301,58,48);ctx.clip();
+ ctx.translate(16,305);ctx.scale(2,2);
+ if(dialogue.who==='DOG')drawDogPortrait(0,0);
+ else if(dialogue.who==='CONDUCTOR')drawConductorPortrait(0,0);
+ else drawPlayerPortrait(0,0);
+ ctx.restore();
+ const title=state==='complete'?'CAMPAIGN COMPLETE':state==='win'?'DEPARTURE COMPLETE':state==='lose'?'MISSED DEPARTURE':dialogue.who;
+ px(77,300,Math.max(65,measurePixelText(title,1)+12),10,C.ink);
+ drawPixelText(title,83,301,1,C.cream);
+ ctx.save();ctx.beginPath();ctx.rect(77,313,269,37);ctx.clip();
+ wrap(dialogue.text,265,4).forEach((l,i)=>drawPixelText(l,77,313+i*9,1,C.ink));
+ ctx.restore();
+ px(350,301,2,47,C.mintDark);
+ if(state==='win'||state==='complete'){
+  drawPixelText(touchMode?'TAP BUTTON':'ENTER',360,303,1,C.ink);
+  drawPixelText(state==='complete'?'PLAY AGAIN':'NEXT LEVEL',360,315,1,C.ink);
+ }else{
+  drawPixelText(touchMode?'D-PAD':'WASD / ARROWS',360,303,1,C.ink);
+  drawPixelText('MOVE',360,313,1,C.ink);
+  drawPixelText(touchMode?'TAP PET/TALK':'SPACE PET/TALK',360,325,1,C.ink);
+ }
+ drawPixelText(touchMode?'TAP RETRY':'R RETRY LEVEL',360,340,1,C.ink);
+}
+function render(){ctx.clearRect(0,0,W,H);ctx.save();ctx.beginPath();ctx.rect(0,HUD,W,PANEL-HUD);ctx.clip();world();
+ const sprites=bags.filter(b=>!b.found).map(b=>({y:b.y,draw:()=>bag(b)}));for(const n of passengers)sprites.push({y:n.y,draw:()=>human(n.x,n.y,n.coat,n.hat,false,started&&state==='playing')});sprites.push({y:player.y,draw:()=>{human(player.x,player.y,bumpCooldown>0&&Math.floor(frame/5)%2?C.cream:'#a47745','#493228',true);}},{y:dog.y,draw:dogSprite},{y:conductor.y,draw:()=>human(conductor.x,conductor.y,C.navy,C.navy)});sprites.sort((a,b)=>a.y-b.y).forEach(s=>s.draw());
+ const t=target();prompt(cooldown>0?'REST':'PET',dog.x,dog.y-45,t===dog&&state==='playing');prompt('TALK',conductor.x,conductor.y-53,t===conductor&&state==='playing');ctx.restore();hud();panel();syncTouchControls();}
+let lastTime=performance.now();function loop(now){const dt=document.hidden?0:Math.min((now-lastTime)/1000,.05);lastTime=now;update(dt);render();requestAnimationFrame(loop);}
+setupTouch();reset();resize();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
