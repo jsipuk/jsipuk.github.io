@@ -1,37 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Bellwood Station Panic</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Five stations, four suitcases, one festival. A tiny pixel-art train adventure.">
+<title>Bellwood Station Panic — A Five-Station Journey</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#061e26;overflow:hidden}body{display:grid;place-items:center}canvas{display:block;image-rendering:pixelated;outline:none;box-shadow:0 12px 60px #0008}
-
-#shell{width:100%;height:100%;display:grid;place-items:center}#stage{width:100%;height:100%;min-width:0;min-height:0;display:grid;place-items:center}
-.touch-controls{display:none}body.touch{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);height:100dvh}
-body.touch #shell{grid-template-columns:148px minmax(0,1fr) 148px;gap:4px;padding:4px}
-body.touch .touch-controls{display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
-#move-controls{grid-column:1;grid-row:1}body.touch #stage{grid-column:2;grid-row:1}#action-controls{grid-column:3;grid-row:1;flex-direction:column;gap:12px}
-#dpad{display:grid;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:2px}
-button{appearance:none;border:3px solid #fff0b9;border-radius:6px;background:#14505a;color:#fff0b9;min-height:46px;padding:6px;touch-action:none;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 0 #020e13}
-button:active,button.held{background:#805528;transform:translateY(2px);box-shadow:none}button:focus-visible{outline:3px solid #ffc94f;outline-offset:2px}button:disabled{opacity:.4}
-button canvas{box-shadow:none;max-width:100%;pointer-events:none}#action-controls button{width:138px;min-height:56px;display:grid;place-items:center}
-#up{grid-column:2;grid-row:1}#left{grid-column:1;grid-row:2}#right{grid-column:3;grid-row:2}#down{grid-column:2;grid-row:3}
-@media(orientation:portrait){body.touch #shell{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) 150px;gap:4px}body.touch #stage{grid-column:1 / -1;grid-row:1}#move-controls{grid-column:1;grid-row:2}#action-controls{grid-column:2;grid-row:2}}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071f27;color:#fff0b9}body{height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}#shell{width:100%;height:100%;display:grid;grid-template-rows:minmax(0,1fr) 48px;gap:4px;padding:4px}#stage{min-width:0;min-height:0;display:grid;place-items:center}canvas{display:block;image-rendering:pixelated}#game{outline:none;box-shadow:0 4px 30px #0008;touch-action:none}button{appearance:none;border:2px solid #fff0b9;border-radius:5px;background:#14505a;min-height:44px;min-width:44px;padding:8px;display:grid;place-items:center;touch-action:none;color:#fff0b9;user-select:none;-webkit-user-select:none}button canvas{pointer-events:none;max-width:100%}button:active,button.held{background:#805528}button:focus-visible{outline:3px solid #ffc94f;outline-offset:2px}button:disabled{opacity:.4}#actions{display:flex;justify-content:center;gap:6px}#actions button{width:128px}#move{display:none}body.touch #shell{grid-template-columns:144px minmax(0,1fr) 132px;grid-template-rows:minmax(0,1fr)}body.touch #stage{grid-column:2;grid-row:1}body.touch #move{display:grid;place-items:center;grid-column:1;grid-row:1;touch-action:none}#dpad{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px);gap:3px}#up{grid-area:1/2}#left{grid-area:2/1}#right{grid-area:2/3}#down{grid-area:3/2}body.touch #actions{grid-column:3;grid-row:1;flex-direction:column;align-items:center;justify-content:center}body.touch #actions button{width:128px;min-height:48px}
+@media(orientation:portrait){body.touch #shell{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) 150px}body.touch #stage{grid-column:1/-1;grid-row:1}body.touch #move{grid-column:1;grid-row:2}body.touch #actions{grid-column:2;grid-row:2;display:grid;grid-template-columns:1fr 1fr;gap:4px}body.touch #actions button{width:100%;min-width:0;height:64px;padding:4px}body:not(.touch) #actions button{width:23%;min-width:0;padding:4px}}
 </style>
 </head>
-<body>
-<main id="shell"><section id="stage" aria-label="Game"><canvas id="game" width="480" height="360" tabindex="0" aria-label="Bellwood Station Panic. Move with WASD or arrow keys. Walk over six suitcases, press Space near the dog or conductor, then walk up into the marked train door. R retries the current level. Enter advances after boarding. Complete all five departures."></canvas></section>
-<nav id="move-controls" class="touch-controls" aria-label="Movement"><div id="dpad">
-<button id="up" data-direction="w" aria-label="Move up"></button><button id="left" data-direction="a" aria-label="Move left"></button><button id="right" data-direction="d" aria-label="Move right"></button><button id="down" data-direction="s" aria-label="Move down"></button>
-</div></nav>
-<nav id="action-controls" class="touch-controls" aria-label="Game actions"><button id="touch-action" aria-label="Interact"></button><button id="touch-retry" aria-label="Retry current level"></button></nav>
-</main>
+<body><main id="shell"><section id="stage" aria-label="Game"><canvas id="game" width="480" height="360" tabindex="0" aria-label="Bellwood Station Panic. Move with WASD or arrows. Space or Enter interacts and advances dialogue. P pauses, R retries, M mutes. Touch controls are available on touch devices."></canvas></section>
+<nav id="move" aria-label="Movement"><div id="dpad"><button id="up" data-direction="w" aria-label="Move up"></button><button id="left" data-direction="a" aria-label="Move left"></button><button id="right" data-direction="d" aria-label="Move right"></button><button id="down" data-direction="s" aria-label="Move down"></button></div></nav>
+<nav id="actions" aria-label="Game actions"><button id="action" aria-label="Start journey"></button><button id="pause" aria-label="Pause"></button><button id="retry" aria-label="New journey"></button><button id="mute" aria-label="Mute sound"></button></nav></main>
 <script>
 'use strict';
+// RENDERING PRIMITIVES: native resolution and embedded font keep this file asset-free.
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
-const W=480,H=360,HUD=32,PANEL=280;
-// All world drawing is clipped between HUD and PANEL. All text uses our bitmap font.
+const touchMode=matchMedia('(any-pointer: coarse), (max-width: 900px)').matches||navigator.maxTouchPoints>0;
+const W=480,H=touchMode?440:360,HUD=44,PANEL=280,VH=PANEL-HUD;
+canvas.height=H;
+const TEXT_SCALE=touchMode?2:1,TEXT_WIDTH=touchMode?192:385,TEXT_LINES=touchMode?4:3;
 const C={ink:'#071f27',navy:'#0b3440',navy2:'#14505a',cream:'#fff0b9',cream2:'#fff8d7',white:'#fff7dd',gold:'#ffc94f',tan:'#df9b63',pink:'#ff9fba',mintDark:'#2d5e59',red:'#ca4d43',green:'#3e8970',brown:'#714326',water:'#4199be'};
 function px(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
 function box(x,y,w,h,b=C.ink,f=C.cream){px(x,y,w,h,b);px(x+2,y+2,w-4,h-4,f);}
@@ -150,279 +138,218 @@ function drawConductorPortrait(x, y) {
   px(x + 15, y + 7, 2, 1, C.ink);
 }
 
-// Layout and collision geometry share the same coordinate system as the art.
-// Feet, not the player's head/body, determine ground collisions and boarding.
-const DOOR={x:430,y:148,w:26,h:62};
-const THRESHOLD={x:434,y:199,w:18,h:11};
-const TRAIN_SOLIDS=[{x:344,y:126,w:86,h:84},{x:456,y:126,w:24,h:84}];
-const player={x:230,y:245,moving:false}; // x = feet centre; y = feet baseline
-const dog={x:289,y:242},conductor={x:393,y:221};
-const touchDirections=new Map();
-const touchMode=matchMedia("(any-pointer: coarse)").matches || navigator.maxTouchPoints>0;
-const keys=new Set();let interact=false,state,started,departure,panic,bags,found,frame=0,cooldown,dialogue,doorInside=false;
-let passengers=[],bumpCooldown=0,levelIndex=0,conductorRelief=false;
-// Each departure changes route planning as well as pressure. Retries are deterministic.
-const LEVELS=[
- {name:'Mind The Crowd',seconds:35,count:3,speed:32,startPanic:30,rise:1,bump:12,ordered:false,cross:0,briefing:'Six bags, 35 seconds. Bumps add 12 panic AND cost 2 seconds. Pet the dog to recover. Walk UP into the door.'},
- {name:'Cross Traffic',seconds:30,count:5,speed:39,startPanic:35,rise:1.2,bump:14,ordered:false,cross:2,briefing:'Cross traffic! Blue-coated commuters cross the platform. Bags have moved. Bumps cost 2 seconds and 14 panic.'},
- {name:'The Packing List',seconds:40,count:6,speed:43,startPanic:30,rise:1.2,bump:14,ordered:true,cross:2,briefing:'Collect numbered bags IN ORDER, 1 to 6. Gold marks the next bag. Plan your crossings. Bumps add 14 panic.'},
- {name:'Wrong End Of The Platform',seconds:50,count:7,speed:47,startPanic:25,rise:1.2,bump:12,ordered:true,cross:3,briefing:'Follow bags 1 to 6 across the platform. Three crossing commuters! Bumps add 12 panic. Leave time for the dog.'},
- {name:'Last Train Home',seconds:46,count:7,speed:51,startPanic:28,rise:1.3,bump:14,ordered:true,cross:4,briefing:'Last train. Bags 1 to 6, four crossing commuters. Bumps cost 14 panic and 2 seconds. Find gaps. No second train.'}
-];
-// Ordered routes deliberately require return trips; unnumbered levels allow free routing.
-const BAG_LAYOUTS=[
- [[57,251],[124,233],[176,260],[258,219],[336,260],[408,253]],
- [[35,218],[92,264],[170,219],[276,265],[355,220],[417,265]],
- [[62,259],[349,222],[139,219],[411,259],[205,264],[300,218]],
- [[405,263],[45,220],[330,220],[115,264],[378,245],[190,219]],
- [[42,263],[408,220],[110,219],[359,263],[180,263],[303,220]]
-];
-// x, feet y, left bound, right bound, direction, coat, hat.
+// STATION DATA: maps, errands, characters and timed encounters have no level-specific game-loop branches.
+const WORLD={w:800,h:464};
 const PATROLS=[
- [77,228,35,225,1,C.green,C.ink],
- [351,250,205,419,-1,C.pink,C.pink],
- [30,266,20,185,1,'#9c7b4d',C.brown],
- [310,218,245,365,1,'#b66b41',C.brown],
- [155,241,50,330,-1,'#5d769f',C.navy],
- [385,263,240,420,-1,'#9b6789','#603f60'],
- [135,216,30,300,1,'#6b8872',C.ink]
+ {x:150,y:210,axis:'x',min:90,max:530,speed:33,dir:1},
+ {x:490,y:352,axis:'x',min:100,max:700,speed:29,dir:-1},
+ {x:680,y:265,axis:'y',min:190,max:417,speed:28,dir:1},
+ {x:345,y:190,axis:'y',min:175,max:425,speed:34,dir:1},
+ {x:570,y:410,axis:'y',min:165,max:425,speed:36,dir:-1}
 ];
-const INTRO='Find six bags. Avoid passengers! SPACE pets the dog or talks. With six bags, walk UP into the open door.';
-const bagLines=['Luggage secured. Your socks believe in you.','Another bag. Mostly clothes. Some regrets.','A suitcase! Tiny bureaucracy applauds.','Packed with care. Carried with panic.','Bag rescued. The train is mildly impressed.','Found it. Your holiday is taking shape.'];
-const dogLines=['You pet the dog. A calmer you. Temporarily.','The dog wags. Your worries lose their luggage.','Soft ears. Deep breath. You can do this.','Dog morale deployed. Extremely effective.'];
-const missingLines=['Six bags, please. Even the suspicious one.','Still missing luggage. Check the whole platform.','Your train is ready. Your packing is not.'];
-const readyLines=['All six! Walk UP into the striped open door.','Bags accounted for. The open door is to my right.','Splendid. Through the marked doorway, please.'];
-let lastLine='';
-function randomLine(lines){const choices=lines.filter(s=>s!==lastLine);return lastLine=choices[Math.floor(Math.random()*choices.length)];}
-function say(text,who='YOU'){if(touchMode)text=text.replace(/SPACE/g,'INTERACT').replace(/ENTER:/g,'TAP BUTTON:').replace(/Press R/g,'Tap RETRY');dialogue={text,who};}
-// A retry reloads the current departure; only completion advances the campaign.
-function reset(){loadLevel(levelIndex);}
-function loadLevel(index){
- levelIndex=Math.max(0,Math.min(LEVELS.length-1,index));
- const level=LEVELS[levelIndex];
- passengers=PATROLS.slice(0,level.count).map(([x,y,min,max,dir,coat,hat])=>({x,y,min,max,dir,coat,hat,speed:level.speed}));
- // Crossing patrols occupy visible vertical lanes; none reaches the doorway.
- const crossingX=[95,325,170,375];
- passengers.forEach((n,i)=>{if(i>=level.count-level.cross){const j=i-(level.count-level.cross);n.axis='y';n.x=crossingX[j];n.y=j%2?263:218;n.min=216;n.max=267;n.dir=j%2?-1:1;n.coat='#548fb1';}});
- state='playing';started=false;departure=level.seconds;panic=level.startPanic;found=0;conductorRelief=false;
- cooldown=0;bumpCooldown=0;doorInside=false;frame=0;lastLine='';
- clearInput();player.x=230;player.y=245;player.moving=false;
- bags=BAG_LAYOUTS[levelIndex].map(([x,y],i)=>({x,y,color:[C.brown,C.green,C.brown,C.brown,C.red,'#17698d'][i],order:i+1,found:false}));
- say(level.briefing);
+const STATIONS=[
+ {name:'BELLWOOD',sign:'BELLWOOD',time:60,theme:'village',floor:'#e8bd78',roof:'#b95442',wall:'#f0c163',spawn:[74,410],bags:[[68,186],[170,382],[485,186],[738,398]],solids:[[210,246,96,30,'bench'],[430,300,96,30,'flowers']],patrols:[0,1,2],events:[],
+  quest:{item:'TICKET',giver:'conductor',receiver:null},
+  npcs:[['conductor','CONDUCTOR',644,184,'#17566c'],['dog','DOG',392,371,'#ffffff']],
+  briefing:['The Lantern Festival is five stops away. Four suitcases, one rather ambitious holiday.','Collect four bags and talk to the conductor for your ticket. Follow the TASK marker.','WASD or arrows move. SPACE interacts. The clock pauses while you read. Close this briefing to begin.'],
+  giverLines:['All aboard the festival line! Here is your ticket. Try not to pack the dog.','Find your four cases, then walk UP into the striped open doorway. I will meet you at the next stop.'],
+  optional:{conductor:['Your ticket is safe. Four cases, then the open door to my right.'],dog:['A familiar wag. Every journey needs a good travelling companion.']}},
+ {name:'LAKESIDE HALT',sign:'LAKESIDE',time:65,theme:'lake',floor:'#c5c8a1',roof:'#437d87',wall:'#f0dcaa',spawn:[72,406],bags:[[70,195],[195,415],[484,191],[739,394]],solids:[[205,270,110,28,'bench'],[435,247,105,30,'flowers']],patrols:[0,2,3,4],events:[],
+  quest:{item:'POSTCARD',pickup:[100,180],receiver:'traveller'},
+  npcs:[['conductor','CONDUCTOR',644,184,'#17566c'],['dog','DOG',385,388,'#ffffff'],['traveller','MIRA',705,350,'#bc6485']],
+  briefing:['Lakeside Halt. The water glitters, but Mira has lost a postcard for someone at the festival.','Find the marked postcard and bring it to Mira. Four bags need collecting too. Watch the crossing commuters.'],
+  pickupLines:['A postcard: SEE YOU UNDER THE LANTERNS. Mira will be relieved.'],
+  missingLines:['My postcard blew away near the western lake rail. Look for the gold ITEM marker.'],
+  receiverLines:['You found it! My brother is waiting at the festival. I thought I had lost his address.','Thank you. If we meet at Lantern Terminus, I owe you a story.'],
+  optional:{conductor:['Crossing commuters go north and south. The outer path gives you more room.'],traveller:['See you under the lanterns. And mind those suitcases!']}},
+ {name:'MARKET JUNCTION',sign:'MARKET',time:75,theme:'market',floor:'#d7ad86',roof:'#964959',wall:'#e5bd8a',spawn:[70,409],bags:[[76,192],[185,418],[472,178],[738,410]],solids:[[205,258,110,34,'stall'],[435,258,118,34,'stall']],patrols:[0,1,2,4],
+  events:[{type:'trolley',first:10,interval:16,duration:5,rect:[337,245,72,62],label:'TROLLEY CROSSING'}],
+  quest:{item:'PARCEL',giver:'vendor',receiver:'porter'},
+  npcs:[['conductor','CONDUCTOR',644,184,'#17566c'],['dog','DOG',390,399,'#ffffff'],['vendor','VENDOR',120,225,'#b96845'],['porter','PORTER',696,370,'#60854e']],
+  briefing:['Market Junction smells of cinnamon and hurried decisions. The vendor needs a parcel delivered.','Talk to the vendor, take the parcel to the porter, and gather four bags. A trolley crosses the shortcut.'],
+  giverLines:['Lantern candles for the porter. Please keep them upright. The candles have standards.'],
+  missingLines:['The vendor on the west side has my parcel of festival candles.'],
+  receiverLines:['Right on time! These candles will light the platform at the festival.','The trolley blocks the centre briefly. Watch its warning and go around the stalls if you need to.'],
+  optional:{vendor:['Thank you for taking the candles. Everything feels brighter already.'],porter:['Parcel delivered. Your cases are the only cargo left.'],conductor:['The trolley whistles two seconds before it moves. The southern path stays open.']}},
+ {name:'HILLCREST STATION',sign:'HILLCREST',time:75,theme:'hill',floor:'#b9b8a2',roof:'#426c67',wall:'#d9c69d',spawn:[73,408],bags:[[65,180],[187,405],[480,205],[737,407]],solids:[[205,248,102,30,'hedge'],[435,318,112,30,'bench']],patrols:[0,1,2,3],
+  events:[{type:'crowd',first:12,interval:19,duration:8,rect:[570,152,76,40],label:'ARRIVING PASSENGERS'}],
+  quest:{item:'WHISTLE',pickup:[112,192],receiver:'conductor'},
+  npcs:[['conductor','CONDUCTOR',672,212,'#17566c'],['dog','DOG',381,390,'#ffffff']],
+  briefing:['Hillcrest Station. The conductor has misplaced his whistle. Even professionals have mornings like this.','Find the marked whistle and bring it back. Incoming passengers are announced before they reach the platform.'],
+  pickupLines:['One whistle, slightly muddy. The dog looks innocent. Suspiciously innocent.'],
+  missingLines:['My whistle is near the west garden. I cannot give the all-clear without it.'],
+  receiverLines:['There it is! A station without a whistle is just a very anxious garden.','Next stop: Lantern Terminus. Watch for the arriving crowd and bring all four bags.'],
+  optional:{conductor:['Listen for the arrival announcement. Let the crowd pass or take the outer path.']}},
+ {name:'LANTERN TERMINUS',sign:'LANTERN',time:80,theme:'festival',floor:'#c9a995',roof:'#784d76',wall:'#e4ba88',spawn:[70,406],bags:[[70,190],[196,421],[490,184],[734,408]],solids:[[205,252,112,34,'flowers'],[435,295,115,34,'stall']],patrols:[0,1,2,3,4],
+  events:[{type:'crowd',first:10,interval:18,duration:8,rect:[570,152,76,40],label:'FESTIVAL ARRIVALS'}],
+  quest:{item:'BANNER',pickup:[110,181],receiver:'host'},
+  npcs:[['conductor','CONDUCTOR',656,186,'#17566c'],['dog','DOG',384,385,'#ffffff'],['host','FESTIVAL HOST',691,330,'#9966ac'],['traveller','MIRA',120,330,'#bc6485']],
+  briefing:['Lantern Terminus! The candles have arrived. Mira has found her brother. Only the welcome banner is missing.','Bring the banner to the host, gather your bags, then catch the last shuttle to the festival square.'],
+  pickupLines:['WELCOME, EVERYONE! A small banner with a very large job.'],
+  missingLines:['Our banner is by the west lantern stand. Bring it here and we can welcome the whole town.'],
+  receiverLines:['Beautiful. The candles, the postcard, the whistle... you helped this journey come together.','Four bags and one last train. We will see you beneath the lanterns.'],
+  optional:{traveller:['You made it! My brother loved the postcard. Thank you for bringing a little piece of home.'],host:['The square is ready. Your last shuttle leaves through the open doorway.'],conductor:['One last departure, old friend. The dog and I saved you a seat.']}}
+];
+// Stable map geometry: an open southern bypass and side corridors surround the obstacles.
+const DOOR={x:714,y:128,w:30,h:26},THRESHOLD={x:720,y:143,w:18,h:9};
+const player={x:74,y:410,facing:'down',moving:false};
+let stationIndex=0,station=STATIONS[0],state='start',previousState='playing',clock=60,panic=25,elapsed=0,anim=0,departureAnim=0;
+let bags=[],actors=[],commuters=[],events=[],waves=[],questStep=0,carried='',dogCooldown=0,invulnerable=0,stumble=0,doorInside=false;
+let pages=[],pageIndex=0,speaker='YOU',notice='',noticeTime=0,dialogueReturn='playing';
+const camera={x:0,y:0},keys=new Set(),pointers=new Map();
+// SAVE DATA: only completed stations and preferences persist. Bad storage never stops play.
+const SAVE_KEY='bellwood-journey-v1';let save={version:1,unlocked:0,complete:false,muted:false},storageOK=true;
+try{const stored=JSON.parse(localStorage.getItem(SAVE_KEY));if(stored&&stored.version===1&&Number.isInteger(stored.unlocked)&&stored.unlocked>=0&&stored.unlocked<5&&typeof stored.complete==='boolean'&&typeof stored.muted==='boolean')save=stored;}catch{storageOK=false;}
+function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch{storageOK=false;}}
+// AUDIO: created only from a user gesture, no audio files or network requests.
+let audio=null;
+function unlockAudio(){try{const Audio=window.AudioContext||window.webkitAudioContext;if(!audio&&Audio)audio=new Audio();if(audio?.state==='suspended')audio.resume().catch(()=>{});}catch{}}
+function sound(kind){if(save.muted||!audio||audio.state!=='running')return;const notes={pickup:[660,880],talk:[330],bump:[100,70],dog:[260,380],whistle:[880,1100]}[kind]||[440];try{notes.forEach((frequency,i)=>{const osc=audio.createOscillator(),gain=audio.createGain(),t=audio.currentTime+i*.09;osc.type=kind==='bump'?'sawtooth':'square';osc.frequency.value=frequency;gain.gain.setValueAtTime(.025,t);gain.gain.exponentialRampToValueAtTime(.001,t+.1);osc.connect(gain);gain.connect(audio.destination);osc.start(t);osc.stop(t+.11);});}catch{}}
+function clearInput(){keys.clear();pointers.clear();document.querySelectorAll('.held').forEach(b=>b.classList.remove('held'));player.moving=false;}
+function setState(next){clearInput();state=next;syncControls();}
+function freshStation(index){
+ stationIndex=index;station=STATIONS[index];clock=station.time;panic=25;elapsed=0;anim=0;departureAnim=0;
+ player.x=station.spawn[0];player.y=station.spawn[1];player.facing='up';
+ bags=station.bags.map(([x,y],i)=>({x,y,found:false,color:[C.brown,C.green,C.red,'#17698d'][i]}));
+ actors=station.npcs.map(([id,name,x,y,coat])=>({id,name,x,y,coat,facing:'down'}));
+ commuters=station.patrols.map((i,j)=>({...PATROLS[i],id:'commuter'+j,coat:[C.green,C.pink,'#738cad'][j%3],facing:'down'}));
+ events=station.events.map(e=>({...e,next:e.first,phase:'idle',end:0}));waves=[];
+ questStep=0;carried='';dogCooldown=0;invulnerable=0;stumble=0;doorInside=false;notice='';noticeTime=0;
+ openDialogue('CONDUCTOR',station.briefing,'briefing');updateCamera();
 }
-function feet(x=player.x,y=player.y){return{x:x-4,y:y-4,w:8,h:4};}
-function overlaps(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
-function near(p){return Math.hypot(player.x-p.x,player.y-p.y)<28;}
-function target(){return [dog,conductor].filter(near).sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y))[0];}
-function allowed(x,y){return x>=10&&x<=470&&y>=211&&y<=270&&!TRAIN_SOLIDS.some(r=>overlaps(feet(x,y),r)) || x>=438&&x<=448&&y>=203&&y<=211;}
-// Movement resolves axes separately. Only the narrow open doorway permits entry north of the platform.
-function move(dx,dy){const x=player.x+dx,y=player.y+dy;if(allowed(x,player.y))player.x=x;if(allowed(player.x,y))player.y=y;}
-function finish(win,text){
- state=win?(levelIndex===LEVELS.length-1?'complete':'win'):'lose';
- player.moving=false;clearInput();
- if(win)text=`${state==='complete'?'All five departures caught!':'Departure complete!'} Time left: ${Math.ceil(departure)} seconds. Final panic: ${Math.ceil(panic)}%. ${state==='complete'?'ENTER: play again.':'ENTER: next level.'}`;
- say(text,win?'CONDUCTOR':'YOU');
+function openDialogue(who,text,kind='dialogue'){speaker=who;pages=(Array.isArray(text)?text:[text]).flatMap(t=>{const lines=wrap(t,TEXT_WIDTH),result=[];for(let i=0;i<lines.length;i+=TEXT_LINES)result.push(lines.slice(i,i+TEXT_LINES).join(' '));return result;});pageIndex=0;dialogueReturn='playing';setState(kind);}
+function advanceDialogue(){if(pageIndex<pages.length-1){pageIndex++;sound('talk');}else setState(dialogueReturn);}
+function announce(text){notice=text;noticeTime=3;}
+function objective(){const q=station.quest;if(questStep<2){if(questStep===1)return 'BRING '+q.item+' TO '+actors.find(a=>a.id===q.receiver)?.name;if(q.giver)return 'TALK TO '+actors.find(a=>a.id===q.giver)?.name;return 'PICK UP THE '+q.item;}if(bags.some(b=>!b.found))return 'COLLECT '+bags.filter(b=>!b.found).length+' MORE BAGS';return 'WALK UP INTO THE OPEN TRAIN DOOR';}
+function objectiveTarget(){const q=station.quest;if(questStep===0)return q.giver?actors.find(a=>a.id===q.giver):{x:q.pickup[0],y:q.pickup[1]};if(questStep===1)return actors.find(a=>a.id===q.receiver);return bags.find(b=>!b.found)||{x:729,y:153};}
+function target(){const candidates=[...actors];if(questStep===0&&station.quest.pickup)candidates.push({id:'item',name:station.quest.item,x:station.quest.pickup[0],y:station.quest.pickup[1]});return candidates.filter(a=>Math.hypot(a.x-player.x,a.y-player.y)<30).sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0];}
+function interact(){
+ const a=target();if(!a)return;const q=station.quest;sound('talk');
+ if(a.id==='dog'){if(dogCooldown<=0){panic=Math.max(0,panic-20);dogCooldown=5;sound('dog');openDialogue('DOG',stationIndex===0?'You pet the dog. A calmer you. Temporarily.':'A familiar friend! Soft ears, deep breath. The dog remembers you.');}else openDialogue('DOG','Still wagging. Give me '+Math.ceil(dogCooldown)+' seconds of walking, then pet again.');return;}
+ if(questStep===0&&(a.id==='item'||a.id===q.giver)){questStep=q.receiver?1:2;carried=q.receiver?q.item:'';sound('pickup');openDialogue(a.id==='item'?'YOU':a.name,station.pickupLines||station.giverLines);return;}
+ if(a.id===q.receiver&&questStep<2){if(questStep===1){questStep=2;carried='';sound('pickup');openDialogue(a.name,station.receiverLines);}else openDialogue(a.name,station.missingLines);return;}
+ openDialogue(a.name,station.optional?.[a.id]||(a.id==='conductor'?'Four bags and your station errand, then the open doorway. You have got this.':'Safe travels! The festival is waiting.'));
 }
-// Ground footprints give readable collisions without penalising mere head/sprite overlap.
-// Dense final levels grant 1.5 s of grace, preventing overlapping crowds from trapping the player.
-function passengerFootprint(p){return{x:p.x-7,y:p.y-10,w:14,h:10};}
-function updatePassengers(dt){
- bumpCooldown=Math.max(0,bumpCooldown-dt);
- if(!started)return; // Keep the opening instructions safe to read.
- for(const n of passengers){
-  const axis=n.axis||'x';n[axis]+=n.dir*n.speed*dt;
-  if(n[axis]>=n.max){n[axis]=n.max;n.dir=-1;}
-  if(n[axis]<=n.min){n[axis]=n.min;n.dir=1;}
-  if(bumpCooldown<=0&&overlaps(passengerFootprint(player),passengerFootprint(n))){
-   panic=Math.min(100,panic+LEVELS[levelIndex].bump);departure=Math.max(0,departure-2);bumpCooldown=levelIndex>=3?1.5:.75;
-   say(`Bumped! ${LEVELS[levelIndex].bump} panic and 2 seconds lost. Watch for a gap.`);
-  }
- }
+// PHYSICS: feet rectangles, fixed small time steps, and axis resolution prevent tunnelling.
+function rectFeet(x,y){return{x:x-5,y:y-6,w:10,h:6};}
+function overlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+function rect(data){return{x:data[0],y:data[1],w:data[2],h:data[3]};}
+function passable(x,y){if(x<24||x>776||y>446)return false;if(y<158&&!(x>=DOOR.x+6&&x<=DOOR.x+DOOR.w-6&&y>=147))return false;const f=rectFeet(x,y);if(station.solids.some(r=>overlap(f,rect(r))))return false;if(events.some(e=>e.type==='trolley'&&e.phase==='active'&&overlap(f,rect(e.rect))))return false;return true;}
+function move(dx,dy){if(passable(player.x+dx,player.y))player.x+=dx;if(passable(player.x,player.y+dy))player.y+=dy;}
+function held(k){return keys.has(k)||[...pointers.values()].includes(k);}
+function fail(reason){speaker='YOU';pages=[reason+' Press R or tap RETRY to try this station again. Your earlier stops are safe.'];pageIndex=0;setState('failed');}
+function board(){sound('whistle');departureAnim=0;setState('departing');}
+function completeStation(){save.unlocked=Math.max(save.unlocked,Math.min(4,stationIndex+1));if(stationIndex===4)save.complete=true;persist();speaker='CONDUCTOR';pages=[stationIndex===4?'You made it. Mira, the porter, the host, and one very good dog are waiting beneath the lanterns. Thank you for making the journey.':'Departure caught! '+Math.ceil(clock)+' seconds to spare. Next stop: '+STATIONS[stationIndex+1].name+'.'];pageIndex=0;setState(stationIndex===4?'journey-complete':'station-complete');}
+// ENCOUNTERS: warning lasts at least two active seconds. Occupied spawn areas delay activation.
+function updateEvents(dt){for(const e of events){if(e.phase==='idle'&&elapsed>=e.next-2){e.phase='warning';e.warnedAt=elapsed;announce(e.label+' IN TWO SECONDS. WATCH THE MARKED AREA.');sound('whistle');}
+ if(e.phase==='warning'&&elapsed>=e.next&&elapsed-e.warnedAt>=2){if(overlap(rectFeet(player.x,player.y),rect(e.rect)))continue;e.phase='active';e.end=elapsed+e.duration;if(e.type==='crowd'){for(let j=0;j<3;j++)waves.push({x:e.rect[0]+12+j*22,y:e.rect[1]+8,speed:42+j*3,coat:[C.pink,C.green,'#b68b54'][j],facing:'down',ttl:e.duration});}}
+ if(e.phase==='active'&&elapsed>=e.end){e.phase='idle';e.next=elapsed+e.interval;}}
+ waves.forEach(n=>{if(passable(n.x,n.y+n.speed*dt))n.y+=n.speed*dt;n.ttl-=dt;});waves=waves.filter(n=>n.ttl>0&&n.y<445);
 }
-function update(dt){frame+=dt*60;if(state!=='playing')return;
- let dx=Number(held('d')||held('arrowright'))-Number(held('a')||held('arrowleft'));
- let dy=Number(held('s')||held('arrowdown'))-Number(held('w')||held('arrowup'));
- const oldX=player.x,oldY=player.y,len=Math.hypot(dx,dy);if(len)move(dx/len*72*dt,dy/len*72*dt);
- player.moving=oldX!==player.x||oldY!==player.y;
- if(player.moving&&!started){started=true;say(LEVELS[levelIndex].ordered?'Follow numbered bags IN ORDER. Gold marks your next bag. Bumps cost panic and time.':'Collect six bags. Avoid collisions: each costs panic and 2 seconds. SPACE pets or talks.');}
- // Waiting to read the opening instructions costs neither time nor panic.
- if(started){departure=Math.max(0,departure-dt);panic=Math.min(100,panic+dt*(player.moving?.72:1.2)*LEVELS[levelIndex].rise);}
- cooldown=Math.max(0,cooldown-dt);
- updatePassengers(dt);
- if(departure<=0||panic>=100){finish(false,departure<=0?'The train has left. Your luggage enjoyed the outing. Press R to try again.':'Panic complete. Breathe, regroup, and press R to try again.');interact=false;return;}
- for(const b of bags){if(!b.found&&(!LEVELS[levelIndex].ordered||b.order===found+1)&&overlaps(feet(),{x:b.x-8,y:b.y-7,w:16,h:12})){b.found=true;found++;panic=Math.max(0,panic-6);say(randomLine(bagLines)+(found===6?' All six! Head for the open door.':''));}}
- if(interact){const t=target();if(t){started=true;if(t===dog){if(cooldown<=0){panic=Math.max(0,panic-22);cooldown=3;say(randomLine(dogLines),'DOG');}else say('Still wagging. Give me a moment, then pet again.','DOG');}else{panic=Math.max(0,Math.min(100,panic+(found===6?(conductorRelief?0:-8):3)));if(found===6)conductorRelief=true;say(randomLine(found===6?readyLines:missingLines),'CONDUCTOR');}}}
- interact=false;
- if(panic>=100){finish(false,'Panic complete. Breathe, regroup, and press R to try again.');return;}
- const inside=overlaps(feet(),THRESHOLD);
- // Edge-triggered: Space, nearby luggage and conductor proximity can NEVER board.
- if(inside&&!doorInside&&player.moving){if(found===6)finish(true,'Train caught! Six bags, one happy dog, and you. Press R for another trip.');else{say('You need all six bags. Step back onto the platform and find the rest.','CONDUCTOR');player.y=214;}}
- doorInside=overlaps(feet(),THRESHOLD);
-}
-function held(key){return keys.has(key)||[...touchDirections.values()].includes(key);}
-function clearInput(){keys.clear();touchDirections.clear();interact=false;document.querySelectorAll('.held').forEach(b=>b.classList.remove('held'));}
-function resize(){
- clearInput();
- const rect=document.getElementById('stage').getBoundingClientRect();
- const fit=Math.min(rect.width/W,rect.height/H);
- const scale=touchMode?fit:(fit>=1?Math.floor(fit):fit);
- canvas.style.width=`${W*scale}px`;canvas.style.height=`${H*scale}px`;ctx.imageSmoothingEnabled=false;
-}
-// Draw button labels using the same embedded bitmap alphabet as the game.
-function buttonLabel(button,text){
- if(button.dataset.label===text)return;
- button.dataset.label=text;button.setAttribute('aria-label',text);
- const label=document.createElement('canvas');label.width=measurePixelText(text,1);label.height=7;
- label.style.width=`${label.width*2}px`;label.style.height='14px';label.setAttribute('aria-hidden','true');
- const c=label.getContext('2d');c.fillStyle=C.cream;let x=0;
- for(const ch of text){const glyph=FONT[ch]||FONT['?'];glyph.forEach((row,y)=>{[...row].forEach((v,i)=>{if(v==='1')c.fillRect(x+i,y,1,1);});});x+=glyph[0].length+1;}
- button.replaceChildren(label);
-}
-function syncTouchControls(){
- if(!touchMode)return;
- const button=document.getElementById('touch-action');
- const label=state==='win'?'NEXT LEVEL':state==='complete'?'PLAY AGAIN':state==='lose'?'RETRY':target()===dog?(cooldown>0?'REST':'PET'):target()===conductor?'TALK':'INTERACT';
- buttonLabel(button,label);
- button.disabled=state==='playing'&&(!target()||(target()===dog&&cooldown>0));
-}
-function setupTouch(){
- if(!touchMode)return;
- document.body.classList.add('touch');
- const arrows={w:'UP',a:'LEFT',d:'RIGHT',s:'DOWN'};
- document.querySelectorAll('[data-direction]').forEach(button=>{
-  button.setAttribute('aria-label','Move '+arrows[button.dataset.direction].toLowerCase());
-  const icon=document.createElement('canvas');icon.width=7;icon.height=7;icon.style.width='28px';icon.style.height='28px';icon.setAttribute('aria-hidden','true');
-  const c=icon.getContext('2d');c.fillStyle=C.cream;
-  const pattern=['0001000','0011100','0111110','1111111','0001000','0001000','0001000'];
-  pattern.forEach((row,y)=>[...row].forEach((v,x)=>{if(v!=='1')return;const d=button.dataset.direction;const point=d==='w'?[x,y]:d==='s'?[6-x,6-y]:d==='a'?[y,6-x]:[6-y,x];c.fillRect(...point,1,1);}));button.replaceChildren(icon);
-  button.addEventListener('pointerdown',e=>{
-   e.preventDefault();if(state!=='playing')return;
-   button.setPointerCapture(e.pointerId);touchDirections.set(e.pointerId,button.dataset.direction);button.classList.add('held');
-  });
-  const release=e=>{touchDirections.delete(e.pointerId);if(![...touchDirections.values()].includes(button.dataset.direction))button.classList.remove('held');};
-  for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,release);
- });
- document.getElementById('touch-action').addEventListener('click',()=>{
-  if(state==='win')loadLevel(levelIndex+1);
-  else if(state==='complete')loadLevel(0);
-  else if(state==='lose')reset();
-  else if(target())interact=true;
- });
- const retry=document.getElementById('touch-retry');buttonLabel(retry,'RETRY');retry.addEventListener('click',reset);
- document.querySelectorAll('.touch-controls').forEach(node=>node.addEventListener('contextmenu',e=>e.preventDefault()));
-}
-addEventListener('resize',resize);
-// Ignore auto-repeat after resets/transitions: held keys cannot start the next level.
-function onKeyDown(e){
- const k=e.key.toLowerCase();
- if(['enter',' ','arrowup','arrowdown','arrowleft','arrowright','w','a','s','d','r'].includes(k))e.preventDefault();
- if(e.repeat)return;
- if(k==='r'){reset();return;}
- if(k==='enter'){
-  if(state==='win')loadLevel(levelIndex+1);
-  else if(state==='complete')loadLevel(0);
-  return;
- }
+function update(dt){
+ if(state==='departing'){departureAnim+=dt;anim+=dt;if(departureAnim>=2.2)completeStation();return;}
  if(state!=='playing')return;
- if(k===' ')interact=true;
- keys.add(k);
+ elapsed+=dt;anim+=dt;clock=Math.max(0,clock-dt);panic=Math.min(100,panic+dt*.5);dogCooldown=Math.max(0,dogCooldown-dt);invulnerable=Math.max(0,invulnerable-dt);stumble=Math.max(0,stumble-dt);noticeTime=Math.max(0,noticeTime-dt);
+ if(clock<=0||panic>=100){fail(clock<=0?'The train has left. Take a breath.':'Panic caught up with you. Take a breath.');return;}
+ let dx=Number(held('d')||held('arrowright'))-Number(held('a')||held('arrowleft')),dy=Number(held('s')||held('arrowdown'))-Number(held('w')||held('arrowup'));
+ const oldX=player.x,oldY=player.y,len=Math.hypot(dx,dy);if(len&&stumble<=0){player.facing=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');move(dx/len*84*dt,dy/len*84*dt);}player.moving=oldX!==player.x||oldY!==player.y;
+ updateEvents(dt);
+ for(const n of commuters){const axis=n.axis;let next=n[axis]+n.dir*n.speed*dt;const nx=axis==='x'?next:n.x,ny=axis==='y'?next:n.y;if(next<n.min||next>n.max||!passable(nx,ny))n.dir*=-1;else n[axis]=next;n.facing=axis==='x'?(n.dir>0?'right':'left'):(n.dir>0?'down':'up');}
+ for(const n of [...commuters,...waves]){if(invulnerable<=0&&Math.abs(n.x-player.x)<14&&Math.abs(n.y-player.y)<10){panic=Math.min(100,panic+12);invulnerable=1.25;stumble=.2;sound('bump');announce('BUMP! 12 PANIC. FIND A GAP OR TAKE THE OUTER PATH.');}}
+ if(panic>=100){fail('Panic caught up with you.');return;}
+ for(const b of bags){if(!b.found&&Math.hypot(player.x-b.x,player.y-b.y)<14){b.found=true;panic=Math.max(0,panic-5);sound('pickup');announce(['LUGGAGE SECURED. YOUR SOCKS BELIEVE IN YOU.','ANOTHER BAG. MOSTLY CLOTHES. SOME REGRETS.','BAG RESCUED. TINY BUREAUCRACY APPLAUDS.'][Math.floor(Math.random()*3)]);}}
+ const inside=overlap(rectFeet(player.x,player.y),THRESHOLD);if(inside&&!doorInside&&player.moving){if(bags.every(b=>b.found)&&questStep===2)board();else{player.y=161;openDialogue('CONDUCTOR',questStep<2?'Finish your station errand first. '+objective()+'.':'You still have luggage on the platform. Follow the BAG marker.');}}doorInside=overlap(rectFeet(player.x,player.y),THRESHOLD);updateCamera();
 }
-addEventListener('keydown',onKeyDown);
-addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
-addEventListener('blur',()=>{clearInput();});
-// No time jumps after changing tabs, and no sticky movement after focus loss.
-document.addEventListener('visibilitychange',()=>{clearInput();lastTime=performance.now();});
-function mountain(cx,peak,width,color){for(let y=peak;y<146;y+=2){const span=(y-peak)*width/(146-peak);px(cx-span/2,y,span,2,color);if(y<peak+12)px(cx-span/4,y,span/2,2,'#a3c5df');}}
-function plant(x,y){px(x-9,y-2,18,4,C.brown);px(x-7,y+2,14,13,C.tan);px(x-5,y+3,3,10,'#ffc16a');for(let i=0;i<5;i++){px(x-8+i*3,y-13-(i%3)*4,5,15,C.mintDark);px(x-7+i*3,y-14-(i%3)*4,3,6,i%2?'#8bb449':'#4f8f4e');}}
-function windowArt(x,y){box(x,y,29,43,C.brown,'#d58b44');box(x+4,y+4,21,33,C.ink,'#86c5e8');px(x+6,y+6,6,13,'#b4e2ed');px(x+14,y+4,2,33,C.ink);px(x+4,y+21,21,2,C.ink);px(x-2,y+39,33,6,C.mintDark);for(let i=0;i<7;i++){px(x+i*4,y+36-i%2*2,3,4,i%2?C.red:C.cream);}}
-function world(){
- for(let y=32;y<158;y+=2){const t=(y-32)/126;px(0,y,W,2,`rgb(${Math.round(240+t*15)},${Math.round(117+t*87)},${Math.round(104+t*22)})`);}
- [[21,60,62],[105,53,49],[315,58,38],[383,54,48]].forEach(([x,y,w])=>{px(x,y,w,3,C.cream);px(x+10,y-4,w-22,4,C.cream);px(x+20,y-8,12,4,C.cream);});
- mountain(45,81,127,'#638dc2');mountain(108,102,115,'#709ac7');mountain(408,79,160,'#648cba');
- px(0,143,480,60,C.water);for(let y=148;y<200;y+=7)for(let x=0;x<480;x+=31)px(x+(y%3)*5,y,19,2,'#69bbce');
- for(let i=0;i<4;i++){const x=414+i*15,y=95-(i===1?18:0);px(x,y,12,34,'#edcf88');px(x+4,y+5,3,6,C.brown);for(let j=0;j<7;j++)px(x+6-j,y-8+j,j*2+1,1,C.red);}
- for(let i=0;i<5;i++){const x=(52+i*73+frame*.12)%480;px(x,78+i%2*9,3,1,C.navy);px(x+3,79+i%2*9,2,1,C.navy);px(x+5,78+i%2*9,3,1,C.navy);}
- // Platform first, then buildings and train: the paving never paints over the doorway.
- px(0,198,480,75,'#e9bc77');for(let y=201;y<273;y+=12){px(0,y,480,1,'#c99259');for(let x=(y%24?0:-16);x<480;x+=32){px(x,y,1,12,'#cb965b');px(x+2,y+2,28,1,'#f9d291');}}
- px(0,273,480,7,'#80584b');for(let x=0;x<480;x+=24)px(x,275,16,3,'#b57d5b');
- // Station facade, stepped roof tiles and large readable station name.
- px(137,91,204,109,'#d59b39');px(144,94,190,104,'#f5c65f');for(let x=151;x<332;x+=19)px(x,134,2,61,'#edb34d');
- for(let y=0;y<44;y+=2){const half=y*2.5;px(239-half,36+y,half*2,3,'#9e3834');px(239-half+4,39+y,Math.max(0,half*2-8),2,'#dc6451');}
- for(let y=0;y<34;y+=2){const half=y*2.7;px(239-half,47+y,half*2,2,y%6?'#5c9c81':'#438671');}
- px(131,80,216,12,C.mintDark);px(134,80,210,3,'#6db197');
- box(164,88,153,31,C.ink,C.cream2);px(168,92,2,23,C.gold);px(311,92,2,23,C.gold);drawPixelText('BELLWOOD',240,96,3,C.ink,null,'center');
- for(const x of [140,326]){px(x,117,9,82,'#4b9278');px(x,117,3,82,'#82b39a');px(x-3,190,15,11,C.mintDark);}
- windowArt(163,139);windowArt(283,139);
- box(229,125,23,23,C.ink,C.cream2);px(239,130,2,9,C.ink);px(240,138,7,2,C.ink);
- for(let y=178;y<193;y+=6){box(205,y,69,5,C.brown,'#bd7741');}px(202,193,75,5,C.brown);px(208,198,4,9,C.ink);px(268,198,4,9,C.ink);
- plant(153,187);plant(323,187);
- // Station furnishings and inset, non-floating signage.
- px(79,156,4,50,C.brown);px(123,156,4,50,C.brown);box(74,122,58,65,C.brown,C.ink);drawPixelText('DEPARTS',80,129,1,C.cream);drawPixelText('NY 08:15',79,145,1,C.cream);drawPixelText('PAR 12:20',79,157,1,C.cream);drawPixelText('ON TIME',80,173,1,C.gold);
- px(37,158,4,46,C.ink);box(3,126,66,34,C.ink,C.cream2);drawPixelText('TO',36,132,1,C.ink,null,'center');drawPixelText('EVERYWHERE',36,142,1,C.ink,null,'center');px(24,152,26,2,C.ink);px(47,150,3,6,C.ink);
- px(13,85,4,125,C.ink);box(6,91,18,23,C.ink,C.cream);px(9,94,4,15,'#ffe29b');px(8,87,14,4,C.mintDark);px(11,82,8,5,C.mintDark);px(6,209,20,4,C.ink);plant(39,194);
- box(98,196,12,17,C.mintDark,'#4b977f');px(102,195,7,3,C.ink);
- train();
+function updateCamera(){camera.x=Math.round(Math.max(0,Math.min(WORLD.w-W,player.x-W/2)));camera.y=Math.round(Math.max(0,Math.min(WORLD.h-VH,player.y-VH/2)));}
+// INPUT / STATE TRANSITIONS: every UI action has the same keyboard and touch path.
+function action(kind){unlockAudio();if(kind==='mute'){save.muted=!save.muted;persist();syncControls();return;}
+ if(kind==='pause'){if(state==='paused')setState(previousState);else if(['playing','dialogue','briefing'].includes(state)){previousState=state;setState('paused');}return;}
+ if(kind==='new'){if(save.unlocked>0||save.complete){previousState=state;setState('confirm-new');}else{save.unlocked=0;save.complete=false;freshStation(0);}return;}
+ if(kind==='retry'){if(state==='confirm-new'){setState(previousState);return;}if(state==='start'||state==='journey-complete'){action('new');return;}if(state!=='departing')freshStation(stationIndex);return;}
+ if(kind!=='interact')return;
+ if(state==='confirm-new'){save.unlocked=0;save.complete=false;persist();freshStation(0);}
+ else if(state==='start')freshStation(save.unlocked);
+ else if(state==='briefing'||state==='dialogue')advanceDialogue();
+ else if(state==='playing')interact();
+ else if(state==='paused')setState(previousState);
+ else if(state==='failed')freshStation(stationIndex);
+ else if(state==='station-complete')freshStation(stationIndex+1);
+ else if(state==='journey-complete')setState('start');syncControls();
 }
-function train(){px(344,123,136,88,C.ink);px(344,119,136,6,'#923331');px(348,121,132,3,'#e97052');px(344,128,136,58,C.cream);px(344,177,136,30,C.red);px(345,180,135,2,'#f28160');
- for(let x=350;x<426;x+=25){box(x,140,21,29,'#c99437',C.ink);px(x+3,143,15,22,'#397fb0');px(x+4,145,6,9,'#78b7d8');px(x+2,156,17,2,C.ink);}
- drawPixelText('R.R.',357,189,1,C.cream);drawPixelText('17',464,189,1,C.cream);
- // Door art is fixed to DOOR; no visual shake can detach its collision geometry.
- box(DOOR.x-3,DOOR.y-3,DOOR.w+6,DOOR.h+4,'#862d32',C.gold);px(DOOR.x,DOOR.y,DOOR.w,DOOR.h,C.ink);px(DOOR.x+3,DOOR.y+3,DOOR.w-6,DOOR.h-8,'#103c42');px(452,169,2,23,C.gold);
- box(427,128,33,14,C.ink,C.cream);drawPixelText('BOARD',443,132,1,C.ink,null,'center');
- px(430,206,26,4,'#83b29d');for(let x=430;x<456;x+=6)px(x,210,3,4,C.gold);
- px(441,217,4,5,C.ink);px(439,219,8,2,C.ink);px(442,215,2,2,C.ink);
- // Optional geometry inspection: add #debug to the file URL.
- if(location.hash==='#debug'){ctx.strokeStyle='#ff00e0';ctx.strokeRect(THRESHOLD.x+.5,THRESHOLD.y+.5,THRESHOLD.w,THRESHOLD.h);ctx.strokeStyle='#38ecfc';for(const r of TRAIN_SOLIDS)ctx.strokeRect(r.x+.5,r.y+.5,r.w,r.h);}
+function autoPause(){if(['playing','dialogue','briefing'].includes(state)){previousState=state;setState('paused');}clearInput();}
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();if([' ','enter','escape','p','r','m','w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(e.repeat)return;unlockAudio();if(k===' '||k==='enter')action('interact');else if(k==='p'||k==='escape')action('pause');else if(k==='r')action('retry');else if(k==='m')action('mute');else if(state==='playing')keys.add(k);});
+addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));addEventListener('blur',autoPause);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)autoPause();lastTime=performance.now();});
+function label(button,text){if(button.dataset.label===text)return;button.dataset.label=text;button.setAttribute('aria-label',text);const c=document.createElement('canvas');c.width=measurePixelText(text,1);c.height=7;c.style.width=c.width*2+'px';c.style.height='14px';c.setAttribute('aria-hidden','true');const g=c.getContext('2d');g.fillStyle=C.cream;let x=0;for(const ch of text){const glyph=FONT[ch]||FONT['?'];glyph.forEach((r,y)=>[...r].forEach((v,j)=>{if(v==='1')g.fillRect(x+j,y,1,1);}));x+=glyph[0].length+1;}button.replaceChildren(c);}
+function syncControls(){const a=document.getElementById('action');let text={start:save.unlocked>0?'CONTINUE':'START',briefing:pageIndex<pages.length-1?'NEXT':'BEGIN',dialogue:pageIndex<pages.length-1?'NEXT':'CLOSE',paused:'RESUME',departing:'BOARDING',failed:'RETRY','station-complete':'CONTINUE','journey-complete':'MENU','confirm-new':'YES, NEW'}[state];if(state==='playing'){const t=target();text=t?.id==='dog'?(dogCooldown>0?'REST':'PET'):t?.id==='item'?'PICK UP':t?'TALK':'INTERACT';}label(a,text||'INTERACT');a.disabled=state==='departing'||(state==='playing'&&!target());label(document.getElementById('pause'),state==='paused'?'RESUME':'PAUSE');document.getElementById('pause').disabled=!['playing','dialogue','briefing','paused'].includes(state);label(document.getElementById('retry'),state==='confirm-new'?'CANCEL':state==='start'||state==='journey-complete'?'NEW JOURNEY':'RETRY');document.getElementById('retry').disabled=state==='departing';label(document.getElementById('mute'),save.muted?'SOUND OFF':'SOUND ON');}
+function setupInput(){if(touchMode)document.body.classList.add('touch');document.querySelectorAll('[data-direction]').forEach(b=>{const c=document.createElement('canvas');c.width=7;c.height=7;c.style.width='26px';c.style.height='26px';c.setAttribute('aria-hidden','true');const g=c.getContext('2d');g.fillStyle=C.cream;['0001000','0011100','0111110','1111111','0001000','0001000','0001000'].forEach((r,y)=>[...r].forEach((v,x)=>{if(v!=='1')return;const d=b.dataset.direction,p=d==='w'?[x,y]:d==='s'?[6-x,6-y]:d==='a'?[y,6-x]:[6-y,x];g.fillRect(...p,1,1);}));b.replaceChildren(c);b.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();if(state!=='playing')return;b.setPointerCapture(e.pointerId);pointers.set(e.pointerId,b.dataset.direction);b.classList.add('held');});const release=e=>{pointers.delete(e.pointerId);if(![...pointers.values()].includes(b.dataset.direction))b.classList.remove('held');};for(const type of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(type,release);});for(const [id,kind] of [['action','interact'],['pause','pause'],['retry','retry'],['mute','mute']])document.getElementById(id).addEventListener('click',()=>action(kind));document.getElementById('move').addEventListener('contextmenu',e=>e.preventDefault());}
+function resize(){clearInput();const r=document.getElementById('stage').getBoundingClientRect(),fit=Math.min(r.width/W,r.height/H),scale=fit;canvas.style.width=W*scale+'px';canvas.style.height=H*scale+'px';ctx.imageSmoothingEnabled=false;}
+addEventListener('resize',()=>{autoPause();resize();});
+// PIXEL WORLD: shared tiles and scenery, five distinct palettes and floor plans.
+function shrub(x,y){px(x-9,y-11,18,15,'#285d50');px(x-6,y-16,12,19,'#498556');px(x-3,y-15,5,7,'#88a75e');px(x-8,y+3,16,7,'#a36a46');px(x-6,y+4,3,5,C.tan);}
+function windowTile(x,y){box(x,y,24,30,C.brown,'#85c4d4');px(x+4,y+3,5,10,'#c4e8e9');px(x+11,y+2,2,26,C.ink);px(x+2,y+15,20,2,C.ink);}
+function lamp(x,y){px(x-2,y-25,4,29,C.ink);box(x-7,y-40,14,16,C.ink,C.gold);px(x-4,y-37,4,10,C.cream);px(x-8,y+4,16,3,C.ink);}
+function drawObstacle(r){const[x,y,w,h,kind]=r;px(x+3,y+h-3,w,5,'#977d66');if(kind==='bench'){box(x,y,w,h,C.ink,C.brown);for(let j=3;j<h-3;j+=6)px(x+3,y+j,w-6,3,'#c18b55');}else if(kind==='stall'){box(x,y,w,h,C.brown,'#d3ab72');for(let j=0;j<w;j+=14)px(x+j,y,Math.min(14,w-j),10,j%28?C.cream:station.roof);for(let j=8;j<w-5;j+=16)box(x+j,y+16,9,9,C.brown,j%32?C.gold:C.red);}else{box(x,y,w,h,C.brown,'#35664e');for(let j=5;j<w-4;j+=10){px(x+j,y+4,6,h-8,'#719951');if(kind==='flowers')px(x+j,y+7,4,4,j%20?C.pink:C.gold);}}}
+function scenery(){
+ px(0,0,WORLD.w,WORLD.h,station.theme==='festival'?'#243c53':'#56959d');
+ for(let y=0;y<140;y+=4)px(0,y,800,4,station.theme==='festival'?(y%8?'#35475a':'#394b5e'):(y%8?'#89b5be':'#80afb9'));
+ if(station.theme==='lake'){for(let y=20;y<137;y+=10)for(let x=0;x<800;x+=49)px(x+Math.floor(anim*3)%12,y,24,2,'#b4d8d3');}
+ else if(station.theme==='hill'){for(let x=0;x<800;x+=55){for(let y=0;y<80;y+=4)px(x+40-y/2,y,Math.max(1,y),4,'#507c74');}}
+ // Track, train and doorway align exactly with boarding geometry.
+ px(552,84,248,70,'#4c5354');for(let x=558;x<800;x+=17)px(x,96,8,50,C.brown);px(552,102,248,3,'#b7b6aa');px(552,145,248,3,'#b7b6aa');
+ px(16,148,768,308,station.floor);for(let y=152;y<456;y+=16){px(16,y,768,1,'#ab9478');for(let x=16+(y%32?0:16);x<784;x+=32)px(x,y,1,16,'#b39c80');}
+ px(16,450,768,7,'#826e63');for(let x=24;x<780;x+=24)px(x,452,16,2,'#ad8c6c');
+ // Station building, with no invisible collision against decorative sky.
+ box(170,38,348,104,C.brown,station.wall);px(178,92,332,47,station.wall);for(let y=0;y<32;y+=2)px(157+y/2,10+y,374-y,3,station.roof);px(158,42,374,8,C.ink);px(161,43,368,3,'#cda46d');
+ box(233,54,220,29,C.ink,C.cream);drawPixelText(station.sign,343,62,2,C.ink,null,'center');windowTile(191,94);windowTile(471,94);box(321,91,44,49,C.brown,C.mintDark);px(356,112,2,7,C.gold);
+ box(270,99,23,23,C.ink,C.cream);px(280,103,2,9,C.ink);px(282,111,7,2,C.ink);
+ let offset=state==='departing'?Math.max(0,departureAnim-.7)*230:0;
+ ctx.save();ctx.translate(offset,0);box(574,65,232,79,C.ink,C.red);px(577,69,229,34,C.cream);px(577,107,229,3,C.gold);for(let x=586;x<804;x+=34){if(x>705&&x<748)continue;box(x,78,26,23,C.brown,'#5aa0c1');px(x+4,81,7,9,'#a3d6dc');}drawPixelText('FESTIVAL LINE',590,118,1,C.cream);
+ box(DOOR.x-3,93,36,53,C.brown,C.gold);px(DOOR.x,96,30,48,C.ink);
+ if(state==='departing'){const close=Math.min(15,departureAnim*30);px(714,96,close,48,C.red);px(744-close,96,close,48,C.red);}else{px(716,98,26,40,'#17404b');px(739,107,2,24,C.gold);}ctx.restore();
+ for(let x=713;x<745;x+=6)px(x,150,3,5,C.gold);box(701,55,57,14,C.ink,C.cream);drawPixelText('BOARD',729,59,1,C.ink,null,'center');
+ // Visible borders, plants and landmarks distinguish places without filling walking routes.
+ for(let y=168;y<443;y+=52){shrub(9,y);shrub(791,y);}lamp(38,147);lamp(548,146);
+ box(30,93,100,44,C.brown,C.ink);drawPixelText('FESTIVAL LINE',80,101,1,C.cream,null,'center');drawPixelText('STOP '+(stationIndex+1)+' OF 5',80,115,1,C.gold,null,'center');
+ if(station.theme==='market'){for(let x=28;x<145;x+=22){px(x,59,17,24,C.tan);px(x,58,17,7,x%44?C.red:C.cream);}}
+ if(station.theme==='village'){for(let x=35;x<140;x+=32)shrub(x,69);}
+ if(station.theme==='festival'){for(let x=24;x<790;x+=40){px(x,13,1,16,C.ink);box(x-4,25,10,13,C.brown,x%80?C.pink:C.gold);}for(let x=65;x<770;x+=130)lamp(x,446);}
+ station.solids.forEach(drawObstacle);
+ for(const e of events){if(e.phase==='warning'){const r=e.rect;for(let x=r[0];x<r[0]+r[2];x+=8){px(x,r[1],4,3,C.gold);px(x,r[1]+r[3],4,3,C.gold);}px(r[0],r[1],2,r[3],C.gold);px(r[0]+r[2],r[1],2,r[3],C.gold);drawPixelText('WAIT',r[0]+r[2]/2,r[1]+8,1,C.ink,null,'center');}
+ if(e.type==='trolley'&&e.phase==='active'){const[x,y,w,h]=e.rect;box(x,y,w,h,C.ink,'#8c694e');for(let j=8;j<w;j+=18)box(x+j,y+8,12,20,C.brown,C.tan);px(x+4,y+h-4,8,8,C.ink);px(x+w-12,y+h-4,8,8,C.ink);drawPixelText('TROLLEY',x+w/2,y+38,1,C.cream,null,'center');}}
 }
-function human(x,y,coat,hat,isPlayer=false,walking=false){x=Math.round(x)-7;y=Math.round(y)-27;const step=(isPlayer&&player.moving||walking)?Math.floor(frame/7)%2:0;
- px(x-1,y+26,18,3,'#bd8c5a');px(x+2,y+18,5,9,C.ink);px(x+9,y+18,5,9,C.ink);px(x,y+26-step,7,2,C.ink);px(x+9,y+25+step,7,2,C.ink);
- px(x,y+9,16,12,C.ink);px(x+2,y+10,12,10,coat);px(x+6,y+10,4,10,C.cream);px(x+7,y+11,2,9,isPlayer?'#ba4939':'#7cbbb8');px(x-2,y+12,3,11,coat);px(x+15,y+12,3,11,coat);px(x-2,y+22,3,3,C.tan);px(x+15,y+22,3,3,C.tan);
- box(x+2,y,12,11,C.ink,'#f1bd8c');px(x+4,y+4,2,2,C.ink);px(x+10,y+4,2,2,C.ink);px(x+2,y-3,12,4,hat);px(x,y,16,2,hat);if(!isPlayer){px(x+4,y-6,8,4,hat);px(x+4,y-2,8,1,C.gold);}else px(x+4,y-4,9,2,'#825135');}
-function dogSprite(){const x=dog.x-9,y=dog.y-18;px(x,y+17,23,3,'#bd8c5a');px(x+1,y+8,17,10,C.ink);px(x+3,y+8,13,9,C.white);px(x+2,y+16,4,3,C.white);px(x+13,y+16,4,3,C.white);box(x+3,y,13,12,C.ink,C.white);px(x,y+2,5,8,C.tan);px(x+14,y+2,5,8,C.tan);px(x+6,y+5,2,2,C.ink);px(x+11,y+5,2,2,C.ink);px(x+8,y+9,3,2,C.ink);px(x+7,y-5,5,5,C.pink);px(x+8,y-7,3,2,C.pink);px(x+18,y+9,3,5,C.tan);px(x+20,y+7+(Math.floor(frame/9)%2),2,4,C.tan);}
-function bag(b){const x=b.x-7,y=b.y-16;px(x-1,y+16,18,3,'#bd8c5a');box(x+3,y-4,9,5,C.ink,C.gold);box(x,y,16,17,C.ink,b.color);px(x+3,y+1,2,14,C.gold);px(x+11,y+1,2,14,C.gold);px(x+2,y+7,12,2,'#a7723b');px(x+3,y+7,2,2,C.cream);px(x+11,y+7,2,2,C.cream);
- if(LEVELS[levelIndex].ordered){box(x+3,y-14,11,11,C.ink,b.order===found+1?C.gold:C.cream2);drawPixelText(b.order,x+6,y-12,1,C.ink);}
-}
-// PET / TALK are anchored interaction markers; every dialogue sentence stays below the world.
-function prompt(label,x,y,active){const w=measurePixelText(label,1)+12;box(x-w/2,y,w,14,C.ink,active?C.gold:C.cream2);drawPixelText(label,x,y+4,1,C.ink,null,'center');px(x-2,y+14,5,2,C.ink);px(x,y+16,1,2,C.ink);}
-function hud(){box(2,2,476,28,C.cream,C.ink);px(12,12,13,12,C.gold);px(15,8,7,4,C.gold);px(18,12,2,12,C.brown);drawPixelText(`BAGS ${found}/6`,35,11,2,C.cream);px(146,7,2,18,C.cream);drawPixelText(`TRAIN ${Math.ceil(departure)}`,160,11,2,departure<15?'#ff9974':C.cream);px(279,7,2,18,C.cream);drawPixelText('PANIC',291,11,2,C.cream);box(357,9,68,15,C.cream,C.navy2);for(let i=0;i<10;i++)px(361+i*6,12,5,9,i<Math.ceil(panic/10)?(panic>75?C.red:C.gold):C.navy);drawPixelText(`${Math.ceil(panic)}%`,468,11,2,C.cream,null,'right');}
-// Wrap by measured glyph widths, including long words. Hard cap is explicit ellipsis, never hidden overflow.
-function wrap(str,maxWidth,maxLines){const lines=[];let line='';for(const word of str.toUpperCase().split(/\s+/)){if(measurePixelText(line+(line?' ':'')+word,1)<=maxWidth){line+=(line?' ':'')+word;continue;}if(line){lines.push(line);line='';}for(const ch of word){if(measurePixelText(line+ch,1)>maxWidth){lines.push(line);line='';}line+=ch;}}if(line)lines.push(line);if(lines.length>maxLines){lines.length=maxLines;while(measurePixelText(lines[maxLines-1]+'...',1)>maxWidth)lines[maxLines-1]=lines[maxLines-1].slice(0,-1);lines[maxLines-1]+='...';}return lines;}
-function panel(){
- box(2,282,476,76,C.cream,C.ink);
- // Dedicated level strip. Portrait and dialogue retain their own clipped regions.
- drawPixelText(`LEVEL ${levelIndex+1}/5`,11,287,1,C.gold);
- drawPixelText(LEVELS[levelIndex].name,79,287,1,C.cream);
- if(LEVELS[levelIndex].ordered&&found<6)drawPixelText(`NEXT BAG ${found+1}`,467,287,1,C.gold,null,'right');
- box(7,297,466,56,C.ink,C.cream2);
- px(11,301,58,48,C.mintDark);
- ctx.save();ctx.beginPath();ctx.rect(11,301,58,48);ctx.clip();
- ctx.translate(16,305);ctx.scale(2,2);
- if(dialogue.who==='DOG')drawDogPortrait(0,0);
- else if(dialogue.who==='CONDUCTOR')drawConductorPortrait(0,0);
- else drawPlayerPortrait(0,0);
- ctx.restore();
- const title=state==='complete'?'CAMPAIGN COMPLETE':state==='win'?'DEPARTURE COMPLETE':state==='lose'?'MISSED DEPARTURE':dialogue.who;
- px(77,300,Math.max(65,measurePixelText(title,1)+12),10,C.ink);
- drawPixelText(title,83,301,1,C.cream);
- ctx.save();ctx.beginPath();ctx.rect(77,313,269,37);ctx.clip();
- wrap(dialogue.text,265,4).forEach((l,i)=>drawPixelText(l,77,313+i*9,1,C.ink));
- ctx.restore();
- px(350,301,2,47,C.mintDark);
- if(state==='win'||state==='complete'){
-  drawPixelText(touchMode?'TAP BUTTON':'ENTER',360,303,1,C.ink);
-  drawPixelText(state==='complete'?'PLAY AGAIN':'NEXT LEVEL',360,315,1,C.ink);
- }else{
-  drawPixelText(touchMode?'D-PAD':'WASD / ARROWS',360,303,1,C.ink);
-  drawPixelText('MOVE',360,313,1,C.ink);
-  drawPixelText(touchMode?'TAP PET/TALK':'SPACE PET/TALK',360,325,1,C.ink);
- }
- drawPixelText(touchMode?'TAP RETRY':'R RETRY LEVEL',360,340,1,C.ink);
-}
-function render(){ctx.clearRect(0,0,W,H);ctx.save();ctx.beginPath();ctx.rect(0,HUD,W,PANEL-HUD);ctx.clip();world();
- const sprites=bags.filter(b=>!b.found).map(b=>({y:b.y,draw:()=>bag(b)}));for(const n of passengers)sprites.push({y:n.y,draw:()=>human(n.x,n.y,n.coat,n.hat,false,started&&state==='playing')});sprites.push({y:player.y,draw:()=>{human(player.x,player.y,bumpCooldown>0&&Math.floor(frame/5)%2?C.cream:'#a47745','#493228',true);}},{y:dog.y,draw:dogSprite},{y:conductor.y,draw:()=>human(conductor.x,conductor.y,C.navy,C.navy)});sprites.sort((a,b)=>a.y-b.y).forEach(s=>s.draw());
- const t=target();prompt(cooldown>0?'REST':'PET',dog.x,dog.y-45,t===dog&&state==='playing');prompt('TALK',conductor.x,conductor.y-53,t===conductor&&state==='playing');ctx.restore();hud();panel();syncTouchControls();}
-let lastTime=performance.now();function loop(now){const dt=document.hidden?0:Math.min((now-lastTime)/1000,.05);lastTime=now;update(dt);render();requestAnimationFrame(loop);}
-setupTouch();reset();resize();requestAnimationFrame(loop);
-</script>
-</body>
-</html>
+function human(p,main=false){const x=Math.round(p.x)-7,y=Math.round(p.y)-26;const walking=main?player.moving:state==='playing',step=walking?Math.floor(anim*10)%2:0;px(x-1,y+26,17,3,'#8d806d');px(x+2,y+18,5,9,C.ink);px(x+9,y+18,5,9,C.ink);px(x,y+25+step,7,2,C.ink);px(x+9,y+26-step,7,2,C.ink);box(x,y+9,16,13,C.ink,main?(invulnerable>0&&Math.floor(anim*10)%2?C.cream:'#ad7b49'):p.coat);px(x-2,y+13,3,10,C.tan);px(x+15,y+13,3,10,C.tan);box(x+2,y,12,11,C.ink,'#efbb87');px(x+1,y-3,14,5,main?'#513328':C.navy);if(p.facing==='up'){px(x+2,y+2,12,7,main?'#513328':C.navy);px(x+6,y+12,5,7,C.brown);}else{px(x+6,y+10,4,10,C.cream);px(x+7,y+12,2,7,C.red);if(p.facing==='left')px(x+3,y+4,2,2,C.ink);else if(p.facing==='right')px(x+11,y+4,2,2,C.ink);else{px(x+4,y+4,2,2,C.ink);px(x+10,y+4,2,2,C.ink);}}}
+function drawDog(d){const x=d.x-9,y=d.y-17;px(x,y+16,22,3,'#8d806d');box(x+2,y+6,17,12,C.ink,C.white);box(x+2,y,14,12,C.ink,C.white);px(x,y+2,5,8,C.tan);px(x+14,y+2,5,8,C.tan);px(x+6,y+4,2,2,C.ink);px(x+11,y+4,2,2,C.ink);px(x+8,y+8,3,2,C.ink);px(x+7,y-4,5,4,C.pink);px(x+19,y+9+(Math.floor(anim*7)%2),3,4,C.tan);if(dogCooldown>0){px(x,y+22,20,2,C.ink);px(x,y+22,20*(1-dogCooldown/5),2,C.gold);}}
+function drawBag(b){const x=b.x-7,y=b.y-16;box(x+3,y-4,9,5,C.ink,C.gold);box(x,y,16,17,C.ink,b.color);px(x+3,y+2,2,13,C.gold);px(x+11,y+2,2,13,C.gold);px(x+2,y+8,12,2,C.brown);}
+function marker(text,x,y,active=false){const w=measurePixelText(text,1)+8;box(x-w/2,y,w,13,C.ink,active?C.gold:C.cream);drawPixelText(text,x,y+3,1,C.ink,null,'center');px(x-2,y+13,5,2,C.ink);}
+function drawWorld(){ctx.save();ctx.beginPath();ctx.rect(0,HUD,W,VH);ctx.clip();ctx.translate(-camera.x,HUD-camera.y);scenery();const sprites=[];bags.filter(b=>!b.found).forEach(b=>sprites.push({y:b.y,draw:()=>drawBag(b)}));actors.forEach(a=>sprites.push({y:a.y,draw:()=>a.id==='dog'?drawDog(a):human(a)}));[...commuters,...waves].forEach(n=>sprites.push({y:n.y,draw:()=>human(n)}));if(state!=='departing')sprites.push({y:player.y,draw:()=>human(player,true)});sprites.sort((a,b)=>a.y-b.y).forEach(s=>s.draw());
+ if(questStep===0&&station.quest.pickup){const[x,y]=station.quest.pickup;box(x-7,y-10,14,10,C.brown,C.cream);px(x-4,y-8,8,2,C.red);marker('ITEM',x,y-28,true);}
+ const goal=objectiveTarget();actors.forEach(a=>{if(a.id==='dog')marker('PET',a.x,a.y-47,target()===a);else if(a===goal)marker('TASK',a.x,a.y-47,true);else if(target()===a)marker('TALK',a.x,a.y-47);});
+ // Off-screen objective indicator follows the camera, never enters HUD/dialogue.
+ const gx=goal.x-camera.x,gy=goal.y-camera.y;if(gx<15||gx>465||gy<35||gy>VH-10){const sx=Math.max(34,Math.min(W-34,gx)),sy=Math.max(26,Math.min(VH-24,gy));marker(questStep<2?'TASK':bags.some(b=>!b.found)?'BAG':'TRAIN',camera.x+sx,camera.y+sy-15,true);}
+ ctx.restore();}
+function wrap(text,width){const lines=[];let line='';for(const word of String(text).toUpperCase().split(/\s+/)){if(measurePixelText(line+(line?' ':'')+word,1)<=width){line+=(line?' ':'')+word;continue;}if(line)lines.push(line);line='';for(const ch of word){if(measurePixelText(line+ch,1)>width){lines.push(line);line='';}line+=ch;}}if(line)lines.push(line);return lines;}
+function textBlock(text,x,y,width,maxLines=4){wrap(text,width).slice(0,maxLines).forEach((l,i)=>drawPixelText(l,x,y+i*10,1,C.ink));}
+function hud(){box(2,2,476,40,C.cream,C.ink);drawPixelText('BAGS '+bags.filter(b=>b.found).length+'/4',10,9,2,C.cream);drawPixelText('TRAIN '+Math.ceil(clock),143,9,2,clock<15?C.pink:C.cream);drawPixelText('PANIC',282,9,1,C.cream);box(318,7,91,14,C.cream,C.navy);px(321,10,85*panic/100,8,panic>75?C.red:C.gold);drawPixelText(Math.ceil(panic)+'%',466,10,1,C.cream,null,'right');drawPixelText((stationIndex+1)+'/5 '+station.name,10,29,1,C.gold);drawPixelText('ERRAND '+(questStep===2?'DONE':questStep===1?'DELIVER':'OPEN'),285,29,1,C.cream);}
+function panel(){box(2,282,476,H-284,C.cream,C.ink);box(7,287,466,H-294,C.ink,C.cream2);const talking=['briefing','dialogue'].includes(state);let title=talking?speaker:'YOU',message=noticeTime>0?notice:'Collect four suitcases and finish the station errand. The gold marker points to your next objective.';
+ if(talking)message=pages[pageIndex];
+ if(state==='paused'){title='PAUSED';message='Take your time. Everything is paused. Choose RESUME to continue.';}
+ if(state==='failed'){title='MISSED DEPARTURE';message=pages[0];}
+ if(state==='station-complete'){title='TRAIN CAUGHT';message=pages[0];}
+ if(state==='journey-complete'){title='YOU MADE IT';message=pages[0];}
+ if(state==='departing'){title='CONDUCTOR';message='Doors closing. Next stop, another little adventure.';}
+ if(state==='start'){title='FIVE STATIONS. ONE FESTIVAL.';message='Four bags, one errand at each stop. WASD/arrows move. SPACE talks. Touch buttons work too. '+(storageOK?'Your completed stops are saved on this device.':'Saving is unavailable here; you can still play.');}
+ if(state==='confirm-new'){title='START AGAIN?';message='Start a new journey and clear completed stops? YES, NEW confirms. CANCEL keeps your progress.';}
+ if(touchMode&&state==='start')message='Four bags and one errand at each stop. Arrows move. Tap to talk. '+(storageOK?'Completed stops save on this device.':'Saving unavailable. You can still play.');
+ if(touchMode)message=message.replace(/Press R/g,'Tap RETRY').replace('WASD/arrows move. SPACE talks. Touch buttons work too.','Arrows move. The action button talks or picks up items.');
+ const portraitY=touchMode?334:305;px(12,portraitY,54,44,C.mintDark);ctx.save();ctx.beginPath();ctx.rect(12,portraitY,54,44);ctx.clip();ctx.translate(15,portraitY+2);ctx.scale(2,2);if(title==='DOG')drawDogPortrait(0,0);else if(title==='CONDUCTOR')drawConductorPortrait(0,0);else if(talking&&title!=='YOU'){const a=actors.find(n=>n.name===title);px(3,10,18,15,a?.coat||C.green);px(6,3,12,11,C.tan);px(4,0,16,4,C.brown);px(8,7,2,2,C.ink);px(14,7,2,2,C.ink);}else drawPlayerPortrait(0,0);ctx.restore();
+ const objectiveLine=state==='start'?'A FIVE-STATION JOURNEY':state==='journey-complete'?'THE LANTERN FESTIVAL':objective();wrap(objectiveLine,touchMode?225:450).slice(0,2).forEach((l,i)=>drawPixelText(l,13,291+i*18,TEXT_SCALE,C.ink));const titleY=touchMode?330:302;px(76,titleY,Math.min(391,measurePixelText(title,TEXT_SCALE)+10),TEXT_SCALE*7+3,C.ink);drawPixelText(title,81,titleY+2,TEXT_SCALE,C.cream);wrap(message,TEXT_WIDTH).slice(0,TEXT_LINES).forEach((l,i)=>drawPixelText(l,77,(touchMode?350:316)+i*(touchMode?18:10),TEXT_SCALE,C.ink));
+ if(talking)drawPixelText((pageIndex+1)+'/'+pages.length+' '+(pageIndex===pages.length-1?'CLOSE':'NEXT'),466,H-16,1,C.ink,null,'right');else if(carried)drawPixelText('CARRYING '+carried,466,H-16,1,C.ink,null,'right');}
+function titleScene(){px(0,44,480,236,'#314c59');for(let y=44;y<280;y+=8)px(0,y,480,4,'#385460');for(let x=25;x<480;x+=45){px(x,48,1,23,C.ink);box(x-6,67,14,20,C.brown,x%2?C.gold:C.pink);}drawPixelText('BELLWOOD',240,112,4,C.cream,null,'center');drawPixelText('STATION PANIC',240,151,2,C.gold,null,'center');drawPixelText('A FIVE-STATION JOURNEY',240,179,1,C.cream,null,'center');for(let i=0;i<5;i++){box(103+i*56,205,48,29,C.ink,i<=save.unlocked?'#6b997b':'#49616a');drawPixelText(i+1,126+i*56,212,2,C.cream,null,'center');}drawPixelText(save.complete?'FESTIVAL REACHED':save.unlocked?'CONTINUE YOUR JOURNEY':'YOUR TRAIN IS WAITING',240,256,1,C.cream,null,'center');}
+function festivalScene(){px(0,44,480,236,'#243649');for(let x=18;x<480;x+=36){px(x,44,1,27,C.ink);box(x-5,67,12,18,C.brown,x%72?C.gold:C.pink);}px(0,191,480,89,'#ad8e7e');drawPixelText('WELCOME, EVERYONE!',240,110,2,C.cream,null,'center');drawPixelText('THE LANTERN FESTIVAL',240,144,1,C.gold,null,'center');for(let i=0;i<5;i++)human({x:130+i*45,y:235,coat:[C.navy,'#bc6485','#60854e','#9966ac',C.green][i],facing:'down'});drawDog({x:367,y:236});}
+function render(){ctx.clearRect(0,0,W,H);if(state==='start'||state==='confirm-new')titleScene();else if(state==='journey-complete')festivalScene();else drawWorld();hud();panel();syncControls();}
+// Fixed simulation steps maintain collision/event behaviour across refresh rates.
+let lastTime=performance.now(),accumulator=0;
+function loop(now){const delta=Math.min((now-lastTime)/1000,.1);lastTime=now;if(!document.hidden){accumulator+=delta;while(accumulator>=1/60){update(1/60);accumulator-=1/60;}}else accumulator=0;render();requestAnimationFrame(loop);}
+setupInput();syncControls();resize();requestAnimationFrame(loop);
+</script></body></html>
