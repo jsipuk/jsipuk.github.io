@@ -3,10 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Interactive explorer for the Netskope One product suite — 36 products across 8 categories, built for sales and technical evaluation.">
-<meta name="author" content="John Saunders">
-<meta name="app-version" content="2.0.2">
-<meta name="last-modified" content="2026-08-21">
 <title>Netskope One — Product Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -327,6 +323,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
+    overflow: hidden;
     margin-top: 8px;
     margin-bottom: 28px;
     animation: slideDown 0.2s ease;
@@ -497,74 +494,24 @@
     flex-shrink: 0;
   }
 
+  /* PACKAGE TIER BADGES */
+  .badge-tier {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    cursor: help;
+  }
+  .badge-tier.tier-prime { background: rgba(0,167,206,0.12); color: #0076a8; border: 1px solid rgba(0,167,206,0.3); }
+  .badge-tier.tier-max   { background: rgba(255,131,0,0.12); color: #c76600; border: 1px solid rgba(255,131,0,0.3); }
+  .badge-tier.tier-api   { background: rgba(123,79,212,0.12); color: #6339b5; border: 1px solid rgba(123,79,212,0.3); }
+  .pc-tiers { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+
   /* DETAIL PANEL ACCENT */
   .detail-panel { border-top: 3px solid var(--dp-accent-color, var(--ns-teal)); }
-
-  /* ADD-ON CHIPS */
-  .dp-addons { grid-column: 1 / -1; margin-top: 4px; padding-top: 16px; border-top: 1px dashed var(--border); }
-  .dp-addons h4 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-3); margin-bottom: 10px; }
-  .addon-list { display: flex; flex-wrap: wrap; gap: 8px; }
-  .addon-chip {
-    position: relative;
-    font-size: 12px;
-    padding: 5px 12px;
-    border-radius: 6px;
-    background: transparent;
-    color: var(--text-2);
-    border: 1.5px dashed var(--border-strong);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: help;
-    transition: var(--transition);
-  }
-  .addon-chip:hover, .addon-chip.tip-active {
-    border-color: var(--ns-teal);
-    border-style: solid;
-    background: var(--ns-teal-light);
-    color: var(--ns-navy);
-  }
-  .addon-chip:focus-visible {
-    outline: 2px solid var(--ns-teal);
-    outline-offset: 2px;
-  }
-  .addon-chip .ac-plus { font-weight: 700; color: var(--ns-teal); }
-  .addon-tip {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(calc(-50% + var(--tip-shift, 0px))) translateY(4px);
-    width: max-content;
-    max-width: 240px;
-    background: var(--ns-navy);
-    color: #fff;
-    font-size: 12px;
-    line-height: 1.5;
-    font-weight: 400;
-    padding: 9px 12px;
-    border-radius: 8px;
-    box-shadow: 0 6px 20px rgba(0,43,73,0.25);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    z-index: 20;
-    text-align: left;
-    white-space: normal;
-  }
-  .addon-tip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: calc(50% - var(--tip-shift, 0px));
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: var(--ns-navy);
-  }
-  .addon-chip:hover .addon-tip,
-  .addon-chip.tip-active .addon-tip {
-    opacity: 1;
-    transform: translateX(calc(-50% + var(--tip-shift, 0px))) translateY(0);
-  }
 
   /* KEYBOARD HINT */
   .kbd-hint {
@@ -584,6 +531,51 @@
     flex-shrink: 0;
   }
 
+  /* PRODUCT OVERVIEW ENRICHMENT — industry category label + clamped summary on
+     cards, "Product overview" block in the detail panel. Cards become a flex
+     column so the tier badges sit at the bottom edge consistently. */
+  .product-card { display: flex; flex-direction: column; }
+  .product-card > .pc-cat { align-self: flex-start; }
+  .product-card > .pc-tiers { margin-top: auto; padding-top: 8px; }
+  .pc-industry { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-3); line-height: 1.35; margin: -4px 0 8px; padding-right: 16px; }
+  .pc-summary { font-size: 12px; color: var(--text-2); line-height: 1.45; margin: 10px 0 4px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .dp-overview { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(0,167,206,0.05), transparent 70%); }
+  .dp-ov-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .dp-ov-head h4 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-3); }
+  .dp-ov-note { font-size: 11px; color: var(--text-3); font-style: italic; }
+  .dp-ov-tag { font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 4px; background: rgba(0,167,206,0.1); color: #0076a8; display: inline-block; margin-bottom: 8px; }
+  .dp-overview p { font-size: 13.5px; color: var(--text-2); line-height: 1.6; max-width: 900px; }
+  .dp-ov-extra { margin: 10px 0 0; padding-left: 18px; max-width: 900px; display: flex; flex-direction: column; gap: 4px; }
+  .dp-ov-extra li { font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
+  .dp-ov-extra strong { color: var(--text); font-weight: 600; }
+  .badge-status { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: rgba(255,131,0,0.14); color: #b35c00; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+
+  /* CAPABILITY MAP VIEW */
+  .cap-intro { font-size: 13px; color: var(--text-2); line-height: 1.55; margin: -4px 0 14px; max-width: 760px; }
+  .cap-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+  .cap-filter-chip { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: var(--transition); }
+  .cap-filter-chip:hover { border-color: var(--ns-teal); color: var(--ns-navy); }
+  .cap-filter-chip.active { background: var(--ns-navy); border-color: var(--ns-navy); color: #fff; }
+  .cap-filter-chip:disabled { opacity: 0.45; cursor: default; }
+  .cap-filter-count { font-family: 'DM Mono', monospace; font-size: 10.5px; padding: 0 6px; border-radius: 8px; background: var(--surface2); color: var(--text-3); }
+  .cap-filter-chip.active .cap-filter-count { background: rgba(255,255,255,0.18); color: #fff; }
+
+  /* Card title row: name + New / status badges. Wraps so a long name keeps the full
+     card width and the badges drop below it instead of squeezing it (and clipping). */
+  .pc-name-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-bottom: 8px; }
+  .pc-name-row .badge-new, .pc-name-row .badge-status { margin-left: 0; white-space: nowrap; }
+  .cap-list { display: flex; flex-direction: column; gap: 10px; }
+  .cap-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: grid; grid-template-columns: minmax(200px,1fr) 2fr; gap: 18px; }
+  .cap-row h3 { font-size: 14.5px; font-weight: 600; color: var(--text); margin: 0 0 4px; letter-spacing: -0.01em; }
+  .cap-num { font-family: 'DM Mono', monospace; font-size: 10.5px; color: var(--text-3); }
+  .cap-means { font-size: 12px; color: var(--text-3); line-height: 1.5; margin-top: 6px; }
+  .cap-delivers { font-size: 13px; color: var(--text-2); line-height: 1.55; margin: 0 0 10px; }
+  .cap-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .cap-chip { font-size: 11.5px; padding: 3px 10px; border-radius: 14px; background: var(--surface2); border: 1px solid var(--border); color: var(--ns-navy); cursor: pointer; transition: var(--transition); }
+  .cap-chip:hover { border-color: var(--ns-teal); color: #0076a8; }
+  .cap-chip.static { cursor: default; color: var(--text-3); }
+  .cap-chip.static:hover { border-color: var(--border); color: var(--text-3); }
+
   /* RESPONSIVE */
   @media (max-width: 900px) {
     .hero-stats { display: none; }
@@ -602,31 +594,8 @@
     .dp-top { flex-wrap: wrap; }
     .dp-actions { flex-direction: row; flex-wrap: wrap; }
     .search-box input { width: 120px; }
-  }
-
-  /* PRINT VIEW */
-  #print-view { display: none; }
-  @media print {
-    @page { margin: 16mm 14mm; }
-    body { background: #fff; }
-    .topbar, .sidebar, footer, .hero-strip, #detail-panel, #product-area { display: none !important; }
-    .layout { display: block !important; }
-    .main { padding: 0 !important; overflow: visible !important; }
-    #print-view { display: block !important; }
-
-    .pv-title { font-size: 20px; font-weight: 700; color: #002B49; margin-bottom: 2px; }
-    .pv-subtitle { font-size: 11px; color: #666; margin-bottom: 20px; }
-    .pv-cat { font-size: 15px; font-weight: 700; color: #002B49; margin-top: 22px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1.5px solid #002B49; break-after: avoid; }
-    .pv-cat:first-of-type { margin-top: 0; }
-    .pv-product { margin-bottom: 12px; break-inside: avoid; padding-left: 2px; }
-    .pv-product-name { font-size: 12.5px; font-weight: 600; color: #111; display: inline; }
-    .pv-new { font-size: 8px; font-weight: 700; color: #00A7CE; border: 1px solid #00A7CE; border-radius: 3px; padding: 1px 4px; margin-left: 5px; vertical-align: middle; }
-    .pv-desc { font-size: 10.5px; color: #333; line-height: 1.5; margin: 2px 0 3px; }
-    .pv-features { font-size: 9.5px; color: #555; }
-    .pv-features b { color: #333; }
-    .pv-addons { font-size: 9.5px; color: #0E7490; margin-top: 2px; }
-    .pv-addons b { color: #333; }
-    .pv-footer { margin-top: 24px; padding-top: 8px; border-top: 1px solid #ccc; font-size: 9px; color: #888; }
+    .cap-row { grid-template-columns: 1fr; gap: 8px; }
+    .dp-overview { padding: 14px 18px; }
   }
 </style>
 </head>
@@ -635,7 +604,7 @@
 <!-- TOP NAV -->
 <nav class="topbar">
   <a class="logo" href="https://www.netskope.com/products" target="_blank">
-    <img src="data:image/png;base64,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" alt="Netskope" style="height:26px;width:auto">
+    <img src="https://cdn.brandfetch.io/id8gc0ILB0/theme/light/logo.svg?c=1dxbfHSJFAPEGdCLU4o5B" alt="Netskope" style="height:26px;width:auto">
   </a>
   <div class="topbar-divider"></div>
   <span class="topbar-title">Product Explorer</span>
@@ -645,7 +614,7 @@
       <input type="text" id="search-input" placeholder="Search products…" autocomplete="off">
       <span class="kbd-hint">/</span>
     </div>
-    <span class="topbar-badge" id="topbar-count">28 products</span>
+    <span class="topbar-badge" id="topbar-count">39 products</span>
   </div>
 </nav>
 
@@ -658,12 +627,12 @@
     <!-- Hero strip -->
     <div class="hero-strip">
       <div class="hero-text">
-        <h1>Netskope One Platform</h1>
-        <p>The industry's leading SSE and SASE platform — now with AgentSkope agentic operations and a full AI security suite, built natively on a single cloud.</p>
+        <h1 id="hero-title">Netskope One Platform</h1>
+        <p id="hero-sub">The industry's leading SSE and SASE platform — with Netskope Skylight AI security, AgentSkope agentic operations and unified data security, built natively on a single cloud.</p>
       </div>
       <div class="hero-stats">
         <div class="hero-stat">
-          <div class="hs-num" id="stat-products">28</div>
+          <div class="hs-num" id="stat-products">39</div>
           <div class="hs-label">Products</div>
         </div>
         <div class="hero-stat">
@@ -684,18 +653,18 @@
 
 <footer>
   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1" stroke-linecap="round"/></svg>
-  Last updated August 2026 &nbsp;·&nbsp; <span id="footer-version">v1.1.0</span> &nbsp;·&nbsp; Created by John Saunders &nbsp;·&nbsp;
+<span id="release-stamp">v4.4 &nbsp;·&nbsp; Last updated 30 September 2026</span> &nbsp;·&nbsp; Created by John Saunders &nbsp;·&nbsp;
   <a href="https://www.netskope.com/products" target="_blank">netskope.com/products ↗</a>
-  &nbsp;·&nbsp;
-  <button id="print-btn" onclick="window.print()" style="background:none;border:none;color:var(--ns-teal);cursor:pointer;font-size:12px;font-family:inherit;padding:0;text-decoration:none;display:inline-flex;align-items:center;gap:4px" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4V1h6v3M3 9h6v2H3V9zM1.5 4h9a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H9V7H3v2H1.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/></svg>
-    Print / Save as PDF
-  </button>
 </footer>
 
-<div id="print-view"></div>
-
 <script>
+// <!-- RELEASE:START -->
+// Current release stamp — generated; do not hand-edit.
+const RELEASE_META = {"version": "v4.4", "date": "30 September 2026", "month": "September 2026", "iso": "2026-09-30"};
+// <!-- RELEASE:END -->
+// Footer version/date follows RELEASE_META (rewritten by the generator on each update)
+document.getElementById('release-stamp').textContent = `${RELEASE_META.version}  ·  Last updated ${RELEASE_META.date}`;
+
 const CAT_META = {
   "All":                    { color: "#002B49", bg: "rgba(0,43,73,0.07)", icon: "⊞" },
   "Converged":              { color: "#FF8300", bg: "rgba(255,131,0,0.1)", icon: "⬡" },
@@ -707,15 +676,6 @@ const CAT_META = {
   "Networking":             { color: "#0F7A5A", bg: "rgba(15,122,90,0.1)", icon: "⬡" },
   "Analytics":              { color: "#D97706", bg: "rgba(217,119,6,0.1)", icon: "◇" }
 };
-
-// ——————————————————————
-// VERSIONING POLICY (semver: MAJOR.MINOR.PATCH)
-//   PATCH (x.x.N) — small fixes: typo, bug, single-product update
-//   MINOR (x.N.0) — bigger updates: new feature, several products added/changed
-//   MAJOR (N.0.0) — full product review or major structural addition (e.g. new category)
-// Bump this constant on every change that ships. Footer reads from it automatically.
-// ——————————————————————
-const APP_VERSION = "2.0.2";
 
 const PRODUCTS = [
   {name:"SASE",              cat:"Converged",     icon:"🔐",
@@ -736,59 +696,65 @@ const PRODUCTS = [
    related:["SASE","Secure SD-WAN","Endpoint SD-WAN"],
    url:"https://www.netskope.com/products/converged-access"},
 
+  {name:"Converged Gateway", cat:"Converged",     icon:"🚪", isNew:true,
+   desc:"A single converged gateway unifying security and networking enforcement in one place — simplifying architecture with one gateway for all traffic, users, and locations.",
+   features:["Unified enforcement point","Security + networking","Simplified architecture","One gateway, all traffic","SASE-native"],
+   related:["Converged Access","SASE","SSE"],
+   url:"https://www.netskope.com/products/converged-gateway"},
+
   {name:"Unified Data Security",cat:"Converged",  icon:"🗄️",
    desc:"Re-imagine how you protect your organization's data in the AI era — the most comprehensive, unified data security in a single platform combining DLP, DSPM, CASB, and SSPM.",
    features:["Unified DLP","DSPM","CASB integration","SSPM","AI-era data protection"],
-   related:["DLP","DSPM","CASB (API)"],
+   related:["DLP","DSPM","CASB (API)","DataSec Command Center"],
    url:"https://www.netskope.com/products/data-security"},
 
   {name:"AgentSkope",        cat:"AgentSkope",    icon:"🧠", isNew:true,
-   desc:"Announced 5 May 2026. Netskope One AgentSkope is the architectural foundation for deploying Netskope AI agents that execute end-to-end SOC and NOC workflows — including first-of-kind agentic DLP analysis and insider-threat triage. Provides shared GRC, privacy and security controls plus agent-utilisation telemetry across the platform.",
-   features:["6 launch agents","First-of-kind agentic DLP","First-of-kind insider-threat triage","Unified GRC + privacy controls","Agent utilisation tracking","Natural-language ops"],
-   related:["AI Gateway","Agentic Broker","AI Guardrails","DLP","DSPM"],
-   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+   desc:"Netskope One AgentSkope enables agentic operation of Netskope One — automating onerous processes for policy admins, NetOps, and SecOps teams, freeing skilled staff to focus on what matters. A unified foundation with consistent security, privacy, and GRC controls for every agent. The AgentSkope Marketplace gives one catalog to find and size agents, one shared pool of capacity to fund them, and one view to track and plan usage.",
+   features:["Agentic operations platform","Persona automation","Unified GRC controls","SIEM ingestion cost reduction","AgentSkope Marketplace","Shared agent capacity pool"],
+   related:["Netskope DLP AISecOps Agent","Netskope DEM Insights Agent","AI Command Center"],
+   url:"https://www.netskope.com/netskope-one/agentskope"},
 
   {name:"Netskope DLP AISecOps Agent", cat:"AgentSkope", icon:"🧪", isNew:true,
-   desc:"First-of-its-kind agentic DLP analysis (announced 5 May 2026). Mimics a security operations analyst to execute end-to-end data protection workflows — contextualised risk assessments, intelligent triage and investigation, and agentic risk remediation. One global professional-services beta customer uses it to analyse millions of alerts, convert them into automatically-investigated cases, and free their team for critical work.",
-   features:["First-of-kind agentic DLP","Contextualised risk assessment","Intelligent triage & investigation","Agentic risk remediation","Eliminates low-value incident time"],
-   related:["AgentSkope","DLP","DSPM","Unified Data Security"],
-   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+   desc:"Mimics the actions of a security operations analyst to execute end-to-end data protection workflows — applying contextualized risk assessments, intelligent triage and investigation, and agentic risk remediation. Consolidates large volumes of raw DLP alerts into a small number of high-priority cases, and works in tandem with DataSec Command Center to resolve data security incidents at machine speed.",
+   features:["End-to-end DLP workflows","Contextual risk assessment","Intelligent triage","Agentic remediation","Alert-to-case consolidation","AgentSkope Marketplace"],
+   related:["AgentSkope","DLP","DataSec Command Center","Netskope Insider Threat AISecOps Agent"],
+   url:"https://www.netskope.com/netskope-one/agentskope/dlp-aisecops-agent"},
 
-  {name:"Netskope Insider Threat AISecOps Agent", cat:"AgentSkope", icon:"🕵️", isNew:true,
-   desc:"First-of-its-kind insider-threat triage (announced 5 May 2026, currently in private preview). Combines DLP alerts with user behaviour data to identify malicious activity and protect against insider threats — surfacing the patterns a tired analyst would miss.",
-   features:["First-of-kind insider-threat triage","Combines DLP + UEBA signal","Malicious-activity detection","User behaviour correlation","Private preview"],
-   related:["AgentSkope","Netskope DLP AISecOps Agent","DLP"],
-   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+  {name:"Netskope Insider Threat AISecOps Agent", cat:"AgentSkope", icon:"🕵️", isNew:true, status:"Private preview",
+   desc:"Automates insider threat detection and investigation workflows — correlating user behaviour, data movement, and risk signals to surface and triage insider risk like a dedicated analyst. Currently in private preview for select customers; contact your Netskope account team for more information.",
+   features:["Insider risk detection","Behavioural correlation","Automated investigation","Analyst persona automation","Private preview"],
+   related:["AgentSkope","Netskope DLP AISecOps Agent","Advanced Analytics"],
+   url:"https://www.netskope.com/netskope-one/agentskope/insider-threat-agent"},
 
   {name:"Netskope Private Access AIOps Agent", cat:"AgentSkope", icon:"🛠️", isNew:true,
-   desc:"Automatically audits configurations for Netskope One Private Access — removing dormant settings and helping ensure access privileges are never left open. Generates granular application segments and policies based on real user-consumption patterns.",
-   features:["Auto-audit NPA configurations","Remove dormant settings","Granular app segments","Usage-driven policies","Cuts audit fatigue"],
+   desc:"Automatically audits configurations for Netskope One Private Access — removing dormant settings and helping ensure access privileges are never left open.",
+   features:["Automated config audits","Dormant setting cleanup","Access privilege hygiene","ZTNA operations","Add-on license"],
    related:["AgentSkope","ZTNA / Private Access","Universal ZTNA"],
-   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+   url:"https://www.netskope.com/netskope-one/agentskope/npa-aiops-agent"},
 
   {name:"Netskope DEM Data Intelligence Agent", cat:"AgentSkope", icon:"💬", isNew:true,
-   desc:"Streamlines troubleshooting for user-experience issues by transforming granular DEM telemetry and raw metrics into actionable insights — through natural language in an easy-to-use conversational interface.",
-   features:["Conversational DEM analysis","Natural-language queries","Telemetry to insights","Root-cause acceleration","Reduces MTTR"],
+   desc:"Streamlines troubleshooting for user experience issues — transforming granular DEM telemetry and raw metrics into actionable insights via a natural language conversational interface.",
+   features:["Natural language queries","Telemetry to insights","UX troubleshooting","Conversational interface","Add-on license"],
    related:["AgentSkope","Digital Experience Mgmt","Netskope DEM Insights Agent"],
-   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+   url:"https://www.netskope.com/netskope-one/agentskope/dem-data-intel-agent"},
 
   {name:"Netskope DEM Insights Agent", cat:"AgentSkope", icon:"📈", isNew:true,
-   desc:"Provides a high-level view of organisational digital health — correlating granular telemetry to surface critical incidents, macro-impacting trends and performance bottlenecks before they affect the business.",
-   features:["High-level digital health","Critical incident surfacing","Macro trend correlation","Performance bottleneck detection","Proactive alerting"],
+   desc:"Provides a high-level view of organizational digital health — correlating granular telemetry to surface critical incidents, macro-impacting trends, and performance bottlenecks. Included in DEM Level 3/4.",
+   features:["Org-wide digital health","Incident surfacing","Trend correlation","Performance bottlenecks","Included in DEM L3/4"],
    related:["AgentSkope","Digital Experience Mgmt","Netskope DEM Data Intelligence Agent"],
-   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+   url:"https://www.netskope.com/netskope-one/agentskope"},
 
   {name:"Netskope CCI Insights Agent", cat:"AgentSkope", icon:"🔍", isNew:true,
-   desc:"Empowers SOC analysts to query complex risk attributes and compliance certifications across more than 85,000 cloud, AI and SaaS applications using natural language — enabling conversational interaction with app risk data.",
-   features:["Natural-language risk queries","85,000+ apps covered","Risk attribute exploration","Compliance certifications","Conversational app-risk data"],
-   related:["AgentSkope","Cloud Inline Security","CASB (API)","GenAI Security"],
-   url:"https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage"},
+   desc:"Empowers SOC analysts to query complex risk attributes and compliance certifications across more than 85,000 cloud, AI, and SaaS applications using natural language — conversational interaction with app risk data. Included.",
+   features:["85,000+ apps covered","Natural language queries","Risk attribute lookup","Compliance certifications","Included"],
+   related:["AgentSkope","Cloud Inline Security","Advanced Analytics"],
+   url:"https://www.netskope.com/netskope-one/agentskope"},
 
   {name:"AI Command Center", cat:"AI Security",   icon:"🎛️", isNew:true,
-   desc:"The foundational layer beneath Netskope's AI Security products — a holistic view of AI usage and risk with centralised AI discovery, risk understanding, and remediation across every agent, MCP server, and AI-related data store in the enterprise.",
-   features:["AI asset inventory","Overview dashboard","Agentic registry (coming soon)","AI topology & explorer (coming soon)","Policy-based risk rules (coming soon)","Compliance benchmarking (coming soon)"],
-   related:["Agentic Broker","AI Gateway","AI Guardrails","AI Red Teaming"],
-   url:"https://www.netskope.com/products/ai-security"},
+   desc:"Netskope Skylight AI Command Center is a single pane of glass for your entire AI security posture — comprehensive visibility from AI apps and embedded AI in SaaS to the MCP servers powering autonomous agents, with connected risk insights to govern shadow AI, high-risk behaviour, DLP violations and AI threats.",
+   features:["Unified AI visibility","AI asset inventory","Endpoint AI discovery","AI governance hub","Cross-product AI control","Single pane of glass"],
+   related:["AI Gateway","Agentic Broker","AI Guardrails","DataSec Command Center"],
+   url:"https://www.netskope.com/products/ai-command-center"},
 
   {name:"Agentic Broker",    cat:"AI Security",   icon:"🤖", isNew:true,
    desc:"Secure and govern AI agents operating across your enterprise — visibility, control, and policy enforcement for every agentic AI action, workflow, and data interaction.",
@@ -797,8 +763,8 @@ const PRODUCTS = [
    url:"https://www.netskope.com/products/agentic-broker"},
 
   {name:"AI Gateway",        cat:"AI Security",   icon:"⚡", isNew:true,
-   desc:"A gateway for all AI traffic, including MCP servers, that gives your organization visibility and control over how employees and agents use AI tools — without sacrificing speed or user experience. Install and host in your own VPC or data centre.",
-   features:["AI traffic visibility","MCP server support","Access control","Data protection","Usage analytics","Shadow AI discovery"],
+   desc:"A gateway for all AI traffic, including MCP servers, that gives your organization visibility and control over how employees and agents use AI tools — without sacrificing speed or user experience. Host it in your own VPC or data center, with AI guardrails and threat protection built in.",
+   features:["AI traffic visibility","MCP server support","Built-in AI guardrails","Threat protection","Customer-hosted","Shadow AI discovery"],
    related:["Agentic Broker","AI Guardrails","GenAI Security"],
    url:"https://www.netskope.com/products/ai-gateway"},
 
@@ -816,18 +782,23 @@ const PRODUCTS = [
 
   {name:"GenAI Security",    cat:"AI Security",   icon:"✨",
    desc:"Comprehensive security for generative AI adoption — discover, analyze, and control all GenAI app usage across your organization with granular policy controls.",
-   features:["GenAI app discovery","Usage controls","Data protection","Risk scoring","Policy enforcement"],
+   features:["GenAI app discovery","1,800+ GenAI apps","gRPC & WebSocket decoding","Usage controls","Data protection","Policy enforcement"],
    related:["AI Gateway","AI Guardrails","Cloud Inline Security"],
    url:"https://www.netskope.com/products/securing-generative-ai"},
 
-  {name:"Next Gen SWG",      cat:"Web & Cloud",   icon:"🌐", 
+  {name:"Deepfake Detection API", cat:"AI Security", icon:"🎭", isNew:true,
+   desc:"Automated forensic analysis of audio, video and image files to identify synthetic content created or modified by AI deepfake technologies — helping organizations combat social engineering, identity fraud and corporate disinformation, and verify the authenticity of sensitive media.",
+   features:["Audio, video & image analysis","Voice & facial biometrics","Forensic reporting","API-based submission","Fraud & impersonation defense"],
+   related:["AI Guardrails","AI Red Teaming","AI Command Center"],
+   url:"https://docs.netskope.com/en/deepfake-detection"},
+
+  {name:"Next Gen SWG",      cat:"Web & Cloud",   icon:"🌐", tiers:["Prime","Max"], 
    desc:"The foundation for SSE web and cloud inline security — a next-generation secure web gateway providing real-time threat and data protection for all web and cloud traffic.",
    features:["Inline threat detection","DLP inline","Cloud app controls","SSL inspection","Zero-day protection"],
    related:["Cloud Inline Security","Threat Protection","Remote Browser Isolation"],
-   addons:[{name:"Cert-Pinned App Inspection", desc:"Extends inline inspection to certificate-pinned applications that normally block TLS interception."}],
    url:"https://www.netskope.com/products/next-gen-swg"},
 
-  {name:"Cloud Inline Security",cat:"Web & Cloud",icon:"☁️", 
+  {name:"Cloud Inline Security",cat:"Web & Cloud",icon:"☁️", tiers:["Prime","Max"], 
    desc:"Netskope One CASB lets you confidently adopt cloud applications without sacrificing security — inline and out-of-band protection for managed and unmanaged cloud apps.",
    features:["Inline + API CASB","Shadow IT discovery","Policy enforcement","Managed/unmanaged apps","Real-time coaching"],
    related:["Next Gen SWG","CASB (API)","SSPM"],
@@ -837,10 +808,6 @@ const PRODUCTS = [
    desc:"Netskope One Private Access ensures secure, optimized access to all private apps from anywhere — combining ZTNA with Endpoint SD-WAN for best-in-class zero trust private application access. The cornerstone of VPN replacement.",
    features:["App-level zero trust","Continuous trust verification","Endpoint SD-WAN built-in","Replace VPN","Any app, any location"],
    related:["Endpoint SD-WAN","Universal ZTNA","SASE"],
-   addons:[
-     {name:"Universal Reverse Proxy", desc:"Clientless private app access via reverse proxy — no agent required for the end user."},
-     {name:"NPA Local Broker Pair", desc:"On-premises broker pair for routing private app traffic locally, for hybrid or latency-sensitive environments."}
-   ],
    url:"https://www.netskope.com/products/private-access"},
 
   {name:"Universal ZTNA",       cat:"ZTNA & Private Access", icon:"🛂",
@@ -855,15 +822,10 @@ const PRODUCTS = [
    related:["ZTNA / Private Access","Secure SD-WAN","Converged Access"],
    url:"https://www.netskope.com/products/endpoint-sd-wan"},
 
-  {name:"Firewall as a Service",cat:"Web & Cloud",icon:"🔥", 
+  {name:"Firewall as a Service",cat:"Web & Cloud",icon:"🔥", tiers:["Max"], 
    desc:"Netskope One Cloud Firewall delivers FWaaS for egress traffic in a SASE architecture — cloud-delivered, policy-driven firewall for all users and locations, no hardware required.",
    features:["Cloud-delivered FWaaS","SASE-integrated","Egress control","DNS security","IPS/IDS"],
    related:["Next Gen SWG","SASE","SSE"],
-   addons:[
-     {name:"DNS Security", desc:"Recursive DNS resolution with security filtering to block malicious and risky domains before a connection is even made."},
-     {name:"DNS Content Filtering", desc:"Category-based content filtering at the DNS layer, alongside DNS Security."},
-     {name:"IPS for Non-Web Traffic", desc:"Intrusion prevention extended to non-web protocols passing through the firewall."}
-   ],
    url:"https://www.netskope.com/products/firewall"},
 
   {name:"Enterprise Browser", cat:"Web & Cloud",  icon:"🖥️",
@@ -872,38 +834,43 @@ const PRODUCTS = [
    related:["Remote Browser Isolation","ZTNA / Private Access","Next Gen SWG"],
    url:"https://www.netskope.com/products/enterprise-browser"},
 
-  {name:"Remote Browser Isolation",cat:"Web & Cloud",icon:"🔒", 
+  {name:"Remote Browser Isolation",cat:"Web & Cloud",icon:"🔒", tiers:["Max"], 
    desc:"Netskope One RBI isolates uncategorized and risky websites, executing all browser code remotely — protecting endpoints from web-borne threats without impacting user experience.",
-   features:["Remote code execution","Risky site isolation","Transparent experience","Integrated with SWG","Zero endpoint risk"],
+   features:["Remote code execution","Risky site isolation","Screen watermarking","Transparent experience","Integrated with SWG","Zero endpoint risk"],
    related:["Next Gen SWG","Enterprise Browser","Threat Protection"],
-   addons:[{name:"E2E Encrypted App Inspection", desc:"Inline inspection of end-to-end encrypted applications via isolation, without breaking encryption for the user."}],
    url:"https://www.netskope.com/products/remote-browser-isolation"},
 
-  {name:"Threat Protection",  cat:"Web & Cloud",  icon:"🛡️", 
+  {name:"Threat Protection",  cat:"Web & Cloud",  icon:"🛡️", tiers:["Prime","Max"], 
    desc:"High-efficacy threat detection and blocking for advanced malware (including ransomware) and phishing — inline, real-time, AI-powered protection built into the SSE platform.",
    features:["Anti-malware","Anti-phishing","Ransomware defense","AI threat detection","Zero-day protection"],
    related:["Next Gen SWG","Cloud Inline Security","Advanced Analytics"],
    url:"https://www.netskope.com/netskope-one/threat-protection"},
 
-  {name:"DLP",               cat:"Data Security", icon:"📂", 
+  {name:"DLP",               cat:"Data Security", icon:"📂", tiers:["Prime","Max","API"], 
    desc:"Unified, ML-enhanced data loss prevention for cloud, web, email, private apps, and devices — reduce the risk of data exfiltration across every channel from one policy engine.",
    features:["Multi-channel DLP","ML-enhanced detection","Cloud + endpoint","Policy automation","Exact Data Match"],
    related:["DSPM","Unified Data Security","Cloud Inline Security"],
    url:"https://www.netskope.com/products/data-loss-prevention"},
 
-  {name:"DSPM",              cat:"Data Security", icon:"🗺️", 
+  {name:"DSPM",              cat:"Data Security", icon:"🗺️", tiers:["API"], 
    desc:"Netskope One DSPM empowers security teams to discover, map, and protect sensitive data across cloud, on-premises, and hybrid environments — find data risk before it becomes a breach.",
    features:["Data discovery","Risk posture scoring","Cloud + on-prem","Compliance mapping","Auto-remediation"],
    related:["DLP","CASB (API)","Unified Data Security"],
    url:"https://www.netskope.com/products/data-security-posture-management"},
 
   {name:"Data Lineage",      cat:"Data Security", icon:"🧬", isNew:true,
-   desc:"Netskope One Data Lineage monitors the provenance, lifecycle, and transformation of sensitive data across cloud, web, email, and AI environments — a verifiable digital breadcrumb trail that helps security teams identify insider threats and track data exfiltration.",
-   features:["Provenance tracking","Data lifecycle visibility","Transformation history","Insider-threat evidence","Exfiltration tracing"],
-   related:["DSPM","DLP","Netskope Insider Threat AISecOps Agent","Unified Data Security"],
-   url:"https://www.netskope.com/products/data-security"},
+   desc:"Track the complete journey of your sensitive data — where it originated, how it's transformed, where it moves, and who touches it — giving you full provenance and context for data risk decisions.",
+   features:["Data provenance tracking","Movement visibility","Transformation history","Risk context","AI-era data governance"],
+   related:["DSPM","DLP","Unified Data Security"],
+   url:"https://www.netskope.com/security-defined/what-is-data-lineage"},
 
-  {name:"CASB (API)",        cat:"Data Security", icon:"🔗", 
+  {name:"DataSec Command Center", cat:"Data Security", icon:"🗂️", isNew:true,
+   desc:"Netskope One DataSec Command Center is a unified control plane that discovers, understands, tracks and protects sensitive data wherever it lives and moves — across AI environments, cloud, network, on-premises, endpoint and email. It correlates relationships between users, devices, data stores and AI assets to surface hidden risk, then speeds remediation with direct actions, triage and investigation workflows, and policy recommendations enforced back at Netskope's data security control points.",
+   features:["Unified data security control plane","Data asset inventory","Correlated risk insights","Remediation workflows","Policy recommendations","Works with DLP AISecOps Agent"],
+   related:["DSPM","DLP","CASB (API)","Netskope DLP AISecOps Agent","Unified Data Security"],
+   url:"https://www.netskope.com/products/datasec-command-center"},
+
+  {name:"CASB (API)",        cat:"Data Security", icon:"🔗", tiers:["API"], 
    desc:"Out-of-band CASB protection for sanctioned SaaS apps via API — visibility and control for data at rest in Microsoft 365, Salesforce, Google Workspace, and hundreds more.",
    features:["API-connected","Data at rest scanning","Compliance enforcement","SaaS app coverage","Misconfiguration detection"],
    related:["Cloud Inline Security","SSPM","DLP"],
@@ -919,7 +886,6 @@ const PRODUCTS = [
    desc:"Netskope One SD-WAN — a 100% SaaS-based converged connectivity platform for branches, remote users, and clouds — one platform, one software, one policy with full SASE integration.",
    features:["SaaS-based","SASE-native","High-performance","Zero trust integrated","Cloud-managed"],
    related:["SASE","Converged Access","Micro Branch"],
-   addons:[{name:"Bandwidth Control", desc:"Granular bandwidth shaping by application, category, or domain across the SD-WAN fabric."}],
    url:"https://www.netskope.com/products/sase-branch"},
 
   {name:"Micro Branch",      cat:"Networking",    icon:"📡",
@@ -934,27 +900,221 @@ const PRODUCTS = [
    related:["ZTNA / Private Access","Micro Branch","Advanced Analytics"],
    url:"https://www.netskope.com/products/device-intelligence"},
 
-  {name:"Advanced Analytics", cat:"Analytics",    icon:"📊", 
+  {name:"Advanced Analytics", cat:"Analytics",    icon:"📊", tiers:["Prime","Max"], 
    desc:"Transform security operations with data-driven insights — identify trends, zero in on areas of risk, and use evidence to take action with powerful analytics built natively into the platform.",
    features:["Custom dashboards","Risk trending","Behavioral analytics","Policy impact analysis","Threat intelligence"],
    related:["Digital Experience Mgmt","Threat Protection","DSPM"],
-   addons:[
-     {name:"Log Streaming", desc:"Streams transaction, alert, and event data directly to your SIEM or data lake for long-term retention and correlation."},
-     {name:"Cloud TAP", desc:"Full traffic packet captures for deep forensic investigation and threat hunting."}
-   ],
    url:"https://www.netskope.com/products/advanced-analytics"},
 
-  {name:"Digital Experience Mgmt",cat:"Analytics",icon:"😊", 
+  {name:"Digital Experience Mgmt",cat:"Analytics",icon:"😊", tiers:["Prime","Max"], 
    desc:"Proactive Digital Experience Management (P-DEM) gives IT teams end-to-end visibility into user experience quality across apps, networks, and devices — resolve issues before users notice.",
-   features:["End-to-end visibility","Proactive alerting","App performance scoring","Remote user insights","Network path analysis"],
+   features:["End-to-end visibility","Proactive alerting","App performance scoring","Remote user insights","Network path analysis","Wi-Fi diagnostics"],
    related:["Advanced Analytics","Secure SD-WAN","Device Intelligence"],
    url:"https://www.netskope.com/products/digital-experience-management"}
 ];
 
+// ——————————————————————
+// PRODUCT OVERVIEWS + CAPABILITY MAP (generated — descriptive content only)
+// <!-- PRODUCT-CATALOGUE:START -->
+// Product descriptions and capability map — generated; do not hand-edit.
+const PRODUCT_CATALOGUE_META = {"asOf": "September 2026", "products": 95, "categories": 20};
+const PRODUCT_CATALOGUE = {
+  "Netskope One SASE": {"n": 1, "industry": "Secure Access Service Edge (SASE)", "category": "Platform & Solution Suites", "desc": "Converged Secure Access Service Edge: combines Netskope's SSE security services with Borderless SD-WAN to protect users, branches, IoT devices, apps and data everywhere, with one policy across security and networking."},
+  "Netskope One SSE": {"n": 2, "industry": "Security Service Edge (SSE)", "category": "Platform & Solution Suites", "desc": "Security Service Edge: consolidates Next Gen SWG, CASB, ZTNA, FWaaS, RBI, DLP, threat protection and behaviour analytics into one cloud-delivered inline platform, securing access to web, cloud, AI and private apps from anywhere."},
+  "TLS Inspection": {"n": 5, "industry": "Secure Web Gateway (SWG)", "category": "Platform Foundations (included)", "desc": "Full TLS/SSL decryption and inspection at scale using a Netskope-signed certificate authority (a customer-signed CA is available as an option), with granular bypass controls for privacy and compliance."},
+  "Next Gen Secure Web Gateway (SWG)": {"n": 6, "industry": "Secure Web Gateway (SWG)", "category": "Web, Cloud & Network Security", "desc": "Cloud-delivered secure web gateway inspecting all web and cloud traffic in real time: URL filtering, TLS inspection, app and instance awareness, user coaching, inline DLP and threat protection, and granular activity controls (for example allow view but block upload)."},
+  "Unauthenticated and Machine Traffic Inspection": {"n": 7, "industry": "Secure Web Gateway (SWG)", "category": "Web, Cloud & Network Security", "desc": "Applies SWG, CASB, FWaaS, IPS and DLP inspection to server, machine and unauthenticated traffic arriving over IPsec and GRE tunnels (for example data centre egress, IoT and guest networks) where there is no user identity."},
+  "Certificate-Pinned Application Inline Inspection": {"n": 8, "industry": "Secure Web Gateway (SWG)", "category": "Web, Cloud & Network Security", "desc": "Enables inline visibility and control of applications that use certificate pinning and would otherwise have to be bypassed from TLS inspection."},
+  "End-to-End Encrypted Application Inline Inspection": {"n": 9, "industry": "Secure Web Gateway (SWG)", "category": "Web, Cloud & Network Security", "desc": "Provides policy control and data protection for end-to-end encrypted applications (such as encrypted messaging apps) that cannot be decrypted by a proxy, using isolation-based inspection."},
+  "Cloud Confidence Index (CCI)": {"n": 10, "industry": "Cloud Access Security Broker (CASB)", "category": "Platform Foundations (included)", "desc": "Risk ratings for 85,000+ cloud, SaaS and AI applications, scored on security, auditability, compliance certifications and business continuity attributes. Used directly in policy to control risky or unsanctioned apps."},
+  "CASB Inline": {"n": 11, "industry": "Cloud Access Security Broker (CASB)", "category": "Web, Cloud & Network Security", "desc": "Real-time cloud access security broker for managed and unmanaged (shadow IT) SaaS. Decodes application JSON to see users, instances (corporate vs personal) and activities, and applies data and threat policy inline across tens of thousands of apps."},
+  "CASB API Protection": {"n": 12, "industry": "Cloud Access Security Broker (CASB)", "category": "Data Security", "desc": "Out-of-band, API-connected protection for sanctioned SaaS (Microsoft 365, Google Workspace, Salesforce, ServiceNow, Box, Slack and many more): scans data at rest, detects sensitive content and malware, monitors sharing and exposure, retroactively remediates, and applies DLP, threat protection and behaviour analytics to API-visible activity."},
+  "Universal ZTNA": {"n": 13, "industry": "Zero Trust Network Access (ZTNA)", "category": "Platform & Solution Suites", "desc": "Zero trust access model that extends beyond remote workers to every user and device type (managed, unmanaged, contractors, IoT and OT) with one consistent policy framework, positioned to replace both VPN and NAC."},
+  "Private Application Access": {"n": 14, "industry": "Zero Trust Network Access (ZTNA)", "category": "Private Access (ZTNA)", "desc": "Zero trust network access for client-initiated connections to private applications in data centres and public clouds. Application-level, identity- and posture-aware access without network exposure, with inline DLP, threat protection and web IPS."},
+  "Private Unified Access": {"n": 15, "industry": "Zero Trust Network Access (ZTNA)", "category": "Private Access (ZTNA)", "desc": "Full VPN replacement combining ZTNA with Endpoint SD-WAN: supports both client-initiated and server-initiated applications (VoIP, remote support, patching, device management), with inline DLP, threat protection and web IPS."},
+  "Private Optimized Access": {"n": 16, "industry": "Zero Trust Network Access (ZTNA)", "category": "Private Access (ZTNA)", "desc": "SD-WAN-based remote access optimised for latency-sensitive voice and video, with client- and server-initiated connectivity and path optimisation."},
+  "Endpoint SD-WAN": {"n": 17, "industry": "Zero Trust Network Access (ZTNA)", "category": "Private Access (ZTNA)", "desc": "Extends SD-WAN intelligence (path selection, QoS, packet loss correction) to every remote user's device through the Netskope Client, giving remote workers branch-quality connectivity with no additional agent."},
+  "NPA Local Broker": {"n": 18, "industry": "Zero Trust Network Access (ZTNA)", "category": "Private Access (ZTNA)", "desc": "On-premises broker pair that keeps traffic between on-site users and local private applications inside the site, avoiding a hairpin to the cloud while retaining central zero trust policy."},
+  "Universal Reverse Proxy": {"n": 19, "industry": "Zero Trust Network Access (ZTNA)", "category": "Private Access (ZTNA)", "desc": "Clientless, browser-based zero trust access to private web applications for unmanaged devices and third parties, via reverse proxy with no software to install."},
+  "NPA Publisher": {"n": 20, "industry": "Zero Trust Network Access (ZTNA)", "category": "Private Access (ZTNA)", "desc": "Lightweight software connector deployed near private applications (data centre, IaaS or on-premises) that establishes outbound-only connectivity to NewEdge, so no inbound firewall rules or exposed ports are needed."},
+  "Cloud Firewall (Firewall as a Service)": {"n": 21, "industry": "Firewall as a Service (FWaaS) and DNS Security", "category": "Web, Cloud & Network Security", "desc": "Cloud-delivered firewall for all outbound non-web traffic from users and sites: 5-tuple access control, user-ID and FQDN-based policies, application firewall rules, FTP application layer gateway, full event logging, and steering via client or tunnels. Extensible with IPS, DNS Security, non-web DLP and SOCKS5 proxy."},
+  "IPS for Non-Web Traffic": {"n": 22, "industry": "Firewall as a Service (FWaaS) and DNS Security", "category": "Web, Cloud & Network Security", "desc": "Intrusion prevention for non-web and network protocols passing through the Cloud Firewall, extending signature and anomaly-based detection beyond HTTP/S."},
+  "DNS Security and DNS Content Filtering": {"n": 23, "industry": "Firewall as a Service (FWaaS) and DNS Security", "category": "Web, Cloud & Network Security", "desc": "Protective DNS layered on the Cloud Firewall: blocks malicious, phishing, command-and-control and DGA domains, plus category-based DNS content filtering for acceptable use."},
+  "DNS as a Service (DNSaaS)": {"n": 24, "industry": "Firewall as a Service (FWaaS) and DNS Security", "category": "Web, Cloud & Network Security", "desc": "Cloud-hosted recursive DNS resolver with integrated DNS Security and DNS Content Filtering, for authenticated users and for unauthenticated users and devices such as IoT and guest networks."},
+  "SOCKS5 Proxy": {"n": 25, "industry": "Firewall as a Service (FWaaS) and DNS Security", "category": "Web, Cloud & Network Security", "desc": "Secure SOCKS5 proxy service through the Cloud Firewall for applications and workloads that require proxy-based egress rather than transparent steering."},
+  "Remote Browser Isolation (RBI)": {"n": 26, "industry": "Remote Browser Isolation (RBI) and Secure Enterprise Browser", "category": "Web, Cloud & Network Security", "desc": "Isolates risky browsing by rendering sites remotely and streaming pixels to the user: miscellaneous and uncategorised sites, security-risk categories, predefined or custom categories, predefined or custom applications and full app suites, with watermarking, and DLP and threat inspection of uploads and downloads."},
+  "Enterprise Browser": {"n": 27, "industry": "Remote Browser Isolation (RBI) and Secure Enterprise Browser", "category": "Web, Cloud & Network Security", "desc": "Netskope-managed secure browser for unmanaged devices, contractors and BYOD. Delivers SWG and ZTNA policy, data controls and isolation inside the browser with no endpoint agent, including mobile support."},
+  "Netskope One Unified Data Security": {"n": 28, "industry": "Data Loss Prevention (DLP) and Data Security", "category": "Platform & Solution Suites", "desc": "Data protection suite bringing together DLP, DSPM, CASB, SSPM and Data Lineage in a single platform, so one set of data classifiers and policies protects data in motion, in use and at rest across web, SaaS, IaaS, email, endpoint, private apps and AI."},
+  "DLP for Non-Web Traffic": {"n": 29, "industry": "Data Loss Prevention (DLP) and Data Security", "category": "Web, Cloud & Network Security", "desc": "Extends the platform's DLP classifiers and policies to non-web protocols inspected by the Cloud Firewall, so sensitive data leaving over FTP, SMTP and other network protocols is detected and controlled."},
+  "Data Loss Prevention (DLP)": {"n": 30, "industry": "Data Loss Prevention (DLP) and Data Security", "category": "Data Security", "desc": "Unified, ML-enhanced DLP with one policy engine across every channel: web, SaaS (inline and API), IaaS, email, endpoint, private apps, AI and non-web traffic. Includes compliance templates, 3,000+ data identifiers, custom rules, data label read and write, Exact Data Match, image and text fingerprinting, OCR, AI/ML classifiers for all document types (CVs, source code and more), steganography detection and Microsoft Purview label integration."},
+  "Endpoint DLP": {"n": 31, "industry": "Data Loss Prevention (DLP) and Data Security", "category": "Data Security", "desc": "Extends DLP policy to the device itself via the Netskope Client: controls USB and removable media, printing, clipboard, network shares and local file activity using the same classifiers and incident management as cloud DLP."},
+  "Email DLP (SMTP)": {"n": 32, "industry": "Data Loss Prevention (DLP) and Data Security", "category": "Data Security", "desc": "Inline DLP for outbound corporate email via SMTP relay, applying the same data classifiers and policies to messages and attachments leaving Microsoft 365, Google Workspace or on-premises mail."},
+  "DLP On-Demand Appliance": {"n": 33, "industry": "Data Loss Prevention (DLP) and Data Security", "category": "Data Security", "desc": "Customer-hosted DLP scanning appliance for bulk or on-premises data inspection using the platform's classifiers, for use cases such as file-share discovery, migration scanning and integration with third-party systems."},
+  "ZTNA DLP": {"n": 34, "industry": "Data Loss Prevention (DLP) and Data Security", "category": "Data Security", "desc": "Applies DLP inspection to traffic flowing to private applications over Netskope Private Access, protecting sensitive data in internal apps as well as SaaS and web."},
+  "Data Lineage": {"n": 35, "industry": "Data Loss Prevention (DLP) and Data Security", "category": "Data Security", "desc": "Tracks the provenance, lifecycle and transformation of sensitive data across cloud, web, email and AI environments, creating a verifiable digital breadcrumb trail to identify insider threats and trace data exfiltration."},
+  "IaaS DLP and Storage Scan": {"n": 36, "industry": "Data Security Posture Management (DSPM)", "category": "Data Security", "desc": "API-based discovery and DLP scanning of data at rest in AWS, Azure and Google Cloud storage, plus posture checks against cloud misconfigurations, with scanning by data volume for large object stores."},
+  "Data Security Posture Management (DSPM)": {"n": 37, "industry": "Data Security Posture Management (DSPM)", "category": "Data Security", "desc": "Discovers, classifies and maps sensitive data across SaaS, IaaS/PaaS and on-premises structured, semi-structured and unstructured data stores. Includes data risk posture scoring, access and exposure analysis, query behaviour analysis on databases, de-identification of structured and unstructured data, and compliance mapping."},
+  "DataSec Command Center": {"n": 38, "industry": "Data Security Posture Management (DSPM)", "category": "Data Security", "desc": "Unified control plane for data security that discovers, understands, tracks and protects sensitive data wherever it lives and moves: AI environments, cloud, network, on-premises, endpoint and email. Correlates signals from Next Gen SWG, CASB API and DSPM into a data asset inventory with rules-based risk detection, remediation workflows and action recommendations, and works in tandem with the DLP AISecOps Agent."},
+  "SaaS Security Posture Management (SSPM)": {"n": 39, "industry": "SaaS Security Posture Management (SSPM)", "category": "Data Security", "desc": "Continuously assesses SaaS configuration against security best practice and compliance benchmarks (CIS, NIST, ISO, PCI and others), detects configuration drift and risky third-party app integrations, prioritises risk and supports automated remediation."},
+  "Online Threat Library": {"n": 40, "industry": "Advanced Threat Protection (ATP)", "category": "Platform Foundations (included)", "desc": "Curated threat intelligence and research content on cloud, web and AI threats, integrated into the platform."},
+  "Threat Protection": {"n": 41, "industry": "Advanced Threat Protection (ATP)", "category": "Web, Cloud & Network Security", "desc": "Multi-layer inline threat defence: anti-malware and file-type controls, threat intelligence feeds and IOC import, IPS for web and SaaS traffic, inline AI/ML detection of malicious executables, HTML smuggling, phishing and patient-zero threats, compromised-credential (dark web) incidents, de-obfuscation and unpacking, pre-execution heuristics for Office files, cloud sandboxing with MITRE ATT&CK analysis, Patient Zero alerts, RetroHunt API and API file submission."},
+  "Deepscan on Demand": {"n": 42, "industry": "Advanced Threat Protection (ATP)", "category": "Web, Cloud & Network Security", "desc": "RESTful API service for submitting files to Netskope Threat Protection and receiving a threat verdict and detailed analysis report, for use by SOC tooling and automation."},
+  "Network Threat Hunting": {"n": 43, "industry": "Advanced Threat Protection (ATP)", "category": "Web, Cloud & Network Security", "desc": "Surfaces high-confidence IPS detections that fall just below the auto-block threshold as alerts for SOC and incident response teams to hunt against with NDR and XDR tooling."},
+  "C2 Beacon Detection (SOC Detections Pack)": {"n": 44, "industry": "Advanced Threat Protection (ATP)", "category": "Web, Cloud & Network Security", "desc": "AI/ML models that baseline user and organisational behaviour to detect command-and-control beaconing from malleable frameworks such as Cobalt Strike and Mythic, which evade traditional signature defences."},
+  "Behaviour Analytics (UEBA)": {"n": 45, "industry": "User and Entity Behaviour Analytics (UEBA) and Insider Risk", "category": "Web, Cloud & Network Security", "desc": "User and entity behaviour analytics: sequential anomaly rules (bulk download, delete, failed logins, proximity, rare events), instance awareness, 65+ AI/ML models and 180+ detectors, behaviour baselines, dynamic peer groups, custom sequential rules, Cloud Risk Exchange, and a User Confidence Index risk score usable in real-time adaptive access policies."},
+  "AI Command Center": {"n": 47, "industry": "AI Security (AI TRiSM and GenAI Security)", "category": "AI Security", "desc": "Central inventory and risk view of all enterprise AI, part of Netskope Skylight: discovers AI assets (agents, MCP servers, models, AI-related data stores) and the human and non-human identities using them across cloud, endpoint and network. Includes an overview dashboard, detailed asset profiles and endpoint AI discovery via the Netskope Client."},
+  "Generative AI Application Inline Inspection": {"n": 48, "industry": "AI Security (AI TRiSM and GenAI Security)", "category": "AI Security", "desc": "Deep inline decoding of 1,800+ GenAI applications, including gRPC and WebSocket protocols used by tools such as ChatGPT and Cursor, with policies by app risk, instance and activity, seven GenAI sub-categories for filtering and an AI usage dashboard in Advanced Analytics. The foundation for AI Guardrails."},
+  "AI Guardrails": {"n": 49, "industry": "AI Security (AI TRiSM and GenAI Security)", "category": "AI Security", "desc": "Real-time inspection and categorisation of AI prompts and responses: detects prompt injection and jailbreak attempts, blocks inappropriate content categories (hate, crime, weapons, self-harm and others) and enforces custom keyword and semantic matching across public AI apps, agentic traffic and the AI Gateway."},
+  "Agentic Broker": {"n": 50, "industry": "AI Security (AI TRiSM and GenAI Security)", "category": "AI Security", "desc": "Secures agentic AI (MCP) communications between AI agents and the tools and data sources they call. Decodes MCP conversations, prevents tool poisoning, assesses the risk of external MCP servers and gives oversight of non-human AI interactions."},
+  "DLP for Agentic Workloads": {"n": 51, "industry": "AI Security (AI TRiSM and GenAI Security)", "category": "AI Security", "desc": "Applies the platform's full DLP classifiers and policies to MCP and agentic traffic inspected by the Agentic Broker, preventing sensitive data leaking through autonomous agents."},
+  "AI Gateway": {"n": 52, "industry": "AI Security (AI TRiSM and GenAI Security)", "category": "AI Security", "desc": "Customer-hosted gateway (VPC or data centre) for private AI environments, custom LLMs, AI agents and MCP servers. Provides visibility, access control and runtime inspection of private AI traffic with built-in AI Guardrails and threat protection, plus optional DLP for AI Gateway traffic."},
+  "AI Red Teaming": {"n": 53, "industry": "AI Security (AI TRiSM and GenAI Security)", "category": "AI Security", "desc": "Continuous adversarial testing service for privately hosted or customised AI models: prompt library with category probes, multi-turn attacks and drift detection, custom test prompts, and detailed vulnerability assessments mapped to OWASP Top 10 for LLMs and MITRE ATLAS."},
+  "Deepfake Detection API": {"n": 54, "industry": "AI Security (AI TRiSM and GenAI Security)", "category": "AI Security", "desc": "API service for automated forensic analysis of audio, video and image files to detect AI-generated or manipulated (deepfake) content, using biometric voice and facial analysis, with forensic reporting. Aimed at social engineering, identity fraud and disinformation use cases."},
+  "Digital Experience Management (DEM)": {"n": 55, "industry": "Digital Experience Monitoring (DEM)", "category": "Visibility & Analytics", "desc": "Proactive end-to-end user experience monitoring: enhanced real user monitoring for customer-selected apps, synthetic network and application monitoring, site monitoring, custom web-app and private app support, telemetry from the Netskope Client, browser extension and Enterprise Station, user-focused views, advanced diagnostics for sites, applications and Wi-Fi, alerting, and the DEM Insights and Data Intelligence agents."},
+  "Borderless WAN Enterprise (SD-WAN Software)": {"n": 56, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "Cloud-managed, SASE-native SD-WAN software scaling from 50 Mbps to 5 Gbps for branches, data centres and clouds: application-aware routing, WAN optimisation, QoS, packet loss correction, zero-touch provisioning and single-policy integration with Netskope security. Runs on Netskope One Gateway hardware, virtual or cloud appliances."},
+  "Borderless WAN Enterprise Virtual Appliance": {"n": 57, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "Virtual SD-WAN gateway for VMware ESXi and KVM (2, 4 or 8 core), delivering up to 5 Gbps site-to-site throughput and 2,400 overlay tunnels for data centres and virtualised branches."},
+  "Borderless WAN Cloud Appliance": {"n": 58, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "SD-WAN gateway images for AWS, Azure and Google Cloud, extending the SD-WAN fabric into public cloud VPCs and VNets with up to 5 Gbps throughput and 2,400 overlay tunnels."},
+  "Netskope One Gateway NSG-101": {"n": 59, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "Compact ruggedised (IP40, -30 to 60 C) appliance for micro sites, retail, kiosks and industrial locations: 4x 1G ports, Wi-Fi 5, integrated LTE, DIN-rail or wall mount, 50 Mbps site-to-site throughput."},
+  "Netskope One Gateway NSG-500": {"n": 62, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "Small-to-medium branch appliance with 4x 1G RJ45 plus 1x 1G SFP, Wi-Fi 6, 500 Mbps site-to-site throughput and 200 overlay tunnels."},
+  "Netskope One Gateway NSG-1500": {"n": 63, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "Medium branch appliance with 2x 1G RJ45/SFP, 4x 2.5G RJ45 and 2x 10G SFP+, Wi-Fi 6, rack or wall mount, 1 Gbps site-to-site throughput and 400 overlay tunnels."},
+  "Netskope One Gateway NSG-2000": {"n": 65, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "Large branch and hub appliance with 2x 1G RJ45/SFP, 4x 2.5G RJ45 and 2x 10G SFP+, 2 Gbps site-to-site throughput, 800 overlay tunnels and 4,000 Endpoint SD-WAN tunnels (up to 2,000 remote clients per hub)."},
+  "Netskope One Gateway NSG-2108CW": {"n": 66, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "Large branch appliance with 1x 1G RJ45, 4x 2.5G RJ45 (PoE option) and 2x 10G SFP+, Wi-Fi 6 and integrated 5G with eSIM, 4 Gbps site-to-site throughput, 800 overlay tunnels and 4,000 Endpoint SD-WAN tunnels."},
+  "Netskope One Gateway NSG-3000": {"n": 67, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "Large site and data centre appliance with 6 or 8x 1G RJ45 (PoE option) and 6x 10G SFP+, redundant power, 8 Gbps site-to-site throughput, 2,500 overlay tunnels and 8,000 Endpoint SD-WAN tunnels (up to 5,000 remote clients per hub)."},
+  "Micro Branch": {"n": 69, "industry": "SD-WAN and Secure Branch Connectivity", "category": "Branch Connectivity (SD-WAN)", "desc": "Lightweight, cloud-managed SASE connectivity for very small sites, home offices and remote locations using compact gateways with zero-touch deployment and inline security."},
+  "Device Intelligence (IoT and OT Security)": {"n": 70, "industry": "IoT/OT Security and Network Access Control (NAC)", "category": "Branch Connectivity (SD-WAN)", "desc": "Agentless discovery, classification and risk assessment of every connected device (IoT, OT, medical, BYOD and unmanaged) with asset management, device risk scoring and zero trust access control. Deployed alongside Borderless SD-WAN or with a dedicated appliance."},
+  "Cloud Exchange": {"n": 71, "industry": "Security Analytics, Reporting and SIEM Integration", "category": "Platform Foundations (included)", "desc": "Free integration hub with modules for Cloud Threat Exchange (bi-directional IOC sharing), Cloud Risk Exchange (risk score sharing), Cloud Log Shipper (SIEM and data-lake export) and Cloud Ticket Orchestrator (ITSM and collaboration workflows)."},
+  "Advanced Analytics": {"n": 72, "industry": "Security Analytics, Reporting and SIEM Integration", "category": "Visibility & Analytics", "desc": "Built-in business intelligence over all platform telemetry: custom dashboards and reports, risk trending, policy impact analysis, executive and compliance reporting, and AI usage dashboards across application events, firewall and web transaction logs."},
+  "Standard Reporting and SkopeIT": {"n": 73, "industry": "Security Analytics, Reporting and SIEM Integration", "category": "Visibility & Analytics", "desc": "Out-of-the-box reporting and the SkopeIT event viewer for application events, alerts, incidents and transactions, with extended retention and custom attributes for enrichment."},
+  "Log Streaming": {"n": 74, "industry": "Security Analytics, Reporting and SIEM Integration", "category": "Visibility & Analytics", "desc": "High-volume streaming of transaction events, alerts and incident data directly to SIEM, data lake or analytics platforms in near real time, with capacity that scales with the estate."},
+  "Cloud TAP": {"n": 75, "industry": "Security Analytics, Reporting and SIEM Integration", "category": "Visibility & Analytics", "desc": "Cloud-based packet capture of decrypted traffic inspected by Netskope, delivered to customer NDR, forensic or compliance tools that require full packet visibility."},
+  "NewEdge Global Network": {"n": 76, "industry": "Cloud Network Infrastructure and Connectivity", "category": "Platform Foundations (included)", "desc": "Netskope's privately owned security cloud with full compute in 80+ regions serving 220+ countries and territories. Includes global server load balancing, route control, localisation zones and direct peering with major SaaS providers for low-latency inspection."},
+  "Traffic Steering (IPsec and GRE Tunnels)": {"n": 77, "industry": "Cloud Network Infrastructure and Connectivity", "category": "Platform Foundations (included)", "desc": "Clientless steering of site, server and unmanaged-device traffic to NewEdge via standard IPsec or GRE tunnels from existing routers, firewalls or SD-WAN devices."},
+  "Bandwidth Control": {"n": 78, "industry": "Cloud Network Infrastructure and Connectivity", "category": "Web, Cloud & Network Security", "desc": "Traffic shaping and prioritisation by application, category or domain for traffic arriving over IPsec and GRE tunnels, protecting business-critical apps at sites."},
+  "Express Connect (Private Network Interconnect)": {"n": 79, "industry": "Cloud Network Infrastructure and Connectivity", "category": "NewEdge Network Services", "desc": "Dedicated 10 Gbps private network interconnect between customer data centres or carrier hotels and the NewEdge network, bypassing the public internet for predictable, high-bandwidth access."},
+  "High-Bandwidth IPsec and GRE Tunnels": {"n": 80, "industry": "Cloud Network Infrastructure and Connectivity", "category": "NewEdge Network Services", "desc": "Enhanced site tunnels at 1, 2 and 3 Gbps (IPsec) and 3 Gbps (GRE) for large offices, data centres and hubs that exceed standard tunnel capacity."},
+  "Dedicated Egress IP Addresses": {"n": 81, "industry": "Cloud Network Infrastructure and Connectivity", "category": "NewEdge Network Services", "desc": "Customer-specific egress IP addresses (two per point of presence) on a regional-zone, global or China basis, for allow-listing with SaaS providers, partners and legacy applications, with granular usage controls."},
+  "Geo-Anchoring": {"n": 82, "industry": "Cloud Network Infrastructure and Connectivity", "category": "NewEdge Network Services", "desc": "Ensures traffic egresses from a configured geography so users appear to be in the required country or region, supporting data residency, localisation and geo-restricted application requirements."},
+  "Customer Signed CA": {"n": 83, "industry": "Cloud Network Infrastructure and Connectivity", "category": "NewEdge Network Services", "desc": "Allows TLS inspection to be performed using the customer's own certificate authority rather than a Netskope-signed CA, integrating with existing PKI and trust stores."},
+  "China Access": {"n": 84, "industry": "Cloud Network Infrastructure and Connectivity", "category": "NewEdge Network Services", "desc": "In-country and cross-border access options for users in mainland China, covering CASB, SWG, FWaaS, full SSE and Private Access traffic, delivered through Netskope's China data planes and partner infrastructure."},
+  "Netskope One Platform": {"n": 85, "industry": "Zero Trust Architecture and Platform Foundations", "category": "Platform & Solution Suites", "desc": "Netskope's unified, cloud-native security and networking platform. A single client, single console and single policy engine deliver SSE, SASE, data security, AI security and SD-WAN, all running on the NewEdge private cloud. Every product in this list is a component of Netskope One."},
+  "Zero Trust Engine": {"n": 86, "industry": "Zero Trust Architecture and Platform Foundations", "category": "Platform Foundations (included)", "desc": "The real-time adaptive policy engine at the heart of Netskope One. Evaluates user, device, app, instance, activity, data sensitivity and risk context on every transaction to allow, block, coach or step up controls."},
+  "SkopeAI": {"n": 87, "industry": "Zero Trust Architecture and Platform Foundations", "category": "Platform Foundations (included)", "desc": "Netskope's AI and machine learning layer, applied across the platform for data classification, threat detection, behaviour analytics, app risk scoring and the natural-language AI agents."},
+  "Netskope Client": {"n": 88, "industry": "Zero Trust Architecture and Platform Foundations", "category": "Platform Foundations (included)", "desc": "Lightweight unified endpoint agent for Windows, macOS, iOS, Android and Linux that steers web, cloud, private app and network traffic to Netskope, provides device posture checks and hosts Endpoint DLP, Endpoint SD-WAN and DEM telemetry."},
+  "Post-Quantum Cryptography Key Exchange": {"n": 89, "industry": "Zero Trust Architecture and Platform Foundations", "category": "Platform Foundations (included)", "desc": "Quantum-resistant key exchange for connections to the NewEdge network, protecting inspected traffic against harvest-now, decrypt-later threats."},
+  "RESTful APIs and Role-Based Access Control": {"n": 90, "industry": "Zero Trust Architecture and Platform Foundations", "category": "Platform Foundations (included)", "desc": "Comprehensive REST APIs for policy, events, alerts and administration, plus granular RBAC for tenant administration and delegated operations."},
+  "Production and Test Tenants": {"n": 91, "industry": "Zero Trust Architecture and Platform Foundations", "category": "Platform Foundations (included)", "desc": "Separate production and test tenants for safe policy development and change control."},
+  "AgentSkope": {"n": 92, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Architectural foundation and marketplace for Netskope's AI agents that execute end-to-end SOC and NOC workflows, with shared governance, privacy and security controls and utilisation telemetry for every agent."},
+  "DLP AISecOps Agent": {"n": 93, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Agentic DLP analyst: performs contextual risk assessment, triage, investigation and remediation of DLP incidents. Includes case management, out-of-the-box and custom case rules, agent-assisted investigation with context memory, collaboration and assignment, similar-case detection, automated assignment, closure recommendations, manager approval workflows, DLP policy insights, PDF reporting and third-party integrations."},
+  "Insider Threat AISecOps Agent": {"n": 94, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Combines DLP alerts with user behaviour analytics to triage, investigate and respond to insider threat activity, surfacing patterns an analyst would miss. Currently in private preview."},
+  "Private Access AIOps Agent": {"n": 95, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Automatically audits Netskope Private Access configuration, removes dormant settings and stale access, and generates granular application segments and policies from real usage patterns."},
+  "DEM Insights Agent": {"n": 96, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Provides a high-level view of organisational digital health by correlating DEM telemetry to surface critical incidents, macro trends and performance bottlenecks."},
+  "DEM Data Intelligence Agent": {"n": 97, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Conversational, natural-language interface over Digital Experience Management telemetry that turns raw metrics into actionable troubleshooting insights."},
+  "CCI Insights Agent": {"n": 98, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Natural-language querying of risk attributes and compliance certifications across the 85,000+ apps in the Cloud Confidence Index, enabling SOC analysts to interrogate app risk conversationally."},
+  "NetOps Assistant": {"n": 99, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Conversational network operations assistant for SD-WAN and connectivity troubleshooting and insight."},
+  "Policy Recommender": {"n": 100, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Recommends real-time adaptive policies based on tenant context and observed activity, accelerating policy authoring."},
+  "Insights Assistant": {"n": 101, "industry": "Agentic AI for Security and Network Operations", "category": "AI Agents (AgentSkope)", "desc": "Cross-tenant conversational assistant for querying security and usage insights across the platform."},
+  "Netskope Skylight AI Security": {"n": 46, "industry": "AI Security (AI TRiSM and GenAI Security)", "category": "Platform & Solution Suites", "desc": "Netskope Skylight secures enterprise AI adoption with AI Command Center, AI Guardrails, AI Gateway, Agentic Broker and AI Red Teaming, alongside GenAI app inspection and Deepfake Detection, covering employee use of public AI, agentic (MCP) traffic and privately hosted models."}
+};
+const CAPABILITY_MAP = [
+  {"n": 1, "industry": "Secure Access Service Edge (SASE)", "means": "Converged, cloud-delivered networking and security: SD-WAN plus SSE services under one policy and management plane, protecting users, sites and devices wherever they are.", "delivers": "Netskope One SASE unifies Borderless SD-WAN, the Netskope One Gateway range and the full SSE stack on the NewEdge network, with one client, one console and one policy engine.", "products": ["Netskope One SASE"], "themes": ["Platform & SASE", "Networking & Connectivity"]},
+  {"n": 2, "industry": "Security Service Edge (SSE)", "means": "The security half of SASE: SWG, CASB, ZTNA, FWaaS and related controls delivered from the cloud to secure access to web, SaaS and private applications.", "delivers": "Netskope One SSE delivers all SSE controls in a single-pass inline architecture with shared DLP, threat and behaviour analytics engines, on a private security cloud with 80+ full-compute regions.", "products": ["Netskope One SSE"], "themes": ["Platform & SASE", "Web, Cloud & Threat Protection"]},
+  {"n": 3, "industry": "Secure Web Gateway (SWG)", "means": "Inline inspection and policy enforcement for web traffic: URL filtering, TLS decryption, malware protection, acceptable use and data controls.", "delivers": "Next Gen SWG inspects all web and cloud traffic in real time with TLS inspection, app and instance awareness, user coaching, inline DLP and threat protection, plus specialist inspection for certificate-pinned and end-to-end encrypted apps.", "products": ["TLS Inspection", "Next Gen Secure Web Gateway (SWG)", "Unauthenticated and Machine Traffic Inspection", "Certificate-Pinned Application Inline Inspection", "End-to-End Encrypted Application Inline Inspection"], "themes": ["Web, Cloud & Threat Protection"]},
+  {"n": 4, "industry": "Cloud Access Security Broker (CASB)", "means": "Visibility and control over sanctioned and unsanctioned SaaS: shadow IT discovery, app risk scoring, activity-level policy, and protection of data at rest via API.", "delivers": "CASB Inline (real-time, instance-aware) and CASB API Protection (data at rest in sanctioned SaaS) share one policy and DLP engine, backed by risk ratings for 85,000+ apps in the Cloud Confidence Index.", "products": ["Cloud Confidence Index (CCI)", "CASB Inline", "CASB API Protection"], "themes": ["Web, Cloud & Threat Protection", "Data Security"]},
+  {"n": 5, "industry": "Zero Trust Network Access (ZTNA)", "means": "Identity- and context-aware, application-level access to private apps without placing users on the network; the modern replacement for remote access VPN.", "delivers": "Netskope Private Access covers client-initiated and server-initiated apps (full VPN replacement), clientless access via reverse proxy, local brokers for on-site traffic, Endpoint SD-WAN for remote performance, and inline DLP and threat protection on private app traffic.", "products": ["Universal ZTNA", "Private Application Access", "Private Unified Access", "Private Optimized Access", "Endpoint SD-WAN", "NPA Local Broker", "Universal Reverse Proxy", "NPA Publisher"], "themes": ["Zero Trust Access"]},
+  {"n": 6, "industry": "Firewall as a Service (FWaaS) and DNS Security", "means": "Cloud-delivered layer 3/4 and application firewalling, IPS and protective DNS for all outbound non-web traffic, removing the need for branch firewall appliances for internet egress.", "delivers": "Cloud Firewall provides 5-tuple and application firewall rules, IPS for non-web traffic, DNS Security and content filtering, DNS as a Service, SOCKS5 proxy and DLP for non-web protocols.", "products": ["Cloud Firewall (Firewall as a Service)", "IPS for Non-Web Traffic", "DNS Security and DNS Content Filtering", "DNS as a Service (DNSaaS)", "SOCKS5 Proxy"], "themes": ["Web, Cloud & Threat Protection"]},
+  {"n": 7, "industry": "Remote Browser Isolation (RBI) and Secure Enterprise Browser", "means": "Executing web content away from the endpoint (RBI) or inside a managed browser so that risky sites and unmanaged devices cannot compromise data or the device.", "delivers": "Netskope RBI is a policy action within the SWG, extendable to specific apps and app suites with DLP and threat inspection of transfers; Enterprise Browser secures unmanaged and BYOD devices without an agent.", "products": ["Remote Browser Isolation (RBI)", "Enterprise Browser"], "themes": ["Web, Cloud & Threat Protection", "Zero Trust Access"]},
+  {"n": 8, "industry": "Data Loss Prevention (DLP) and Data Security", "means": "Discovering, classifying and controlling sensitive data in motion, in use and at rest across web, cloud, email, endpoint and network channels, with a single policy set.", "delivers": "One DLP engine (3,000+ identifiers, Exact Data Match, fingerprinting, OCR, AI/ML classifiers, Purview label support) applied across web, SaaS, IaaS, email, endpoint, private apps, non-web traffic and AI, plus Data Lineage for tracing data movement and an AI agent for incident triage.", "products": ["Netskope One Unified Data Security", "DLP for Non-Web Traffic", "Data Loss Prevention (DLP)", "Endpoint DLP", "Email DLP (SMTP)", "DLP On-Demand Appliance", "ZTNA DLP", "Data Lineage"], "themes": ["Data Security"]},
+  {"n": 9, "industry": "Data Security Posture Management (DSPM)", "means": "Finding and classifying sensitive data across cloud, SaaS and on-premises data stores, understanding exposure and access risk, and prioritising remediation.", "delivers": "Netskope DSPM maps structured and unstructured data across SaaS, IaaS/PaaS and on-premises stores, with risk scoring, access analysis, query behaviour analysis and de-identification, alongside IaaS storage scanning and the DataSec Command Center.", "products": ["IaaS DLP and Storage Scan", "Data Security Posture Management (DSPM)", "DataSec Command Center"], "themes": ["Data Security"]},
+  {"n": 10, "industry": "SaaS Security Posture Management (SSPM)", "means": "Continuous assessment of SaaS tenant configuration against security best practice and compliance benchmarks, detecting drift and risky third-party integrations.", "delivers": "Netskope SSPM benchmarks Microsoft 365, Salesforce, Google Workspace and other SaaS against CIS, NIST, ISO and PCI standards, with drift detection and remediation guidance.", "products": ["SaaS Security Posture Management (SSPM)"], "themes": ["Data Security"]},
+  {"n": 11, "industry": "Advanced Threat Protection (ATP)", "means": "Inline malware and phishing defence including sandboxing, IPS, machine-learning detection of unknown threats and threat intelligence sharing.", "delivers": "Threat Protection combines AV, IPS, inline AI/ML, cloud sandboxing with MITRE ATT&CK analysis, patient-zero protection, RetroHunt and dark-web credential monitoring, with Deepscan on Demand, Network Threat Hunting and C2 beacon detection for SOC teams.", "products": ["Online Threat Library", "Threat Protection", "Deepscan on Demand", "Network Threat Hunting", "C2 Beacon Detection (SOC Detections Pack)"], "themes": ["Web, Cloud & Threat Protection"]},
+  {"n": 12, "industry": "User and Entity Behaviour Analytics (UEBA) and Insider Risk", "means": "Machine learning over user activity to detect anomalous or malicious behaviour (insider threat, compromised accounts) and feed risk scores into access decisions.", "delivers": "Behaviour Analytics with 65+ ML models, behaviour baselines, peer groups and a User Confidence Index usable in real-time policy, plus the Insider Threat AISecOps Agent and Data Lineage for investigation.", "products": ["Behaviour Analytics (UEBA)"], "themes": ["Web, Cloud & Threat Protection", "Data Security"]},
+  {"n": 13, "industry": "AI Security (AI TRiSM and GenAI Security)", "means": "Governing and securing enterprise use of AI: discovering AI usage, protecting data in prompts and responses, securing agentic (MCP) traffic and private models, and testing AI systems for vulnerabilities.", "delivers": "AI Command Center, GenAI app inline inspection, AI Guardrails, Agentic Broker, AI Gateway, DLP for agentic workloads, AI Red Teaming and Deepfake Detection cover employee AI use, agent-to-tool traffic and privately hosted models.", "products": ["Netskope Skylight AI Security", "AI Command Center", "Generative AI Application Inline Inspection", "AI Guardrails", "Agentic Broker", "DLP for Agentic Workloads", "AI Gateway", "AI Red Teaming", "Deepfake Detection API"], "themes": ["AI Security & Agents"]},
+  {"n": 14, "industry": "Digital Experience Monitoring (DEM)", "means": "End-to-end visibility of the user's application experience across device, network, security cloud and SaaS, with real user and synthetic monitoring.", "delivers": "Digital Experience Management from the Netskope Client, browser extension and Enterprise Station, with synthetic and site monitoring, advanced diagnostics and AI agents for insight and troubleshooting.", "products": ["Digital Experience Management (DEM)"], "themes": ["Visibility & Operations"]},
+  {"n": 15, "industry": "SD-WAN and Secure Branch Connectivity", "means": "Software-defined WAN for branches, data centres and clouds: application-aware routing across any underlay, QoS, zero-touch provisioning and integrated branch security.", "delivers": "Borderless WAN Enterprise software, virtual and cloud appliances and the Netskope One Gateway hardware range (NSG-101 to NSG-4000), with Endpoint SD-WAN for remote users and Micro Branch for small sites.", "products": ["Borderless WAN Enterprise (SD-WAN Software)", "Borderless WAN Enterprise Virtual Appliance", "Borderless WAN Cloud Appliance", "Netskope One Gateway NSG-101", "Netskope One Gateway NSG-500", "Netskope One Gateway NSG-1500", "Netskope One Gateway NSG-2000", "Netskope One Gateway NSG-2108CW", "Netskope One Gateway NSG-3000", "Micro Branch"], "themes": ["Networking & Connectivity"]},
+  {"n": 16, "industry": "IoT/OT Security and Network Access Control (NAC)", "means": "Discovering, classifying and controlling access for every connected device, including unmanaged, IoT and OT, on campus and branch networks.", "delivers": "Device Intelligence provides agentless device discovery, classification, risk scoring and zero trust access control, and Universal ZTNA extends one policy framework to every device type.", "products": ["Device Intelligence (IoT and OT Security)"], "themes": ["Zero Trust Access", "Networking & Connectivity"]},
+  {"n": 17, "industry": "Security Analytics, Reporting and SIEM Integration", "means": "Dashboards, reporting and retention of security telemetry, and reliable export of events to SIEM, data lakes and SOAR tooling.", "delivers": "Advanced Analytics, Standard Reporting and SkopeIT, Log Streaming, Cloud Exchange modules for SIEM, threat intel, risk score and ticketing integration, Cloud TAP for packet capture, and REST APIs.", "products": ["Cloud Exchange", "Advanced Analytics", "Standard Reporting and SkopeIT", "Log Streaming", "Cloud TAP"], "themes": ["Visibility & Operations"]},
+  {"n": 18, "industry": "Cloud Network Infrastructure and Connectivity", "means": "The private security cloud and connectivity options that determine performance, resilience and data residency: points of presence, peering, private interconnect, tunnels and egress control.", "delivers": "NewEdge (80+ full-compute regions, 220+ countries), Express Connect private interconnect, high-bandwidth IPsec and GRE tunnels, dedicated egress IPs, geo-anchoring, China access and customer-signed CA.", "products": ["NewEdge Global Network", "Traffic Steering (IPsec and GRE Tunnels)", "Bandwidth Control", "Express Connect (Private Network Interconnect)", "High-Bandwidth IPsec and GRE Tunnels", "Dedicated Egress IP Addresses", "Geo-Anchoring", "Customer Signed CA", "China Access"], "themes": ["Networking & Connectivity"]},
+  {"n": 19, "industry": "Zero Trust Architecture and Platform Foundations", "means": "The shared engine and services that make zero trust practical: continuous adaptive policy, identity and device integration, unified client, encryption standards and open APIs.", "delivers": "Zero Trust Engine, SkopeAI, Netskope Client, TLS inspection, post-quantum key exchange, RBAC and APIs, and production plus test tenants, shared by every product on the platform.", "products": ["Netskope One Platform", "Zero Trust Engine", "SkopeAI", "Netskope Client", "Post-Quantum Cryptography Key Exchange", "RESTful APIs and Role-Based Access Control", "Production and Test Tenants"], "themes": ["Platform & SASE"]},
+  {"n": 20, "industry": "Agentic AI for Security and Network Operations", "means": "AI agents that execute SOC and NOC workflows (triage, investigation, configuration audit, troubleshooting) rather than just assisting analysts.", "delivers": "AgentSkope and its agents: DLP AISecOps, Insider Threat AISecOps, Private Access AIOps, DEM Insights, DEM Data Intelligence, CCI Insights, plus the NetOps, Policy Recommender and Insights assistants.", "products": ["AgentSkope", "DLP AISecOps Agent", "Insider Threat AISecOps Agent", "Private Access AIOps Agent", "DEM Insights Agent", "DEM Data Intelligence Agent", "CCI Insights Agent", "NetOps Assistant", "Policy Recommender", "Insights Assistant"], "themes": ["AI Security & Agents", "Visibility & Operations"]}
+];
+const CAPABILITY_THEMES = ["Platform & SASE", "Web, Cloud & Threat Protection", "Zero Trust Access", "Data Security", "AI Security & Agents", "Networking & Connectivity", "Visibility & Operations"];
+// <!-- PRODUCT-CATALOGUE:END -->
+
+// Which product card each catalogue entry describes (names differ between the
+// two, e.g. "Cloud Inline Security" vs "CASB Inline"), plus navigation-only
+// aliases so every Capability Map chip that has a related card links to it.
+const CATALOGUE_LINKS = {
+  products: {
+    "SASE":"Netskope One SASE", "SSE":"Netskope One SSE", "Unified Data Security":"Netskope One Unified Data Security",
+    "AgentSkope":"AgentSkope", "Netskope DLP AISecOps Agent":"DLP AISecOps Agent", "Netskope Insider Threat AISecOps Agent":"Insider Threat AISecOps Agent",
+    "Netskope Private Access AIOps Agent":"Private Access AIOps Agent", "Netskope DEM Data Intelligence Agent":"DEM Data Intelligence Agent",
+    "Netskope DEM Insights Agent":"DEM Insights Agent", "Netskope CCI Insights Agent":"CCI Insights Agent",
+    "AI Command Center":"AI Command Center", "Agentic Broker":"Agentic Broker", "AI Gateway":"AI Gateway", "AI Red Teaming":"AI Red Teaming",
+    "AI Guardrails":"AI Guardrails", "GenAI Security":"Generative AI Application Inline Inspection", "Deepfake Detection API":"Deepfake Detection API",
+    "Next Gen SWG":"Next Gen Secure Web Gateway (SWG)", "Cloud Inline Security":"CASB Inline", "ZTNA / Private Access":"Private Application Access",
+    "Universal ZTNA":"Universal ZTNA", "Endpoint SD-WAN":"Endpoint SD-WAN", "Firewall as a Service":"Cloud Firewall (Firewall as a Service)",
+    "Enterprise Browser":"Enterprise Browser", "Remote Browser Isolation":"Remote Browser Isolation (RBI)", "Threat Protection":"Threat Protection",
+    "DLP":"Data Loss Prevention (DLP)", "DSPM":"Data Security Posture Management (DSPM)", "Data Lineage":"Data Lineage",
+    "DataSec Command Center":"DataSec Command Center", "CASB (API)":"CASB API Protection", "SSPM":"SaaS Security Posture Management (SSPM)",
+    "Secure SD-WAN":"Borderless WAN Enterprise (SD-WAN Software)", "Micro Branch":"Micro Branch", "Device Intelligence":"Device Intelligence (IoT and OT Security)",
+    "Advanced Analytics":"Advanced Analytics", "Digital Experience Mgmt":"Digital Experience Management (DEM)"
+    // "Converged Access", "Converged Gateway" — no catalogue equivalent
+  },
+  // catalogue entry → related product card (chip navigation; the card's own overview is unchanged)
+  aliases: {
+    "TLS Inspection":"Next Gen SWG", "Unauthenticated and Machine Traffic Inspection":"Next Gen SWG",
+    "Certificate-Pinned Application Inline Inspection":"Next Gen SWG", "End-to-End Encrypted Application Inline Inspection":"Next Gen SWG",
+    "Cloud Confidence Index (CCI)":"Cloud Inline Security",
+    "Private Unified Access":"ZTNA / Private Access", "Private Optimized Access":"ZTNA / Private Access", "NPA Local Broker":"ZTNA / Private Access",
+    "Universal Reverse Proxy":"ZTNA / Private Access", "NPA Publisher":"ZTNA / Private Access",
+    "IPS for Non-Web Traffic":"Firewall as a Service", "DNS Security and DNS Content Filtering":"Firewall as a Service",
+    "DNS as a Service (DNSaaS)":"Firewall as a Service", "SOCKS5 Proxy":"Firewall as a Service",
+    "DLP for Non-Web Traffic":"DLP", "Endpoint DLP":"DLP", "Email DLP (SMTP)":"DLP", "DLP On-Demand Appliance":"DLP", "ZTNA DLP":"DLP",
+    "IaaS DLP and Storage Scan":"DSPM",
+    "Online Threat Library":"Threat Protection", "Deepscan on Demand":"Threat Protection", "Network Threat Hunting":"Threat Protection",
+    "C2 Beacon Detection (SOC Detections Pack)":"Threat Protection",
+    "DLP for Agentic Workloads":"Agentic Broker",
+    "Borderless WAN Enterprise Virtual Appliance":"Secure SD-WAN", "Borderless WAN Cloud Appliance":"Secure SD-WAN",
+    "Netskope One Gateway NSG-101":"Secure SD-WAN", "Netskope One Gateway NSG-500":"Secure SD-WAN", "Netskope One Gateway NSG-1500":"Secure SD-WAN",
+    "Netskope One Gateway NSG-2000":"Secure SD-WAN", "Netskope One Gateway NSG-2108CW":"Secure SD-WAN", "Netskope One Gateway NSG-3000":"Secure SD-WAN",
+    "Cloud Exchange":"Advanced Analytics", "Standard Reporting and SkopeIT":"Advanced Analytics", "Log Streaming":"Advanced Analytics", "Cloud TAP":"Advanced Analytics"
+  },
+  // detail-panel extras: per-channel catalogue entries listed under a product's overview
+  extras: {
+    "DLP":["Endpoint DLP","Email DLP (SMTP)","ZTNA DLP","DLP for Non-Web Traffic","DLP On-Demand Appliance"],
+    "ZTNA / Private Access":["Private Unified Access","Private Optimized Access","Universal Reverse Proxy","NPA Local Broker"],
+    "Firewall as a Service":["IPS for Non-Web Traffic","DNS Security and DNS Content Filtering","DNS as a Service (DNSaaS)","SOCKS5 Proxy"],
+    "Threat Protection":["Deepscan on Demand","Network Threat Hunting","C2 Beacon Detection (SOC Detections Pack)"],
+    "Advanced Analytics":["Log Streaming","Standard Reporting and SkopeIT","Cloud TAP","Cloud Exchange"]
+  }
+};
+
+// Attach `.catalogue` to each product card; build chip → card targets.
+const CATALOGUE_TARGETS = {};
+PRODUCTS.forEach(p => {
+  const n = CATALOGUE_LINKS.products[p.name];
+  if (n && PRODUCT_CATALOGUE[n]) { p.catalogue = { name: n, ...PRODUCT_CATALOGUE[n] }; CATALOGUE_TARGETS[n] = p.name; }
+  else if (n) console.warn('CATALOGUE_LINKS: no catalogue entry named', n);
+});
+Object.entries(CATALOGUE_LINKS.aliases).forEach(([n, prod]) => {
+  if (PRODUCT_CATALOGUE[n] && PRODUCTS.some(p => p.name === prod) && !CATALOGUE_TARGETS[n]) CATALOGUE_TARGETS[n] = prod;
+});
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function catalogueText(p) {
+  const c = p.catalogue; if (!c) return '';
+  const extras = (CATALOGUE_LINKS.extras[p.name] || []).map(n => n + ' ' + ((PRODUCT_CATALOGUE[n] || {}).desc || ''));
+  return [c.name, c.industry, c.desc, ...extras].join(' ');
+}
+
 // State
+let activeView = "products";   // "products" | "capmap"
 let activeCat = "All";
 let selectedProduct = null;
 let searchQuery = "";
+let capTheme = "All";           // Capability Map theme filter
 
 // ——————————————————————
 // SIDEBAR
@@ -964,7 +1124,23 @@ function renderSidebar() {
   const cats = ["All", ...new Set(PRODUCTS.map(p=>p.cat))];
   sb.innerHTML = '';
 
-  const s1 = document.createElement('div'); s1.className = 'sidebar-section';
+  // Explore: product grid or the industry Capability Map
+  const s0 = document.createElement('div'); s0.className = 'sidebar-section';
+  const lbl0 = document.createElement('div'); lbl0.className = 'sidebar-label'; lbl0.textContent = 'Explore';
+  s0.appendChild(lbl0);
+  [{key:'products', label:'Products', count: PRODUCTS.length, icon: catIcon('All')},
+   {key:'capmap', label:'Capability Map', count: CAPABILITY_MAP.length,
+    icon:`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3.5 5 2l4 1.5L13 2v8.5L9 12l-4-1.5L1 12V3.5z" stroke-linejoin="round"/><path d="M5 2v8.5M9 3.5V12"/></svg>`}
+  ].forEach(v => {
+    const item = document.createElement('div');
+    item.className = 'sidebar-item' + (activeView===v.key ? ' active' : '');
+    item.innerHTML = `<div class="si-icon" style="background:var(--ns-teal-light);color:var(--ns-teal)">${v.icon}</div>${v.label}<span class="si-count">${v.count}</span>`;
+    item.onclick = () => { activeView = v.key; activeCat = 'All'; selectedProduct = null; render(); };
+    s0.appendChild(item);
+  });
+  sb.appendChild(s0);
+
+  const s1 = document.createElement('div'); s1.className = 'sidebar-section'; s1.style.marginTop = '12px';
   const lbl1 = document.createElement('div'); lbl1.className = 'sidebar-label'; lbl1.textContent = 'Categories';
   s1.appendChild(lbl1);
 
@@ -972,7 +1148,7 @@ function renderSidebar() {
     const count = cat === "All" ? PRODUCTS.length : PRODUCTS.filter(p=>p.cat===cat).length;
     const m = CAT_META[cat] || CAT_META["All"];
     const item = document.createElement('div');
-    item.className = 'sidebar-item' + (activeCat===cat?' active':'');
+    item.className = 'sidebar-item' + (activeView==='products' && activeCat===cat ?' active':'');
     item.innerHTML = `
       <div class="si-icon" style="background:${m.bg};color:${m.color}">
         ${catIcon(cat)}
@@ -980,7 +1156,7 @@ function renderSidebar() {
       ${cat}
       <span class="si-count">${count}</span>
     `;
-    item.onclick = () => { activeCat = cat; selectedProduct = null; render(); };
+    item.onclick = () => { activeView = 'products'; activeCat = cat; selectedProduct = null; render(); };
     s1.appendChild(item);
   });
 
@@ -992,7 +1168,7 @@ function renderSidebar() {
   s2.appendChild(lbl2);
 
   [["Netskope One Platform","https://www.netskope.com/netskope-one"],
-   ["Netskope AI Security","https://www.netskope.com/ai"],
+   ["Netskope Skylight AI Security","https://www.netskope.com/products/ai-products"],
    ["NewEdge Network","https://www.netskope.com/netskope-one/newedge"],
    ["Experience Netskope","https://www.netskope.com/experience-netskope"],
    ["Netskope Documentation","https://docs.netskope.com/"]
@@ -1033,6 +1209,7 @@ function catIcon(cat) {
 function renderMain() {
   const area = document.getElementById('product-area');
   area.innerHTML = '';
+  if (activeView === 'capmap') { renderCapabilityMap(area); return; }
 
   const q = searchQuery.toLowerCase().trim();
   let filtered = activeCat === "All" ? [...PRODUCTS] : PRODUCTS.filter(p=>p.cat===activeCat);
@@ -1042,14 +1219,14 @@ function renderMain() {
       p.cat.toLowerCase().includes(q) ||
       p.desc.toLowerCase().includes(q) ||
       p.features.some(f=>f.toLowerCase().includes(q)) ||
-      (p.addons && p.addons.some(a=>a.name.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q)))
+      catalogueText(p).toLowerCase().includes(q)
     );
   }
 
   if(!filtered.length) {
     area.innerHTML = `<div class="empty-state">
       <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="18" cy="18" r="11"/><path d="m28 28 8 8" stroke-linecap="round"/></svg>
-      <p>No products match "<strong>${q}</strong>"</p>
+      <p>No products match "<strong>${escapeHtml(q)}</strong>"</p>
     </div>`;
     return;
   }
@@ -1078,24 +1255,22 @@ function renderMain() {
     prods.forEach(p => {
       const card = document.createElement('div');
       card.className = 'product-card' + (selectedProduct===p.name?' selected':'');
+      // Industry category + short plain-language summary (falls back to the card's own description)
+      const summary = (p.catalogue && p.catalogue.desc) || p.desc;
       card.innerHTML = `
         <div class="pc-icon" style="background:${m.bg};color:${m.color}">${p.icon}</div>
-        <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px">
+        <div class="pc-name-row">
           <div class="pc-name" style="margin-bottom:0">${p.name}</div>
           ${p.isNew ? '<span class="badge-new">New</span>' : ''}
+          ${p.status ? `<span class="badge-status">${escapeHtml(p.status)}</span>` : ''}
         </div>
+        ${p.catalogue ? `<div class="pc-industry" title="Industry category">${escapeHtml(p.catalogue.industry)}</div>` : ''}
         <span class="pc-cat" style="background:${m.bg};color:${m.color}">${p.cat}</span>
+        <div class="pc-summary" title="${escapeHtml(summary)}">${escapeHtml(summary)}</div>
+        ${tierBadges(p)}
         <span class="pc-arrow" style="color:${m.color}">→</span>
       `;
-      card.onclick = () => {
-        if(selectedProduct === p.name) {
-          closeDetail();
-        } else {
-          selectedProduct = p.name;
-          renderDetail(p);
-          renderCards();
-        }
-      };
+      card.onclick = () => { selectedProduct = p.name; renderDetail(p); renderCards(); };
       grid.appendChild(card);
     });
 
@@ -1110,12 +1285,43 @@ function renderMain() {
   });
 }
 
+const TIER_INFO = {
+  "Prime": "Included in the Netskope One Prime package",
+  "Max":   "Included in the Netskope One Max package",
+  "API":   "Available via API deployment"
+};
+function tierBadges(p, inline) {
+  if(!p.tiers || !p.tiers.length) return '';
+  const badges = p.tiers.map(t =>
+    `<span class="badge-tier tier-${t.toLowerCase()}" title="${TIER_INFO[t]||t}">${t}</span>`
+  ).join('');
+  return `<div class="pc-tiers"${inline?' style="margin-top:10px"':''}>${badges}</div>`;
+}
+
 function renderCards() {
   document.querySelectorAll('.product-card').forEach(card => {
     const name = card.querySelector('.pc-name').textContent;
     if(name === selectedProduct) card.classList.add('selected');
     else card.classList.remove('selected');
   });
+}
+
+// "Product overview" block: industry category, plain-language description and,
+// for multi-channel products, the individual capabilities that sit under it.
+function overviewHtml(p) {
+  const c = p.catalogue; if (!c) return '';
+  const extra = (CATALOGUE_LINKS.extras[p.name] || []).filter(n => PRODUCT_CATALOGUE[n])
+    .map(n => `<li><strong>${escapeHtml(n)}</strong> — ${escapeHtml(PRODUCT_CATALOGUE[n].desc)}</li>`).join('');
+  return `
+    <div class="dp-overview">
+      <div class="dp-ov-head">
+        <h4>Product overview</h4>
+        <span class="dp-ov-note">As of ${escapeHtml(PRODUCT_CATALOGUE_META.asOf)} · describes the full capability set; availability depends on your subscription</span>
+      </div>
+      <span class="dp-ov-tag" title="Industry category">${escapeHtml(c.industry)}</span>
+      <p>${escapeHtml(c.desc)}</p>
+      ${extra ? `<ul class="dp-ov-extra">${extra}</ul>` : ''}
+    </div>`;
 }
 
 function buildDetailPanel(p) {
@@ -1141,12 +1347,14 @@ function buildDetailPanel(p) {
     <div class="dp-top">
       <div class="dp-icon" style="background:${m.bg};color:${m.color};font-size:26px">${p.icon}</div>
       <div class="dp-info">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:6px 8px;margin-bottom:6px;flex-wrap:wrap">
           <h3 style="margin-bottom:0">${p.name}</h3>
           ${p.isNew ? '<span class="badge-new">New</span>' : ''}
+          ${p.status ? `<span class="badge-status">${escapeHtml(p.status)}</span>` : ''}
         </div>
         <div class="dp-cat" style="background:${m.bg};color:${m.color}">${p.cat}</div>
         <div class="dp-desc">${p.desc}</div>
+        ${tierBadges(p, true)}
       </div>
       <div class="dp-actions">
         <a class="btn-primary" href="${p.url}" target="_blank">
@@ -1161,6 +1369,7 @@ function buildDetailPanel(p) {
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l10 10M11 1 1 11" stroke-linecap="round"/></svg>
       </button>
     </div>
+    ${overviewHtml(p)}
     <div class="dp-bottom">
       <div class="dp-features">
         <h4>Key capabilities</h4>
@@ -1176,21 +1385,6 @@ function buildDetailPanel(p) {
         <h4>Related products</h4>
         <div class="related-list">${relatedProds || '<p style="font-size:13px;color:var(--text-3)">—</p>'}</div>
       </div>
-      ${p.addons && p.addons.length ? `
-      <div class="dp-addons">
-        <h4>Available add-ons</h4>
-        <div class="addon-list">
-          ${p.addons.map((a,i) => `
-            <span class="addon-chip" tabindex="0" role="button" aria-label="${a.name} add-on: ${a.desc}"
-              onmouseenter="positionAddonTip(this)"
-              onclick="event.stopPropagation();positionAddonTip(this);this.classList.toggle('tip-active')"
-              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();positionAddonTip(this);this.classList.toggle('tip-active')}"
-              onfocus="positionAddonTip(this)">
-              <span class="ac-plus">+</span>${a.name}
-              <span class="addon-tip">${a.desc}</span>
-            </span>`).join('')}
-        </div>
-      </div>` : ''}
     </div>
   `;
   return panel;
@@ -1233,37 +1427,81 @@ function selectProduct(name) {
   renderCards();
 }
 
-// Builds a flattened, category-grouped print/PDF view of the full catalogue —
-// independent of whatever filter or search is currently active on screen.
-function buildPrintView() {
-  const container = document.getElementById('print-view');
-  const cats = [...new Set(PRODUCTS.map(p=>p.cat))];
-  let html = `
-    <div class="pv-title">Netskope One — Product Suite</div>
-    <div class="pv-subtitle">${PRODUCTS.length} products across ${cats.length} categories &nbsp;·&nbsp; Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} &nbsp;·&nbsp; netskope.com/products</div>
-  `;
-  cats.forEach(cat => {
-    html += `<div class="pv-cat">${cat}</div>`;
-    PRODUCTS.filter(p=>p.cat===cat).forEach(p => {
-      html += `
-        <div class="pv-product">
-          <span class="pv-product-name">${p.icon} ${p.name}</span>
-          ${p.isNew ? '<span class="pv-new">NEW</span>' : ''}
-          <div class="pv-desc">${p.desc}</div>
-          <div class="pv-features"><b>Key capabilities:</b> ${p.features.join(', ')}</div>
-          ${p.addons && p.addons.length ? `<div class="pv-addons"><b>Add-ons:</b> ${p.addons.map(a=>a.name).join(', ')}</div>` : ''}
-        </div>`;
-    });
-  });
-  html += `<div class="pv-footer">Created by John Saunders &nbsp;·&nbsp; v${APP_VERSION} &nbsp;·&nbsp; netskope.com/products</div>`;
-  container.innerHTML = html;
+// ——————————————————————
+// CAPABILITY MAP — industry categories (SASE, SSE, SWG, CASB, ZTNA, DLP, DSPM,
+// AI security…), how Netskope delivers each, and the capabilities behind it.
+// Chips with a related product card open it.
+// ——————————————————————
+function openFromMap(name) {
+  const target = CATALOGUE_TARGETS[name]; if (!target) return;
+  activeView = 'products'; activeCat = 'All'; selectedProduct = target;
+  searchQuery = ''; document.getElementById('search-input').value = '';
+  render();
+  setTimeout(() => {
+    const el = document.getElementById('detail-panel');
+    if (el) window.scrollTo({ top: Math.max(el.getBoundingClientRect().top + window.pageYOffset - 72, 0), behavior: 'smooth' });
+  }, 60);
+}
+
+// Theme filter chips (index into ['All', ...CAPABILITY_THEMES] — theme names contain & and ,)
+function setCapTheme(i) { capTheme = ['All', ...CAPABILITY_THEMES][i] || 'All'; renderMain(); }
+
+function renderCapabilityMap(area) {
+  const q = searchQuery.toLowerCase().trim();
+  const matchesQ = r => !q || [r.industry, r.means, r.delivers, ...r.products].join(' ').toLowerCase().includes(q);
+  const inQ = CAPABILITY_MAP.filter(matchesQ);
+  const rows = inQ.filter(r => capTheme === 'All' || (r.themes || []).includes(capTheme));
+  const chips = ['All', ...CAPABILITY_THEMES].map((t, i) => {
+    const n = t === 'All' ? inQ.length : inQ.filter(r => (r.themes || []).includes(t)).length;
+    return `<button class="cap-filter-chip${capTheme === t ? ' active' : ''}" onclick="setCapTheme(${i})"${n ? '' : ' disabled'}>${escapeHtml(t)}<span class="cap-filter-count">${n}</span></button>`;
+  }).join('');
+  const section = document.createElement('div'); section.className = 'product-section';
+  section.innerHTML = `
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--ns-navy)"></div>
+      <h2>Capability Map</h2>
+      <div class="section-line"></div>
+      <span class="section-count">${rows.length}</span>
+    </div>
+    <p class="cap-intro">Recognised industry categories, what each means, and how Netskope delivers it — a quick way to map your existing security and networking tools to Netskope and spot consolidation opportunities. Filter by theme, or select a capability to open the related product.</p>
+    <div class="cap-filter" role="group" aria-label="Filter capabilities by theme">${chips}</div>`;
+  area.appendChild(section);
+  if (!rows.length) {
+    section.insertAdjacentHTML('beforeend', `<div class="empty-state"><p>No categories match${q ? ` "<strong>${escapeHtml(q)}</strong>"` : ''}${capTheme !== 'All' ? ` in ${escapeHtml(capTheme)}` : ''}</p></div>`);
+    return;
+  }
+  const list = document.createElement('div'); list.className = 'cap-list';
+  list.innerHTML = rows.map(r => `
+    <div class="cap-row">
+      <div>
+        <div class="cap-num">${String(r.n).padStart(2,'0')}</div>
+        <h3>${escapeHtml(r.industry)}</h3>
+        <div class="cap-means">${escapeHtml(r.means)}</div>
+      </div>
+      <div>
+        <p class="cap-delivers">${escapeHtml(r.delivers)}</p>
+        <div class="cap-chips">${r.products.map(n => {
+          const tip = escapeHtml((PRODUCT_CATALOGUE[n] || {}).desc || '');
+          return CATALOGUE_TARGETS[n]
+            ? `<span class="cap-chip" title="${tip}" onclick="openFromMap('${n.replace(/'/g, "\\'")}')">${escapeHtml(n)}</span>`
+            : `<span class="cap-chip static" title="${tip}">${escapeHtml(n)}</span>`;
+        }).join('')}</div>
+      </div>
+    </div>`).join('');
+  section.appendChild(list);
 }
 
 function render() {
   renderSidebar();
   renderMain();
-  // Dynamic page title
-  const titleSuffix = activeCat === "All" ? "All Products" : activeCat;
+  // Hero + page title follow the active view
+  const capmap = activeView === 'capmap';
+  document.getElementById('hero-title').textContent = capmap ? 'Capability Map' : 'Netskope One Platform';
+  document.getElementById('hero-sub').textContent = capmap
+    ? 'Industry categories mapped to how Netskope delivers them — from SASE and SSE to data security, AI security and agentic operations.'
+    : "The industry's leading SSE and SASE platform — with Netskope Skylight AI security, AgentSkope agentic operations and unified data security, built natively on a single cloud.";
+  document.getElementById('search-input').placeholder = capmap ? 'Search capabilities…' : 'Search products…';
+  const titleSuffix = capmap ? "Capability Map" : (activeCat === "All" ? "All Products" : activeCat);
   document.title = `Netskope One — ${titleSuffix}`;
 }
 
@@ -1275,29 +1513,6 @@ document.getElementById('search-input').addEventListener('input', function() {
 });
 
 // Keyboard shortcut: / to focus search, Escape to clear
-// Keep addon tooltips fully on-screen by shifting them off-center when near an edge
-function positionAddonTip(chip) {
-  const tip = chip.querySelector('.addon-tip');
-  if(!tip) return;
-  chip.style.setProperty('--tip-shift', '0px');
-  const rect = tip.getBoundingClientRect();
-  const pad = 12;
-  let shift = 0;
-  if(rect.left < pad) {
-    shift = pad - rect.left;
-  } else if(rect.right > window.innerWidth - pad) {
-    shift = (window.innerWidth - pad) - rect.right;
-  }
-  chip.style.setProperty('--tip-shift', shift + 'px');
-}
-
-// Dismiss addon tooltips when clicking elsewhere
-document.addEventListener('click', function(e) {
-  if(!e.target.closest('.addon-chip')) {
-    document.querySelectorAll('.addon-chip.tip-active').forEach(c => c.classList.remove('tip-active'));
-  }
-});
-
 document.addEventListener('keydown', function(e) {
   const input = document.getElementById('search-input');
   if(e.key === '/' && document.activeElement !== input) {
@@ -1326,8 +1541,6 @@ const totalCats = new Set(PRODUCTS.map(p=>p.cat)).size;
 document.getElementById('stat-products').textContent = totalProducts;
 document.getElementById('stat-cats').textContent = totalCats;
 document.getElementById('topbar-count').textContent = totalProducts + ' products';
-document.getElementById('footer-version').textContent = 'v' + APP_VERSION;
-buildPrintView();
 
 // Init
 render();
