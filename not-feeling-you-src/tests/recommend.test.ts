@@ -19,9 +19,9 @@ const base: Input = {
 }
 
 describe("activity data", () => {
-  it("has 120 activities with unique IDs", () => {
-    expect(ACTIVITIES).toHaveLength(120)
-    expect(new Set(ACTIVITIES.map((a) => a.id)).size).toBe(120)
+  it("has 130 activities with unique IDs", () => {
+    expect(ACTIVITIES).toHaveLength(130)
+    expect(new Set(ACTIVITIES.map((a) => a.id)).size).toBe(130)
   })
 
   it("has sane ranges and copy on every activity", () => {

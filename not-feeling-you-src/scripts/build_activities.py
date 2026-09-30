@@ -11,6 +11,7 @@ Run: npm run data  (needs: pip install openpyxl)
 
 import json
 import pathlib
+import re
 
 import openpyxl
 
@@ -577,6 +578,86 @@ A = {
 }
 
 
+# Free, at-home ideas added after the V1 review. The inventory leaned hard
+# on buying things, and "£0, 15 mins, stay home" had almost nothing to offer.
+# These aren't in the spreadsheet, so each entry is complete.
+def extra(id, title, category, actions, cost, time, e, company, feelings, personality, novelty, w, summary, why, better,
+          setting=("home",), environment=("indoor",), planning="now"):
+    return {
+        "id": id, "title": title, "summary": summary, "category": category,
+        "cost": dict(zip(("min", "typical", "max"), cost)),
+        "time": dict(zip(("minMinutes", "typicalMinutes", "maxMinutes"), time)),
+        "energy": [ENERGY[x] for x in e], "company": list(company), "setting": list(setting),
+        "environment": list(environment), "actions": list(actions), "feelings": list(feelings),
+        "planning": planning, "novelty": novelty, "personality": list(personality), "wildcardScore": w,
+        "whyItWorks": why, "makeItBetter": better, "source": {"type": "original"},
+    }
+
+ALL = ("solo", "partner", "friends", "family")
+
+EXTRAS = [
+    extra("WTY121", "Clear one surface completely", "Home", ["do"], (0, 0, 0), (10, 20, 45), "LM", ALL,
+          ["achievement", "calm"], ["sensible"], "familiar", 10,
+          "Pick one table, shelf or worktop and get it totally clear. Just the one.",
+          "Small enough to finish, visible enough that you'll notice it every time you walk past.",
+          "Put one nice thing back on it afterwards. Only one."),
+    extra("WTY122", "Make the best hot drink you can", "Comfort", ["make"], (0, 0, 0), (10, 15, 30), "V", ALL,
+          ["comfort", "calm"], ["cosy"], "familiar", 10,
+          "Use what's already in the kitchen and make it properly: warmed mug, the good biscuits, sit down to drink it.",
+          "Five minutes of doing one thing slowly and well. It counts.",
+          "Drink it by a window, not a screen."),
+    extra("WTY123", "Hold a three-song kitchen disco", "Move", ["do"], (0, 0, 0), (10, 15, 30), "MH", ALL,
+          ["laughter", "play", "distraction"], ["silly", "active"], "new", 70,
+          "Three songs, full volume, nobody watching. Dance like you're at a wedding at 11pm.",
+          "Hard to stay flat when you're moving badly to something loud.",
+          "Let someone else pick song two. No vetoes."),
+    extra("WTY124", "Follow a free workout video badly", "Move", ["do"], (0, 0, 0), (15, 25, 45), "MH", ("solo", "partner", "family"),
+          ["achievement", "distraction"], ["active"], "familiar", 25,
+          "Pick a beginner video of 20 minutes or less and do it with zero concern for form or dignity.",
+          "Someone else does the thinking; you just copy. Twenty minutes later you've moved.",
+          "Pick the most over-enthusiastic instructor you can find."),
+    extra("WTY125", "Cook something from whatever's in the cupboard", "Food", ["make"], (0, 0, 0), (30, 60, 90), "LM", ALL,
+          ["achievement", "play"], ["crafty", "quirky"], "new", 55,
+          "No shop. Pick three things you've already got and make them into a meal.",
+          "It turns 'there's nothing in' into a small puzzle, and you get fed at the end.",
+          "Give it a restaurant-menu name. 'Deconstructed beans on toast' is a strong start."),
+    extra("WTY126", "Send a voice note to someone you miss", "Social", ["do"], (0, 0, 0), (5, 10, 20), "VL", ("solo",),
+          ["connection", "comfort"], ["wholesome"], "familiar", 30,
+          "Someone you haven't spoken to in ages. Two minutes, no reason needed.",
+          "Reaching out without having to hold a whole conversation. They'll almost certainly be glad.",
+          "Start with a memory: 'I just thought about the time we...'"),
+    extra("WTY127", "Rewatch something you loved at fourteen", "Media", ["do"], (0, 0, 0), (25, 60, 180), "V", ALL,
+          ["comfort", "laughter"], ["cosy"], "familiar", 30,
+          "Find the first episode of a show you were obsessed with as a teenager, if you've got it on something already.",
+          "Old favourites ask nothing of you, and they come with a better version of your past attached.",
+          "Text someone who watched it with you back then."),
+    extra("WTY128", "Build a proper blanket fort", "Silly", ["make"], (0, 0, 0), (20, 45, 120), "LM", ALL,
+          ["play", "laughter", "comfort"], ["silly"], "new", 80,
+          "Chairs, sofa cushions, every blanket in the house. Then get in it with a snack.",
+          "You're too old for this, which is exactly why it works.",
+          "Watch something from inside it on a laptop."),
+    extra("WTY129", "Do the full reset: shower, clean clothes, open a window", "Self-care", ["do"], (0, 0, 0), (10, 20, 30), "V", ("solo",),
+          ["comfort", "calm"], ["sensible"], "familiar", 5,
+          "A quick shower, the comfiest clean thing you own, and five minutes of fresh air through an open window.",
+          "It doesn't fix anything, but it changes how you feel in your own skin in twenty minutes.",
+          "Put the bedsheets in the wash while you're at it."),
+    extra("WTY130", "Make a playlist for an oddly specific moment", "Music", ["make"], (0, 0, 0), (15, 30, 60), "V", ALL,
+          ["play", "laughter", "distraction"], ["quirky"], "new", 75,
+          "Pick a scenario like 'driving to a heist' or 'a pigeon's big day out' and build the perfect soundtrack.",
+          "A small, silly job that uses the bit of your brain that likes being clever.",
+          "Send it to someone without explaining the title."),
+]
+
+
+TEXT_FIELDS = ("title", "summary", "whyItWorks", "makeItBetter")
+
+
+def typeset(text: str) -> str:
+    """Curly quotes, to match the UI copy."""
+    text = re.sub(r"(^|[\s(])'", "\\1\u2018", text)
+    return text.replace("'", "\u2019")
+
+
 def main() -> None:
     wb = openpyxl.load_workbook(SRC, read_only=True)
     ws = wb["Ideas"]
@@ -637,6 +718,11 @@ def main() -> None:
         out.append(item)
 
     assert len(out) == 120
+    out.extend(EXTRAS)
+    for item in out:
+        for f in TEXT_FIELDS:
+            if f in item:
+                item[f] = typeset(item[f])
     OUT.write_text(json.dumps(out, indent=2, ensure_ascii=False) + "\n")
     print(f"wrote {len(out)} activities to {OUT.relative_to(ROOT)}")
 

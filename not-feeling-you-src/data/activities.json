@@ -2,7 +2,7 @@
   {
     "id": "WTY001",
     "title": "Take a cheap train somewhere new",
-    "summary": "Pick a station you've never been to, buy a cheap return and wander without a plan.",
+    "summary": "Pick a station you’ve never been to, buy a cheap return and wander without a plan.",
     "category": "Explore",
     "cost": {
       "min": 5,
@@ -95,7 +95,7 @@
       "wholesome"
     ],
     "wildcardScore": 55,
-    "whyItWorks": "Everything's already there. You just have to look at it like a visitor.",
+    "whyItWorks": "Everything’s already there. You just have to look at it like a visitor.",
     "makeItBetter": "Buy a postcard of your own town and send it to someone.",
     "source": {
       "type": "reddit",
@@ -148,8 +148,8 @@
       "sensible"
     ],
     "wildcardScore": 20,
-    "whyItWorks": "Free, warm, quiet, and full of things that aren't about you.",
-    "makeItBetter": "Only read the labels of things you'd actually want to own.",
+    "whyItWorks": "Free, warm, quiet, and full of things that aren’t about you.",
+    "makeItBetter": "Only read the labels of things you’d actually want to own.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -201,7 +201,7 @@
     ],
     "wildcardScore": 20,
     "whyItWorks": "Low effort, quiet, and nobody expects you to talk.",
-    "makeItBetter": "Find the worst painting in the building and decide what it's called.",
+    "makeItBetter": "Find the worst painting in the building and decide what it’s called.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -252,7 +252,7 @@
     ],
     "wildcardScore": 45,
     "whyItWorks": "Hard to stay in your own head when a room full of strangers is laughing.",
-    "makeItBetter": "Sit near the back if you'd rather not be spoken to.",
+    "makeItBetter": "Sit near the back if you’d rather not be spoken to.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -313,7 +313,7 @@
   {
     "id": "WTY007",
     "title": "Go to a small gig",
-    "summary": "Go to a small local venue and see a band you've never heard of.",
+    "summary": "Go to a small local venue and see a band you’ve never heard of.",
     "category": "Entertainment",
     "cost": {
       "min": 5,
@@ -354,8 +354,8 @@
       "active"
     ],
     "wildcardScore": 60,
-    "whyItWorks": "Loud enough to drown out whatever's going on in your head.",
-    "makeItBetter": "Buy the band's cheapest bit of merch if they're any good.",
+    "whyItWorks": "Loud enough to drown out whatever’s going on in your head.",
+    "makeItBetter": "Buy the band’s cheapest bit of merch if they’re any good.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -402,8 +402,8 @@
       "sensible"
     ],
     "wildcardScore": 20,
-    "whyItWorks": "A dark room, a big screen and zero obligations. Nobody knows you're there.",
-    "makeItBetter": "Go to the earliest showing of the day; you'll have the place to yourself.",
+    "whyItWorks": "A dark room, a big screen and zero obligations. Nobody knows you’re there.",
+    "makeItBetter": "Go to the earliest showing of the day; you’ll have the place to yourself.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -453,7 +453,7 @@
     ],
     "wildcardScore": 20,
     "whyItWorks": "Two easy things back to back feels like a proper day out without any planning.",
-    "makeItBetter": "Get lunch somewhere you've never tried in between.",
+    "makeItBetter": "Get lunch somewhere you’ve never tried in between.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -462,7 +462,7 @@
   {
     "id": "WTY010",
     "title": "Go bowling",
-    "summary": "Play a game or two, alone or with company, and don't care about the score.",
+    "summary": "Play a game or two, alone or with company, and don’t care about the score.",
     "category": "Play",
     "cost": {
       "min": 8,
@@ -557,7 +557,7 @@
       "silly"
     ],
     "wildcardScore": 58,
-    "whyItWorks": "Nobody's good at it and nobody's meant to be. That's the whole point.",
+    "whyItWorks": "Nobody’s good at it and nobody’s meant to be. That’s the whole point.",
     "makeItBetter": "Loser buys the ice cream.",
     "source": {
       "type": "reddit",
@@ -567,7 +567,7 @@
   {
     "id": "WTY012",
     "title": "Go karting",
-    "summary": "Book a short session somewhere cheap and drive like nobody's watching.",
+    "summary": "Book a short session somewhere cheap and drive like nobody’s watching.",
     "category": "Play",
     "cost": {
       "min": 20,
@@ -606,7 +606,7 @@
       "active"
     ],
     "wildcardScore": 70,
-    "whyItWorks": "You can't brood at 40mph. It takes your whole brain, briefly.",
+    "whyItWorks": "You can’t brood at 40mph. It takes your whole brain, briefly.",
     "makeItBetter": "Pick a karting name for the scoreboard and commit to it.",
     "source": {
       "type": "reddit",
@@ -658,7 +658,7 @@
     ],
     "wildcardScore": 64,
     "whyItWorks": "Each route is a small, obvious win. Your arms will be too tired to worry.",
-    "makeItBetter": "Finish on a route you've already done so you leave on a win.",
+    "makeItBetter": "Finish on a route you’ve already done so you leave on a win.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -759,7 +759,7 @@
       "quirky"
     ],
     "wildcardScore": 55,
-    "whyItWorks": "An hour where the only problem is somebody else's fake one.",
+    "whyItWorks": "An hour where the only problem is somebody else’s fake one.",
     "makeItBetter": "Ask for the easier room. Winning is more fun than learning.",
     "source": {
       "type": "reddit",
@@ -811,7 +811,7 @@
       "quirky"
     ],
     "wildcardScore": 20,
-    "whyItWorks": "A contained puzzle with an ending. Your brain gets a job that isn't you.",
+    "whyItWorks": "A contained puzzle with an ending. Your brain gets a job that isn’t you.",
     "makeItBetter": "Print the downloadable bits and pin them to a wall with string.",
     "source": {
       "type": "reddit",
@@ -821,7 +821,7 @@
   {
     "id": "WTY017",
     "title": "Take a picnic to somewhere scenic",
-    "summary": "Pack what's already in the kitchen, pick a castle, beach or viewpoint, and make the view the treat.",
+    "summary": "Pack what’s already in the kitchen, pick a castle, beach or viewpoint, and make the view the treat.",
     "category": "Explore",
     "cost": {
       "min": 0,
@@ -873,7 +873,7 @@
   {
     "id": "WTY018",
     "title": "Take a bus to the seaside",
-    "summary": "Get the bus, walk the front, and come home when you've had enough.",
+    "summary": "Get the bus, walk the front, and come home when you’ve had enough.",
     "category": "Explore",
     "cost": {
       "min": 5,
@@ -977,7 +977,7 @@
   {
     "id": "WTY020",
     "title": "Go for a walk and have a good moan",
-    "summary": "Walk somewhere open, beach if you've got one, vent to yourself or someone you trust, and keep going until your head's quieter.",
+    "summary": "Walk somewhere open, beach if you’ve got one, vent to yourself or someone you trust, and keep going until your head’s quieter.",
     "category": "Move",
     "cost": {
       "min": 0,
@@ -1018,8 +1018,8 @@
       "wholesome"
     ],
     "wildcardScore": 20,
-    "whyItWorks": "Walking and moaning are both better together. It's practically science.",
-    "makeItBetter": "Set a moan limit: once you pass the bench, you're only allowed to talk about nice things.",
+    "whyItWorks": "Walking and moaning are both better together. It’s practically science.",
+    "makeItBetter": "Set a moan limit: once you pass the bench, you’re only allowed to talk about nice things.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -1070,7 +1070,7 @@
       "wholesome"
     ],
     "wildcardScore": 45,
-    "whyItWorks": "Animals don't care how you're feeling. Weirdly, that helps.",
+    "whyItWorks": "Animals don’t care how you’re feeling. Weirdly, that helps.",
     "makeItBetter": "Leave a quid in the donation box and read the name board on the way out.",
     "source": {
       "type": "reddit",
@@ -1080,7 +1080,7 @@
   {
     "id": "WTY022",
     "title": "Visit a petting zoo or small farm",
-    "summary": "Find somewhere informal where you're allowed to get close to the animals.",
+    "summary": "Find somewhere informal where you’re allowed to get close to the animals.",
     "category": "Animals",
     "cost": {
       "min": 5,
@@ -1121,7 +1121,7 @@
       "wholesome"
     ],
     "wildcardScore": 40,
-    "whyItWorks": "It's hard to take yourself seriously while a goat eats your sleeve.",
+    "whyItWorks": "It’s hard to take yourself seriously while a goat eats your sleeve.",
     "makeItBetter": "Decide which animal is your favourite and why, out loud.",
     "source": {
       "type": "reddit",
@@ -1173,8 +1173,8 @@
       "wholesome"
     ],
     "wildcardScore": 35,
-    "whyItWorks": "Tiny effort, very grateful audience, and you're outside without trying.",
-    "makeItBetter": "Name the most aggressive duck. There's always one.",
+    "whyItWorks": "Tiny effort, very grateful audience, and you’re outside without trying.",
+    "makeItBetter": "Name the most aggressive duck. There’s always one.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -1183,7 +1183,7 @@
   {
     "id": "WTY024",
     "title": "Hire a canoe for an hour",
-    "summary": "Find a local hire point and paddle somewhere quiet, if the weather's on your side.",
+    "summary": "Find a local hire point and paddle somewhere quiet, if the weather’s on your side.",
     "category": "Explore",
     "cost": {
       "min": 15,
@@ -1225,7 +1225,7 @@
       "adventurous"
     ],
     "wildcardScore": 68,
-    "whyItWorks": "The water's calm, your arms are busy, and your phone is safely in a dry bag.",
+    "whyItWorks": "The water’s calm, your arms are busy, and your phone is safely in a dry bag.",
     "makeItBetter": "Aim for a pub or café reachable by water.",
     "source": {
       "type": "reddit",
@@ -1381,7 +1381,7 @@
       "quirky"
     ],
     "wildcardScore": 50,
-    "whyItWorks": "Warm, green, calm, and there's usually cake.",
+    "whyItWorks": "Warm, green, calm, and there’s usually cake.",
     "makeItBetter": "Find the ugliest ornament in the place and photograph it for posterity.",
     "source": {
       "type": "reddit",
@@ -1431,7 +1431,7 @@
     ],
     "wildcardScore": 66,
     "whyItWorks": "A treasure hunt with a price tag. Easy to lose an hour in it.",
-    "makeItBetter": "Set a 'most ridiculous jacket' challenge if you go with someone.",
+    "makeItBetter": "Set a ‘most ridiculous jacket’ challenge if you go with someone.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -1483,7 +1483,7 @@
       "wholesome"
     ],
     "wildcardScore": 40,
-    "whyItWorks": "People who've made something are usually happy to talk about it. Easy company.",
+    "whyItWorks": "People who’ve made something are usually happy to talk about it. Easy company.",
     "makeItBetter": "Ask a maker how they made the thing you bought.",
     "source": {
       "type": "reddit",
@@ -1493,7 +1493,7 @@
   {
     "id": "WTY030",
     "title": "Buy a good book",
-    "summary": "Pick a book you're genuinely excited to start tonight.",
+    "summary": "Pick a book you’re genuinely excited to start tonight.",
     "category": "Books",
     "cost": {
       "min": 5,
@@ -1592,7 +1592,7 @@
   {
     "id": "WTY032",
     "title": "Start a new book series",
-    "summary": "Get the first book or two of a series people won't stop going on about.",
+    "summary": "Get the first book or two of a series people won’t stop going on about.",
     "category": "Books",
     "cost": {
       "min": 8,
@@ -1681,8 +1681,8 @@
       "sensible"
     ],
     "wildcardScore": 30,
-    "whyItWorks": "Pictures do half the work, so it's reading for tired brains.",
-    "makeItBetter": "Go to a comic shop and ask whoever's behind the counter for a recommendation.",
+    "whyItWorks": "Pictures do half the work, so it’s reading for tired brains.",
+    "makeItBetter": "Go to a comic shop and ask whoever’s behind the counter for a recommendation.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -1691,7 +1691,7 @@
   {
     "id": "WTY034",
     "title": "Get an audiobook you can disappear into",
-    "summary": "Choose a series or a narrator you'd happily listen to without looking at a screen.",
+    "summary": "Choose a series or a narrator you’d happily listen to without looking at a screen.",
     "category": "Books",
     "cost": {
       "min": 8,
@@ -1740,7 +1740,7 @@
   {
     "id": "WTY035",
     "title": "Buy a film you love and make an event of it",
-    "summary": "Pick a film you'll genuinely rewatch and do it properly: lights off, snacks, no phone.",
+    "summary": "Pick a film you’ll genuinely rewatch and do it properly: lights off, snacks, no phone.",
     "category": "Media",
     "cost": {
       "min": 3,
@@ -1784,7 +1784,7 @@
     ],
     "wildcardScore": 15,
     "whyItWorks": "A known good thing. No risk, all comfort.",
-    "makeItBetter": "Pause it at your favourite bit and tell whoever's with you why it's the best bit.",
+    "makeItBetter": "Pause it at your favourite bit and tell whoever’s with you why it’s the best bit.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -1843,7 +1843,7 @@
   {
     "id": "WTY037",
     "title": "Buy a vinyl record",
-    "summary": "Pick an album you love, or the one you've always meant to own properly.",
+    "summary": "Pick an album you love, or the one you’ve always meant to own properly.",
     "category": "Music",
     "cost": {
       "min": 8,
@@ -1883,7 +1883,7 @@
       "sensible"
     ],
     "wildcardScore": 25,
-    "whyItWorks": "Putting a record on is a small ritual. You can't skip; you just listen.",
+    "whyItWorks": "Putting a record on is a small ritual. You can’t skip; you just listen.",
     "makeItBetter": "Buy it in a record shop and let the person behind the counter recommend a second one.",
     "source": {
       "type": "reddit",
@@ -2039,8 +2039,8 @@
       "wholesome"
     ],
     "wildcardScore": 25,
-    "whyItWorks": "Methodical, calming, and you end up with flowers that won't die.",
-    "makeItBetter": "Put it somewhere you'll see first thing in the morning.",
+    "whyItWorks": "Methodical, calming, and you end up with flowers that won’t die.",
+    "makeItBetter": "Put it somewhere you’ll see first thing in the morning.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -2089,8 +2089,8 @@
       "hobbyist"
     ],
     "wildcardScore": 30,
-    "whyItWorks": "Small, fiddly, absorbing. It's very hard to worry and glue at the same time.",
-    "makeItBetter": "Give it a name and a backstory once it's finished.",
+    "whyItWorks": "Small, fiddly, absorbing. It’s very hard to worry and glue at the same time.",
+    "makeItBetter": "Give it a name and a backstory once it’s finished.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -2139,7 +2139,7 @@
       "quirky"
     ],
     "wildcardScore": 48,
-    "whyItWorks": "Tiny things need your full attention. That's the trick.",
+    "whyItWorks": "Tiny things need your full attention. That’s the trick.",
     "makeItBetter": "Hide one thing in the scene that only you know about.",
     "source": {
       "type": "reddit",
@@ -2149,7 +2149,7 @@
   {
     "id": "WTY043",
     "title": "Do a jigsaw",
-    "summary": "Pick a picture you'll actually enjoy looking at for a few hours.",
+    "summary": "Pick a picture you’ll actually enjoy looking at for a few hours.",
     "category": "Make",
     "cost": {
       "min": 5,
@@ -2193,7 +2193,7 @@
       "wholesome"
     ],
     "wildcardScore": 10,
-    "whyItWorks": "Slow, satisfying and endlessly forgiving. It's fine to leave it on the table for a week.",
+    "whyItWorks": "Slow, satisfying and endlessly forgiving. It’s fine to leave it on the table for a week.",
     "makeItBetter": "Get one from a charity shop. The missing piece is part of the adventure.",
     "source": {
       "type": "reddit",
@@ -2341,8 +2341,8 @@
       "crafty"
     ],
     "wildcardScore": 20,
-    "whyItWorks": "There's no wrong answer and nothing to decide except which blue.",
-    "makeItBetter": "Pick a sweary colouring book. It's more cathartic than it has any right to be.",
+    "whyItWorks": "There’s no wrong answer and nothing to decide except which blue.",
+    "makeItBetter": "Pick a sweary colouring book. It’s more cathartic than it has any right to be.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -2393,8 +2393,8 @@
       "crafty"
     ],
     "wildcardScore": 30,
-    "whyItWorks": "Looking back at good days is a gentle reminder that there'll be more.",
-    "makeItBetter": "Add a ticket stub or receipt from the day. It's always the tiny stuff.",
+    "whyItWorks": "Looking back at good days is a gentle reminder that there’ll be more.",
+    "makeItBetter": "Add a ticket stub or receipt from the day. It’s always the tiny stuff.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -2442,7 +2442,7 @@
       "crafty"
     ],
     "wildcardScore": 25,
-    "whyItWorks": "All the thinking's been done for you. You just get to make the thing.",
+    "whyItWorks": "All the thinking’s been done for you. You just get to make the thing.",
     "makeItBetter": "Give the finished thing to someone, however wonky.",
     "source": {
       "type": "reddit",
@@ -2494,7 +2494,7 @@
     ],
     "wildcardScore": 55,
     "whyItWorks": "Slow, rhythmic and forgiving. Plus you get to hold a knife and feel capable.",
-    "makeItBetter": "Carve a spoon. It's the classic first project for a reason.",
+    "makeItBetter": "Carve a spoon. It’s the classic first project for a reason.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -2545,7 +2545,7 @@
     ],
     "wildcardScore": 58,
     "whyItWorks": "Muddy hands, a teacher, and a lopsided bowl to take home. All the fun, none of the mess.",
-    "makeItBetter": "Make something for someone else. It'll be terrible and they'll love it.",
+    "makeItBetter": "Make something for someone else. It’ll be terrible and they’ll love it.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -2645,7 +2645,7 @@
       "silly"
     ],
     "wildcardScore": 55,
-    "whyItWorks": "Small, cheerful, and you'll be playing an actual song within an hour.",
+    "whyItWorks": "Small, cheerful, and you’ll be playing an actual song within an hour.",
     "makeItBetter": "Film yourself playing it on day one and day seven.",
     "source": {
       "type": "reddit",
@@ -2655,7 +2655,7 @@
   {
     "id": "WTY053",
     "title": "Take a cheap online course",
-    "summary": "Choose a topic you've always been curious about, not one that's 'useful'.",
+    "summary": "Choose a topic you’ve always been curious about, not one that’s ‘useful’.",
     "category": "Learn",
     "cost": {
       "min": 10,
@@ -2694,7 +2694,7 @@
       "sensible"
     ],
     "wildcardScore": 30,
-    "whyItWorks": "Learning something for no reason is a good reminder that you're more than your to-do list.",
+    "whyItWorks": "Learning something for no reason is a good reminder that you’re more than your to-do list.",
     "makeItBetter": "Tell someone one fact from lesson one.",
     "source": {
       "type": "reddit",
@@ -2704,7 +2704,7 @@
   {
     "id": "WTY054",
     "title": "Watch a lecture on something you know nothing about",
-    "summary": "Pick one subject you've never looked into and give it an hour, or a short talk if that's all you've got.",
+    "summary": "Pick one subject you’ve never looked into and give it an hour, or a short talk if that’s all you’ve got.",
     "category": "Learn",
     "cost": {
       "min": 0,
@@ -2742,7 +2742,7 @@
       "sensible"
     ],
     "wildcardScore": 35,
-    "whyItWorks": "Borrow someone else's enthusiasm for an hour. It's free and it's catching.",
+    "whyItWorks": "Borrow someone else’s enthusiasm for an hour. It’s free and it’s catching.",
     "makeItBetter": "Pick the most obscure topic you can find. Medieval plumbing. Competitive bird calling.",
     "source": {
       "type": "reddit",
@@ -2839,8 +2839,8 @@
       "hobbyist"
     ],
     "wildcardScore": 45,
-    "whyItWorks": "No commitment. If it's not for you, you've lost an evening and a tenner.",
-    "makeItBetter": "Pick one you'd have loved at age ten.",
+    "whyItWorks": "No commitment. If it’s not for you, you’ve lost an evening and a tenner.",
+    "makeItBetter": "Pick one you’d have loved at age ten.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -2939,8 +2939,8 @@
       "cosy"
     ],
     "wildcardScore": 55,
-    "whyItWorks": "Instant route back to a version of you that wasn't worrying about this.",
-    "makeItBetter": "Put it somewhere you'll see it at work or at your desk.",
+    "whyItWorks": "Instant route back to a version of you that wasn’t worrying about this.",
+    "makeItBetter": "Put it somewhere you’ll see it at work or at your desk.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -2987,7 +2987,7 @@
       "quirky"
     ],
     "wildcardScore": 85,
-    "whyItWorks": "It'll make you laugh every time you walk past it for years.",
+    "whyItWorks": "It’ll make you laugh every time you walk past it for years.",
     "makeItBetter": "Give it a name and never explain it to visitors.",
     "source": {
       "type": "reddit",
@@ -3035,8 +3035,8 @@
       "silly"
     ],
     "wildcardScore": 50,
-    "whyItWorks": "You'll use it every day, which means a small daily grin.",
-    "makeItBetter": "Make the first tea in it the best one you've made all month.",
+    "whyItWorks": "You’ll use it every day, which means a small daily grin.",
+    "makeItBetter": "Make the first tea in it the best one you’ve made all month.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -3086,7 +3086,7 @@
       "silly"
     ],
     "wildcardScore": 92,
-    "whyItWorks": "It's absurd, it's cheap and you'll have something to check on every morning.",
+    "whyItWorks": "It’s absurd, it’s cheap and you’ll have something to check on every morning.",
     "makeItBetter": "Name them after people you work with.",
     "source": {
       "type": "reddit",
@@ -3181,7 +3181,7 @@
       "cosy"
     ],
     "wildcardScore": 5,
-    "whyItWorks": "Putting on nice pyjamas is a clear signal that the day's done.",
+    "whyItWorks": "Putting on nice pyjamas is a clear signal that the day’s done.",
     "makeItBetter": "Wash the sheets the same day. Clean sheets and new pyjamas is elite.",
     "source": {
       "type": "reddit",
@@ -3191,7 +3191,7 @@
   {
     "id": "WTY064",
     "title": "Buy absurdly good socks",
-    "summary": "Choose the pair you'd normally decide is too expensive for socks.",
+    "summary": "Choose the pair you’d normally decide is too expensive for socks.",
     "category": "Comfort",
     "cost": {
       "min": 8,
@@ -3229,8 +3229,8 @@
       "cosy"
     ],
     "wildcardScore": 25,
-    "whyItWorks": "Cheap luxury you'll feel every time you put your feet up.",
-    "makeItBetter": "Get a pattern you'd never usually wear.",
+    "whyItWorks": "Cheap luxury you’ll feel every time you put your feet up.",
+    "makeItBetter": "Get a pattern you’d never usually wear.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -3323,7 +3323,7 @@
       "cosy"
     ],
     "wildcardScore": 5,
-    "whyItWorks": "Being warm and comfortable at home isn't a small thing when you feel rubbish.",
+    "whyItWorks": "Being warm and comfortable at home isn’t a small thing when you feel rubbish.",
     "makeItBetter": "Ceremonially bin the old ones.",
     "source": {
       "type": "reddit",
@@ -3371,7 +3371,7 @@
     ],
     "wildcardScore": 5,
     "whyItWorks": "Staying in is fine. Staying in properly is better.",
-    "makeItBetter": "Get one that's slightly too big.",
+    "makeItBetter": "Get one that’s slightly too big.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -3469,8 +3469,8 @@
       "cosy"
     ],
     "wildcardScore": 5,
-    "whyItWorks": "A warm bed on a cold night is one of life's best cheap pleasures.",
-    "makeItBetter": "Switch it on half an hour before bed so it's ready.",
+    "whyItWorks": "A warm bed on a cold night is one of life’s best cheap pleasures.",
+    "makeItBetter": "Switch it on half an hour before bed so it’s ready.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -3516,7 +3516,7 @@
       "cosy"
     ],
     "wildcardScore": 5,
-    "whyItWorks": "Warmth is comforting in a way that doesn't need explaining.",
+    "whyItWorks": "Warmth is comforting in a way that doesn’t need explaining.",
     "makeItBetter": "Get one with a cover you like touching.",
     "source": {
       "type": "reddit",
@@ -3614,7 +3614,7 @@
       "sensible"
     ],
     "wildcardScore": 5,
-    "whyItWorks": "A small fix you'll feel every single night.",
+    "whyItWorks": "A small fix you’ll feel every single night.",
     "makeItBetter": "Swap it tonight, then put the old one in the car for road trips.",
     "source": {
       "type": "original"
@@ -3661,7 +3661,7 @@
     ],
     "wildcardScore": 35,
     "whyItWorks": "Dark, quiet and a voice telling you a story. Bedtime sorted.",
-    "makeItBetter": "Pair it with a sleep story you'd never admit to choosing.",
+    "makeItBetter": "Pair it with a sleep story you’d never admit to choosing.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -3768,7 +3768,7 @@
   {
     "id": "WTY076",
     "title": "Have a cheap pamper evening",
-    "summary": "Pick two or three things: a bath bomb, a face mask, nail polish. Or use what's already in the cupboard.",
+    "summary": "Pick two or three things: a bath bomb, a face mask, nail polish. Or use what’s already in the cupboard.",
     "category": "Self-care",
     "cost": {
       "min": 0,
@@ -3864,7 +3864,7 @@
   {
     "id": "WTY078",
     "title": "Buy flowers for yourself",
-    "summary": "Pick the bunch you'd normally only buy for someone else.",
+    "summary": "Pick the bunch you’d normally only buy for someone else.",
     "category": "Home",
     "cost": {
       "min": 5,
@@ -3904,7 +3904,7 @@
     ],
     "wildcardScore": 20,
     "whyItWorks": "Flowers on the table make the whole room feel looked after, including you.",
-    "makeItBetter": "Buy the ones reduced for quick sale. They're still lovely.",
+    "makeItBetter": "Buy the ones reduced for quick sale. They’re still lovely.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -3955,7 +3955,7 @@
       "wholesome"
     ],
     "wildcardScore": 20,
-    "whyItWorks": "Something living that depends on you, a little. That's surprisingly good for you.",
+    "whyItWorks": "Something living that depends on you, a little. That’s surprisingly good for you.",
     "makeItBetter": "Give it a name. Plants with names get watered.",
     "source": {
       "type": "reddit",
@@ -4005,7 +4005,7 @@
       "silly"
     ],
     "wildcardScore": 74,
-    "whyItWorks": "It's a plant, but it's also a joke. Both keep growing.",
+    "whyItWorks": "It’s a plant, but it’s also a joke. Both keep growing.",
     "makeItBetter": "Make it a tiny name sign.",
     "source": {
       "type": "reddit",
@@ -4054,7 +4054,7 @@
       "sensible"
     ],
     "wildcardScore": 30,
-    "whyItWorks": "Change the room, change the mood. And it's done by teatime.",
+    "whyItWorks": "Change the room, change the mood. And it’s done by teatime.",
     "makeItBetter": "Move one piece of furniture. It makes it feel like a new room.",
     "source": {
       "type": "reddit",
@@ -4064,7 +4064,7 @@
   {
     "id": "WTY082",
     "title": "Fix one annoying thing at home",
-    "summary": "Fix the thing you've been tolerating for months. Buy the small part or tool if you need it.",
+    "summary": "Fix the thing you’ve been tolerating for months. Buy the small part or tool if you need it.",
     "category": "Home",
     "cost": {
       "min": 0,
@@ -4156,7 +4156,7 @@
     ],
     "wildcardScore": 60,
     "whyItWorks": "Oddly, unreasonably satisfying. Instant visible progress.",
-    "makeItBetter": "Do the jumper you've stopped wearing because of the bobbles. Welcome back.",
+    "makeItBetter": "Do the jumper you’ve stopped wearing because of the bobbles. Welcome back.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -4253,7 +4253,7 @@
       "sensible"
     ],
     "wildcardScore": 45,
-    "whyItWorks": "It makes you want to go and look at something in the dark. That's the point.",
+    "whyItWorks": "It makes you want to go and look at something in the dark. That’s the point.",
     "makeItBetter": "Go for a short evening walk with it the same day.",
     "source": {
       "type": "reddit",
@@ -4445,7 +4445,7 @@
     ],
     "wildcardScore": 10,
     "whyItWorks": "Looking a bit more like yourself sometimes gets you feeling a bit more like yourself.",
-    "makeItBetter": "Wear it tomorrow, not 'for best'.",
+    "makeItBetter": "Wear it tomorrow, not ‘for best’.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -4594,7 +4594,7 @@
       "quirky"
     ],
     "wildcardScore": 50,
-    "whyItWorks": "It's absurdly specific. That's why it feels like a treat.",
+    "whyItWorks": "It’s absurdly specific. That’s why it feels like a treat.",
     "makeItBetter": "Make instant noodles fancy tonight: an egg, spring onions, the works.",
     "source": {
       "type": "reddit",
@@ -4647,7 +4647,7 @@
     ],
     "wildcardScore": 70,
     "whyItWorks": "Hitting something as hard as you can is surprisingly good for a bad mood.",
-    "makeItBetter": "Name each ball after something that's annoying you.",
+    "makeItBetter": "Name each ball after something that’s annoying you.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -4656,7 +4656,7 @@
   {
     "id": "WTY094",
     "title": "Buy a tool for a hobby you already love",
-    "summary": "Choose the small upgrade that'll make you want to start the next project.",
+    "summary": "Choose the small upgrade that’ll make you want to start the next project.",
     "category": "Hobby",
     "cost": {
       "min": 10,
@@ -4744,7 +4744,7 @@
     ],
     "wildcardScore": 15,
     "whyItWorks": "Getting it out of your head and onto paper makes it smaller.",
-    "makeItBetter": "Write in a café. Something about other people's noise helps.",
+    "makeItBetter": "Write in a café. Something about other people’s noise helps.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -4753,7 +4753,7 @@
   {
     "id": "WTY096",
     "title": "Sketch badly on purpose",
-    "summary": "Pencil, any paper, and whatever's in front of you. Badly is the brief.",
+    "summary": "Pencil, any paper, and whatever’s in front of you. Badly is the brief.",
     "category": "Make",
     "cost": {
       "min": 0,
@@ -4795,7 +4795,7 @@
     ],
     "wildcardScore": 40,
     "whyItWorks": "Looking properly at one thing is a good way to stop looking at everything else.",
-    "makeItBetter": "Draw with your wrong hand. It's funnier.",
+    "makeItBetter": "Draw with your wrong hand. It’s funnier.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -4803,8 +4803,8 @@
   },
   {
     "id": "WTY097",
-    "title": "Get the piercing you've wanted for a while",
-    "summary": "Book something simple at a reputable studio, if it's something you've wanted for a while rather than a snap decision.",
+    "title": "Get the piercing you’ve wanted for a while",
+    "summary": "Book something simple at a reputable studio, if it’s something you’ve wanted for a while rather than a snap decision.",
     "category": "Style",
     "cost": {
       "min": 20,
@@ -4842,7 +4842,7 @@
       "adventurous"
     ],
     "wildcardScore": 35,
-    "whyItWorks": "A small, permanent marker that you're still in charge of you.",
+    "whyItWorks": "A small, permanent marker that you’re still in charge of you.",
     "makeItBetter": "Take a friend for moral support and lunch after.",
     "source": {
       "type": "reddit",
@@ -4940,7 +4940,7 @@
       "silly"
     ],
     "wildcardScore": 35,
-    "whyItWorks": "Gives everyone something to do, so you don't have to make conversation.",
+    "whyItWorks": "Gives everyone something to do, so you don’t have to make conversation.",
     "makeItBetter": "Pick something with a 30-minute play time so you can go again.",
     "source": {
       "type": "reddit",
@@ -4991,7 +4991,7 @@
       "wholesome"
     ],
     "wildcardScore": 10,
-    "whyItWorks": "Side-by-side talking is easier than face-to-face. And you're outside.",
+    "whyItWorks": "Side-by-side talking is easier than face-to-face. And you’re outside.",
     "makeItBetter": "Walk to somewhere that sells a hot drink.",
     "source": {
       "type": "reddit",
@@ -5042,8 +5042,8 @@
       "wholesome"
     ],
     "wildcardScore": 55,
-    "whyItWorks": "Making someone's day better is one of the fastest ways to improve your own.",
-    "makeItBetter": "Deliver it in person. Don't just order it to their door.",
+    "whyItWorks": "Making someone’s day better is one of the fastest ways to improve your own.",
+    "makeItBetter": "Deliver it in person. Don’t just order it to their door.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -5092,7 +5092,7 @@
       "wholesome"
     ],
     "wildcardScore": 20,
-    "whyItWorks": "Your attention is the best thing you can give them, and it's good for you too.",
+    "whyItWorks": "Your attention is the best thing you can give them, and it’s good for you too.",
     "makeItBetter": "Let them be in charge for the whole afternoon.",
     "source": {
       "type": "original"
@@ -5143,7 +5143,7 @@
       "wholesome"
     ],
     "wildcardScore": 45,
-    "whyItWorks": "A good reminder that you've been OK before, and you will be again.",
+    "whyItWorks": "A good reminder that you’ve been OK before, and you will be again.",
     "makeItBetter": "Take a photo of the same spot you remember and send it to whoever was there then.",
     "source": {
       "type": "original"
@@ -5242,7 +5242,7 @@
       "crafty"
     ],
     "wildcardScore": 65,
-    "whyItWorks": "A tiny mission changes how you see a street you've walked a hundred times.",
+    "whyItWorks": "A tiny mission changes how you see a street you’ve walked a hundred times.",
     "makeItBetter": "Make a grid of your ten best and send it to someone.",
     "source": {
       "type": "original"
@@ -5345,8 +5345,8 @@
   },
   {
     "id": "WTY108",
-    "title": "Book something you'd never normally book",
-    "summary": "Check a reputable local deals site for an activity you'd usually scroll past.",
+    "title": "Book something you’d never normally book",
+    "summary": "Check a reputable local deals site for an activity you’d usually scroll past.",
     "category": "Explore",
     "cost": {
       "min": 10,
@@ -5389,7 +5389,7 @@
     ],
     "wildcardScore": 75,
     "whyItWorks": "Future-you gets something to look forward to. That alone helps.",
-    "makeItBetter": "Pick the one you'd be most embarrassed to admit you booked.",
+    "makeItBetter": "Pick the one you’d be most embarrassed to admit you booked.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -5440,7 +5440,7 @@
       "wholesome"
     ],
     "wildcardScore": 35,
-    "whyItWorks": "Big rooms, big gardens, and someone else's problems from 300 years ago.",
+    "whyItWorks": "Big rooms, big gardens, and someone else’s problems from 300 years ago.",
     "makeItBetter": "Find the most pointless room in the house.",
     "source": {
       "type": "reddit",
@@ -5493,7 +5493,7 @@
     ],
     "wildcardScore": 45,
     "whyItWorks": "Climbing up a castle keeps legs busy and brains elsewhere.",
-    "makeItBetter": "Work out where you'd have been posted if you'd lived there.",
+    "makeItBetter": "Work out where you’d have been posted if you’d lived there.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -5545,8 +5545,8 @@
       "quirky"
     ],
     "wildcardScore": 80,
-    "whyItWorks": "Hard to feel stuck in a rut when you're literally underground.",
-    "makeItBetter": "Ask the guide what the weirdest thing they've found down there is.",
+    "whyItWorks": "Hard to feel stuck in a rut when you’re literally underground.",
+    "makeItBetter": "Ask the guide what the weirdest thing they’ve found down there is.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -5598,7 +5598,7 @@
     ],
     "wildcardScore": 35,
     "whyItWorks": "Green, quiet and far enough away that home feels properly paused.",
-    "makeItBetter": "Take a paper map. You'll look more interesting.",
+    "makeItBetter": "Take a paper map. You’ll look more interesting.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -5645,7 +5645,7 @@
       "wholesome"
     ],
     "wildcardScore": 25,
-    "whyItWorks": "Same thing you'd do at home, but it counts as going out.",
+    "whyItWorks": "Same thing you’d do at home, but it counts as going out.",
     "makeItBetter": "Stay for one more chapter than you planned.",
     "source": {
       "type": "original"
@@ -5697,8 +5697,8 @@
       "silly"
     ],
     "wildcardScore": 82,
-    "whyItWorks": "The rule turns a wander into a game. You'll look at every shop differently.",
-    "makeItBetter": "Whoever's with you gets a £5 too. Compare at the end. Best one wins.",
+    "whyItWorks": "The rule turns a wander into a game. You’ll look at every shop differently.",
+    "makeItBetter": "Whoever’s with you gets a £5 too. Compare at the end. Best one wins.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -5748,7 +5748,7 @@
     ],
     "wildcardScore": 10,
     "whyItWorks": "Permission to be completely offline for an evening. Surprisingly rare.",
-    "makeItBetter": "Tell one person you're doing it so you can't cheat.",
+    "makeItBetter": "Tell one person you’re doing it so you can’t cheat.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
@@ -5852,7 +5852,7 @@
   {
     "id": "WTY118",
     "title": "Buy the ridiculous thing you keep looking at",
-    "summary": "If it's harmless, affordable, and still makes you laugh after a week, give in.",
+    "summary": "If it’s harmless, affordable, and still makes you laugh after a week, give in.",
     "category": "Silly",
     "cost": {
       "min": 1,
@@ -5890,8 +5890,8 @@
       "silly"
     ],
     "wildcardScore": 80,
-    "whyItWorks": "You've clearly already decided. This just saves time.",
-    "makeItBetter": "Tell someone what it is. They'll laugh too.",
+    "whyItWorks": "You’ve clearly already decided. This just saves time.",
+    "makeItBetter": "Tell someone what it is. They’ll laugh too.",
     "source": {
       "type": "original"
     }
@@ -5942,7 +5942,7 @@
     ],
     "wildcardScore": 88,
     "whyItWorks": "A limit turns an ordinary day out into a game.",
-    "makeItBetter": "Get a bus to the end of the line and see what's there.",
+    "makeItBetter": "Get a bus to the end of the line and see what’s there.",
     "source": {
       "type": "original"
     }
@@ -5995,6 +5995,500 @@
     "wildcardScore": 50,
     "whyItWorks": "Taking the decision out of your hands is sometimes the whole problem solved.",
     "makeItBetter": "Get someone else to write the list.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY121",
+    "title": "Clear one surface completely",
+    "summary": "Pick one table, shelf or worktop and get it totally clear. Just the one.",
+    "category": "Home",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 10,
+      "typicalMinutes": 20,
+      "maxMinutes": 45
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "achievement",
+      "calm"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "sensible"
+    ],
+    "wildcardScore": 10,
+    "whyItWorks": "Small enough to finish, visible enough that you’ll notice it every time you walk past.",
+    "makeItBetter": "Put one nice thing back on it afterwards. Only one.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY122",
+    "title": "Make the best hot drink you can",
+    "summary": "Use what’s already in the kitchen and make it properly: warmed mug, the good biscuits, sit down to drink it.",
+    "category": "Comfort",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 10,
+      "typicalMinutes": 15,
+      "maxMinutes": 30
+    },
+    "energy": [
+      "very-low"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "make"
+    ],
+    "feelings": [
+      "comfort",
+      "calm"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "cosy"
+    ],
+    "wildcardScore": 10,
+    "whyItWorks": "Five minutes of doing one thing slowly and well. It counts.",
+    "makeItBetter": "Drink it by a window, not a screen.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY123",
+    "title": "Hold a three-song kitchen disco",
+    "summary": "Three songs, full volume, nobody watching. Dance like you’re at a wedding at 11pm.",
+    "category": "Move",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 10,
+      "typicalMinutes": 15,
+      "maxMinutes": 30
+    },
+    "energy": [
+      "medium",
+      "high"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "laughter",
+      "play",
+      "distraction"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "silly",
+      "active"
+    ],
+    "wildcardScore": 70,
+    "whyItWorks": "Hard to stay flat when you’re moving badly to something loud.",
+    "makeItBetter": "Let someone else pick song two. No vetoes.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY124",
+    "title": "Follow a free workout video badly",
+    "summary": "Pick a beginner video of 20 minutes or less and do it with zero concern for form or dignity.",
+    "category": "Move",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 15,
+      "typicalMinutes": 25,
+      "maxMinutes": 45
+    },
+    "energy": [
+      "medium",
+      "high"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "achievement",
+      "distraction"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "active"
+    ],
+    "wildcardScore": 25,
+    "whyItWorks": "Someone else does the thinking; you just copy. Twenty minutes later you’ve moved.",
+    "makeItBetter": "Pick the most over-enthusiastic instructor you can find.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY125",
+    "title": "Cook something from whatever’s in the cupboard",
+    "summary": "No shop. Pick three things you’ve already got and make them into a meal.",
+    "category": "Food",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 30,
+      "typicalMinutes": 60,
+      "maxMinutes": 90
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "make"
+    ],
+    "feelings": [
+      "achievement",
+      "play"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "crafty",
+      "quirky"
+    ],
+    "wildcardScore": 55,
+    "whyItWorks": "It turns ‘there’s nothing in’ into a small puzzle, and you get fed at the end.",
+    "makeItBetter": "Give it a restaurant-menu name. ‘Deconstructed beans on toast’ is a strong start.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY126",
+    "title": "Send a voice note to someone you miss",
+    "summary": "Someone you haven’t spoken to in ages. Two minutes, no reason needed.",
+    "category": "Social",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 5,
+      "typicalMinutes": 10,
+      "maxMinutes": 20
+    },
+    "energy": [
+      "very-low",
+      "low"
+    ],
+    "company": [
+      "solo"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "connection",
+      "comfort"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "wholesome"
+    ],
+    "wildcardScore": 30,
+    "whyItWorks": "Reaching out without having to hold a whole conversation. They’ll almost certainly be glad.",
+    "makeItBetter": "Start with a memory: ‘I just thought about the time we...’",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY127",
+    "title": "Rewatch something you loved at fourteen",
+    "summary": "Find the first episode of a show you were obsessed with as a teenager, if you’ve got it on something already.",
+    "category": "Media",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 25,
+      "typicalMinutes": 60,
+      "maxMinutes": 180
+    },
+    "energy": [
+      "very-low"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "comfort",
+      "laughter"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "cosy"
+    ],
+    "wildcardScore": 30,
+    "whyItWorks": "Old favourites ask nothing of you, and they come with a better version of your past attached.",
+    "makeItBetter": "Text someone who watched it with you back then.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY128",
+    "title": "Build a proper blanket fort",
+    "summary": "Chairs, sofa cushions, every blanket in the house. Then get in it with a snack.",
+    "category": "Silly",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 20,
+      "typicalMinutes": 45,
+      "maxMinutes": 120
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "make"
+    ],
+    "feelings": [
+      "play",
+      "laughter",
+      "comfort"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "silly"
+    ],
+    "wildcardScore": 80,
+    "whyItWorks": "You’re too old for this, which is exactly why it works.",
+    "makeItBetter": "Watch something from inside it on a laptop.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY129",
+    "title": "Do the full reset: shower, clean clothes, open a window",
+    "summary": "A quick shower, the comfiest clean thing you own, and five minutes of fresh air through an open window.",
+    "category": "Self-care",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 10,
+      "typicalMinutes": 20,
+      "maxMinutes": 30
+    },
+    "energy": [
+      "very-low"
+    ],
+    "company": [
+      "solo"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "comfort",
+      "calm"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "sensible"
+    ],
+    "wildcardScore": 5,
+    "whyItWorks": "It doesn’t fix anything, but it changes how you feel in your own skin in twenty minutes.",
+    "makeItBetter": "Put the bedsheets in the wash while you’re at it.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY130",
+    "title": "Make a playlist for an oddly specific moment",
+    "summary": "Pick a scenario like ‘driving to a heist’ or ‘a pigeon’s big day out’ and build the perfect soundtrack.",
+    "category": "Music",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 15,
+      "typicalMinutes": 30,
+      "maxMinutes": 60
+    },
+    "energy": [
+      "very-low"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "make"
+    ],
+    "feelings": [
+      "play",
+      "laughter",
+      "distraction"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "quirky"
+    ],
+    "wildcardScore": 75,
+    "whyItWorks": "A small, silly job that uses the bit of your brain that likes being clever.",
+    "makeItBetter": "Send it to someone without explaining the title.",
     "source": {
       "type": "original"
     }

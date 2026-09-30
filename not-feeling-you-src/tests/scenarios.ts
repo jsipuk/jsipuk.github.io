@@ -22,7 +22,7 @@ const S = (n: number, expectedAnyOf: string[], banned: string[], minCategories =
 
 export const SCENARIOS: Scenario[] = [
   // Free, an hour, flat: box-set night, pamper evening, journal. No shopping, no karting.
-  S(1, ["WTY115", "WTY076", "WTY095", "WTY096"], ["WTY012", "WTY013", "WTY001", "WTY065"]),
+  S(1, ["WTY115", "WTY076", "WTY095", "WTY096", "WTY122", "WTY127", "WTY128", "WTY129"], ["WTY012", "WTY013", "WTY001", "WTY065"]),
   // Charity-shop challenge, weird ornament, ducks, mini golf.
   S(2, ["WTY025", "WTY059", "WTY023", "WTY011", "WTY118"], ["WTY012", "WTY013"]),
   // Family day out that's new: tourist in town, castle, caves, amateur show, micro-adventure.
@@ -42,7 +42,7 @@ export const SCENARIOS: Scenario[] = [
   // Couple, three hours out, something new.
   S(10, ["WTY003", "WTY105", "WTY006", "WTY024", "WTY108", "WTY111", "WTY029"], ["WTY115", "WTY065", "WTY012"]),
   // Fifteen minutes, nothing to spend, needs calm.
-  S(11, ["WTY095", "WTY096", "WTY054"], ["WTY115", "WTY017", "WTY020"], 2),
+  S(11, ["WTY095", "WTY096", "WTY054", "WTY122", "WTY129", "WTY121"], ["WTY115", "WTY017", "WTY020"]),
   // Surprise me: something with character, still sane.
   S(12, ["WTY051", "WTY061", "WTY025", "WTY059", "WTY105", "WTY080", "WTY119", "WTY120"], ["WTY001", "WTY018"]),
   // Friends, cheap, low energy, connection.
@@ -64,7 +64,7 @@ export const SCENARIOS: Scenario[] = [
   // Couple, calm, out.
   S(21, ["WTY004", "WTY020", "WTY017", "WTY024", "WTY027", "WTY112", "WTY023"], ["WTY012", "WTY007", "WTY115"]),
   // A fiver, half an hour, needs comfort.
-  S(22, ["WTY065", "WTY062", "WTY060", "WTY074", "WTY078", "WTY058", "WTY031"], ["WTY067", "WTY069", "WTY001"]),
+  S(22, ["WTY122", "WTY129", "WTY127", "WTY065", "WTY062", "WTY060", "WTY074", "WTY078", "WTY058", "WTY031"], ["WTY067", "WTY069", "WTY001"]),
   // Family afternoon, low energy, distraction.
   S(23, ["WTY002", "WTY003", "WTY035", "WTY043", "WTY010", "WTY099", "WTY022"], ["WTY012", "WTY013", "WTY001"]),
   // Curiosity, out.
