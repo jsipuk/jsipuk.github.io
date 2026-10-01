@@ -482,8 +482,8 @@ A = {
     why="Gives everyone something to do, so you don't have to make conversation.",
     better="Pick something with a 30-minute play time so you can go again."),
 "WTY100": dict(e="LM", f=["connection", "outside", "perspective"], c=["partner", "family"], tc=0, tt=75, time=(30, 75, 150), pl="now", w=10,
-    t="Ring a friend and go for a walk",
-    s="Keep the plan simple: somewhere pleasant, no big agenda.",
+    t="Go for a walk with someone you like",
+    s="Ring a friend or grab whoever's in. Somewhere pleasant, no big agenda.",
     why="Side-by-side talking is easier than face-to-face. And you're outside.",
     better="Walk to somewhere that sells a hot drink."),
 "WTY101": dict(e="LM", f=["connection", "comfort"], c=["partner"], tc=10, tt=45, cost=(1, 10, 25), time=(15, 45, 120), a=["give", "buy"], w=55, p=["wholesome"],
@@ -567,11 +567,11 @@ A = {
     why="You've clearly already decided. This just saves time.",
     better="Tell someone what it is. They'll laugh too."),
 "WTY119": dict(e="MH", f=["novelty", "play", "outside"], tc=8, tt=150, time=(60, 150, 240), w=88, pl="now",
-    t="Go on a £10 micro-adventure",
-    s="Set a hard £10 cap, leave the house, and see how much you can get out of it.",
+    t="Go on a micro-adventure",
+    s="Set a hard spending cap, even £0, leave the house, and see how much you can get out of it.",
     why="A limit turns an ordinary day out into a game.",
     better="Get a bus to the end of the line and see what's there."),
-"WTY120": dict(e="LM", f=["novelty", "play", "laughter"], tc=0, tt=60, time=(15, 60, 240), w=40, pl="now", st=["home", "local"],
+"WTY120": dict(e="L", f=["play", "novelty"], tc=0, tt=30, time=(15, 30, 240), w=15, pl="now", st=["home", "local"],
     t="Let a dice decide",
     s="Write down six things you could do today, roll a die and do what it says.",
     why="Taking the decision out of your hands is sometimes the whole problem solved.",
@@ -597,7 +597,7 @@ def extra(id, title, category, actions, cost, time, e, company, feelings, person
 ALL = ("solo", "partner", "friends", "family")
 
 EXTRAS = [
-    extra("WTY121", "Clear one surface completely", "Home", ["do"], (0, 0, 0), (10, 20, 45), "LM", ALL,
+    extra("WTY121", "Clear one surface completely", "Home", ["do"], (0, 0, 0), (10, 20, 45), "LM", ("solo", "partner", "family"),
           ["achievement", "calm"], ["sensible"], "familiar", 10,
           "Pick one table, shelf or worktop and get it totally clear. Just the one.",
           "Small enough to finish, visible enough that you'll notice it every time you walk past.",
@@ -674,9 +674,9 @@ EXTRAS += [
           "Look up when it sets tonight and find somewhere with a decent bit of sky. Phone in pocket.",
           "It happens every day and it's free. Watching the whole thing feels oddly like an event.",
           "Stay until the colour's completely gone.", setting=LOCAL, environment=("outdoor",)),
-    extra("WTY135", "Go and look at the stars", "Nature", ["go"], (0, 0, 0), (15, 30, 90), "VL", ALL,
-          ["novelty", "calm", "perspective"], ["adventurous", "wholesome"], "new", 60,
-          "Wait for a clear night, get away from the streetlights and give your eyes ten minutes to adjust.",
+    extra("WTY135", "Go and look at the stars tonight", "Nature", ["go"], (0, 0, 0), (15, 30, 90), "VL", ALL,
+          ["novelty", "calm", "perspective"], ["adventurous", "wholesome"], "new", 40,
+          "Once it's dark and clear, get away from the streetlights and give your eyes ten minutes to adjust.",
           "Very hard to feel your problems are enormous while looking at actual space.",
           "Use a free star-map app to find one planet.", setting=LOCAL, environment=("outdoor",)),
     extra("WTY136", "Run until you're out of breath, once", "Move", ["do"], (0, 0, 0), (5, 15, 30), "H", ("solo", "family"),
@@ -949,7 +949,7 @@ EXTRAS += [
     # Filling a whole day
     extra("WTY186", "Walk somewhere for lunch", "Explore", ["go"], (0, 12, 25), (180, 240, 360), "MH", ("solo", "partner", "friends", "family"),
           ["outside", "achievement", "perspective"], ["active", "wholesome"], "familiar", 40,
-          "Pick a pub or café five or six miles away and walk there. Get the bus back if you want.",
+          "Pick a pub or café five or six miles away, or pack a lunch and pick a viewpoint, and walk there. Get the bus back if you want.",
           "A long walk with a hot meal at the end is about as good as a day gets.",
           "Order the thing on the menu that sounds most like a reward.", setting=TREAT, environment=("outdoor",), planning="now"),
     extra("WTY187", "Take a day trip to a city you don't know", "Explore", ["go"], (10, 30, 50), (360, 420, 480), "MH", ("solo", "partner", "friends", "family"),
@@ -1020,6 +1020,20 @@ EXTRAS += [
           "Find a list of deep-and-daft conversation questions online and take turns answering, phones away.",
           "You'll learn something new about someone you thought you knew inside out.",
           "Each of you adds one question of your own at the end."),
+]
+
+# Batch 5: gaps found by rating 30 deliberately awkward answer sets by hand.
+EXTRAS += [
+    extra("WTY200", "People-watch and invent their backstories", "Silly", ["do"], (0, 0, 0), (15, 30, 60), "VL", ("solo", "partner", "friends", "family"),
+          ["laughter", "distraction", "connection"], ["silly", "quirky"], "new", 70,
+          "Find a bench or a café window, pick strangers, and decide who they really are and where they're going. Quietly.",
+          "Free, takes no energy, and it gets funnier the more ridiculous the stories get.",
+          "Each of you has to work one stranger into the other's story.", setting=LOCAL, environment=("mixed",), planning="now"),
+    extra("WTY201", "Do the one errand you keep putting off", "Home", ["do", "go"], (0, 0, 10), (10, 20, 45), "VL", ("solo", "partner", "family"),
+          ["achievement", "comfort"], ["sensible"], "familiar", 15,
+          "Post the parcel, return the thing, drop off the form. Just the one that's been nagging you.",
+          "It's been taking up space in your head for weeks. Twenty minutes and it's gone.",
+          "Treat yourself to something small on the way back.", setting=LOCAL, planning="now"),
 ]
 
 

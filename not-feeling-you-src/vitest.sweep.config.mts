@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config"
 
+// Slow or human-read checks that stay out of `npm test`.
 export default defineConfig({
-  test: { include: ["scripts/sweep.test.ts"] },
+  test: { include: ["scripts/*.test.ts"] },
 })

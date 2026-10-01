@@ -23,6 +23,14 @@ export function isSurprise(input: Input): boolean {
  */
 const NEAR: Partial<Record<Feeling, Feeling>> = { comfort: "calm", outside: "perspective" }
 
+/** True if the activity speaks to at least one feeling the person picked. */
+export function matchesAFeeling(a: Activity, input: Input): boolean {
+  if (isSurprise(input)) return true
+  return input.feelings.some(
+    (f) => f !== "surprise" && (a.feelings.includes(f) || (NEAR[f] !== undefined && a.feelings.includes(NEAR[f]!))),
+  )
+}
+
 function feelingScore(a: Activity, feeling: Feeling, full: number): number {
   const i = a.feelings.indexOf(feeling)
   // Dominant feeling gets full marks; a supporting feeling still counts for most of it.
