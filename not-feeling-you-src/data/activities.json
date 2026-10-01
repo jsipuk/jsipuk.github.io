@@ -4548,8 +4548,8 @@
   },
   {
     "id": "WTY100",
-    "title": "Ring a friend and go for a walk",
-    "summary": "Keep the plan simple: somewhere pleasant, no big agenda.",
+    "title": "Go for a walk with someone you like",
+    "summary": "Ring a friend or grab whoever’s in. Somewhere pleasant, no big agenda.",
     "category": "Social",
     "cost": {
       "min": 0,
@@ -5496,8 +5496,8 @@
   },
   {
     "id": "WTY119",
-    "title": "Go on a £10 micro-adventure",
-    "summary": "Set a hard £10 cap, leave the house, and see how much you can get out of it.",
+    "title": "Go on a micro-adventure",
+    "summary": "Set a hard spending cap, even £0, leave the house, and see how much you can get out of it.",
     "category": "Explore",
     "cost": {
       "min": 0,
@@ -5557,12 +5557,11 @@
     },
     "time": {
       "minMinutes": 15,
-      "typicalMinutes": 60,
+      "typicalMinutes": 30,
       "maxMinutes": 240
     },
     "energy": [
-      "low",
-      "medium"
+      "low"
     ],
     "company": [
       "solo",
@@ -5581,16 +5580,15 @@
       "do"
     ],
     "feelings": [
-      "novelty",
       "play",
-      "laughter"
+      "novelty"
     ],
     "planning": "now",
     "novelty": "new",
     "personality": [
       "silly"
     ],
-    "wildcardScore": 40,
+    "wildcardScore": 15,
     "whyItWorks": "Taking the decision out of your hands is sometimes the whole problem solved.",
     "makeItBetter": "Get someone else to write the list.",
     "source": {
@@ -5619,7 +5617,6 @@
     "company": [
       "solo",
       "partner",
-      "friends",
       "family"
     ],
     "setting": [
@@ -6299,8 +6296,8 @@
   },
   {
     "id": "WTY135",
-    "title": "Go and look at the stars",
-    "summary": "Wait for a clear night, get away from the streetlights and give your eyes ten minutes to adjust.",
+    "title": "Go and look at the stars tonight",
+    "summary": "Once it’s dark and clear, get away from the streetlights and give your eyes ten minutes to adjust.",
     "category": "Nature",
     "cost": {
       "min": 0,
@@ -6342,7 +6339,7 @@
       "adventurous",
       "wholesome"
     ],
-    "wildcardScore": 60,
+    "wildcardScore": 40,
     "whyItWorks": "Very hard to feel your problems are enormous while looking at actual space.",
     "makeItBetter": "Use a free star-map app to find one planet.",
     "source": {
@@ -8844,7 +8841,7 @@
   {
     "id": "WTY186",
     "title": "Walk somewhere for lunch",
-    "summary": "Pick a pub or café five or six miles away and walk there. Get the bus back if you want.",
+    "summary": "Pick a pub or café five or six miles away, or pack a lunch and pick a viewpoint, and walk there. Get the bus back if you want.",
     "category": "Explore",
     "cost": {
       "min": 0,
@@ -9540,6 +9537,108 @@
     "wildcardScore": 55,
     "whyItWorks": "You’ll learn something new about someone you thought you knew inside out.",
     "makeItBetter": "Each of you adds one question of your own at the end.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY200",
+    "title": "People-watch and invent their backstories",
+    "summary": "Find a bench or a café window, pick strangers, and decide who they really are and where they’re going. Quietly.",
+    "category": "Silly",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 15,
+      "typicalMinutes": 30,
+      "maxMinutes": 60
+    },
+    "energy": [
+      "very-low",
+      "low"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "mixed"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "laughter",
+      "distraction",
+      "connection"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "silly",
+      "quirky"
+    ],
+    "wildcardScore": 70,
+    "whyItWorks": "Free, takes no energy, and it gets funnier the more ridiculous the stories get.",
+    "makeItBetter": "Each of you has to work one stranger into the other’s story.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY201",
+    "title": "Do the one errand you keep putting off",
+    "summary": "Post the parcel, return the thing, drop off the form. Just the one that’s been nagging you.",
+    "category": "Home",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 10
+    },
+    "time": {
+      "minMinutes": 10,
+      "typicalMinutes": 20,
+      "maxMinutes": 45
+    },
+    "energy": [
+      "very-low",
+      "low"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "family"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do",
+      "go"
+    ],
+    "feelings": [
+      "achievement",
+      "comfort"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "sensible"
+    ],
+    "wildcardScore": 15,
+    "whyItWorks": "It’s been taking up space in your head for weeks. Twenty minutes and it’s gone.",
+    "makeItBetter": "Treat yourself to something small on the way back.",
     "source": {
       "type": "original"
     }

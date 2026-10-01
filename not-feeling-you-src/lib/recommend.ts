@@ -1,7 +1,7 @@
 import activitiesJson from "../data/activities.json"
 import { penaltyAgainst, wildcardValue } from "./diversify"
 import { energyDistance, passesHardFilters } from "./filters"
-import { score } from "./score"
+import { matchesAFeeling, score } from "./score"
 import type { Activity, Input, Pick, Slot } from "./types"
 
 export const ACTIVITIES = activitiesJson as Activity[]
@@ -57,6 +57,9 @@ function pickFor(
       ? pool.filter((c) => c.score >= floor && energyDistance(c.activity, input.energy) <= 1)
       : pool
   if (!candidates.length) candidates = pool
+  // Every card should answer what you asked for. Only fall back when nothing does.
+  const onBrief = candidates.filter((c) => matchesAFeeling(c.activity, input))
+  if (onBrief.length) candidates = onBrief
   // Repeating a category is a last resort, not just a penalty.
   const takenCategories = new Set(others.map((o) => o.category))
   const fresh = candidates.filter((c) => !takenCategories.has(c.activity.category))

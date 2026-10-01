@@ -19,9 +19,9 @@ const base: Input = {
 }
 
 describe("activity data", () => {
-  it("has 190 activities with unique IDs", () => {
-    expect(ACTIVITIES).toHaveLength(190)
-    expect(new Set(ACTIVITIES.map((a) => a.id)).size).toBe(190)
+  it("has 192 activities with unique IDs", () => {
+    expect(ACTIVITIES).toHaveLength(192)
+    expect(new Set(ACTIVITIES.map((a) => a.id)).size).toBe(192)
   })
 
   it("still finds grouped ideas by their old IDs", () => {
