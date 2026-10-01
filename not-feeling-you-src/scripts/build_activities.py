@@ -1041,6 +1041,67 @@ CATEGORY = {
     "WTY168": "Self-care",
 }
 
+# Near-duplicate "buy a cosy thing" ideas, grouped into one outcome each.
+# The survivor keeps its ID; the others are listed in mergedFrom so links
+# and saved items that use an old ID still resolve.
+MERGE = {
+    "WTY065": dict(
+        absorbs=["WTY063", "WTY064", "WTY066", "WTY067"],
+        title="Buy something soft to wear at home",
+        summary="Pick one: fluffy socks, absurdly good socks, slippers, new pyjamas or a dressing gown. Put it on as soon as you get in.",
+        whyItWorks="Being warm and comfortable at home isn’t a small thing when you feel rubbish. It makes staying in feel deliberate rather than defeated.",
+        makeItBetter="Ceremonially bin the sad old version.",
+        cost=(3, 12, 35), time=(10, 20, 30), feelings=["comfort", "calm"], category="Cosy kit"),
+    "WTY068": dict(
+        absorbs=["WTY069", "WTY070"],
+        title="Make one spot properly warm",
+        summary="A snuggly blanket for the sofa, an electric blanket for the bed, or a rechargeable hot-water bottle. Choose the one you’ll use tonight.",
+        whyItWorks="Warmth is comforting in a way that doesn’t need explaining. One reliably warm spot changes the whole evening.",
+        makeItBetter="Warm it up half an hour before you need it.",
+        cost=(10, 20, 35), time=(10, 20, 60), feelings=["comfort", "calm"], category="Cosy kit"),
+    "WTY071": dict(
+        absorbs=["WTY072"],
+        title="Upgrade your bed",
+        summary="Buy the one thing that would make your bed better: a good cotton sheet or the pillow you complain about every night.",
+        whyItWorks="You spend a third of your life there. A small fix you’ll feel every single night.",
+        makeItBetter="Change the bed tonight, not at the weekend.",
+        cost=(10, 18, 30), time=(10, 30, 60), feelings=["comfort", "calm", "achievement"], category="Sleep"),
+    "WTY074": dict(
+        absorbs=["WTY075"],
+        title="Make home smell nice",
+        summary="A candle or a reed diffuser. Choose the scent by smell, not by what sounds sophisticated.",
+        whyItWorks="Smell changes how a room feels faster than anything else.",
+        makeItBetter="Put it in the hallway so home smells nice the moment you walk in.",
+        cost=(5, 12, 25), time=(10, 20, 30), feelings=["comfort", "calm"], category="Scent"),
+    "WTY089": dict(
+        absorbs=["WTY087"],
+        title="Buy one thing to wear that makes you feel better",
+        summary="A really nice top, or replacing tired underwear with pairs that actually fit. One thing, worn tomorrow.",
+        whyItWorks="Looking and feeling a bit more like yourself sometimes gets you feeling a bit more like yourself.",
+        makeItBetter="Wear it tomorrow, not ‘for best’.",
+        cost=(10, 20, 30), time=(15, 45, 90), feelings=["comfort", "novelty"], category="Clothes"),
+}
+
+
+def apply_merges(items: list) -> list:
+    by_id = {i["id"]: i for i in items}
+    gone = set()
+    for keep, m in MERGE.items():
+        item = by_id[keep]
+        for k in ("title", "summary", "whyItWorks", "makeItBetter", "feelings", "category"):
+            item[k] = m[k]
+        item["cost"] = dict(zip(("min", "typical", "max"), m["cost"]))
+        item["time"] = dict(zip(("minMinutes", "typicalMinutes", "maxMinutes"), m["time"]))
+        # Union of who and where the originals suited.
+        for k in ("company", "setting", "energy"):
+            for other in m["absorbs"]:
+                for v in by_id[other][k]:
+                    if v not in item[k]:
+                        item[k].append(v)
+        item["mergedFrom"] = m["absorbs"]
+        gone.update(m["absorbs"])
+    return [i for i in items if i["id"] not in gone]
+
 TEXT_FIELDS = ("title", "summary", "whyItWorks", "makeItBetter")
 
 
@@ -1113,6 +1174,8 @@ def main() -> None:
     out.extend(EXTRAS)
     for item in out:
         item["category"] = CATEGORY.get(item["id"], item["category"])
+    out = apply_merges(out)
+    for item in out:
         for f in TEXT_FIELDS:
             if f in item:
                 item[f] = typeset(item[f])

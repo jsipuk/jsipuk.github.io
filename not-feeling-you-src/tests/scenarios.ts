@@ -64,11 +64,11 @@ export const SCENARIOS: Scenario[] = [
   // Couple, calm, out.
   S(21, ["WTY004", "WTY020", "WTY017", "WTY024", "WTY027", "WTY112", "WTY023"], ["WTY012", "WTY007", "WTY115"]),
   // A fiver, half an hour, needs comfort.
-  S(22, ["WTY122", "WTY129", "WTY127", "WTY065", "WTY062", "WTY060", "WTY074", "WTY078", "WTY058", "WTY031"], ["WTY067", "WTY069", "WTY001"]),
+  S(22, ["WTY122", "WTY129", "WTY127", "WTY065", "WTY062", "WTY060", "WTY074", "WTY078", "WTY058", "WTY031"], ["WTY001"]),
   // Family afternoon, low energy, distraction.
   S(23, ["WTY002", "WTY003", "WTY035", "WTY043", "WTY010", "WTY099", "WTY022"], ["WTY012", "WTY013", "WTY001"]),
   // Curiosity, out.
   S(24, ["WTY003", "WTY004", "WTY002", "WTY110", "WTY111", "WTY105", "WTY029"], ["WTY065", "WTY115"]),
   // Wildcard-heavy: expect oddities, not the sensible stuff.
-  S(25, ["WTY133", "WTY165", "WTY108", "WTY051", "WTY061", "WTY059", "WTY025", "WTY114", "WTY119", "WTY080", "WTY105"], ["WTY071", "WTY072", "WTY087", "WTY063"]),
+  S(25, ["WTY133", "WTY165", "WTY108", "WTY051", "WTY061", "WTY059", "WTY025", "WTY114", "WTY119", "WTY080", "WTY105"], ["WTY071", "WTY065", "WTY089"]),
 ]

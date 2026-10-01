@@ -3145,19 +3145,19 @@
     }
   },
   {
-    "id": "WTY063",
-    "title": "Buy new pyjamas",
-    "summary": "Get a set that makes going to bed feel slightly more deliberate.",
-    "category": "Sleep",
+    "id": "WTY065",
+    "title": "Buy something soft to wear at home",
+    "summary": "Pick one: fluffy socks, absurdly good socks, slippers, new pyjamas or a dressing gown. Put it on as soon as you get in.",
+    "category": "Cosy kit",
     "cost": {
-      "min": 8,
-      "typical": 18,
-      "max": 25
+      "min": 3,
+      "typical": 12,
+      "max": 35
     },
     "time": {
-      "minMinutes": 15,
-      "typicalMinutes": 30,
-      "maxMinutes": 60
+      "minMinutes": 10,
+      "typicalMinutes": 20,
+      "maxMinutes": 30
     },
     "energy": [
       "very-low"
@@ -3185,219 +3185,33 @@
       "cosy"
     ],
     "wildcardScore": 5,
-    "whyItWorks": "Putting on nice pyjamas is a clear signal that the day’s done.",
-    "makeItBetter": "Wash the sheets the same day. Clean sheets and new pyjamas is elite.",
+    "whyItWorks": "Being warm and comfortable at home isn’t a small thing when you feel rubbish. It makes staying in feel deliberate rather than defeated.",
+    "makeItBetter": "Ceremonially bin the sad old version.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
+    },
+    "mergedFrom": [
+      "WTY063",
+      "WTY064",
+      "WTY066",
+      "WTY067"
+    ]
   },
   {
-    "id": "WTY064",
-    "title": "Buy absurdly good socks",
-    "summary": "Choose the pair you’d normally decide is too expensive for socks.",
+    "id": "WTY068",
+    "title": "Make one spot properly warm",
+    "summary": "A snuggly blanket for the sofa, an electric blanket for the bed, or a rechargeable hot-water bottle. Choose the one you’ll use tonight.",
     "category": "Cosy kit",
     "cost": {
-      "min": 8,
-      "typical": 15,
-      "max": 25
-    },
-    "time": {
-      "minMinutes": 10,
-      "typicalMinutes": 20,
-      "maxMinutes": 30
-    },
-    "energy": [
-      "very-low"
-    ],
-    "company": [
-      "solo"
-    ],
-    "setting": [
-      "home",
-      "local"
-    ],
-    "environment": [
-      "indoor"
-    ],
-    "actions": [
-      "buy"
-    ],
-    "feelings": [
-      "comfort",
-      "laughter"
-    ],
-    "planning": "same-day",
-    "novelty": "familiar",
-    "personality": [
-      "cosy"
-    ],
-    "wildcardScore": 25,
-    "whyItWorks": "Cheap luxury you’ll feel every time you put your feet up.",
-    "makeItBetter": "Get a pattern you’d never usually wear.",
-    "source": {
-      "type": "reddit",
-      "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
-  },
-  {
-    "id": "WTY065",
-    "title": "Buy fluffy socks",
-    "summary": "Get the softest pair you can find and wear them immediately.",
-    "category": "Cosy kit",
-    "cost": {
-      "min": 3,
-      "typical": 6,
-      "max": 15
-    },
-    "time": {
-      "minMinutes": 10,
-      "typicalMinutes": 20,
-      "maxMinutes": 30
-    },
-    "energy": [
-      "very-low"
-    ],
-    "company": [
-      "solo"
-    ],
-    "setting": [
-      "home",
-      "local"
-    ],
-    "environment": [
-      "indoor"
-    ],
-    "actions": [
-      "buy"
-    ],
-    "feelings": [
-      "comfort"
-    ],
-    "planning": "same-day",
-    "novelty": "familiar",
-    "personality": [
-      "cosy"
-    ],
-    "wildcardScore": 5,
-    "whyItWorks": "Small, warm and silly. Cold feet make everything worse.",
-    "makeItBetter": "Buy two pairs and give one away.",
-    "source": {
-      "type": "reddit",
-      "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
-  },
-  {
-    "id": "WTY066",
-    "title": "Buy slippers",
-    "summary": "Replace the sad old pair, or buy some for the first time.",
-    "category": "Cosy kit",
-    "cost": {
-      "min": 8,
-      "typical": 15,
-      "max": 25
-    },
-    "time": {
-      "minMinutes": 10,
-      "typicalMinutes": 20,
-      "maxMinutes": 30
-    },
-    "energy": [
-      "very-low"
-    ],
-    "company": [
-      "solo"
-    ],
-    "setting": [
-      "home",
-      "local"
-    ],
-    "environment": [
-      "indoor"
-    ],
-    "actions": [
-      "buy"
-    ],
-    "feelings": [
-      "comfort",
-      "achievement"
-    ],
-    "planning": "same-day",
-    "novelty": "familiar",
-    "personality": [
-      "cosy"
-    ],
-    "wildcardScore": 5,
-    "whyItWorks": "Being warm and comfortable at home isn’t a small thing when you feel rubbish.",
-    "makeItBetter": "Ceremonially bin the old ones.",
-    "source": {
-      "type": "reddit",
-      "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
-  },
-  {
-    "id": "WTY067",
-    "title": "Buy a dressing gown",
-    "summary": "Choose one that makes staying in feel deliberate rather than defeated.",
-    "category": "Cosy kit",
-    "cost": {
-      "min": 15,
-      "typical": 25,
+      "min": 10,
+      "typical": 20,
       "max": 35
     },
     "time": {
       "minMinutes": 10,
       "typicalMinutes": 20,
-      "maxMinutes": 30
-    },
-    "energy": [
-      "very-low"
-    ],
-    "company": [
-      "solo"
-    ],
-    "setting": [
-      "home",
-      "local"
-    ],
-    "environment": [
-      "indoor"
-    ],
-    "actions": [
-      "buy"
-    ],
-    "feelings": [
-      "comfort",
-      "calm",
-      "distraction"
-    ],
-    "planning": "same-day",
-    "novelty": "familiar",
-    "personality": [
-      "cosy"
-    ],
-    "wildcardScore": 5,
-    "whyItWorks": "Staying in is fine. Staying in properly is better.",
-    "makeItBetter": "Get one that’s slightly too big.",
-    "source": {
-      "type": "reddit",
-      "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
-  },
-  {
-    "id": "WTY068",
-    "title": "Buy a snuggly blanket",
-    "summary": "Choose texture over practicality and put it straight on the sofa.",
-    "category": "Cosy kit",
-    "cost": {
-      "min": 10,
-      "typical": 18,
-      "max": 25
-    },
-    "time": {
-      "minMinutes": 10,
-      "typicalMinutes": 20,
-      "maxMinutes": 30
+      "maxMinutes": 60
     },
     "energy": [
       "very-low"
@@ -3428,116 +3242,25 @@
       "cosy"
     ],
     "wildcardScore": 5,
-    "whyItWorks": "Being physically comfortable is half the battle some days.",
-    "makeItBetter": "Wash it once before using it. It gets softer.",
+    "whyItWorks": "Warmth is comforting in a way that doesn’t need explaining. One reliably warm spot changes the whole evening.",
+    "makeItBetter": "Warm it up half an hour before you need it.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
-  },
-  {
-    "id": "WTY069",
-    "title": "Buy an electric blanket",
-    "summary": "Make one spot in the house reliably warm and inviting.",
-    "category": "Cosy kit",
-    "cost": {
-      "min": 15,
-      "typical": 25,
-      "max": 35
     },
-    "time": {
-      "minMinutes": 10,
-      "typicalMinutes": 20,
-      "maxMinutes": 60
-    },
-    "energy": [
-      "very-low"
-    ],
-    "company": [
-      "solo",
-      "partner"
-    ],
-    "setting": [
-      "home"
-    ],
-    "environment": [
-      "indoor"
-    ],
-    "actions": [
-      "buy"
-    ],
-    "feelings": [
-      "comfort",
-      "calm"
-    ],
-    "planning": "same-day",
-    "novelty": "familiar",
-    "personality": [
-      "cosy"
-    ],
-    "wildcardScore": 5,
-    "whyItWorks": "A warm bed on a cold night is one of life’s best cheap pleasures.",
-    "makeItBetter": "Switch it on half an hour before bed so it’s ready.",
-    "source": {
-      "type": "reddit",
-      "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
-  },
-  {
-    "id": "WTY070",
-    "title": "Buy an electric hot-water bottle",
-    "summary": "Get a rechargeable one for cold evenings or aching shoulders.",
-    "category": "Cosy kit",
-    "cost": {
-      "min": 15,
-      "typical": 20,
-      "max": 30
-    },
-    "time": {
-      "minMinutes": 10,
-      "typicalMinutes": 20,
-      "maxMinutes": 30
-    },
-    "energy": [
-      "very-low"
-    ],
-    "company": [
-      "solo"
-    ],
-    "setting": [
-      "home"
-    ],
-    "environment": [
-      "indoor"
-    ],
-    "actions": [
-      "buy"
-    ],
-    "feelings": [
-      "comfort",
-      "calm"
-    ],
-    "planning": "same-day",
-    "novelty": "familiar",
-    "personality": [
-      "cosy"
-    ],
-    "wildcardScore": 5,
-    "whyItWorks": "Warmth is comforting in a way that doesn’t need explaining.",
-    "makeItBetter": "Get one with a cover you like touching.",
-    "source": {
-      "type": "reddit",
-      "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
+    "mergedFrom": [
+      "WTY069",
+      "WTY070"
+    ]
   },
   {
     "id": "WTY071",
-    "title": "Upgrade your bedsheet",
-    "summary": "Buy one good cotton sheet rather than a whole bedding set.",
+    "title": "Upgrade your bed",
+    "summary": "Buy the one thing that would make your bed better: a good cotton sheet or the pillow you complain about every night.",
     "category": "Sleep",
     "cost": {
-      "min": 15,
-      "typical": 20,
+      "min": 10,
+      "typical": 18,
       "max": 30
     },
     "time": {
@@ -3565,7 +3288,8 @@
     ],
     "feelings": [
       "comfort",
-      "calm"
+      "calm",
+      "achievement"
     ],
     "planning": "same-day",
     "novelty": "familiar",
@@ -3573,61 +3297,15 @@
       "sensible"
     ],
     "wildcardScore": 5,
-    "whyItWorks": "You spend a third of your life on it. Might as well be nice.",
+    "whyItWorks": "You spend a third of your life there. A small fix you’ll feel every single night.",
     "makeItBetter": "Change the bed tonight, not at the weekend.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
-  },
-  {
-    "id": "WTY072",
-    "title": "Buy a better pillow",
-    "summary": "Replace the pillow you complain about every night.",
-    "category": "Sleep",
-    "cost": {
-      "min": 10,
-      "typical": 18,
-      "max": 30
     },
-    "time": {
-      "minMinutes": 10,
-      "typicalMinutes": 30,
-      "maxMinutes": 60
-    },
-    "energy": [
-      "very-low"
-    ],
-    "company": [
-      "solo",
-      "partner"
-    ],
-    "setting": [
-      "home",
-      "local"
-    ],
-    "environment": [
-      "indoor"
-    ],
-    "actions": [
-      "buy"
-    ],
-    "feelings": [
-      "comfort",
-      "achievement",
-      "calm"
-    ],
-    "planning": "same-day",
-    "novelty": "familiar",
-    "personality": [
-      "sensible"
-    ],
-    "wildcardScore": 5,
-    "whyItWorks": "A small fix you’ll feel every single night.",
-    "makeItBetter": "Swap it tonight, then put the old one in the car for road trips.",
-    "source": {
-      "type": "original"
-    }
+    "mergedFrom": [
+      "WTY072"
+    ]
   },
   {
     "id": "WTY073",
@@ -3679,8 +3357,8 @@
   },
   {
     "id": "WTY074",
-    "title": "Buy a candle you genuinely love",
-    "summary": "Choose the scent by smell, not by what sounds sophisticated.",
+    "title": "Make home smell nice",
+    "summary": "A candle or a reed diffuser. Choose the scent by smell, not by what sounds sophisticated.",
     "category": "Scent",
     "cost": {
       "min": 5,
@@ -3720,60 +3398,14 @@
     ],
     "wildcardScore": 10,
     "whyItWorks": "Smell changes how a room feels faster than anything else.",
-    "makeItBetter": "Light it when you get home, not just on special occasions.",
+    "makeItBetter": "Put it in the hallway so home smells nice the moment you walk in.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
-  },
-  {
-    "id": "WTY075",
-    "title": "Buy a reed diffuser",
-    "summary": "Change how one room smells as a small reset.",
-    "category": "Scent",
-    "cost": {
-      "min": 5,
-      "typical": 12,
-      "max": 25
     },
-    "time": {
-      "minMinutes": 10,
-      "typicalMinutes": 20,
-      "maxMinutes": 30
-    },
-    "energy": [
-      "very-low"
-    ],
-    "company": [
-      "solo",
-      "partner"
-    ],
-    "setting": [
-      "home",
-      "local"
-    ],
-    "environment": [
-      "indoor"
-    ],
-    "actions": [
-      "buy"
-    ],
-    "feelings": [
-      "calm",
-      "comfort"
-    ],
-    "planning": "same-day",
-    "novelty": "familiar",
-    "personality": [
-      "cosy"
-    ],
-    "wildcardScore": 10,
-    "whyItWorks": "The room feels different, so you feel a bit different in it.",
-    "makeItBetter": "Put it in the hallway so home smells nice when you walk in.",
-    "source": {
-      "type": "reddit",
-      "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
+    "mergedFrom": [
+      "WTY075"
+    ]
   },
   {
     "id": "WTY076",
@@ -4319,54 +3951,6 @@
     }
   },
   {
-    "id": "WTY087",
-    "title": "Buy nicer underwear",
-    "summary": "Replace two tired pairs with ones that fit properly and feel good.",
-    "category": "Clothes",
-    "cost": {
-      "min": 10,
-      "typical": 18,
-      "max": 30
-    },
-    "time": {
-      "minMinutes": 15,
-      "typicalMinutes": 30,
-      "maxMinutes": 60
-    },
-    "energy": [
-      "very-low"
-    ],
-    "company": [
-      "solo"
-    ],
-    "setting": [
-      "home",
-      "local"
-    ],
-    "environment": [
-      "indoor"
-    ],
-    "actions": [
-      "buy"
-    ],
-    "feelings": [
-      "comfort",
-      "achievement"
-    ],
-    "planning": "same-day",
-    "novelty": "familiar",
-    "personality": [
-      "sensible"
-    ],
-    "wildcardScore": 5,
-    "whyItWorks": "No one sees it, but you feel it all day.",
-    "makeItBetter": "Bin the worst pair on the same day.",
-    "source": {
-      "type": "reddit",
-      "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
-  },
-  {
     "id": "WTY088",
     "title": "Buy comfortable shoes in a sale",
     "summary": "If you genuinely need shoes, turn the treat budget into a small everyday upgrade.",
@@ -4416,8 +4000,8 @@
   },
   {
     "id": "WTY089",
-    "title": "Buy a really nice top",
-    "summary": "Pick one thing that makes you feel better as soon as you put it on.",
+    "title": "Buy one thing to wear that makes you feel better",
+    "summary": "A really nice top, or replacing tired underwear with pairs that actually fit. One thing, worn tomorrow.",
     "category": "Clothes",
     "cost": {
       "min": 10,
@@ -4425,12 +4009,13 @@
       "max": 30
     },
     "time": {
-      "minMinutes": 20,
+      "minMinutes": 15,
       "typicalMinutes": 45,
       "maxMinutes": 90
     },
     "energy": [
-      "low"
+      "low",
+      "very-low"
     ],
     "company": [
       "solo"
@@ -4455,12 +4040,15 @@
       "sensible"
     ],
     "wildcardScore": 10,
-    "whyItWorks": "Looking a bit more like yourself sometimes gets you feeling a bit more like yourself.",
+    "whyItWorks": "Looking and feeling a bit more like yourself sometimes gets you feeling a bit more like yourself.",
     "makeItBetter": "Wear it tomorrow, not ‘for best’.",
     "source": {
       "type": "reddit",
       "url": "https://www.reddit.com/r/AskUK/comments/1wtl7hm/its_payday_can_you_suggest_something_for_ke_to/"
-    }
+    },
+    "mergedFrom": [
+      "WTY087"
+    ]
   },
   {
     "id": "WTY090",

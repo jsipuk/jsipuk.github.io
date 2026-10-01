@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 import { formatMeta } from "@/lib/format"
-import { ACTIVITIES } from "@/lib/recommend"
+import { findActivity } from "@/lib/recommend"
 import { useSaved } from "@/lib/storage"
 
 export default function SavedPage() {
   const { ids, remove } = useSaved()
-  const items = ids.map((id) => ACTIVITIES.find((a) => a.id === id)).filter((a) => a !== undefined)
+  // Old IDs resolve to the grouped idea that replaced them; duplicates collapse.
+  const items = [...new Map(ids.map((id) => findActivity(id)).filter((a) => a !== undefined).map((a) => [a.id, a])).values()]
 
   return (
     <div className="saved">
@@ -28,7 +29,12 @@ export default function SavedPage() {
                 <p className="rec-meta">{formatMeta(a)}</p>
                 <p className="saved-summary">{a.summary}</p>
               </div>
-              <button type="button" className="btn btn-quiet" onClick={() => remove(a.id)} aria-label={`Remove ${a.title}`}>
+              <button
+                type="button"
+                className="btn btn-quiet"
+                onClick={() => [a.id, ...(a.mergedFrom ?? [])].forEach(remove)}
+                aria-label={`Remove ${a.title}`}
+              >
                 Remove
               </button>
             </li>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { similarityPenalty } from "../lib/diversify"
 import { energyDistance, rejectReasons } from "../lib/filters"
-import { ACTIVITIES, rank, recommend, replace } from "../lib/recommend"
+import { ACTIVITIES, findActivity, rank, recommend, replace } from "../lib/recommend"
 import { score, scoreBreakdown } from "../lib/score"
 import type { Activity, Input } from "../lib/types"
 import { SCENARIOS } from "./scenarios"
@@ -19,9 +19,19 @@ const base: Input = {
 }
 
 describe("activity data", () => {
-  it("has 199 activities with unique IDs", () => {
-    expect(ACTIVITIES).toHaveLength(199)
-    expect(new Set(ACTIVITIES.map((a) => a.id)).size).toBe(199)
+  it("has 190 activities with unique IDs", () => {
+    expect(ACTIVITIES).toHaveLength(190)
+    expect(new Set(ACTIVITIES.map((a) => a.id)).size).toBe(190)
+  })
+
+  it("still finds grouped ideas by their old IDs", () => {
+    const merged = ACTIVITIES.flatMap((a) => a.mergedFrom ?? [])
+    expect(merged).toHaveLength(9)
+    for (const old of merged) {
+      expect(ACTIVITIES.some((a) => a.id === old), old).toBe(false)
+      expect(findActivity(old)?.mergedFrom, old).toContain(old)
+    }
+    expect(findActivity("WTY066")?.title).toBe("Buy something soft to wear at home")
   })
 
   it("has sane ranges and copy on every activity", () => {
@@ -52,7 +62,7 @@ describe("hard filters", () => {
   })
 
   it("keeps home-only things out of 'get me out', and out-only things out of 'stay home'", () => {
-    expect(rejectReasons(byId("WTY069"), { ...base, setting: "out" })).toContain("setting")
+    expect(rejectReasons(byId("WTY115"), { ...base, setting: "out" })).toContain("setting")
     expect(rejectReasons(byId("WTY003"), { ...base, setting: "home" })).toContain("setting")
   })
 
@@ -104,7 +114,7 @@ describe("scoring", () => {
 
 describe("diversity", () => {
   it("penalises same-category pairs hardest", () => {
-    expect(similarityPenalty(byId("WTY065"), byId("WTY066"))).toBeGreaterThanOrEqual(20)
+    expect(similarityPenalty(byId("WTY065"), byId("WTY068"))).toBeGreaterThanOrEqual(20)
     expect(similarityPenalty(byId("WTY065"), byId("WTY019"))).toBeLessThan(10)
   })
 

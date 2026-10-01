@@ -8,6 +8,11 @@ export const ACTIVITIES = activitiesJson as Activity[]
 
 export type Scored = { activity: Activity; score: number }
 
+/** Finds an activity by its ID, or by an older ID it absorbed. */
+export function findActivity(id: string): Activity | undefined {
+  return ACTIVITIES.find((a) => a.id === id) ?? ACTIVITIES.find((a) => a.mergedFrom?.includes(id))
+}
+
 /** FNV-1a. Small, stable, good enough to shuffle ties. */
 function hash(text: string): number {
   let h = 0x811c9dc5
