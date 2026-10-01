@@ -2283,13 +2283,15 @@
       "make"
     ],
     "feelings": [
+      "comfort",
       "calm",
       "distraction"
     ],
     "planning": "same-day",
     "novelty": "familiar",
     "personality": [
-      "crafty"
+      "crafty",
+      "cosy"
     ],
     "wildcardScore": 20,
     "whyItWorks": "A good pen on paper is a small, dependable pleasure.",
@@ -2332,8 +2334,9 @@
       "make"
     ],
     "feelings": [
+      "distraction",
       "calm",
-      "distraction"
+      "laughter"
     ],
     "planning": "same-day",
     "novelty": "familiar",
@@ -3145,7 +3148,7 @@
     "id": "WTY063",
     "title": "Buy new pyjamas",
     "summary": "Get a set that makes going to bed feel slightly more deliberate.",
-    "category": "Cosy kit",
+    "category": "Sleep",
     "cost": {
       "min": 8,
       "typical": 18,
@@ -3173,7 +3176,8 @@
       "buy"
     ],
     "feelings": [
-      "comfort"
+      "comfort",
+      "calm"
     ],
     "planning": "same-day",
     "novelty": "familiar",
@@ -3315,7 +3319,8 @@
       "buy"
     ],
     "feelings": [
-      "comfort"
+      "comfort",
+      "achievement"
     ],
     "planning": "same-day",
     "novelty": "familiar",
@@ -3362,7 +3367,9 @@
       "buy"
     ],
     "feelings": [
-      "comfort"
+      "comfort",
+      "calm",
+      "distraction"
     ],
     "planning": "same-day",
     "novelty": "familiar",
@@ -3539,6 +3546,7 @@
       "maxMinutes": 60
     },
     "energy": [
+      "low",
       "very-low"
     ],
     "company": [
@@ -3606,6 +3614,7 @@
     ],
     "feelings": [
       "comfort",
+      "achievement",
       "calm"
     ],
     "planning": "same-day",
@@ -3651,8 +3660,9 @@
       "buy"
     ],
     "feelings": [
-      "comfort",
-      "calm"
+      "calm",
+      "distraction",
+      "comfort"
     ],
     "planning": "same-day",
     "novelty": "new",
@@ -4340,7 +4350,8 @@
       "buy"
     ],
     "feelings": [
-      "comfort"
+      "comfort",
+      "achievement"
     ],
     "planning": "same-day",
     "novelty": "familiar",
@@ -5756,17 +5767,17 @@
   },
   {
     "id": "WTY116",
-    "title": "Choose a sensory reset",
-    "summary": "Pick one smell, texture or sound: a candle, soap, blanket, record or diffuser.",
+    "title": "Change one thing your senses notice",
+    "summary": "Pick one sense and change it with what you’ve got: rain sounds on, a lamp instead of the big light, a window open, a softer jumper.",
     "category": "Scent",
     "cost": {
-      "min": 3,
-      "typical": 10,
+      "min": 0,
+      "typical": 0,
       "max": 25
     },
     "time": {
-      "minMinutes": 15,
-      "typicalMinutes": 30,
+      "minMinutes": 10,
+      "typicalMinutes": 15,
       "maxMinutes": 60
     },
     "energy": [
@@ -5776,8 +5787,7 @@
       "solo"
     ],
     "setting": [
-      "home",
-      "local"
+      "home"
     ],
     "environment": [
       "indoor"
@@ -5789,14 +5799,14 @@
       "calm",
       "comfort"
     ],
-    "planning": "same-day",
+    "planning": "now",
     "novelty": "new",
     "personality": [
       "cosy"
     ],
     "wildcardScore": 25,
     "whyItWorks": "Change one sense and the room feels different. So do you.",
-    "makeItBetter": "Do one sense tonight, then another next week.",
+    "makeItBetter": "Do another sense tomorrow.",
     "source": {
       "type": "original"
     }
@@ -5992,7 +6002,7 @@
     "personality": [
       "silly"
     ],
-    "wildcardScore": 50,
+    "wildcardScore": 40,
     "whyItWorks": "Taking the decision out of your hands is sometimes the whole problem solved.",
     "makeItBetter": "Get someone else to write the list.",
     "source": {
@@ -6641,7 +6651,7 @@
       "silly",
       "quirky"
     ],
-    "wildcardScore": 78,
+    "wildcardScore": 65,
     "whyItWorks": "A two-quid gamble with a guaranteed story either way.",
     "makeItBetter": "Rate it out of ten and text the score to someone.",
     "source": {
@@ -8840,6 +8850,1108 @@
     "wildcardScore": 50,
     "whyItWorks": "A tiny competition that’s over in minutes but somehow feels like an event.",
     "makeItBetter": "Loser makes the drinks.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY178",
+    "title": "Book a massage",
+    "summary": "Find a local therapist or a college clinic (cheaper, still good) and book the next free slot.",
+    "category": "Treat",
+    "cost": {
+      "min": 25,
+      "typical": 40,
+      "max": 50
+    },
+    "time": {
+      "minMinutes": 45,
+      "typicalMinutes": 60,
+      "maxMinutes": 90
+    },
+    "energy": [
+      "very-low",
+      "low"
+    ],
+    "company": [
+      "solo",
+      "partner"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "comfort",
+      "calm"
+    ],
+    "planning": "booking",
+    "novelty": "familiar",
+    "personality": [
+      "cosy"
+    ],
+    "wildcardScore": 15,
+    "whyItWorks": "An hour where someone else looks after you, and you don’t have to say a word.",
+    "makeItBetter": "Book it for late afternoon so you can go straight home and do nothing.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY179",
+    "title": "Have afternoon tea somewhere nice",
+    "summary": "Tiny sandwiches, scones, too much tea. Book a slot or find a café that does a simple version.",
+    "category": "Treat",
+    "cost": {
+      "min": 15,
+      "typical": 25,
+      "max": 50
+    },
+    "time": {
+      "minMinutes": 60,
+      "typicalMinutes": 90,
+      "maxMinutes": 120
+    },
+    "energy": [
+      "very-low",
+      "low"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "go",
+      "buy"
+    ],
+    "feelings": [
+      "comfort",
+      "connection"
+    ],
+    "planning": "booking",
+    "novelty": "familiar",
+    "personality": [
+      "cosy",
+      "wholesome"
+    ],
+    "wildcardScore": 25,
+    "whyItWorks": "It’s impossible to rush afternoon tea. Ninety minutes of sitting still with good food.",
+    "makeItBetter": "Ask for a box and take the leftovers home.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY180",
+    "title": "Get a cheap theatre ticket",
+    "summary": "Check for day seats, standby or restricted-view tickets at your nearest theatre. They’re often a fraction of the price.",
+    "category": "Entertainment",
+    "cost": {
+      "min": 10,
+      "typical": 20,
+      "max": 45
+    },
+    "time": {
+      "minMinutes": 150,
+      "typicalMinutes": 180,
+      "maxMinutes": 210
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "go"
+    ],
+    "feelings": [
+      "distraction",
+      "novelty",
+      "connection"
+    ],
+    "planning": "same-day",
+    "novelty": "new",
+    "personality": [
+      "sensible",
+      "wholesome"
+    ],
+    "wildcardScore": 35,
+    "whyItWorks": "Two hours where somebody else’s drama is the only one that matters.",
+    "makeItBetter": "Read nothing about it before you go.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY181",
+    "title": "Book a spa day pass",
+    "summary": "Many hotel and leisure-centre spas sell off-peak day passes: pool, sauna, steam room, robe.",
+    "category": "Treat",
+    "cost": {
+      "min": 30,
+      "typical": 45,
+      "max": 50
+    },
+    "time": {
+      "minMinutes": 180,
+      "typicalMinutes": 240,
+      "maxMinutes": 480
+    },
+    "energy": [
+      "very-low"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "go"
+    ],
+    "feelings": [
+      "comfort",
+      "calm"
+    ],
+    "planning": "booking",
+    "novelty": "new",
+    "personality": [
+      "cosy"
+    ],
+    "wildcardScore": 30,
+    "whyItWorks": "A whole day of being warm, quiet and unreachable. That’s the treatment.",
+    "makeItBetter": "Leave your phone in the locker. All of it.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY182",
+    "title": "Try axe throwing",
+    "summary": "Book a session with a coach who’ll have you hitting the board within ten minutes.",
+    "category": "Play",
+    "cost": {
+      "min": 20,
+      "typical": 30,
+      "max": 45
+    },
+    "time": {
+      "minMinutes": 60,
+      "typicalMinutes": 75,
+      "maxMinutes": 90
+    },
+    "energy": [
+      "medium",
+      "high"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "play",
+      "achievement",
+      "laughter"
+    ],
+    "planning": "booking",
+    "novelty": "new",
+    "personality": [
+      "adventurous",
+      "active"
+    ],
+    "wildcardScore": 82,
+    "whyItWorks": "Throwing something heavy at a wall, safely, with permission. Surprisingly good for your head.",
+    "makeItBetter": "Name the target after something annoying you this week.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY183",
+    "title": "Take a one-off cookery class",
+    "summary": "Pasta, bread, dumplings, curry: pick one dish and let someone show you properly.",
+    "category": "Classes",
+    "cost": {
+      "min": 25,
+      "typical": 40,
+      "max": 50
+    },
+    "time": {
+      "minMinutes": 120,
+      "typicalMinutes": 150,
+      "maxMinutes": 180
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "learn",
+      "do"
+    ],
+    "feelings": [
+      "achievement",
+      "novelty",
+      "connection"
+    ],
+    "planning": "booking",
+    "novelty": "new",
+    "personality": [
+      "hobbyist"
+    ],
+    "wildcardScore": 50,
+    "whyItWorks": "You learn something, you meet people, and you eat what you made.",
+    "makeItBetter": "Make it again at home within a week so it sticks.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY184",
+    "title": "Go out for a proper meal on your own",
+    "summary": "Pick somewhere you’ve wanted to try, book a table for one, and order exactly what you want.",
+    "category": "Treat",
+    "cost": {
+      "min": 15,
+      "typical": 25,
+      "max": 50
+    },
+    "time": {
+      "minMinutes": 60,
+      "typicalMinutes": 90,
+      "maxMinutes": 120
+    },
+    "energy": [
+      "low"
+    ],
+    "company": [
+      "solo"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "go"
+    ],
+    "feelings": [
+      "comfort",
+      "novelty"
+    ],
+    "planning": "same-day",
+    "novelty": "new",
+    "personality": [
+      "adventurous",
+      "sensible"
+    ],
+    "wildcardScore": 60,
+    "whyItWorks": "Treating yourself like good company. It feels strange for five minutes, then great.",
+    "makeItBetter": "Sit at the counter or a window seat. Bring a book if you like.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY185",
+    "title": "Do a night in done properly",
+    "summary": "Good takeaway or cheese board, a film you’ve both wanted to see, the good blanket. Phones off.",
+    "category": "Treat",
+    "cost": {
+      "min": 15,
+      "typical": 30,
+      "max": 50
+    },
+    "time": {
+      "minMinutes": 120,
+      "typicalMinutes": 180,
+      "maxMinutes": 300
+    },
+    "energy": [
+      "very-low"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "buy",
+      "do"
+    ],
+    "feelings": [
+      "comfort",
+      "distraction",
+      "connection"
+    ],
+    "planning": "same-day",
+    "novelty": "familiar",
+    "personality": [
+      "cosy"
+    ],
+    "wildcardScore": 15,
+    "whyItWorks": "Staying in, but deliberately. It’s the opposite of a wasted evening.",
+    "makeItBetter": "Light a candle even though it feels a bit much.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY186",
+    "title": "Walk somewhere for lunch",
+    "summary": "Pick a pub or café five or six miles away and walk there. Get the bus back if you want.",
+    "category": "Explore",
+    "cost": {
+      "min": 0,
+      "typical": 12,
+      "max": 25
+    },
+    "time": {
+      "minMinutes": 180,
+      "typicalMinutes": 240,
+      "maxMinutes": 360
+    },
+    "energy": [
+      "medium",
+      "high"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "outdoor"
+    ],
+    "actions": [
+      "go"
+    ],
+    "feelings": [
+      "outside",
+      "achievement",
+      "perspective"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "active",
+      "wholesome"
+    ],
+    "wildcardScore": 40,
+    "whyItWorks": "A long walk with a hot meal at the end is about as good as a day gets.",
+    "makeItBetter": "Order the thing on the menu that sounds most like a reward.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY187",
+    "title": "Take a day trip to a city you don’t know",
+    "summary": "Buy an advance or off-peak return to somewhere an hour or two away and spend the day wandering.",
+    "category": "Explore",
+    "cost": {
+      "min": 10,
+      "typical": 30,
+      "max": 50
+    },
+    "time": {
+      "minMinutes": 360,
+      "typicalMinutes": 420,
+      "maxMinutes": 480
+    },
+    "energy": [
+      "medium",
+      "high"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "travel"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "go"
+    ],
+    "feelings": [
+      "novelty",
+      "distraction",
+      "perspective"
+    ],
+    "planning": "same-day",
+    "novelty": "new",
+    "personality": [
+      "adventurous"
+    ],
+    "wildcardScore": 65,
+    "whyItWorks": "Being somewhere completely new makes your own problems feel very far away.",
+    "makeItBetter": "Find the best-rated independent café and work outwards from there.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY188",
+    "title": "Have a proper duvet day",
+    "summary": "Bed or sofa, all day, no guilt. Snacks within reach and the heating on.",
+    "category": "Comfort",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 10
+    },
+    "time": {
+      "minMinutes": 240,
+      "typicalMinutes": 360,
+      "maxMinutes": 480
+    },
+    "energy": [
+      "very-low"
+    ],
+    "company": [
+      "solo",
+      "partner"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "comfort",
+      "calm",
+      "distraction"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "cosy"
+    ],
+    "wildcardScore": 20,
+    "whyItWorks": "Sometimes rest is the right answer. Doing it on purpose beats drifting into it.",
+    "makeItBetter": "Plan one small treat for the evening so the day has a shape.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY189",
+    "title": "Do a whole-day project",
+    "summary": "Paint a wall, build the flat-pack, sort the shed. One job you can finish today.",
+    "category": "Home",
+    "cost": {
+      "min": 0,
+      "typical": 15,
+      "max": 50
+    },
+    "time": {
+      "minMinutes": 240,
+      "typicalMinutes": 360,
+      "maxMinutes": 480
+    },
+    "energy": [
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "make",
+      "do"
+    ],
+    "feelings": [
+      "achievement",
+      "distraction"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "crafty",
+      "sensible"
+    ],
+    "wildcardScore": 30,
+    "whyItWorks": "A whole day with a clear goal, and something you can point at when it’s done.",
+    "makeItBetter": "Take a before photo. You’ll want it.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY190",
+    "title": "Go on a long bike ride",
+    "summary": "Pick a route along a canal, an old railway line or quiet lanes, with a stop at the halfway point.",
+    "category": "Move",
+    "cost": {
+      "min": 0,
+      "typical": 5,
+      "max": 15
+    },
+    "time": {
+      "minMinutes": 180,
+      "typicalMinutes": 240,
+      "maxMinutes": 360
+    },
+    "energy": [
+      "high"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "outdoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "outside",
+      "achievement",
+      "perspective"
+    ],
+    "planning": "same-day",
+    "novelty": "familiar",
+    "personality": [
+      "active",
+      "adventurous"
+    ],
+    "wildcardScore": 40,
+    "whyItWorks": "Miles go by, your legs do the work, your head gets quieter.",
+    "makeItBetter": "Plan the route around a good café.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY191",
+    "title": "Learn five birds by their song",
+    "summary": "Take a free bird-sound app to a park, record what you hear, and learn the five commonest.",
+    "category": "Nature",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 30,
+      "typicalMinutes": 45,
+      "maxMinutes": 90
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "family"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "outdoor"
+    ],
+    "actions": [
+      "learn",
+      "go"
+    ],
+    "feelings": [
+      "novelty",
+      "outside",
+      "calm"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "hobbyist",
+      "wholesome"
+    ],
+    "wildcardScore": 60,
+    "whyItWorks": "Once you can name them, every walk has background music you understand.",
+    "makeItBetter": "Pick one bird to listen for every morning this week.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY192",
+    "title": "Learn ten words in a new language",
+    "summary": "Pick a language you’ve always fancied, use a free app or video, and learn ten useful words.",
+    "category": "Learn",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 10,
+      "typicalMinutes": 20,
+      "maxMinutes": 30
+    },
+    "energy": [
+      "very-low"
+    ],
+    "company": [
+      "solo",
+      "partner"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "learn"
+    ],
+    "feelings": [
+      "achievement",
+      "novelty",
+      "distraction"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "sensible"
+    ],
+    "wildcardScore": 35,
+    "whyItWorks": "Small, measurable progress in fifteen minutes. Your brain likes that.",
+    "makeItBetter": "Pick the language of somewhere you’d like to go next year.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY193",
+    "title": "Learn to juggle with rolled-up socks",
+    "summary": "Three pairs of balled-up socks and a free tutorial. Start with two. Expect to drop them a lot.",
+    "category": "Learn",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 15,
+      "typicalMinutes": 30,
+      "maxMinutes": 60
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "learn",
+      "do"
+    ],
+    "feelings": [
+      "play",
+      "achievement",
+      "laughter"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "silly",
+      "quirky"
+    ],
+    "wildcardScore": 55,
+    "whyItWorks": "Soft enough to drop indoors, hard enough to need all your attention.",
+    "makeItBetter": "Film your first attempt and your tenth.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY194",
+    "title": "Bake something for the neighbours",
+    "summary": "Make a simple batch of biscuits or flapjacks and drop a few next door with a note.",
+    "category": "Social",
+    "cost": {
+      "min": 0,
+      "typical": 5,
+      "max": 10
+    },
+    "time": {
+      "minMinutes": 60,
+      "typicalMinutes": 75,
+      "maxMinutes": 120
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "give",
+      "make"
+    ],
+    "feelings": [
+      "connection",
+      "achievement",
+      "comfort"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "wholesome"
+    ],
+    "wildcardScore": 45,
+    "whyItWorks": "Baking keeps your hands busy; giving it away gives you a small, warm buzz.",
+    "makeItBetter": "Put the recipe on the note.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY195",
+    "title": "Leave a glowing review for a local place",
+    "summary": "Your favourite café, a good mechanic, the kind dentist. Write the review they deserve.",
+    "category": "Social",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 5,
+      "typicalMinutes": 10,
+      "maxMinutes": 15
+    },
+    "energy": [
+      "very-low"
+    ],
+    "company": [
+      "solo"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "give"
+    ],
+    "feelings": [
+      "connection",
+      "comfort"
+    ],
+    "planning": "now",
+    "novelty": "familiar",
+    "personality": [
+      "wholesome"
+    ],
+    "wildcardScore": 30,
+    "whyItWorks": "Five minutes of being nice to someone who’ll genuinely appreciate it.",
+    "makeItBetter": "Mention a staff member by name. It often gets back to them.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY196",
+    "title": "Clear out a bag for the charity shop",
+    "summary": "One bag, one cupboard. If you haven’t used it in a year, it goes. Drop it off today.",
+    "category": "Home",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 30,
+      "typicalMinutes": 45,
+      "maxMinutes": 90
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "family"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "give",
+      "do"
+    ],
+    "feelings": [
+      "achievement",
+      "connection"
+    ],
+    "planning": "same-day",
+    "novelty": "familiar",
+    "personality": [
+      "sensible"
+    ],
+    "wildcardScore": 20,
+    "whyItWorks": "Less clutter for you, something useful for someone else.",
+    "makeItBetter": "Reward yourself with one thing from the charity shop you drop it at. Small one.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY197",
+    "title": "Volunteer for an afternoon",
+    "summary": "Look for one-off slots: a food bank shift, a park clean-up, a charity shop afternoon.",
+    "category": "Social",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 5
+    },
+    "time": {
+      "minMinutes": 120,
+      "typicalMinutes": 180,
+      "maxMinutes": 240
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "solo",
+      "partner",
+      "friends",
+      "family"
+    ],
+    "setting": [
+      "local"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "give",
+      "do"
+    ],
+    "feelings": [
+      "connection",
+      "achievement",
+      "perspective"
+    ],
+    "planning": "booking",
+    "novelty": "new",
+    "personality": [
+      "wholesome"
+    ],
+    "wildcardScore": 45,
+    "whyItWorks": "Being useful to someone is one of the most reliable mood-lifters there is.",
+    "makeItBetter": "Go with someone if you’re nervous; most places welcome pairs.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY198",
+    "title": "Cook a fancy dinner at home for two",
+    "summary": "Pick a recipe that feels like a restaurant dish, set the table properly, and dress up a bit.",
+    "category": "Food",
+    "cost": {
+      "min": 10,
+      "typical": 20,
+      "max": 40
+    },
+    "time": {
+      "minMinutes": 90,
+      "typicalMinutes": 120,
+      "maxMinutes": 180
+    },
+    "energy": [
+      "low",
+      "medium"
+    ],
+    "company": [
+      "partner"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "make"
+    ],
+    "feelings": [
+      "connection",
+      "achievement",
+      "comfort"
+    ],
+    "planning": "same-day",
+    "novelty": "new",
+    "personality": [
+      "wholesome",
+      "hobbyist"
+    ],
+    "wildcardScore": 40,
+    "whyItWorks": "Making an effort for each other, without the restaurant bill.",
+    "makeItBetter": "Write a little menu. It’s silly. Do it anyway.",
+    "source": {
+      "type": "original"
+    }
+  },
+  {
+    "id": "WTY199",
+    "title": "Ask each other the big questions",
+    "summary": "Find a list of deep-and-daft conversation questions online and take turns answering, phones away.",
+    "category": "Social",
+    "cost": {
+      "min": 0,
+      "typical": 0,
+      "max": 0
+    },
+    "time": {
+      "minMinutes": 30,
+      "typicalMinutes": 45,
+      "maxMinutes": 90
+    },
+    "energy": [
+      "very-low",
+      "low"
+    ],
+    "company": [
+      "partner",
+      "friends"
+    ],
+    "setting": [
+      "home"
+    ],
+    "environment": [
+      "indoor"
+    ],
+    "actions": [
+      "do"
+    ],
+    "feelings": [
+      "connection",
+      "novelty",
+      "laughter"
+    ],
+    "planning": "now",
+    "novelty": "new",
+    "personality": [
+      "wholesome",
+      "quirky"
+    ],
+    "wildcardScore": 55,
+    "whyItWorks": "You’ll learn something new about someone you thought you knew inside out.",
+    "makeItBetter": "Each of you adds one question of your own at the end.",
     "source": {
       "type": "original"
     }

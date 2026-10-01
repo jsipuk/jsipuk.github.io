@@ -28,13 +28,13 @@ export const SCENARIOS: Scenario[] = [
   // Family day out that's new: tourist in town, castle, caves, amateur show, micro-adventure.
   S(3, ["WTY002", "WTY110", "WTY111", "WTY006", "WTY119", "WTY105"], ["WTY008", "WTY097", "WTY065"]),
   // Very tired couple: box set, film night, blanket, scrapbook, spend it on someone.
-  S(4, ["WTY115", "WTY035", "WTY068", "WTY047", "WTY101", "WTY036"], ["WTY013", "WTY015", "WTY012", "WTY024"]),
+  S(4, ["WTY179", "WTY154", "WTY199", "WTY185", "WTY137", "WTY115", "WTY035", "WTY068", "WTY047", "WTY101", "WTY036"], ["WTY013", "WTY015", "WTY012", "WTY024"]),
   // Free and outside: walk, hill, photo walk, nostalgia trip.
   S(5, ["WTY020", "WTY019", "WTY105", "WTY103", "WTY119"], ["WTY001", "WTY003", "WTY115"]),
   // Friends with energy to burn and £50.
   S(6, ["WTY010", "WTY011", "WTY012", "WTY013", "WTY015", "WTY093"], ["WTY065", "WTY031", "WTY115", "WTY008"]),
   // Thirty flat minutes at home: something to read, play or poke at.
-  S(7, ["WTY031", "WTY038", "WTY044", "WTY054", "WTY046", "WTY033", "WTY053"], ["WTY001", "WTY013", "WTY010"]),
+  S(7, ["WTY192", "WTY130", "WTY031", "WTY038", "WTY044", "WTY054", "WTY046", "WTY033", "WTY053"], ["WTY001", "WTY013", "WTY010"]),
   // Wants a win, two hours, some energy.
   S(8, ["WTY121", "WTY125", "WTY013", "WTY082", "WTY081", "WTY091", "WTY039", "WTY049", "WTY019"], ["WTY065", "WTY115", "WTY031"]),
   // Family, a tenner, an hour, low energy.
