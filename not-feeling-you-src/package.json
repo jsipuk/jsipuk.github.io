@@ -1,0 +1,31 @@
+{
+  "name": "not-feeling-you",
+  "version": "1.0.0",
+  "private": true,
+  "description": "What to do when you're not feeling you. Three things you could actually do.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:pages": "NEXT_PUBLIC_BASE_PATH=/not-feeling-you next build && rm -rf ../not-feeling-you && cp -r out ../not-feeling-you",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "data": "python3 scripts/build_activities.py"
+  },
+  "dependencies": {
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^22.20.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3"
+  }
+}
