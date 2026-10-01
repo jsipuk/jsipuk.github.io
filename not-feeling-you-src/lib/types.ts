@@ -48,6 +48,8 @@ export type Activity = {
   whyItWorks: string
   makeItBetter?: string
   source?: { type: "reddit" | "original"; url?: string }
+  /** Older IDs folded into this one, so saved items and links still resolve. */
+  mergedFrom?: string[]
 }
 
 /** Where the user wants to be. "out" means local or a trip. */

@@ -56,3 +56,12 @@ test("keyboard only: the flow works with Tab and Enter", async ({ page }) => {
   await page.keyboard.press("Enter")
   await expect(page.getByRole("heading", { name: "How much are you happy to spend?" })).toBeFocused()
 })
+
+test("an idea saved under an old ID shows as the grouped idea that replaced it", async ({ page }) => {
+  await page.goto("/saved/")
+  await page.evaluate(() => localStorage.setItem("nfy:saved", JSON.stringify(["WTY066", "WTY064"])))
+  await page.reload()
+  await expect(page.getByRole("heading", { name: "Buy something soft to wear at home" })).toHaveCount(1)
+  await page.getByRole("button", { name: "Remove Buy something soft to wear at home" }).click()
+  await expect(page.getByText("Nothing saved yet. Probably for the best.")).toBeVisible()
+})
