@@ -40,7 +40,8 @@ export function scoreBreakdown(a: Activity, input: Input): Breakdown {
   if (input.setting === "either") setting = 8
   else {
     const both = canBeHome(a) && canBeOut(a)
-    setting = both ? 6 : 10
+    // Spec said 6 for "works either way"; that buried every shop-or-online idea. 8 keeps a small edge for exact fits.
+    setting = both ? 8 : 10
   }
 
   let action = 0

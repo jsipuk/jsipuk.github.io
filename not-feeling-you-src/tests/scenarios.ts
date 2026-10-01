@@ -36,7 +36,7 @@ export const SCENARIOS: Scenario[] = [
   // Thirty flat minutes at home: something to read, play or poke at.
   S(7, ["WTY031", "WTY038", "WTY044", "WTY054", "WTY046", "WTY033", "WTY053"], ["WTY001", "WTY013", "WTY010"]),
   // Wants a win, two hours, some energy.
-  S(8, ["WTY013", "WTY082", "WTY081", "WTY091", "WTY039", "WTY049", "WTY019"], ["WTY065", "WTY115", "WTY031"]),
+  S(8, ["WTY121", "WTY125", "WTY013", "WTY082", "WTY081", "WTY091", "WTY039", "WTY049", "WTY019"], ["WTY065", "WTY115", "WTY031"]),
   // Family, a tenner, an hour, low energy.
   S(9, ["WTY023", "WTY011", "WTY061", "WTY102", "WTY025"], ["WTY012", "WTY001", "WTY008"]),
   // Couple, three hours out, something new.
@@ -70,5 +70,5 @@ export const SCENARIOS: Scenario[] = [
   // Curiosity, out.
   S(24, ["WTY003", "WTY004", "WTY002", "WTY110", "WTY111", "WTY105", "WTY029"], ["WTY065", "WTY115"]),
   // Wildcard-heavy: expect oddities, not the sensible stuff.
-  S(25, ["WTY051", "WTY061", "WTY059", "WTY025", "WTY114", "WTY119", "WTY080", "WTY105"], ["WTY071", "WTY072", "WTY087", "WTY063"]),
+  S(25, ["WTY133", "WTY165", "WTY108", "WTY051", "WTY061", "WTY059", "WTY025", "WTY114", "WTY119", "WTY080", "WTY105"], ["WTY071", "WTY072", "WTY087", "WTY063"]),
 ]

@@ -8,12 +8,29 @@ export const ACTIVITIES = activitiesJson as Activity[]
 
 export type Scored = { activity: Activity; score: number }
 
-/** Every activity that passes the hard filters, best first. Ties break on ID so results never wobble. */
+/** FNV-1a. Small, stable, good enough to shuffle ties. */
+function hash(text: string): number {
+  let h = 0x811c9dc5
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i)
+    h = Math.imul(h, 0x01000193)
+  }
+  return h >>> 0
+}
+
+/**
+ * Every activity that passes the hard filters, best first.
+ * Ties break on a hash of the answers plus the ID: the same answers always
+ * give the same order, but different answers rotate through equally good
+ * ideas instead of the lowest ID winning every time.
+ */
 export function rank(input: Input, activities: Activity[] = ACTIVITIES): Scored[] {
+  const seed = JSON.stringify(input)
+  const tie = (a: Activity) => hash(seed + a.id)
   return activities
     .filter((a) => passesHardFilters(a, input))
     .map((activity) => ({ activity, score: score(activity, input) }))
-    .sort((x, y) => y.score - x.score || x.activity.id.localeCompare(y.activity.id))
+    .sort((x, y) => y.score - x.score || tie(x.activity) - tie(y.activity))
 }
 
 /** A wildcard still has to be a reasonable fit. */
