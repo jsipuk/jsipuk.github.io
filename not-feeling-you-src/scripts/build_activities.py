@@ -1028,7 +1028,7 @@ EXTRAS += [
           ["laughter", "distraction", "connection"], ["silly", "quirky"], "new", 70,
           "Find a bench or a café window, pick strangers, and decide who they really are and where they're going. Quietly.",
           "Free, takes no energy, and it gets funnier the more ridiculous the stories get.",
-          "Each of you has to work one stranger into the other's story.", setting=LOCAL, environment=("mixed",), planning="now"),
+          "Give every stranger a name and a secret. With someone? First to laugh loses.", setting=LOCAL, environment=("mixed",), planning="now"),
     extra("WTY201", "Do the one errand you keep putting off", "Home", ["do", "go"], (0, 0, 10), (10, 20, 45), "VL", ("solo", "partner", "family"),
           ["achievement", "comfort"], ["sensible"], "familiar", 15,
           "Post the parcel, return the thing, drop off the form. Just the one that's been nagging you.",

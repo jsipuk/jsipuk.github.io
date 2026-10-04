@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
 import ChoiceChip from "@/components/ChoiceChip"
+import DemoVideo from "@/components/DemoVideo"
 import ProgressLine from "@/components/ProgressLine"
 import QuestionStep from "@/components/QuestionStep"
 import { toQuery } from "@/lib/query"
@@ -118,6 +119,7 @@ export default function Home() {
           <Link href="/results/?surprise=1" className="text-link">
             Just surprise me
           </Link>
+          <DemoVideo />
         </div>
         <p className="aside">You feel a bit rubbish. That’s enough information. Let’s find something to do.</p>
       </div>

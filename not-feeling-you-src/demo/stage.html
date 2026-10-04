@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Not feeling you: welcome demo</title>
+<style>
+/* FONTS */
+:root {
+  --paper: #f4f0e8;
+  --paper-deep: #ebe5d9;
+  --ink: #1f211d;
+  --muted: #5e6258;
+  --accent: #e05d3b;
+  --accent-ink: #a83e26;
+  --serif: "Fraunces", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { background: #d9d3c7; }
+body { display: grid; place-items: center; min-height: 100vh; font-family: var(--sans); color: var(--ink); }
+body.export { display: block; background: var(--paper); }
+
+/* The 1920×1080 frame. Scaled down to fit when previewed in a browser. */
+#stage {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  background: var(--paper);
+  overflow: hidden;
+  transform-origin: 0 0;
+}
+
+/* Title and end cards */
+.card-text { position: absolute; left: 240px; top: 0; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+.big {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 128px;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  font-variation-settings: "SOFT" 50, "opsz" 144;
+}
+.big .line { display: block; }
+.big em { color: var(--accent); font-variation-settings: "SOFT" 100, "opsz" 144; position: relative; display: inline-block; }
+.underline { position: absolute; left: -4px; bottom: -18px; width: 108%; height: 26px; overflow: visible; }
+.underline path { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round; }
+.sub { margin-top: 44px; font-size: 38px; color: var(--muted); }
+.url {
+  margin-top: 28px;
+  font-size: 34px;
+  font-weight: 500;
+  display: inline-block;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 4px;
+  align-self: flex-start;
+}
+
+/* Captions beside the phone */
+#captions { position: absolute; left: 200px; top: 0; height: 100%; width: 760px; }
+.cap { position: absolute; left: 0; top: 50%; width: 100%; transform: translateY(-50%); }
+.cap-num { font-size: 26px; font-weight: 600; letter-spacing: 0.08em; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+.cap-title {
+  margin-top: 18px;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 76px;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  font-variation-settings: "SOFT" 50, "opsz" 144;
+}
+.cap-sub { margin-top: 26px; font-size: 32px; line-height: 1.4; color: var(--muted); max-width: 30ch; }
+.tokens { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 12px; max-width: 700px; }
+.token {
+  font-size: 26px;
+  padding: 8px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+}
+.labels { margin-top: 40px; display: grid; gap: 18px; }
+.label { font-size: 34px; display: flex; align-items: center; gap: 18px; color: var(--muted); }
+.label .n { font-size: 24px; font-weight: 600; color: var(--accent-ink); width: 40px; }
+.label.on { color: var(--ink); font-weight: 600; }
+.label .bar { height: 4px; width: 0; background: var(--accent); border-radius: 2px; }
+
+/* The phone */
+#phone-wrap { position: absolute; left: 1166px; top: 82px; width: 418px; height: 872px; }
+#phone-back { position: absolute; inset: 0; border-radius: 58px; background: var(--accent); transform: translate(16px, 16px); }
+#phone {
+  position: absolute;
+  inset: 0;
+  border-radius: 58px;
+  background: var(--ink);
+  padding: 14px;
+}
+#screen-clip { width: 390px; height: 844px; border-radius: 44px; overflow: hidden; background: var(--paper); }
+#screen { width: 390px; height: 844px; border: 0; display: block; }
+
+/* Taps */
+.tap { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; pointer-events: none; }
+.tap .dot { position: absolute; inset: 0; border-radius: 50%; background: rgba(31, 33, 29, 0.16); border: 2px solid rgba(31, 33, 29, 0.4); }
+.tap .ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid var(--accent); }
+
+#replay { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); font: 500 15px var(--sans); padding: 10px 16px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--paper); cursor: pointer; }
+body.export #replay { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="card-text" id="title-card">
+    <h1 class="big">
+      <span class="line" id="t1">What to do when</span>
+      <span class="line" id="t2">you’re not feeling</span>
+      <span class="line" id="t3"><em>you<svg class="underline" viewBox="0 0 200 26" preserveAspectRatio="none"><path id="t3-line" d="M4 16 C 50 6, 120 6, 196 14"/></svg></em></span>
+    </h1>
+    <p class="sub" id="t4">A few questions. Three ideas. No life coaching.</p>
+  </div>
+
+  <div id="captions"></div>
+
+  <div id="phone-wrap">
+    <div id="phone-back"></div>
+    <div id="phone"><div id="screen-clip"><iframe id="screen" src="screen.html" title="Phone screen" tabindex="-1"></iframe></div></div>
+  </div>
+
+  <div class="card-text" id="end-card">
+    <p class="big" id="e1">Go on then.</p>
+    <p class="sub" id="e2">Three ideas in about thirty seconds. No life coaching.</p>
+    <p class="url" id="e3">URL</p>
+  </div>
+
+  <div id="taps"></div>
+</div>
+<button id="replay" type="button">Replay</button>
+<script src="stage.js"></script>
+</body>
+</html>
