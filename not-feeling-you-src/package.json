@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "data": "python3 scripts/build_activities.py",
     "sweep": "vitest run --config vitest.sweep.config.mts scripts/sweep.test.ts --silent=false",
-    "awkward": "vitest run --config vitest.sweep.config.mts scripts/awkward.test.ts --silent=false"
+    "awkward": "vitest run --config vitest.sweep.config.mts scripts/awkward.test.ts --silent=false",
+    "demo": "vitest run --config vitest.sweep.config.mts scripts/demo-data.test.ts && node demo/render.mjs"
   },
   "dependencies": {
     "next": "^16.3.8",

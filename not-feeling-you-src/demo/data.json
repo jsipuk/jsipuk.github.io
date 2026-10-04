@@ -1,0 +1,33 @@
+{
+  "context": "Up to £10 · about an hour · just you · not much energy · going out",
+  "cards": [
+    {
+      "title": "People-watch and invent their backstories",
+      "meta": "Free · 15–30 mins · barely any effort",
+      "summary": "Find a bench or a café window, pick strangers, and decide who they really are and where they’re going. Quietly.",
+      "why": "Free, takes no energy, and it gets funnier the more ridiculous the stories get.",
+      "better": "Give every stranger a name and a secret. With someone? First to laugh loses."
+    },
+    {
+      "title": "Buy a harmonica",
+      "meta": "£8–£10 · 20–45 mins · low effort",
+      "summary": "Learn one recognisable tune badly and enjoy the novelty.",
+      "why": "Nobody expects you to be good at harmonica. Freeing, really.",
+      "better": "Learn the theme tune to something daft and perform it for one lucky person."
+    },
+    {
+      "title": "Go to a car boot sale",
+      "meta": "£1–£10 · 1–1.5 hrs · low effort",
+      "summary": "Go early, bring change, and look for the oddest thing on any table.",
+      "why": "Treasure hunting, people-watching and fresh air in one go.",
+      "better": "Haggle once, politely, on principle."
+    }
+  ],
+  "nah": {
+    "title": "Chalk a hopscotch and play it",
+    "meta": "Free–£3 · 15–30 mins · some effort",
+    "summary": "Draw a grid on the pavement or patio and play. If you remember the rules, great. If not, make some up.",
+    "why": "Being outside, moving, and slightly ridiculous. All three help.",
+    "better": "Leave it there for the next person to find."
+  }
+}

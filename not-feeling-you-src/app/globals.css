@@ -133,6 +133,10 @@ button {
 .header-link:hover {
   border-bottom-color: var(--ink);
 }
+/* inline-flex drops the leading space in " (1)", so add it back. */
+.header-link .count {
+  margin-left: 0.3em;
+}
 
 main {
   padding: 0 var(--gutter) 72px var(--inset);

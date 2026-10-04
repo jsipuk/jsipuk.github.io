@@ -112,6 +112,23 @@ One field is added beyond the original schema: `category`, which the diversity s
 
 To add an idea: either add a spreadsheet row plus a matching entry in the `A` dict, or add a complete entry to `EXTRAS`. Then run `npm run data` and `npm test`.
 
+## Welcome video
+
+`public/demo/welcome.mp4` is a 30-second animated walkthrough (1920×1080, 30fps, silent), with a poster frame at `public/demo/welcome-poster.jpg`. It's built from code, not screen-recorded:
+
+- `demo/stage.html` and `demo/stage.js` are the composition. Every frame is a pure function of time, and the phone screen is an iframe styled by the site's real `app/globals.css` at a real 390px width.
+- `scripts/demo-data.test.ts` pulls the results shown in the video from the live engine, so the video always matches the site.
+- `demo/render.mjs` captures 900 frames with Playwright and encodes them with ffmpeg.
+
+```bash
+npm run build        # the video uses the site's own font files
+npm run demo         # writes public/demo/welcome.mp4 and the poster (~2 min)
+DEMO_URL=notfeelingyou.co.uk npm run demo   # change the address on the end card
+node demo/render.mjs --build                # preview: open demo/dist/index.html via any local server
+```
+
+Needs ffmpeg on the PATH (or `FFMPEG=/path/to/ffmpeg`).
+
 ## Typography
 
 Two families, one rule. Fraunces is used for headings only: the page title, each question, and idea titles. Everything else, including the wordmark, labels, buttons and body text, is IBM Plex Sans.
