@@ -284,6 +284,73 @@ main {
   border-left: 2px solid var(--accent);
 }
 
+/* The "How it works" video: a quiet link, then a modal player. */
+.demo-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 17px;
+  min-height: 44px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: var(--border-strong);
+}
+.demo-link:hover {
+  text-decoration-color: var(--ink);
+}
+.demo-length {
+  color: var(--muted);
+  /* The actions row is inline-flex, which drops the space before this. */
+  margin-left: 0.3em;
+}
+
+.demo-dialog {
+  width: min(960px, calc(100vw - 2 * var(--gutter)));
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: var(--ink);
+  color: var(--paper);
+  overflow: visible;
+}
+.demo-dialog::backdrop {
+  background: rgba(31, 33, 29, 0.72);
+}
+.demo-dialog[open] {
+  animation: step-in 200ms var(--ease);
+}
+.demo-frame {
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  line-height: 0;
+}
+.demo-frame video {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: var(--paper);
+}
+.demo-close {
+  display: block;
+  margin-left: auto;
+  min-height: 48px;
+  padding: 0 18px;
+  background: none;
+  border: 0;
+  color: var(--paper);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.demo-dialog :focus-visible {
+  outline-color: var(--accent);
+}
+
 /* ───────── Question flow ───────── */
 
 .flow {
