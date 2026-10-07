@@ -1,0 +1,14 @@
+{
+  "name": "card-ledger-alpha",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:browser": "playwright test",
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/dev.mjs",
+    "reference:import": "node scripts/import-reference.mjs"
+  },
+  "devDependencies": {"esbuild": "0.25.10", "@playwright/test": "1.56.1"}
+}

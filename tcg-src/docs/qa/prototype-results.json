@@ -1,0 +1,34 @@
+[
+  {
+    "width": 1440,
+    "liveBlocked": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://jsip.uk/tcg/"
+  },
+  {
+    "width": 1440,
+    "shelf": 9,
+    "pockets": 9,
+    "undoStyle": {
+      "color": "rgb(16, 30, 73)",
+      "background": "rgb(255, 218, 34)",
+      "border": "rgb(255, 255, 255)"
+    },
+    "zeroSaveAdds": "003/103, owned 1",
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "liveBlocked": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://jsip.uk/tcg/"
+  },
+  {
+    "width": 390,
+    "shelf": 9,
+    "pockets": 9,
+    "undoStyle": {
+      "color": "rgb(16, 30, 73)",
+      "background": "rgb(255, 218, 34)",
+      "border": "rgb(255, 255, 255)"
+    },
+    "zeroSaveAdds": "003/103, owned 1",
+    "overflow": false
+  }
+]
