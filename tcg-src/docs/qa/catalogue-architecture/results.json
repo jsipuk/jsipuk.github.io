@@ -1,0 +1,23 @@
+{
+  "build": "ef0451124d8589761ca17e39c50a92ce8c8c977a",
+  "origin": "http://127.0.0.1:4174/tcg/",
+  "liveOriginBrowser": "Blocked by environment network policy; GitHub Pages deployment succeeded",
+  "results": [
+    {
+      "width": 1440,
+      "realRegistry": "6 researching releases disabled",
+      "realSavedReference": "Charizard 4/102 explicit unknown-context confirmation and Undo",
+      "fixture": "4 physical copies, 3 unique cards, ×2 on 94; fixed nine pockets; reload persisted",
+      "interactions": "Escape/cancel discard, keyboard zoom, missing-slot Add/Undo, reset cancel/confirm/Undo, 200% zoom",
+      "horizontalOverflowAt200Percent": 0
+    },
+    {
+      "width": 390,
+      "realRegistry": "6 researching releases disabled",
+      "realSavedReference": "Charizard 4/102 explicit unknown-context confirmation and Undo",
+      "fixture": "4 physical copies, 3 unique cards, ×2 on 94; fixed nine pockets; reload persisted",
+      "interactions": "Escape/cancel discard, keyboard zoom, missing-slot Add/Undo, reset cancel/confirm/Undo, 200% zoom",
+      "horizontalOverflowAt200Percent": 0
+    }
+  ]
+}
