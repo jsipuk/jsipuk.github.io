@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-07",
+  "scope": "Local generated /tcg/ build; live production QA blocked by network policy",
+  "unitTests": {
+    "passed": 12
+  },
+  "browserTests": {
+    "passed": 6,
+    "widths": [
+      1440,
+      390
+    ]
+  },
+  "runner": {
+    "status": "passed",
+    "failedTests": []
+  }
+}
