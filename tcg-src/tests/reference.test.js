@@ -12,7 +12,7 @@ import {
 import { adaptTCGdexSet, PINNED_REVISION } from "../src/providers/tcgdex.js";
 const reference = JSON.parse(
   await readFile(
-    new URL("../public/data/reference.json", import.meta.url),
+    new URL("./fixtures/legacy-reference.json", import.meta.url),
     "utf8",
   ),
 );

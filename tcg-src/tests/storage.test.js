@@ -17,7 +17,7 @@ import {
 } from "../src/domain/storage.js";
 const reference = JSON.parse(
   await readFile(
-    new URL("../public/data/reference.json", import.meta.url),
+    new URL("./fixtures/legacy-reference.json", import.meta.url),
     "utf8",
   ),
 );
@@ -47,8 +47,8 @@ test("IndexedDB migrates legacy quantities, variants, pending review and notes w
   assert.equal(old.getItem(STORAGE_KEY), raw);
   const stored = await readCollection(db);
   assert.deepEqual(stored.state, state);
-  const tx = db.transaction("collection");
-  const request = tx.objectStore("collection").get("current");
+  const tx = db.transaction("settings");
+  const request = tx.objectStore("settings").get("current");
   await new Promise((resolve) => {
     tx.oncomplete = resolve;
   });
@@ -80,7 +80,7 @@ test("transaction failure after ownership write rolls back ownership and referen
   next.reference.source.extra = "new reference";
   const put = IDBObjectStore.prototype.put;
   IDBObjectStore.prototype.put = function (...args) {
-    if (this.name === "reference") throw Error("Quota exceeded");
+    if (this.name === "referenceSets") throw Error("Quota exceeded");
     return put.apply(this, args);
   };
   try {
@@ -137,4 +137,51 @@ test("simultaneous first-time migration keeps the first committed collection", a
   assert.equal(b.revision, 1);
   db.close();
   other.close();
+});
+
+test("database v1 upgrade splits the stored ledger without resetting copies or losing legacy reference", async () => {
+  const factory = new IDBFactory();
+  const state = { ...fresh(), version: 1, notes: "迁移测试" };
+  delete state.trackedSets;
+  state.quantities = setQuantity(state, card.id, "unspecified", 3).quantities;
+  const old = await new Promise((resolve, reject) => {
+    const request = factory.open("card-ledger", 1);
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore("reference");
+      request.result.createObjectStore("collection");
+    };
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+  });
+  const tx = old.transaction(["reference", "collection"], "readwrite");
+  const { reference: ref, ...ownership } = state;
+  tx.objectStore("reference").put(ref, "current");
+  tx.objectStore("collection").put(
+    { revision: 7, state: ownership },
+    "current",
+  );
+  await new Promise((resolve) => (tx.oncomplete = resolve));
+  old.close();
+  const db = await openDatabase(factory),
+    stored = await readCollection(db);
+  assert.equal(db.version, 2);
+  for (const name of [
+    "referenceSets",
+    "referenceCards",
+    "referenceVersions",
+    "collectionEntries",
+    "settings",
+  ])
+    assert.ok(db.objectStoreNames.contains(name));
+  assert.equal(stored.revision, 7);
+  assert.equal(stored.state.version, 2);
+  assert.deepEqual(stored.state.quantities, state.quantities);
+  assert.deepEqual(stored.state.reference.cards, state.reference.cards);
+  assert.deepEqual(
+    stored.state.trackedSets,
+    state.reference.releases.map((r) => r.id),
+  );
+  assert.equal(stored.state.notes, state.notes);
+  assert.ok(stored.state.reference.releases.every((r) => r.legacy));
+  db.close();
 });

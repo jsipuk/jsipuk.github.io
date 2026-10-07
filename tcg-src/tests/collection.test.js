@@ -168,7 +168,7 @@ test("lossless backup includes reference, zeroes, variants, pending review and e
 test("invalid backups and unknown ownership identities are rejected", () => {
   const s = fresh();
   assert.throws(() => importBackup("{"));
-  assert.throws(() => importBackup(JSON.stringify({ ...s, version: 2 })));
+  assert.throws(() => importBackup(JSON.stringify({ ...s, version: 99 })));
   assert.throws(() =>
     importBackup(JSON.stringify({ ...s, quantities: { orphan: 1 } })),
   );
@@ -184,6 +184,7 @@ test("backup must retain reference metadata even when nothing is owned", () => {
       importBackup(
         JSON.stringify({
           ...s,
+          version: 1,
           reference: { ...s.reference, releases: [], cards: [] },
         }),
       ),
@@ -241,12 +242,12 @@ test("reset clears ownership and preserves reference, input, pending review and 
   assert.equal(quantity(s, cards[0].id), 3);
   assert.equal(completion(reset, releases[0].id).owned, 0);
   const backup = JSON.parse(exportBackup(s));
-  assert.equal(backup.schemaVersion, 1);
-  assert.equal(backup.applicationVersion, "0.2.0");
+  assert.equal(backup.schemaVersion, 2);
+  assert.equal(backup.applicationVersion, "0.3.0");
   assert.ok(Number.isFinite(Date.parse(backup.exportedAt)));
   assert.deepEqual(importBackup(JSON.stringify(backup)), s);
   assert.deepEqual(importBackup(JSON.stringify(s)), s);
   assert.throws(() =>
-    importBackup(JSON.stringify({ ...backup, schemaVersion: 2 })),
+    importBackup(JSON.stringify({ ...backup, schemaVersion: 99 })),
   );
 });

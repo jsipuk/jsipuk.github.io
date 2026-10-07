@@ -19,11 +19,12 @@ export function ownershipIdentity(cardId, variantId) {
 export function createCollection(reference) {
   return validateCollection({
     format: "card-ledger",
-    version: 1,
+    version: 2,
+    trackedSets: [],
     reference: structuredClone(reference),
     quantities: {},
     draft: {
-      releaseId: reference.releases[0]?.id || "",
+      releaseId: "",
       language: "en",
       text: "",
       variant: "unspecified",
@@ -80,7 +81,9 @@ export function addCopies(state, entries) {
 export function completion(state, releaseId) {
   const release = state.reference.releases.find((r) => r.id === releaseId);
   if (!release) throw Error("Unknown release");
-  const cards = state.reference.cards.filter((c) => c.releaseId === releaseId);
+  const cards = state.reference.cards.filter(
+    (c) => c.releaseId === releaseId && !c.retired,
+  );
   const owned = cards.filter((c) => quantity(state, c.id) > 0).length;
   const completeReference =
     release.checklist.complete === true &&
@@ -96,19 +99,17 @@ export function completion(state, releaseId) {
     completed: completeReference && owned === cards.length,
   };
 }
-function numberToken(value) {
-  const m = String(value)
-    .normalize("NFKC")
-    .trim()
-    .match(/^([A-Za-z]*)(\d+)([A-Za-z]*)$/);
-  return m
-    ? `${m[1].toUpperCase()}${m[2].replace(/^0+(?=\d)/, "")}${m[3].toUpperCase()}`
-    : null;
+export function numberToken(value) {
+  const normalized = String(value).normalize("NFKC").trim().toUpperCase();
+  const m = normalized.match(/^(.*?)(\d+)([A-Z]*)$/);
+  if (!m || !/^[A-Z0-9 -]*$/.test(m[1])) return null;
+  return `${m[1].replace(/\s+/g, "")}${m[2].replace(/^0+(?=\d)/, "")}${m[3]}`;
 }
 // Discovery lists possible identities; it never assigns ownership from a number alone.
+
 export function searchCandidates(
   reference,
-  { releaseId = "", language = "", raw },
+  { releaseId = "", language = "", raw, name = "" },
 ) {
   const result = (status, candidates = []) => ({
     status,
@@ -129,20 +130,27 @@ export function searchCandidates(
     (parts.length === 2 && !numberToken(parts[1]))
   )
     return result("invalid");
-  const eligible = new Set(
-    releases
-      .filter(
-        (r) =>
-          parts.length === 1 ||
-          numberToken(parts[1]) === numberToken(r.printedTotal),
-      )
-      .map((r) => r.id),
-  );
+  const eligible = new Map(releases.map((r) => [r.id, r]));
   const candidates = reference.cards
-    .filter(
-      (c) =>
-        eligible.has(c.releaseId) && numberToken(c.collectorNumber) === token,
-    )
+    .filter((c) => {
+      const release = eligible.get(c.releaseId);
+      if (
+        !release ||
+        c.retired ||
+        numberToken(c.collectorNumber) !== token ||
+        (name &&
+          !c.name
+            .normalize("NFKC")
+            .toLocaleLowerCase()
+            .includes(name.normalize("NFKC").toLocaleLowerCase()))
+      )
+        return false;
+      if (parts.length === 1) return true;
+      const printed = c.printedNumber?.split("/");
+      const denominator =
+        printed?.length === 2 ? printed[1] : release.printedTotal;
+      return numberToken(parts[1]) === numberToken(denominator);
+    })
     .map((c) => c.id);
   return result(candidates.length ? "candidate" : "missing", candidates);
 }
@@ -164,8 +172,8 @@ export function exportBackup(state) {
   return JSON.stringify(
     {
       format: "card-ledger-backup",
-      schemaVersion: 1,
-      applicationVersion: "0.2.0",
+      schemaVersion: 2,
+      applicationVersion: "0.3.0",
       exportedAt: new Date().toISOString(),
       collection: state,
     },
@@ -182,16 +190,16 @@ export function importBackup(text) {
   }
   if (parsed?.format === "card-ledger-backup") {
     if (
-      parsed.schemaVersion !== 1 ||
+      ![1, 2].includes(parsed.schemaVersion) ||
       typeof parsed.exportedAt !== "string" ||
       !Number.isFinite(Date.parse(parsed.exportedAt)) ||
       typeof parsed.applicationVersion !== "string"
     )
       throw Error("Unsupported or invalid backup envelope");
-    return validateCollection(parsed.collection);
+    return migrateCollection(validateCollection(parsed.collection));
   }
   // The first alpha exported the collection directly; keep those backups compatible.
-  return validateCollection(parsed);
+  return migrateCollection(validateCollection(parsed));
 }
 function record(value) {
   return value && typeof value === "object" && !Array.isArray(value);
@@ -200,15 +208,18 @@ function text(value) {
   return typeof value === "string" && value.length > 0;
 }
 export function validateCollection(state) {
-  if (!record(state) || state.format !== "card-ledger" || state.version !== 1)
+  if (
+    !record(state) ||
+    state.format !== "card-ledger" ||
+    ![1, 2].includes(state.version)
+  )
     throw Error("Unsupported Card Ledger backup format or version");
   const ref = state.reference;
   if (
     !record(ref) ||
     !Array.isArray(ref.releases) ||
     !Array.isArray(ref.cards) ||
-    ref.releases.length === 0 ||
-    ref.cards.length === 0 ||
+    (state.version === 1 && (!ref.releases.length || !ref.cards.length)) ||
     !record(state.quantities) ||
     !record(state.draft) ||
     !Array.isArray(state.batch)
@@ -246,7 +257,12 @@ export function validateCollection(state) {
       !record(c) ||
       !r ||
       !text(c.name) ||
-      c.id !== cardIdentity(c) ||
+      (c.id !== cardIdentity(c) &&
+        !(
+          c.catalogueSchemaVersion === 1 &&
+          c.referenceIdentity === cardIdentity(c) &&
+          text(c.id)
+        )) ||
       c.game !== r.game ||
       c.region !== r.region ||
       c.releaseKey !== r.releaseKey ||
@@ -300,5 +316,33 @@ export function validateCollection(state) {
       throw Error("Invalid pending review");
     rows.add(row.i);
   }
+  if (
+    state.version === 2 &&
+    (!Array.isArray(state.trackedSets) ||
+      state.trackedSets.some((id) => !releases.has(id)) ||
+      new Set(state.trackedSets).size !== state.trackedSets.length)
+  )
+    throw Error("Invalid tracked releases");
   return structuredClone(state);
+}
+
+export function migrateCollection(state) {
+  const valid = validateCollection(state);
+  if (valid.version === 2) return valid;
+  valid.version = 2;
+  valid.trackedSets = valid.reference.releases.map((r) => r.id);
+  valid.reference.releases = valid.reference.releases.map((r) => ({
+    ...r,
+    legacy: true,
+  }));
+  return validateCollection(valid);
+}
+export function trackRelease(state, releaseId, tracked = true) {
+  const release = state.reference.releases.find((r) => r.id === releaseId);
+  if (!release || (tracked && !release.legacy && !release.readyForApp))
+    throw Error("Release is not ready for collection entry");
+  const next = structuredClone(state);
+  next.trackedSets = next.trackedSets.filter((id) => id !== releaseId);
+  if (tracked) next.trackedSets.push(releaseId);
+  return validateCollection(next);
 }
