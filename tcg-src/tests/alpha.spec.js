@@ -405,3 +405,33 @@ test("IndexedDB updates synchronize across tabs and reference remains available 
   await expect(charizard(other).locator(".count")).toHaveText("×2");
   await expect(other.locator("#storage-warning")).toBeEmpty();
 });
+
+test("200 percent zoom keeps header, candidate confirmation and Undo usable", async ({
+  page,
+}) => {
+  await page.goto("/tcg/#add");
+  await page.locator("#unknown-set").click();
+  await page.locator("#unknown-lang").click();
+  await page.locator("#numbers").fill("4/102");
+  await page.locator("#find").click();
+  await page.locator("[data-review]").click();
+  await page.evaluate(() => (document.body.style.zoom = "2"));
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(await page.evaluate(() => innerWidth));
+  const candidate = await page.locator("[data-choose]").boundingBox();
+  expect(candidate.width).toBeGreaterThanOrEqual(44);
+  expect(candidate.height).toBeGreaterThanOrEqual(44);
+  await page.locator("[data-choose]").click();
+  await page.locator("#commit").click();
+  const undo = page.locator("#undo");
+  await expect(undo).toBeVisible();
+  expect(
+    await undo.evaluate((el) => parseFloat(getComputedStyle(el).minHeight)),
+  ).toBeGreaterThanOrEqual(44);
+  await undo.click();
+  await expect(page.locator(".summary")).toHaveText(
+    "1 ready · 0 need checking",
+  );
+  await page.evaluate(() => (document.body.style.zoom = "1"));
+});

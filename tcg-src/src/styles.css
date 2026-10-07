@@ -72,6 +72,8 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   position: relative;
   background: linear-gradient(115deg, var(--yellow) 58%, #dfedff 58%);
   border-radius: 28px 28px 0 0;
@@ -536,7 +538,7 @@ dialog::backdrop {
 }
 #toast button {
   margin-left: 12px;
-  min-height: 32px;
+  min-height: 44px;
   padding: 2px 9px;
   background: var(--yellow);
   color: var(--navy);
@@ -831,4 +833,9 @@ dialog::backdrop {
 .candidate-art .real-card-art {
   position: absolute;
   inset: 0;
+}
+
+.candidate-heading > div:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
