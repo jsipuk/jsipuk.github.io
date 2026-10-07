@@ -1,5 +1,24 @@
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
+const readSaved = (page) =>
+  page.evaluate(
+    () =>
+      new Promise((resolve, reject) => {
+        const request = indexedDB.open("card-ledger", 1);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result,
+            tx = db.transaction(["reference", "collection"]);
+          const ref = tx.objectStore("reference").get("current"),
+            own = tx.objectStore("collection").get("current");
+          tx.oncomplete = () => {
+            db.close();
+            resolve({ ...own.result.state, reference: ref.result });
+          };
+          tx.onabort = () => reject(tx.error);
+        };
+      }),
+  );
 const base = "pokemon:international:base-set-1999:en";
 const openBase = async (page) => {
   await page.locator('[data-nav="collection"]').click();
@@ -83,6 +102,7 @@ test("real collection preserves binder UI, persists quantities and round-trips a
   await page.locator("#plus").click();
   await page.locator("#save").click();
   await expect(charizard(page).locator(".count")).toHaveText("×4");
+  await expect(charizard(page)).toBeFocused();
   await expect(page.locator("#completion")).toContainText("1 / 102 unique");
   await page.locator('[data-filter="duplicates"]').click();
   await expect(page.locator(".pocket:not(.filtered-out)")).toHaveCount(1);
@@ -108,7 +128,7 @@ test("real collection preserves binder UI, persists quantities and round-trips a
   await page.locator("#backup").click();
   const download = await downloadPromise;
   const backup = await readFile(await download.path(), "utf8");
-  const parsed = JSON.parse(backup);
+  const parsed = JSON.parse(backup).collection;
   expect(parsed.batch).toHaveLength(1);
   expect(Object.values(parsed.quantities).reduce((a, b) => a + b, 0)).toBe(4);
   expect(parsed.reference.cards).toHaveLength(889);
@@ -125,9 +145,8 @@ test("real collection preserves binder UI, persists quantities and round-trips a
   });
   await expect(page.locator("#backup-preview")).toContainText("4 copies");
   await page.locator("#restore-backup").click();
-  const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("cardledger-alpha-v1")),
-  );
+  await expect(page.locator("#toast")).toContainText("Collection restored");
+  const saved = await readSaved(page);
   expect(saved).toEqual(parsed);
   await page.reload();
   await openBase(page);
@@ -155,27 +174,27 @@ test("matching cannot use number alone; invalid backup and failed storage preser
   await page.locator("#unknown-set").click();
   await page.locator("#numbers").fill("4/102");
   await page.locator("#find").click();
-  await expect(page.locator(".summary")).toHaveText("0 ready · 1 need checking");
+  await expect(page.locator(".summary")).toHaveText(
+    "0 ready · 1 need checking",
+  );
   await expect(page.locator("#commit")).toHaveCount(0);
   await page.locator('[data-nav="catalogue"]').click();
-  const before = await page.evaluate(() =>
-    localStorage.getItem("cardledger-alpha-v1"),
-  );
+  const before = await readSaved(page);
   await page.locator("#import-backup").setInputFiles({
     name: "broken.json",
     mimeType: "application/json",
     buffer: Buffer.from("{broken"),
   });
   await expect(page.locator(".import-error")).toContainText("not valid JSON");
-  expect(
-    await page.evaluate(() => localStorage.getItem("cardledger-alpha-v1")),
-  ).toEqual(before);
+  expect(await readSaved(page)).toEqual(before);
   await openBase(page);
   await page.locator(".pocket").first().click();
   await page.locator("#plus").click();
   await page.evaluate(() => {
-    Storage.prototype.setItem = function () {
-      throw Error("Quota exceeded");
+    const transaction = IDBDatabase.prototype.transaction;
+    IDBDatabase.prototype.transaction = function (...args) {
+      if (args[1] === "readwrite") throw Error("Quota exceeded");
+      return transaction.apply(this, args);
     };
   });
   await page.locator("#save").click();
@@ -194,9 +213,7 @@ test("matching cannot use number alone; invalid backup and failed storage preser
     });
   expect(feedbackIsExposed).toBe(true);
   await expect(page.locator("#detail")).toBeVisible();
-  expect(
-    await page.evaluate(() => localStorage.getItem("cardledger-alpha-v1")),
-  ).toEqual(before);
+  expect(await readSaved(page)).toEqual(before);
 });
 test("corrupt storage is not silently overwritten and can be recovered by importing a backup", async ({
   page,
@@ -207,14 +224,30 @@ test("corrupt storage is not silently overwritten and can be recovered by import
   const d = page.waitForEvent("download");
   await page.locator("#backup").click();
   const backup = await readFile(await (await d).path(), "utf8");
-  await page.evaluate(() =>
-    localStorage.setItem("cardledger-alpha-v1", "{damaged"),
+  await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const request = indexedDB.open("card-ledger", 1);
+        request.onsuccess = () => {
+          const db = request.result,
+            tx = db.transaction("collection", "readwrite"),
+            store = tx.objectStore("collection"),
+            get = store.get("current");
+          get.onsuccess = () => {
+            const record = get.result;
+            record.state.version = 999;
+            store.put(record, "current");
+          };
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+        };
+      }),
   );
   await page.reload();
   await expect(page.locator("#storage-warning")).toContainText("preserved");
-  expect(
-    await page.evaluate(() => localStorage.getItem("cardledger-alpha-v1")),
-  ).toBe("{damaged");
+  expect((await readSaved(page)).version).toBe(999);
   await page.locator("#import-backup").setInputFiles({
     name: "recover.json",
     mimeType: "application/json",
@@ -222,11 +255,7 @@ test("corrupt storage is not silently overwritten and can be recovered by import
   });
   await page.locator("#restore-backup").click();
   await expect(page.locator("#storage-warning")).toBeEmpty();
-  expect(
-    await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("cardledger-alpha-v1")),
-    ),
-  ).toEqual(JSON.parse(backup));
+  expect(await readSaved(page)).toEqual(JSON.parse(backup).collection);
 });
 
 test("Don't know discovers real cards and requires release/language confirmation", async ({
@@ -272,9 +301,107 @@ test("Don't know discovers real cards and requires release/language confirmation
     "0 ready · 1 need checking",
   );
   await openBase(page);
-  await expect(charizard(page)).toHaveAttribute(
-    "aria-label",
-    /owned.*1/,
-  );
+  await expect(charizard(page)).toHaveAttribute("aria-label", /owned.*1/);
   await expect(page.locator("#completion")).toContainText("1 / 102 unique");
+});
+
+test("legacy migration, safe reset, Undo and active binder context", async ({
+  page,
+}, testInfo) => {
+  const reference = JSON.parse(
+    await readFile(
+      new URL("../public/data/reference.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const c = reference.cards.find(
+    (c) => c.releaseId === base && c.collectorNumber === "4",
+  );
+  const legacy = {
+    format: "card-ledger",
+    version: 1,
+    reference,
+    quantities: { [JSON.stringify([c.id, "unspecified"])]: 3 },
+    draft: {
+      releaseId: base,
+      language: "en",
+      text: "",
+      variant: "unspecified",
+    },
+    batch: [],
+    notes: "收藏",
+  };
+  const original = JSON.stringify(legacy);
+  await page.addInitScript((value) => {
+    if (!localStorage.getItem("cardledger-alpha-v1"))
+      localStorage.setItem("cardledger-alpha-v1", value);
+  }, original);
+  await page.goto("/tcg/");
+  await openBase(page);
+  await expect(charizard(page).locator(".count")).toHaveText("×3");
+  expect(await readSaved(page)).toEqual(legacy);
+  await page.locator('[data-nav="catalogue"]').click();
+  await page.locator("#reset-collection").click();
+  await page.locator("#cancel-reset").click();
+  await expect(page.locator("#detail")).not.toBeVisible();
+  expect((await readSaved(page)).quantities).toEqual(legacy.quantities);
+  await page.locator("#reset-collection").click();
+  const download = page.waitForEvent("download");
+  await page.locator("#reset-backup").click();
+  expect(
+    JSON.parse(await readFile(await (await download).path(), "utf8"))
+      .collection,
+  ).toEqual(legacy);
+  await page.screenshot({
+    path: testInfo.outputPath("reset-confirmation.png"),
+    fullPage: true,
+  });
+  await page.locator("#confirm-reset").click();
+  await expect(page.locator("#detail")).not.toBeVisible();
+  expect((await readSaved(page)).quantities).toEqual({});
+  await page.locator("#undo").click();
+  await expect
+    .poll(async () => (await readSaved(page)).quantities)
+    .toEqual(legacy.quantities);
+  await page.locator("#reset-collection").click();
+  await page.locator("#confirm-reset").click();
+  await expect(page.locator("#detail")).not.toBeVisible();
+  await page.reload();
+  const reset = await readSaved(page);
+  expect(reset.quantities).toEqual({});
+  expect(reset.reference).toEqual(reference);
+  expect(reset.notes).toBe("收藏");
+  expect(
+    await page.evaluate(() => localStorage.getItem("cardledger-alpha-v1")),
+  ).toBe(original);
+  await page.locator('[data-nav="collection"]').click();
+  await page
+    .locator("[data-binder]")
+    .filter({ has: page.locator(".label", { hasText: /^Jungle$/ }) })
+    .click();
+  await expect(page.locator(".pockets")).toBeVisible();
+  await page.locator('[data-nav="add"]').click();
+  await expect(page.locator("#set option:checked")).toHaveText(
+    "Jungle · English",
+  );
+});
+
+test("IndexedDB updates synchronize across tabs and reference remains available offline", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/tcg/");
+  await expect(page.locator("[data-binder]")).toHaveCount(9);
+  const other = await context.newPage();
+  await other.goto("/tcg/");
+  await openBase(other);
+  await add(page, "4/102\n4/102");
+  await page.locator("#commit").click();
+  await expect(charizard(other).locator(".count")).toHaveText("×2");
+  await expect(other.locator("#toast")).toContainText("another tab");
+  await other.route("**/data/reference.json", (route) => route.abort());
+  await other.reload();
+  await openBase(other);
+  await expect(charizard(other).locator(".count")).toHaveText("×2");
+  await expect(other.locator("#storage-warning")).toBeEmpty();
 });

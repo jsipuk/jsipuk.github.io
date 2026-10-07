@@ -21,11 +21,21 @@ Open http://127.0.0.1:4174/tcg/. The dev command builds first and serves **only*
 the generated `tcg` directory over loopback. Restart it after source changes.
 Alternatively, `npm run build` then serve `tcg/` with any static server.
 
+Main collection data lives in versioned IndexedDB stores with reference and
+ownership stored separately. Existing `cardledger-alpha-v1` collections migrate
+on first use; the previous localStorage document stays untouched as a safety copy.
+Demo data is never migrated.
+
 Try Add cards → Base Set → English → `004/102`, then Find cards and Add ready
 cards. Repeating the number adds copies. Open the Base Set binder and tap
 Charizard to edit quantities; select a variant to track it separately. In Catalogue,
 Download lossless backup exports the entire ledger; Import backup validates and
 previews it before replacing local data. CSV/print are filtered views, not backups.
+“Don’t know” searches all eligible reference releases and languages, then asks you
+to confirm a candidate’s image, release, language and number, even if only one is
+found. Searching alone never adds ownership. An empty Add form uses the active
+binder as context. Catalogue → Reset Collection requires confirmation, offers a
+backup first, preserves the reference and pending input, and supports Undo.
 
 ## Tests and build
 
@@ -40,7 +50,8 @@ The Playwright configuration uses `/usr/bin/chromium` when available. Browser
 QA runs at 1440px and 390px and covers real-card addition, pending review undo,
 reload persistence, variant quantities, unique ownership, Got/Need/Duplicate
 filters, readable Undo, explicit zero, backup round trips, invalid imports,
-failed writes, and corrupt-storage recovery.
+failed writes, migration, reset/Undo, unknown-context discovery, multiple tabs,
+cached reference reload and corrupt-storage recovery.
 
 `npm run build` uses esbuild to produce hashed JS/CSS, copy the pinned reference
 and decorative cover atlas, and regenerate `../tcg/index.html` with relative URLs.

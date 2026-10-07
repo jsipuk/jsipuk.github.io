@@ -156,9 +156,22 @@ export function matchCards(reference, { releaseId, language, raw }) {
   });
   return { status, candidates };
 }
+export function resetCollection(state) {
+  return validateCollection({ ...structuredClone(state), quantities: {} });
+}
 export function exportBackup(state) {
   validateCollection(state);
-  return JSON.stringify(state, null, 2);
+  return JSON.stringify(
+    {
+      format: "card-ledger-backup",
+      schemaVersion: 1,
+      applicationVersion: "0.2.0",
+      exportedAt: new Date().toISOString(),
+      collection: state,
+    },
+    null,
+    2,
+  );
 }
 export function importBackup(text) {
   let parsed;
@@ -167,6 +180,17 @@ export function importBackup(text) {
   } catch {
     throw Error("Backup is not valid JSON");
   }
+  if (parsed?.format === "card-ledger-backup") {
+    if (
+      parsed.schemaVersion !== 1 ||
+      typeof parsed.exportedAt !== "string" ||
+      !Number.isFinite(Date.parse(parsed.exportedAt)) ||
+      typeof parsed.applicationVersion !== "string"
+    )
+      throw Error("Unsupported or invalid backup envelope");
+    return validateCollection(parsed.collection);
+  }
+  // The first alpha exported the collection directly; keep those backups compatible.
   return validateCollection(parsed);
 }
 function record(value) {

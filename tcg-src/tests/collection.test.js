@@ -12,14 +12,10 @@ import {
   completion,
   matchCards,
   searchCandidates,
+  resetCollection,
   exportBackup,
   importBackup,
 } from "../src/domain/collection.js";
-import {
-  loadCollection,
-  saveCollection,
-  STORAGE_KEY,
-} from "../src/domain/storage.js";
 const release = (key, language = "en", region = "international") => ({
   id: `${region}:${key}:${language}`,
   game: "pokemon",
@@ -168,20 +164,8 @@ test("lossless backup includes reference, zeroes, variants, pending review and e
   ];
   s.extra = { futureNotes: ["keep me"] };
   assert.deepEqual(importBackup(exportBackup(s)), s);
-  const storage = {
-    value: null,
-    getItem() {
-      return this.value;
-    },
-    setItem(k, v) {
-      assert.equal(k, STORAGE_KEY);
-      this.value = v;
-    },
-  };
-  saveCollection(storage, s);
-  assert.deepEqual(loadCollection(storage, fresh()).state, s);
 });
-test("invalid imports fail atomically; corrupted storage is preserved for recovery", () => {
+test("invalid backups and unknown ownership identities are rejected", () => {
   const s = fresh();
   assert.throws(() => importBackup("{"));
   assert.throws(() => importBackup(JSON.stringify({ ...s, version: 2 })));
@@ -191,30 +175,6 @@ test("invalid imports fail atomically; corrupted storage is preserved for recove
   const duplicate = structuredClone(s);
   duplicate.reference.cards.push(duplicate.reference.cards[0]);
   assert.throws(() => importBackup(JSON.stringify(duplicate)));
-  const storage = {
-    getItem() {
-      return "{broken";
-    },
-    setItem() {
-      throw Error("must not write");
-    },
-  };
-  const result = loadCollection(storage, s);
-  assert.ok(result.error);
-  assert.equal(result.raw, "{broken");
-  assert.deepEqual(result.state, s);
-  assert.throws(
-    () =>
-      saveCollection(
-        {
-          setItem() {
-            throw Error("QuotaExceeded");
-          },
-        },
-        s,
-      ),
-    /QuotaExceeded/,
-  );
 });
 
 test("backup must retain reference metadata even when nothing is owned", () => {
@@ -268,5 +228,25 @@ test("unknown context discovers candidates without assigning identity", () => {
   assert.equal(
     searchCandidates(ref, { raw: "1", releaseId: "unknown" }).status,
     "context",
+  );
+});
+
+test("reset clears ownership and preserves reference, input, pending review and UTF-8 notes", () => {
+  let s = setQuantity(fresh(), cards[0].id, "holo", 3);
+  s = setQuantity(s, cards[3].id, "unspecified", 2);
+  s.notes = { [cards[3].id]: "简体中文 · 收藏" };
+  s.draft.text = "1/102";
+  const reset = resetCollection(s);
+  assert.deepEqual(reset, { ...s, quantities: {} });
+  assert.equal(quantity(s, cards[0].id), 3);
+  assert.equal(completion(reset, releases[0].id).owned, 0);
+  const backup = JSON.parse(exportBackup(s));
+  assert.equal(backup.schemaVersion, 1);
+  assert.equal(backup.applicationVersion, "0.2.0");
+  assert.ok(Number.isFinite(Date.parse(backup.exportedAt)));
+  assert.deepEqual(importBackup(JSON.stringify(backup)), s);
+  assert.deepEqual(importBackup(JSON.stringify(s)), s);
+  assert.throws(() =>
+    importBackup(JSON.stringify({ ...backup, schemaVersion: 2 })),
   );
 });

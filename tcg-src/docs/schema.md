@@ -1,7 +1,9 @@
 # Collection schema v1
 
-A backup is the complete stored JSON document. `format: "card-ledger"` and
-`version: 1` identify it. Unsupported versions are refused, never silently
+Backups use an envelope with `format: "card-ledger-backup"`, `schemaVersion: 1`,
+`applicationVersion` and ISO `exportedAt`, containing the complete ledger in
+`collection`. The ledger has `format: "card-ledger"` and `version: 1`. Direct
+ledger backups from the first alpha remain importable. Unsupported versions are refused, never silently
 converted. Unknown extension fields are retained in valid v1 backup round trips.
 
 ## Identity and reference
@@ -14,9 +16,11 @@ A card's app ID is the JSON tuple:
 
 All values are nonempty strings. `collectorNumber` is an opaque reference string,
 not a global integer. Source numbers are preserved literally. Matching may
-normalize padded user input only within an explicitly chosen release and language;
-multiple candidates require confirmation. A printed denominator only validates
-the selected release. It does not identify a set or a card globally.
+normalize padded user input to discover candidates. A printed denominator filters
+eligible reference releases, but never uniquely identifies a release or card.
+Without full release/language context, every discovery result requires explicit
+confirmation of a complete card identity, even when there is only one candidate.
+Fully contextual matching remains a separate strict domain function.
 
 Release metadata separately contains `game`, `region`, `releaseKey`, `language`,
 name, date, printed total and checklist coverage. The curated app release key
@@ -59,8 +63,24 @@ owned cards, releases and pending rows before replacement. There is no automatic
 merge or lossy matching during restore.
 
 All quantity and batch operations produce a new collection. UI state changes
-only after localStorage accepts the entire validated document. Failed writes
-leave the current and persisted collection intact. Undo restores the previous
-complete document through the same persistence boundary. Invalid or newer saved
-data is preserved for download/recovery and editing is blocked until recovery.
-The real ledger uses `cardledger-alpha-v1`; it never converts prototype data.
+only after the IndexedDB transaction commits. Database `card-ledger` version 1
+has `reference` and `collection` stores, each with a `current` record. The latter
+stores `{ revision, state }`; `state` includes ownership, input, pending review
+and extensions but excludes reference metadata. Changed reference and ownership
+write in one transaction. Ordinary draft/quantity saves do not rewrite unchanged
+reference data. A saved reference is available on reload without a network fetch.
+
+Writes are queued per tab and evaluate updates against the last committed state.
+Each write checks the persisted revision inside its read/write transaction;
+stale tabs cannot silently overwrite another tab. BroadcastChannel refreshes
+other open tabs. Failed or aborted transactions preserve both stores. Undo
+restores the previous complete ledger through the same persistence boundary.
+Reset clears only `quantities`, requires confirmation, offers a backup and Undo,
+and preserves reference, drafts, review and extension metadata.
+
+On first open, a valid `cardledger-alpha-v1` localStorage ledger is migrated
+transactionally. Its original document remains untouched as a safety copy.
+Once IndexedDB has a collection it takes precedence over the legacy key. The
+demo key is never migrated. Invalid or newer saved data is preserved for download;
+editing is blocked until recovery. Explicit backup replacement can recover a
+corrupt database transactionally. Browser-cleared data still requires a backup.

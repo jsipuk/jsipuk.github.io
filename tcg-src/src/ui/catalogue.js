@@ -1,4 +1,9 @@
-import { quantity, exportBackup, importBackup } from "../domain/collection.js";
+import {
+  quantity,
+  exportBackup,
+  importBackup,
+  resetCollection,
+} from "../domain/collection.js";
 import { passes } from "./binders.js";
 import {
   $,
@@ -20,14 +25,36 @@ export function renderCatalogue(ctx) {
   const rows = state.reference.cards.filter(
     (c) => c.releaseId === release?.id && passes(state, c, ctx.exportMode),
   );
-  ctx.app.innerHTML = `<div class="form"><h1>Catalogue</h1>${note()}<div class="panel"><h2>Collection backup</h2><p>Save all quantities, variants, reference metadata and pending review. Import restores the whole collection on this device.</p><button class="primary wide" id="backup" ${ctx.hasStorageError() ? "disabled" : ""}>Download lossless backup</button><label for="import-backup">Import backup</label><input id="import-backup" type="file" accept="application/json,.json"><div id="backup-preview" aria-live="polite"></div></div><label for="export-set">Release and language</label><select id="export-set">${releaseOptions(state, ctx.exportRelease)}</select><p class="muted">${escape(langName(release?.language || ""))}</p><label>Include</label><div class="chips">${["all", "got", "need", "duplicates"].map((f) => `<button data-mode="${f}" class="${f === ctx.exportMode ? "selected" : ""}">${f[0].toUpperCase() + f.slice(1)}</button>`).join("")}</div><div class="panel"><h2>Preview</h2><div class="table-scroll">${rows.length ? table(state, rows) : "<p>No entries match this filter.</p>"}</div><p class="muted">${rows.length} unique entries${ctx.exportMode === "duplicates" ? " · " + rows.reduce((n, c) => n + Math.max(0, quantity(state, c.id) - 1), 0) + " spare copies" : ""}</p></div><button class="primary wide" id="csv">Download CSV</button><button class="wide" id="print">Print / Save as PDF</button><small>CSV and print show this filtered catalogue. Use the lossless JSON backup to restore your collection.</small><details class="panel"><summary>Reference data</summary><p>${escape(state.reference.source?.name || "Imported reference")} · ${state.reference.cards.length} known cards</p><p>Checklists and variant coverage have not been certified complete. Simplified Chinese reference data is not included in the English alpha.</p><p><a href="https://github.com/tcgdex/cards-database" target="_blank" rel="noreferrer">TCGdex source</a> · <a href="./data/TCGDEX-LICENSE.txt">Database license</a></p></details></div>`;
-  $("#backup").onclick = () => {
+  ctx.app.innerHTML = `<div class="form"><h1>Catalogue</h1>${note()}<div class="panel"><h2>Collection backup</h2><p>Save all quantities, variants, reference metadata and pending review. Import restores the whole collection on this device.</p><button class="primary wide" id="backup" ${ctx.hasStorageError() ? "disabled" : ""}>Download lossless backup</button><label for="import-backup">Import backup</label><input id="import-backup" type="file" accept="application/json,.json"><div id="backup-preview" aria-live="polite"></div><button class="wide" id="reset-collection" ${ctx.hasStorageError() ? "disabled" : ""}>Reset Collection</button></div><label for="export-set">Release and language</label><select id="export-set">${releaseOptions(state, ctx.exportRelease)}</select><p class="muted">${escape(langName(release?.language || ""))}</p><label>Include</label><div class="chips">${["all", "got", "need", "duplicates"].map((f) => `<button data-mode="${f}" class="${f === ctx.exportMode ? "selected" : ""}">${f[0].toUpperCase() + f.slice(1)}</button>`).join("")}</div><div class="panel"><h2>Preview</h2><div class="table-scroll">${rows.length ? table(state, rows) : "<p>No entries match this filter.</p>"}</div><p class="muted">${rows.length} unique entries${ctx.exportMode === "duplicates" ? " · " + rows.reduce((n, c) => n + Math.max(0, quantity(state, c.id) - 1), 0) + " spare copies" : ""}</p></div><button class="primary wide" id="csv">Download CSV</button><button class="wide" id="print">Print / Save as PDF</button><small>CSV and print show this filtered catalogue. Use the lossless JSON backup to restore your collection.</small><details class="panel"><summary>Reference data</summary><p>${escape(state.reference.source?.name || "Imported reference")} · ${state.reference.cards.length} known cards</p><p>Checklists and variant coverage have not been certified complete. Simplified Chinese reference data is not included in the English alpha.</p><p><a href="https://github.com/tcgdex/cards-database" target="_blank" rel="noreferrer">TCGdex source</a> · <a href="./data/TCGDEX-LICENSE.txt">Database license</a></p></details></div>`;
+  $("#backup").onclick = async () => {
+    await ctx.flush();
     try {
       download(exportBackup(ctx.state), "card-ledger-backup.json");
       ctx.toast("Lossless collection backup prepared.");
     } catch (error) {
       ctx.toast(error.message);
     }
+  };
+  $("#reset-collection").onclick = () => {
+    ctx.modal.innerHTML = `<div class="row between"><h2 id="detail-title">Reset your collection?</h2><button id="close" aria-label="Cancel reset">×</button></div><p>This will remove all recorded ownership quantities and return your collection to zero. Card and set reference data will remain.</p><p>Download a backup first if you want to keep your current collection. Pending review entries are kept; they will not be added automatically.</p><button id="reset-backup" class="wide">Download backup before reset</button><button id="confirm-reset" class="primary wide">Reset all ownership quantities</button><button id="cancel-reset" class="wide">Cancel</button>`;
+    ctx.openModal();
+    $("#close").onclick = ctx.closeModal;
+    $("#cancel-reset").onclick = ctx.closeModal;
+    $("#reset-backup").onclick = async () => {
+      await ctx.flush();
+      download(exportBackup(ctx.state), "card-ledger-before-reset.json");
+      ctx.toast("Backup prepared. Reset has not happened yet.");
+    };
+    $("#confirm-reset").onclick = async () => {
+      await ctx.change(
+        resetCollection,
+        "Collection reset. Reference cards were kept.",
+        () => {
+          ctx.modal.close();
+          ctx.render();
+        },
+      );
+    };
   };
   $("#import-backup").onchange = async (e) => {
     const file = e.target.files[0];
@@ -50,8 +77,8 @@ export function renderCatalogue(ctx) {
         preview.innerHTML = "";
         $("#import-backup").value = "";
       };
-      $("#restore-backup").onclick = () => {
-        if (ctx.save(imported, { recovery: true })) {
+      $("#restore-backup").onclick = async () => {
+        if (await ctx.save(imported, { recovery: true })) {
           ctx.currentRelease = null;
           ctx.exportRelease = imported.reference.releases[0]?.id;
           ctx.page = 0;

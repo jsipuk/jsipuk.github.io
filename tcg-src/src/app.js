@@ -1,6 +1,11 @@
 import "./styles.css";
 import { createCollection, validateCollection } from "./domain/collection.js";
-import { loadCollection, saveCollection } from "./domain/storage.js";
+import {
+  openDatabase,
+  readCollection,
+  loadCollection,
+  saveCollection,
+} from "./domain/storage.js";
 import { loadReference } from "./providers/reference.js";
 import { $, escape, download } from "./ui/helpers.js";
 import { renderAdd, renderReview } from "./ui/add.js";
@@ -10,8 +15,11 @@ import { renderCatalogue } from "./ui/catalogue.js";
 const app = $("#app"),
   modal = $("#detail");
 let storage,
+  channel,
+  pending = Promise.resolve(),
   loaded,
   previousFocus,
+  focusSelector,
   renderVersion = 0;
 const ctx = {
   app,
@@ -51,45 +59,81 @@ ctx.toast = (message, undo) => {
   clearTimeout(ctx.toast.timer);
   ctx.toast.timer = setTimeout(() => (el.style.display = "none"), 7000);
   if (undo)
-    $("#undo").onclick = () => {
-      if (undo() !== false) el.style.display = "none";
+    $("#undo").onclick = async () => {
+      if ((await undo()) !== false) el.style.display = "none";
     };
 };
-ctx.save = (next, { recovery = false } = {}) => {
-  if (loaded.error && !recovery) {
-    ctx.toast("Saved data needs recovery. Import a valid backup in Catalogue.");
-    return false;
-  }
-  try {
-    const valid = validateCollection(next);
-    saveCollection(storage, valid);
-    ctx.state = valid;
-    if (recovery) {
-      loaded.error = null;
-      $("#storage-warning").innerHTML = "";
+// Evaluate updates in order, after earlier transactions have committed.
+ctx.save = (update, { recovery = false } = {}) => {
+  const operation = pending.then(async () => {
+    if (loaded.error && !recovery) {
+      ctx.toast(
+        "Saved data needs recovery. Reload or import a valid backup in Catalogue.",
+      );
+      return false;
     }
-    return true;
-  } catch (error) {
-    ctx.toast(
-      `Could not save: ${error.message}. Your saved collection is unchanged.`,
-    );
-    return false;
-  }
-};
-ctx.hasStorageError = () => Boolean(loaded?.error);
-ctx.change = (next, message, after = ctx.render, afterUndo = ctx.render) => {
-  const before = structuredClone(ctx.state);
-  if (!ctx.save(next)) return false;
-  after();
-  ctx.toast(message, () => {
-    if (!ctx.save(before)) return false;
-    afterUndo();
-    return true;
+    try {
+      const next = typeof update === "function" ? update(ctx.state) : update;
+      const valid = validateCollection(next);
+      const revision = await saveCollection(storage, valid, loaded.revision, {
+        recovery,
+      });
+      ctx.state = valid;
+      loaded.revision = revision;
+      if (recovery) {
+        loaded.error = null;
+        $("#storage-warning").innerHTML = "";
+      }
+      channel?.postMessage({ revision });
+      return true;
+    } catch (error) {
+      if (error.code === "STALE_REVISION") loaded.error = error.message;
+      ctx.toast(
+        `Could not save: ${error.message}. Your saved collection is unchanged.`,
+      );
+      return false;
+    }
   });
-  return true;
+  pending = operation;
+  return operation;
+};
+ctx.flush = () => pending;
+ctx.hasStorageError = () => Boolean(loaded?.error);
+ctx.change = async (
+  update,
+  message,
+  after = ctx.render,
+  afterUndo = ctx.render,
+) => {
+  if (ctx.changing) return false;
+  ctx.changing = true;
+  let before;
+  try {
+    const saved = await ctx.save((state) => {
+      before = structuredClone(state);
+      return typeof update === "function" ? update(state) : update;
+    });
+    if (!saved) return false;
+    after();
+    ctx.toast(message, async () => {
+      if (!(await ctx.save(before))) return false;
+      afterUndo();
+      return true;
+    });
+    return true;
+  } finally {
+    ctx.changing = false;
+  }
 };
 ctx.openModal = () => {
   previousFocus = document.activeElement;
+  focusSelector = previousFocus?.dataset.card
+    ? `[data-card="${CSS.escape(previousFocus.dataset.card)}"]`
+    : previousFocus?.dataset.review
+      ? `[data-review="${CSS.escape(previousFocus.dataset.review)}"]`
+      : previousFocus?.id
+        ? `#${CSS.escape(previousFocus.id)}`
+        : null;
   modal.classList.remove("closing");
   modal.showModal();
 };
@@ -106,7 +150,11 @@ ctx.closeModal = () => {
 };
 function restoreFocus() {
   if (previousFocus?.isConnected) previousFocus.focus();
-  else ctx.app.querySelector("button")?.focus();
+  else
+    (
+      (focusSelector && ctx.app.querySelector(focusSelector)) ||
+      ctx.app.querySelector("button")
+    )?.focus();
 }
 modal.addEventListener("cancel", (e) => {
   e.preventDefault();
@@ -125,7 +173,27 @@ ctx.render = () => {
   } else if (ctx.view === "catalogue") renderCatalogue(ctx);
   else renderCollection(ctx);
 };
-ctx.navigate = (view) => {
+ctx.navigate = async (view) => {
+  await pending;
+  if (
+    view === "add" &&
+    ctx.currentRelease &&
+    !ctx.state.draft.text.trim() &&
+    !ctx.state.batch.length
+  ) {
+    const release = ctx.state.reference.releases.find(
+      (r) => r.id === ctx.currentRelease,
+    );
+    if (release)
+      await ctx.save((state) => ({
+        ...state,
+        draft: {
+          ...state.draft,
+          releaseId: release.id,
+          language: release.language,
+        },
+      }));
+  }
   ctx.view = view;
   ctx.review = false;
   location.hash = view;
@@ -150,20 +218,33 @@ ctx.animateBinder = (id, cover) => {
   );
 };
 try {
-  const reference = await loadReference();
+  let cached, databaseError;
   try {
-    storage = window.localStorage;
-  } catch {
-    storage = {
-      getItem() {
-        throw Error("Browser storage unavailable");
-      },
-      setItem() {
-        throw Error("Browser storage unavailable");
-      },
-    };
+    storage = await openDatabase();
+    cached = await readCollection(storage);
+  } catch (error) {
+    databaseError = error;
   }
-  loaded = loadCollection(storage, createCollection(reference));
+  const reference = cached?.state.reference || (await loadReference());
+  if (!storage) {
+    loaded = {
+      state: createCollection(reference),
+      error: databaseError.message,
+      revision: 0,
+    };
+  } else {
+    let legacy;
+    try {
+      legacy = window.localStorage;
+    } catch {
+      legacy = {
+        getItem() {
+          throw Error("Previous collection storage is unavailable");
+        },
+      };
+    }
+    loaded = await loadCollection(storage, legacy, createCollection(reference));
+  }
   ctx.state = loaded.state;
   ctx.exportRelease = ctx.state.reference.releases[0]?.id;
   ctx.view = ["add", "collection", "catalogue"].includes(location.hash.slice(1))
@@ -190,22 +271,27 @@ try {
       ctx.render();
     }
   });
-  window.addEventListener("storage", (event) => {
-    if (event.storageArea === storage && event.key === "cardledger-alpha-v1") {
-      const fresh = loadCollection(storage, ctx.state);
-      if (fresh.error || !event.newValue) {
-        ctx.toast(
-          "Saved collection changed in another tab. Reload before editing.",
-        );
-        loaded.error = "Changed in another tab";
-        return;
-      }
-      ctx.state = fresh.state;
-      modal.close();
-      ctx.render();
-      ctx.toast("Collection updated from another tab.");
-    }
-  });
+  if (typeof BroadcastChannel !== "undefined" && storage) {
+    channel = new BroadcastChannel("card-ledger-updates");
+    channel.onmessage = () => {
+      pending = pending.then(async () => {
+        try {
+          const fresh = await readCollection(storage);
+          if (!fresh || fresh.revision <= loaded.revision) return;
+          ctx.state = fresh.state;
+          loaded.revision = fresh.revision;
+          loaded.error = null;
+          $("#storage-warning").innerHTML = "";
+          if (modal.open) modal.close();
+          ctx.render();
+          ctx.toast("Collection updated from another tab.");
+        } catch (error) {
+          loaded.error = error.message;
+          ctx.toast("Saved collection needs recovery. Reload before editing.");
+        }
+      });
+    };
+  }
   ctx.render();
 } catch (error) {
   app.innerHTML = `<div class="panel"><h1>Reference unavailable</h1><p>${escape(error.message)}</p><button id="retry">Reload reference</button></div>`;

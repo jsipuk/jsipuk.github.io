@@ -17,14 +17,13 @@ export function renderAdd(ctx) {
   const { state } = ctx;
   ctx.app.innerHTML = `<div class="form"><h1>Add cards</h1><p class="muted">Enter one card or a whole batch.</p>${note()}<div class="stack"><div><label for="set">Release</label><div class="field-row"><select id="set">${releaseOptions(state, state.draft.releaseId, true)}</select><button id="unknown-set">Don’t know</button></div></div><div><label for="language">Language</label><div class="field-row"><select id="language"><option value="" ${!state.draft.language ? "selected" : ""}>Don’t know</option><option value="en" ${state.draft.language === "en" ? "selected" : ""}>English</option><option value="zh-Hans" disabled>Simplified Chinese · not available yet</option></select><button id="unknown-lang">Don’t know</button></div></div><div><label for="numbers">Card numbers</label><textarea id="numbers" placeholder="4/102&#10;025/102, 026/102">${escape(state.draft.text)}</textarea><small>Separate numbers with commas or new lines. If you don’t know the release or language, confirm a verified match before adding.</small></div></div><div class="sample-actions"><button class="quiet" id="try">Try Charizard 4/102</button>${state.batch.length ? '<button id="resume">Resume review (' + state.batch.length + ")</button>" : ""}</div><button class="primary wide" id="find">Find cards</button></div>`;
   const saveDraft = () => {
-    const next = structuredClone(ctx.state);
-    next.draft = {
+    const draft = {
       releaseId: $("#set").value,
       language: $("#language").value,
       text: $("#numbers").value,
       variant: "unspecified",
     };
-    return ctx.save(next);
+    return ctx.save((state) => ({ ...state, draft }));
   };
   for (const id of ["set", "language", "numbers"])
     $("#" + id).addEventListener(
@@ -39,27 +38,32 @@ export function renderAdd(ctx) {
     $("#language").value = "";
     saveDraft();
   };
-  $("#try").onclick = () => {
+  $("#try").onclick = async () => {
     const r = ctx.state.reference.releases.find(
       (r) => r.releaseKey === "base-set-1999" && r.language === "en",
     );
     if (!r) return ctx.toast("Base Set is not in this backup’s reference.");
-    const next = structuredClone(ctx.state);
-    next.draft = {
-      releaseId: r.id,
-      language: "en",
-      text: "4/102",
-      variant: "unspecified",
-    };
-    if (ctx.save(next)) renderAdd(ctx);
+    if (
+      await ctx.save((state) => ({
+        ...state,
+        draft: {
+          releaseId: r.id,
+          language: "en",
+          text: "4/102",
+          variant: "unspecified",
+        },
+      }))
+    )
+      renderAdd(ctx);
   };
   if ($("#resume"))
-    $("#resume").onclick = () => {
+    $("#resume").onclick = async () => {
+      await ctx.flush();
       ctx.review = true;
       ctx.render();
     };
-  $("#find").onclick = () => {
-    if (!saveDraft()) return;
+  $("#find").onclick = async () => {
+    if (!(await saveDraft())) return;
     const draft = ctx.state.draft;
     const tokens = draft.text
       .normalize("NFKC")
@@ -93,7 +97,7 @@ export function renderAdd(ctx) {
         language: draft.language,
       };
     });
-    if (ctx.save(next)) {
+    if (await ctx.save((state) => ({ ...state, batch: next.batch }))) {
       ctx.review = true;
       ctx.render();
     }
@@ -123,29 +127,28 @@ export function renderReview(ctx) {
       (b) => (b.onclick = () => reviewRow(ctx, Number(b.dataset.review))),
     );
   if ($("#commit"))
-    $("#commit").onclick = () => {
-      try {
-        let next = addCopies(
-          ctx.state,
-          ready.map((r) => ({ cardId: r.chosen, variantId: r.variantId })),
-        );
-        next.batch = next.batch.filter((r) => !r.chosen);
-        if (!next.batch.length) next.draft.text = "";
-        ctx.change(
-          next,
-          `${ready.length} copies added.`,
-          () => {
-            ctx.review = next.batch.length > 0;
-            ctx.render();
-          },
-          () => {
-            ctx.review = true;
-            ctx.render();
-          },
-        );
-      } catch (error) {
-        ctx.toast(error.message);
-      }
+    $("#commit").onclick = async () => {
+      await ctx.change(
+        (state) => {
+          const ready = state.batch.filter((r) => r.chosen);
+          const next = addCopies(
+            state,
+            ready.map((r) => ({ cardId: r.chosen, variantId: r.variantId })),
+          );
+          next.batch = next.batch.filter((r) => !r.chosen);
+          if (!next.batch.length) next.draft.text = "";
+          return next;
+        },
+        `${ready.length} copies added.`,
+        () => {
+          ctx.review = ctx.state.batch.length > 0;
+          ctx.render();
+        },
+        () => {
+          ctx.review = true;
+          ctx.render();
+        },
+      );
     };
 }
 function reviewRow(ctx, i) {
@@ -168,21 +171,26 @@ function reviewRow(ctx, i) {
   $("#later").onclick = ctx.closeModal;
   ctx.modal.querySelectorAll("[data-choose]").forEach(
     (b) =>
-      (b.onclick = () => {
-        const next = structuredClone(ctx.state),
-          updated = next.batch.find((r) => r.i === i);
-        updated.chosen = b.dataset.choose;
-        const card = findCard(next, updated.chosen);
-        updated.releaseId = card.releaseId;
-        updated.language = card.language;
-        updated.variantId = $("#" + b.dataset.select).value;
-        if (ctx.save(next)) {
+      (b.onclick = async () => {
+        const variantId = $("#" + b.dataset.select).value;
+        if (
+          await ctx.save((state) => {
+            const next = structuredClone(state),
+              updated = next.batch.find((r) => r.i === i);
+            updated.chosen = b.dataset.choose;
+            const card = findCard(next, updated.chosen);
+            updated.releaseId = card.releaseId;
+            updated.language = card.language;
+            updated.variantId = variantId;
+            return next;
+          })
+        ) {
           ctx.modal.close();
           ctx.render();
         }
       }),
   );
-  $("#search-again").onclick = () => {
+  $("#search-again").onclick = async () => {
     const next = structuredClone(ctx.state),
       updated = next.batch.find((r) => r.i === i),
       raw = $("#correct").value.trim();
@@ -196,7 +204,7 @@ function reviewRow(ctx, i) {
       }),
       { raw, chosen: null, variantId: "unspecified" },
     );
-    if (ctx.save(next)) {
+    if (await ctx.save((state) => ({ ...state, batch: next.batch }))) {
       ctx.modal.close();
       ctx.render();
       reviewRow(ctx, i);
