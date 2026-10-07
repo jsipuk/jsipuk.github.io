@@ -1,14 +1,12 @@
 # Card Ledger — functional alpha
 
-Maintained source lives in `tcg-src/`. `tcg/` is the generated static GitHub Pages
-build. Only these two directories belong to this project. Do not edit generated
-HTML or bundles; rerun the build. There is no backend, account, runtime framework
-or API credential. Browser storage is private to this origin and device; use JSON
-backups to move the collection or protect it against cleared browser data.
+Source is `tcg-src/`; `tcg/` is the generated GitHub Pages build. The independent,
+curated reference catalogue lives in `tcg-data/`, outside application source.
+The app uses static files and versioned IndexedDB, with no backend or credentials.
 
 ## Run
 
-Node 24 (the tested runtime):
+Node 24 is the tested runtime:
 
 ```sh
 cd tcg-src
@@ -17,78 +15,94 @@ npm test
 npm run dev
 ```
 
-Open http://127.0.0.1:4174/tcg/. The dev command builds first and serves **only**
-the generated `tcg` directory over loopback. Restart it after source changes.
-Alternatively, `npm run build` then serve `tcg/` with any static server.
+Open http://127.0.0.1:4174/tcg/. The loopback server serves only the generated
+`/tcg/` app and the repository's `/tcg-data/` reference files. Restart after edits.
+The current real manifest has six researching releases and no app-ready card
+files. A new production collection therefore starts with no tracked binders;
+Manage sets shows their availability honestly. Existing saved alpha collections
+keep their card metadata, images, quantities and binders as saved references.
 
-Main collection data lives in versioned IndexedDB stores with reference and
-ownership stored separately. Existing `cardledger-alpha-v1` collections migrate
-on first use; the previous localStorage document stays untouched as a safety copy.
-Demo data is never migrated.
+For the full architecture interaction, use the **isolated synthetic fixture**:
 
-Try Add cards → Base Set → English → `004/102`, then Find cards and Add ready
-cards. Repeating the number adds copies. Open the Base Set binder and tap
-Charizard to edit quantities; select a variant to track it separately. In Catalogue,
-Download lossless backup exports the entire ledger; Import backup validates and
-previews it before replacing local data. CSV/print are filtered views, not backups.
-“Don’t know” searches all eligible reference releases and languages, then asks you
-to confirm a candidate’s image, release, language and number, even if only one is
-found. Searching alone never adds ownership. An empty Add form uses the active
-binder as context. Catalogue → Reset Collection requires confirmation, offers a
-backup first, preserves the reference and pending input, and supports Undo.
+```sh
+npm run dev:fixture
+```
 
-## Tests and build
+Use a fresh browser profile for fixture testing. This command serves a schema-v1
+test manifest and synthetic card files only from the loopback server; no fixture
+is copied into production. A visible banner identifies the fixture. In Manage
+sets, add Perfect Order, open its binder and choose Rapid Entry. Enter `94`,
+`094/088`, `98`, `100`: four copies across three cards, with ×2 for number 94.
+These names and numbers demonstrate architecture, not verified Pokémon facts.
+
+## Reference integration
+
+At startup and on Refresh reference catalogue, the app fetches
+`/tcg-data/manifest.json`, validates schema/data versions and indexes release
+metadata locally. Only `readyForApp: true` entries can import their `cardsFile` and
+be newly tracked. JSON card files import on demand; routine entry then queries
+local reference records without a live provider API.
+
+The contract's Card Ledger IDs are retained as canonical IDs. Provider references
+are provenance only. The cache augments original wire fields with internal
+presentation/identity checks; it does not modify the curated contract or files.
+A card file may be a card array, or an object containing `cards` and optional
+`schemaVersion`, `releaseId`, `language`; provided envelope values are checked.
+Empty variants use an explicit unspecified bucket. Supplied variants need explicit stable IDs (strings or records); display labels
+use supplied labels/names/finish metadata. Unknown identities are rejected rather
+than guessed.
+
+Refresh validates every replacement before committing it. Bad/missing files keep
+cached cards and quantities usable. Removed IDs/finish metadata remain in the
+cache and backup; removed cards appear in Catalogue under saved entries outside
+the current checklist. No quantity is guessed onto a renamed ID. Checklists only
+claim completion when status and the reconciled numbered count justify it.
+
+## Collection interaction
+
+- Manage sets adds/removes shelf membership. Removing a binder keeps ownership.
+- Binders use canonical checklist order with fixed 3×3 pockets, including missing
+  cards. Filters dim pockets without changing their positions.
+- Rapid Entry inherits binder context, adds deterministic matches on Enter and
+  clears/refocuses the input. Ambiguity requires a candidate choice.
+- Batch entry saves draft/review and adds only ready, confirmed identities.
+- Missing slots open the identified card with Add to collection; detail changes
+  otherwise need explicit Save. Cancel/Escape preserve quantities and focus.
+- Quantity badges show physical copies (×3), not spare copies. Completion counts
+  unique tracked cards; incomplete references cannot claim verified 100%.
+- Catalogue exports versioned, timestamped lossless JSON and previews imports.
+  Original alpha backups still import. CSV/print are filtered views, not backups.
+- Reset Collection requires confirmation, offers a backup and Undo, and clears
+  ownership while preserving reference, tracked sets, input and notes.
+
+## Storage and migration
+
+Database `card-ledger` version 2 has `referenceSets`, `referenceCards`,
+`referenceVersions`, `collectionEntries` and `settings`. Reference and ownership
+commit atomically when needed. Writes check revisions and notify other tabs.
+Original localStorage and the earlier two-store IndexedDB ledger migrate without
+resetting ownership; original records remain as recovery copies. Demo quantities
+are never migrated. Browser-cleared data still needs a JSON backup.
+
+## Checks and build
 
 ```sh
 npm test
-npx playwright install chromium  # only if a local Chromium is unavailable
+npx playwright install chromium  # only when no local Chromium is available
 npm run test:browser
 npm run build
 ```
 
-The Playwright configuration uses `/usr/bin/chromium` when available. Browser
-QA runs at 1440px and 390px and covers real-card addition, pending review undo,
-reload persistence, variant quantities, unique ownership, Got/Need/Duplicate
-filters, readable Undo, explicit zero, backup round trips, invalid imports,
-failed writes, migration, reset/Undo, unknown-context discovery, multiple tabs,
-cached reference reload and corrupt-storage recovery.
+Browser QA uses Chromium at 1440px and 390px. Tests cover the actual registry,
+readiness, dynamic fixtures, tracking, Rapid Entry, ambiguity, migration, quantities,
+reference refresh/failure, Unicode backups, reset, Undo and the approved binder UI.
+The old nine-release snapshot exists solely as a migration/data test fixture;
+production no longer bundles it as a second reference catalogue.
 
-`npm run build` uses esbuild to produce hashed JS/CSS, copy the pinned reference
-and decorative cover atlas, and regenerate `../tcg/index.html` with relative URLs.
-GitHub Pages serves the checked-in `tcg/` output at `/tcg/`; no route fallback,
-server secrets, external runtime API or deployment service is required. Commit
-source and regenerated output together. Publishing/pushing is a separate step.
+The build copies application public assets and hashes JS/CSS. It never changes or
+copies `tcg-data/`, which GitHub Pages serves independently. Commit only relevant
+source and generated output; preserve unrelated repository changes.
 
-## Structure
-
-- `src/domain/`: pure identity, quantities, matching, completion, backup validation
-  and storage boundary; unit tests run before UI integration.
-- `src/providers/`: curated app release registry and isolated TCGdex adapter.
-- `src/ui/`: approved add/review, binder, expanded-card and catalogue flows.
-- `src/app.js`: navigation, storage transactions, modal/focus and undo orchestration.
-- `public/data/`: pinned real English reference and database license.
-- `public/assets/`: approved decorative binder-cover artwork, never card scans.
-- `scripts/`: import, build and loopback development server.
-- `docs/`: provider verification, schema and browser QA evidence.
-
-## Scope and known limits
-
-889 real English reference entries across nine releases. No sample quantities are
-seeded or migrated from `cardledger-demo-v1`; prototype identities and artwork
-were illustrative. The old demo key is left intact. English is the first supported
-reference language. Schema can represent Simplified Chinese regional releases,
-but there is no Chinese catalogue or inferred translation in this alpha.
-
-The permanent provider is undecided. The pinned community snapshot is MIT
-licensed; source provenance and the license ship with the build. All checklists
-are explicitly incomplete, so no 100% completion claim is possible from the
-shipped reference. Printings/finishes supplied explicitly by the source get separate
-quantity buckets. Missing finish data remains unspecified, not guessed.
-
-Live browser QA at jsip.uk and actual scan availability at assets.tcgdex.net are
-blocked by the managed environment's outbound policy. The repository prototype
-snapshot was QA’d before features; exact hash and screenshots are recorded in
-`docs/qa/prototype.md`. The alpha displays real reference metadata when a scan
-fails, with an explicit “Image unavailable” label. Real artwork, API coverage and
-independent checklist completeness require further verification before selecting
-a permanent provider. See `docs/data-provider.md` for sources and evidence.
+Direct browser QA of jsip.uk and remote scan availability are blocked by this
+managed environment's network policy. Local generated-build screenshots and
+limits are recorded in `docs/qa/`. Publication is checked through GitHub Pages.

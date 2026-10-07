@@ -1,4 +1,4 @@
-import { cardIdentity } from "../domain/collection.js";
+import { cardIdentity } from "../../src/domain/collection.js";
 export const PINNED_REVISION = "4199850a6af49665db0080fa2bb9ef751750a406";
 export function adaptTCGdexSet(source, registration, sourceCards) {
   if (source.id !== registration.providerId || !source.name.en)

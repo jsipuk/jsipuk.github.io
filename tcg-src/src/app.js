@@ -1,12 +1,22 @@
 import "./styles.css";
-import { createCollection, validateCollection } from "./domain/collection.js";
+import {
+  createCollection,
+  validateCollection,
+  trackRelease,
+} from "./domain/collection.js";
 import {
   openDatabase,
   readCollection,
   loadCollection,
   saveCollection,
 } from "./domain/storage.js";
-import { loadReference } from "./providers/reference.js";
+import {
+  fetchManifest,
+  fetchPack,
+  emptyReference,
+  mergeManifest,
+  mergePack,
+} from "./providers/catalogue.js";
 import { $, escape, download } from "./ui/helpers.js";
 import { renderAdd, renderReview } from "./ui/add.js";
 import { renderCollection } from "./ui/binders.js";
@@ -34,6 +44,9 @@ const ctx = {
   exportMode: "need",
   state: null,
   review: false,
+  manageSets: false,
+  rapid: false,
+  referenceWarning: "",
 };
 ctx.toast = (message, undo) => {
   if (modal.open) {
@@ -75,6 +88,8 @@ ctx.save = (update, { recovery = false } = {}) => {
     try {
       const next = typeof update === "function" ? update(ctx.state) : update;
       const valid = validateCollection(next);
+      if (!recovery && JSON.stringify(valid) === JSON.stringify(ctx.state))
+        return true;
       const revision = await saveCollection(storage, valid, loaded.revision, {
         recovery,
       });
@@ -116,7 +131,13 @@ ctx.change = async (
     if (!saved) return false;
     after();
     ctx.toast(message, async () => {
-      if (!(await ctx.save(before))) return false;
+      if (
+        !(await ctx.save((state) => ({
+          ...before,
+          reference: state.reference,
+        })))
+      )
+        return false;
       afterUndo();
       return true;
     });
@@ -125,7 +146,66 @@ ctx.change = async (
     ctx.changing = false;
   }
 };
+ctx.importRelease = async (id) => {
+  const manifest = ctx.state.reference.manifest;
+  const wire = manifest?.releases.find((r) => r.id === id);
+  if (!wire?.readyForApp)
+    throw Error("This release is still researching and is not app-ready.");
+  const cached = ctx.state.reference.releases.find((r) => r.id === id);
+  if (
+    cached?.importedVersion === manifest.dataVersion &&
+    ctx.state.reference.cards.some((c) => c.releaseId === id && !c.retired)
+  )
+    return true;
+  const imported = await fetchPack(manifest, id);
+  return ctx.save((state) => mergePack(state, imported));
+};
+ctx.track = async (id) => {
+  try {
+    const release = ctx.state.reference.releases.find((r) => r.id === id);
+    if (!release?.legacy && !(await ctx.importRelease(id))) return false;
+    return ctx.change(
+      (state) => trackRelease(state, id),
+      "Set added to your collection.",
+    );
+  } catch (error) {
+    ctx.toast(error.message);
+    return false;
+  }
+};
+ctx.refreshReference = async ({ interactive = false } = {}) => {
+  const startedVersion = renderVersion;
+  try {
+    const manifest = await fetchManifest();
+    if (!(await ctx.save((state) => mergeManifest(state, manifest)))) return;
+    ctx.referenceWarning = "";
+    for (const id of ctx.state.trackedSets) {
+      if (!manifest.releases.some((r) => r.id === id && r.readyForApp))
+        continue;
+      try {
+        await ctx.importRelease(id);
+      } catch (error) {
+        ctx.referenceWarning = `${error.message}. Last valid reference was kept.`;
+      }
+    }
+  } catch (error) {
+    ctx.referenceWarning = ctx.state.reference.cards.length
+      ? "Reference update unavailable. Your saved collection and cached cards are still usable."
+      : "Reference registry unavailable. Retry in Manage sets.";
+  }
+  if (
+    interactive ||
+    ctx.manageSets ||
+    (ctx.view !== "add" &&
+      startedVersion === renderVersion &&
+      !modal.open &&
+      !document.querySelector(".opening-cover"))
+  )
+    ctx.render();
+  else ctx.updateReferenceWarning();
+};
 ctx.openModal = () => {
+  clearTimeout(ctx.closeTimer);
   previousFocus = document.activeElement;
   focusSelector = previousFocus?.dataset.card
     ? `[data-card="${CSS.escape(previousFocus.dataset.card)}"]`
@@ -139,7 +219,7 @@ ctx.openModal = () => {
 };
 ctx.closeModal = () => {
   modal.classList.add("closing");
-  setTimeout(
+  ctx.closeTimer = setTimeout(
     () => {
       modal.close();
       modal.classList.remove("closing");
@@ -162,8 +242,19 @@ modal.addEventListener("cancel", (e) => {
 });
 modal.addEventListener("close", restoreFocus);
 ctx.openCard = (id) => openCard(ctx, id);
+ctx.updateReferenceWarning = () => {
+  const warning = $("#reference-warning");
+  warning.innerHTML =
+    ctx.state.reference.manifest?.testFixture ||
+    ctx.state.reference.releases.some((r) => r.testFixture)
+      ? '<div class="note">Development fixture · Synthetic test cards, not Pokémon reference data.</div>'
+      : "";
+  if (ctx.referenceWarning)
+    warning.innerHTML += `<div class="note">${escape(ctx.referenceWarning)}</div>`;
+};
 ctx.render = () => {
   renderVersion++;
+  ctx.updateReferenceWarning();
   document
     .querySelectorAll("[data-nav]")
     .forEach((b) => b.classList.toggle("selected", b.dataset.nav === ctx.view));
@@ -196,6 +287,7 @@ ctx.navigate = async (view) => {
   }
   ctx.view = view;
   ctx.review = false;
+  ctx.manageSets = false;
   location.hash = view;
   ctx.render();
   window.scrollTo(0, 0);
@@ -225,7 +317,7 @@ try {
   } catch (error) {
     databaseError = error;
   }
-  const reference = cached?.state.reference || (await loadReference());
+  const reference = cached?.state.reference || emptyReference();
   if (!storage) {
     loaded = {
       state: createCollection(reference),
@@ -293,6 +385,7 @@ try {
     };
   }
   ctx.render();
+  if (!loaded.error) await ctx.refreshReference();
 } catch (error) {
   app.innerHTML = `<div class="panel"><h1>Reference unavailable</h1><p>${escape(error.message)}</p><button id="retry">Reload reference</button></div>`;
   $("#retry").onclick = () => location.reload();

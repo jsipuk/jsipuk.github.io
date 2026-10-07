@@ -1,3 +1,4 @@
+import { renderManageSets } from "./sets.js";
 import { quantity, status, completion } from "../domain/collection.js";
 import {
   $,
@@ -25,16 +26,19 @@ export function checklistLabel(state, releaseId) {
     : `Known checklist · ${c.owned} / ${c.tracked} unique cards owned · incomplete reference`;
 }
 export function renderCollection(ctx) {
+  if (ctx.manageSets) return renderManageSets(ctx);
   if (
     ctx.currentRelease &&
     ctx.state.reference.releases.some((r) => r.id === ctx.currentRelease)
   )
     return renderBinder(ctx);
   ctx.currentRelease = null;
-  const releases = ctx.state.reference.releases,
+  const releases = ctx.state.reference.releases.filter((r) =>
+      ctx.state.trackedSets.includes(r.id),
+    ),
     totalShelves = Math.max(1, Math.ceil(releases.length / 9));
   ctx.shelf = Math.min(ctx.shelf, totalShelves - 1);
-  ctx.app.innerHTML = `<h1>My collection</h1>${note()}<div class="row between"><p class="muted">Choose a binder</p><button class="quiet" id="backup-link">Collection backup</button></div><div class="shelf" id="shelf">${releases
+  ctx.app.innerHTML = `<h1>My collection</h1>${note()}<div class="row between"><p class="muted">Choose a binder</p><div><button id="manage-sets">＋ Add / manage sets</button><button class="quiet" id="backup-link">Collection backup</button></div></div><div class="shelf" id="shelf">${releases
     .slice(ctx.shelf * 9, ctx.shelf * 9 + 9)
     .map(
       (r, i) =>
@@ -42,7 +46,7 @@ export function renderCollection(ctx) {
     )
     .join(
       "",
-    )}</div><div class="pager"><button id="prev" aria-label="Previous shelf" ${ctx.shelf === 0 ? "disabled" : ""}>‹</button><span>Shelf ${ctx.shelf + 1} of ${totalShelves}</span><button id="next" aria-label="Next shelf" ${ctx.shelf >= totalShelves - 1 ? "disabled" : ""}>›</button></div><p class="muted" style="text-align:center">Swipe left or right to browse binders.</p>`;
+    )}</div>${!releases.length ? '<div class="panel"><h2>Your collection starts here</h2><p>Add a ready release to create your first binder. Researching releases stay unavailable until their card data is validated.</p></div>' : ""}<div class="pager"><button id="prev" aria-label="Previous shelf" ${ctx.shelf === 0 ? "disabled" : ""}>‹</button><span>Shelf ${ctx.shelf + 1} of ${totalShelves}</span><button id="next" aria-label="Next shelf" ${ctx.shelf >= totalShelves - 1 ? "disabled" : ""}>›</button></div><p class="muted" style="text-align:center">Swipe left or right to browse binders.</p>`;
   document
     .querySelectorAll("[data-binder]")
     .forEach(
@@ -54,6 +58,10 @@ export function renderCollection(ctx) {
     ctx.shelf = Math.max(0, Math.min(totalShelves - 1, ctx.shelf + dir));
     renderCollection(ctx);
   };
+  $("#manage-sets").onclick = () => {
+    ctx.manageSets = true;
+    ctx.render();
+  };
   $("#prev").onclick = () => change(-1);
   $("#next").onclick = () => change(1);
   swipe($("#shelf"), change);
@@ -62,11 +70,13 @@ export function renderCollection(ctx) {
 function renderBinder(ctx) {
   const { state } = ctx,
     r = state.reference.releases.find((r) => r.id === ctx.currentRelease),
-    all = state.reference.cards.filter((c) => c.releaseId === r.id),
+    all = state.reference.cards.filter(
+      (c) => c.releaseId === r.id && !c.retired,
+    ),
     pages = Math.max(1, Math.ceil(all.length / 9));
   ctx.page = Math.min(ctx.page, pages - 1);
   const visible = all.slice(ctx.page * 9, ctx.page * 9 + 9);
-  ctx.app.innerHTML = `<button class="quiet" id="binders">‹ Binders</button><div class="row between"><div><h1>${escape(r.name)}</h1><p class="muted">${escape(langName(r.language))}</p></div><div class="chips"><button id="grid" class="${!ctx.list ? "selected" : ""}">Binder</button><button id="list" class="${ctx.list ? "selected" : ""}">List</button></div></div><div class="row between"><span class="badge" id="completion">${checklistLabel(state, r.id)}</span><div class="chips">${["all", "got", "need", "duplicates"].map((f) => `<button data-filter="${f}" class="${ctx.filter === f ? "selected" : ""}">${f[0].toUpperCase() + f.slice(1)}</button>`).join("")}</div></div>${
+  ctx.app.innerHTML = `<div class="row between"><button class="quiet" id="binders">‹ Binders</button><button id="rapid-entry">Rapid Entry</button></div><div class="row between"><div><h1>${escape(r.name)}</h1><p class="muted">${escape(langName(r.language))}${r.legacy ? " · saved reference" : ""}</p></div><div class="chips"><button id="grid" class="${!ctx.list ? "selected" : ""}">Binder</button><button id="list" class="${ctx.list ? "selected" : ""}">List</button></div></div><div class="row between"><span class="badge" id="completion">${checklistLabel(state, r.id)}</span><p id="physical-count" class="muted">Physical cards: ${all.reduce((n, c) => n + quantity(state, c.id), 0)} · Spare copies: ${all.reduce((n, c) => n + Math.max(0, quantity(state, c.id) - 1), 0)}</p><div class="chips">${["all", "got", "need", "duplicates"].map((f) => `<button data-filter="${f}" class="${ctx.filter === f ? "selected" : ""}">${f[0].toUpperCase() + f.slice(1)}</button>`).join("")}</div></div>${
     ctx.list
       ? `<div class="panel">${
           all
@@ -86,6 +96,12 @@ function renderBinder(ctx) {
             "",
           )}${Array.from({ length: 9 - visible.length }, () => '<div class="pocket empty-pocket" aria-hidden="true"></div>').join("")}</div></div><p class="muted" style="text-align:center">${ctx.filter === "all" ? "Tap a pocket to view or update." : "Non-matching pockets are dimmed to preserve page order."}</p><div class="pager"><button id="prev-page" ${ctx.page === 0 ? "disabled" : ""} aria-label="Previous page">‹</button><span>Page ${ctx.page + 1} of ${pages}</span><button id="next-page" ${ctx.page >= pages - 1 ? "disabled" : ""} aria-label="Next page">›</button></div>`
   }`;
+  $("#rapid-entry").onclick = async () => {
+    ctx.rapid = true;
+    ctx.rapidReleaseId = r.id;
+    ctx.rapidLanguage = r.language;
+    await ctx.navigate("add");
+  };
   $("#binders").onclick = () => {
     ctx.currentRelease = null;
     ctx.render();

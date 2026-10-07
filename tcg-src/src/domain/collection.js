@@ -118,6 +118,7 @@ export function searchCandidates(
   });
   const releases = reference.releases.filter(
     (r) =>
+      (r.legacy || r.registryReady !== false) &&
       (!releaseId || r.id === releaseId) &&
       (!language || r.language === language),
   );
@@ -339,7 +340,12 @@ export function migrateCollection(state) {
 }
 export function trackRelease(state, releaseId, tracked = true) {
   const release = state.reference.releases.find((r) => r.id === releaseId);
-  if (!release || (tracked && !release.legacy && !release.readyForApp))
+  if (
+    !release ||
+    (tracked &&
+      !release.legacy &&
+      (!release.readyForApp || release.registryReady === false))
+  )
     throw Error("Release is not ready for collection entry");
   const next = structuredClone(state);
   next.trackedSets = next.trackedSets.filter((id) => id !== releaseId);

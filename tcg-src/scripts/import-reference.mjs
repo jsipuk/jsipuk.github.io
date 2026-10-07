@@ -11,8 +11,8 @@ import path from "node:path";
 import os from "node:os";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
-import { releaseRegistry } from "../src/providers/releases.js";
-import { adaptTCGdexSet, PINNED_REVISION } from "../src/providers/tcgdex.js";
+import { releaseRegistry } from "./legacy/releases.js";
+import { adaptTCGdexSet, PINNED_REVISION } from "./legacy/tcgdex.js";
 import { createCollection } from "../src/domain/collection.js";
 const root = path.resolve(process.argv[2] || "/tmp/tcgdex-database");
 const revision = execFileSync("git", ["-C", root, "rev-parse", "HEAD"], {
@@ -79,7 +79,7 @@ try {
   }
   createCollection(reference);
   await writeFile(
-    "public/data/reference.json",
+    "tests/fixtures/legacy-reference.json",
     JSON.stringify(reference, null, 2) + "\n",
   );
   await copyFile(path.join(root, "LICENSE"), "public/data/TCGDEX-LICENSE.txt");

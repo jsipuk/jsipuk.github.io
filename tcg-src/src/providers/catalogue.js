@@ -89,6 +89,17 @@ export function mergeManifest(state, manifest) {
   manifest = validateManifest(manifest);
   const next = structuredClone(state);
   const releases = new Map(next.reference.releases.map((r) => [r.id, r]));
+  for (const [id, r] of releases)
+    if (
+      !r.legacy &&
+      r.importedVersion &&
+      !manifest.releases.some((w) => w.id === id)
+    )
+      releases.set(id, {
+        ...r,
+        registryReady: false,
+        checklist: { ...r.checklist, complete: false },
+      });
   for (const wire of manifest.releases) {
     const cached = releases.get(wire.id);
     // Keep the last validated checklist until its replacement card file passes validation.
@@ -141,6 +152,7 @@ export function adaptPack(manifest, releaseId, pack) {
   }
   const release = {
     ...adaptRelease(wire),
+    testFixture: manifest.testFixture === true,
     importedVersion: manifest.dataVersion,
   };
   const ids = new Set(),
@@ -157,7 +169,7 @@ export function adaptPack(manifest, releaseId, pack) {
     assert(
       !ids.has(row.id) &&
         numberToken(row.collectorNumber) &&
-        !numbers.has(numberToken(row.collectorNumber)),
+        !numbers.has(row.collectorNumber),
       "Duplicate card ID or collector number",
     );
     assert(
@@ -170,18 +182,27 @@ export function adaptPack(manifest, releaseId, pack) {
     const variants = [
       { id: "unspecified", label: "Finish not specified", finish: null },
     ];
-    for (const v of row.variants) {
+    const seenVariants = new Set();
+    for (const variant of row.variants) {
+      const v =
+        typeof variant === "string" ? { id: variant, label: variant } : variant;
       assert(
-        record(v) &&
-          text(v.id) &&
-          text(v.label) &&
-          !variants.some((existing) => existing.id === v.id),
+        record(v) && text(v.id) && !seenVariants.has(v.id),
         "Invalid canonical variant",
       );
-      variants.push(structuredClone(v));
+      seenVariants.add(v.id);
+      const label = text(v.label)
+        ? v.label
+        : text(v.name)
+          ? v.name
+          : [v.finish, v.printing].filter(text).join(" · ") || v.id;
+      const item = { ...structuredClone(v), label };
+      const existing = variants.findIndex((old) => old.id === v.id);
+      if (existing >= 0) variants[existing] = item;
+      else variants.push(item);
     }
     ids.add(row.id);
-    numbers.add(numberToken(row.collectorNumber));
+    numbers.add(row.collectorNumber);
     const c = {
       ...structuredClone(row),
       game: wire.game,

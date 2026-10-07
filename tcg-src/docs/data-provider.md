@@ -1,8 +1,15 @@
+> Current app v0.3 uses the independently curated `/tcg-data/` catalogue at
+> runtime. This document records the earlier provider investigation. Its pinned
+> nine-release snapshot now serves only migration/data tests, and is not bundled
+> as a second production registry. Provider selection/curation remains separate
+> from the app. See the authoritative `tcg-data/sources.md` and reference contract.
+
 # Provider verification — 7 October 2026
 
-Permanent provider choice is **open**. The alpha ships a reproducible pinned
-English TCGdex database snapshot through an adapter; it has no API credentials,
-subscription, runtime API calls or ownership dependency on provider IDs.
+Permanent provider choice is **open**. The initial alpha used a reproducible
+pinned English TCGdex snapshot through an adapter. That snapshot is now isolated
+as a migration fixture; normal runtime reads the curated catalogue. Ownership
+has no dependency on provider IDs, API credentials or subscriptions.
 
 ## Sources inspected
 

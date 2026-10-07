@@ -23,9 +23,27 @@ export function renderCatalogue(ctx) {
     state.reference.releases[0];
   ctx.exportRelease = release?.id;
   const rows = state.reference.cards.filter(
-    (c) => c.releaseId === release?.id && passes(state, c, ctx.exportMode),
+    (c) =>
+      c.releaseId === release?.id &&
+      !c.retired &&
+      passes(state, c, ctx.exportMode),
   );
-  ctx.app.innerHTML = `<div class="form"><h1>Catalogue</h1>${note()}<div class="panel"><h2>Collection backup</h2><p>Save all quantities, variants, reference metadata and pending review. Import restores the whole collection on this device.</p><button class="primary wide" id="backup" ${ctx.hasStorageError() ? "disabled" : ""}>Download lossless backup</button><label for="import-backup">Import backup</label><input id="import-backup" type="file" accept="application/json,.json"><div id="backup-preview" aria-live="polite"></div><button class="wide" id="reset-collection" ${ctx.hasStorageError() ? "disabled" : ""}>Reset Collection</button></div><label for="export-set">Release and language</label><select id="export-set">${releaseOptions(state, ctx.exportRelease)}</select><p class="muted">${escape(langName(release?.language || ""))}</p><label>Include</label><div class="chips">${["all", "got", "need", "duplicates"].map((f) => `<button data-mode="${f}" class="${f === ctx.exportMode ? "selected" : ""}">${f[0].toUpperCase() + f.slice(1)}</button>`).join("")}</div><div class="panel"><h2>Preview</h2><div class="table-scroll">${rows.length ? table(state, rows) : "<p>No entries match this filter.</p>"}</div><p class="muted">${rows.length} unique entries${ctx.exportMode === "duplicates" ? " · " + rows.reduce((n, c) => n + Math.max(0, quantity(state, c.id) - 1), 0) + " spare copies" : ""}</p></div><button class="primary wide" id="csv">Download CSV</button><button class="wide" id="print">Print / Save as PDF</button><small>CSV and print show this filtered catalogue. Use the lossless JSON backup to restore your collection.</small><details class="panel"><summary>Reference data</summary><p>${escape(state.reference.source?.name || "Imported reference")} · ${state.reference.cards.length} known cards</p><p>Checklists and variant coverage have not been certified complete. Simplified Chinese reference data is not included in the English alpha.</p><p><a href="https://github.com/tcgdex/cards-database" target="_blank" rel="noreferrer">TCGdex source</a> · <a href="./data/TCGDEX-LICENSE.txt">Database license</a></p></details></div>`;
+  ctx.app.innerHTML = `<div class="form"><h1>Catalogue</h1>${note()}<div class="panel"><h2>Collection backup</h2><p>Save all quantities, variants, reference metadata and pending review. Import restores the whole collection on this device.</p><button class="primary wide" id="backup" ${ctx.hasStorageError() ? "disabled" : ""}>Download lossless backup</button><label for="import-backup">Import backup</label><input id="import-backup" type="file" accept="application/json,.json"><div id="backup-preview" aria-live="polite"></div><button class="wide" id="reset-collection" ${ctx.hasStorageError() ? "disabled" : ""}>Reset Collection</button></div><label for="export-set">Release and language</label><select id="export-set">${releaseOptions(state, ctx.exportRelease)}</select><p class="muted">${escape(langName(release?.language || ""))}</p><label>Include</label><div class="chips">${["all", "got", "need", "duplicates"].map((f) => `<button data-mode="${f}" class="${f === ctx.exportMode ? "selected" : ""}">${f[0].toUpperCase() + f.slice(1)}</button>`).join("")}</div><div class="panel"><h2>Preview</h2><div class="table-scroll">${rows.length ? table(state, rows) : "<p>No entries match this filter.</p>"}</div><p class="muted">${rows.length} unique entries${ctx.exportMode === "duplicates" ? " · " + rows.reduce((n, c) => n + Math.max(0, quantity(state, c.id) - 1), 0) + " spare copies" : ""}</p></div><button class="primary wide" id="csv">Download CSV</button><button class="wide" id="print">Print / Save as PDF</button><small>CSV and print show this filtered catalogue. Use the lossless JSON backup to restore your collection.</small><details class="panel"><summary>Reference data</summary><p>${escape(state.reference.source?.name || "Imported reference")} · ${state.reference.cards.length} known cards</p><p>Completion follows each release’s checklist status. Researching releases remain unavailable for entry. Saved references outside the current registry are retained.</p><p><a href="https://github.com/jsipuk/jsipuk.github.io/tree/main/tcg-data" target="_blank" rel="noreferrer">Curated reference catalogue</a> · ${escape(state.reference.manifest?.dataVersion || "Saved reference")}</p></details>${
+    state.reference.cards.some((c) => c.retired)
+      ? '<div class="panel"><h2>Saved entries outside the current checklist</h2><p>These IDs were removed from a reference update. Quantities are kept without guessing a replacement.</p>' +
+        state.reference.cards
+          .filter((c) => c.retired)
+          .map(
+            (c) =>
+              `<div class="review-row"><span>${escape(c.name)} · ${escape(c.printedNumber || c.collectorNumber)} · ${escape(langName(c.language))}</span><button data-retained="${escape(c.id)}">Own ${quantity(state, c.id)}</button></div>`,
+          )
+          .join("") +
+        "</div>"
+      : ""
+  }</div>`;
+  document
+    .querySelectorAll("[data-retained]")
+    .forEach((b) => (b.onclick = () => ctx.openCard(b.dataset.retained)));
   $("#backup").onclick = async () => {
     await ctx.flush();
     try {
@@ -156,6 +174,8 @@ export function renderCatalogue(ctx) {
     ctx.toast("CSV prepared.");
   };
   $("#print").onclick = () => {
+    if (!release)
+      return ctx.toast("Track a ready release before printing a checklist.");
     $("#printout").innerHTML =
       `<h1>Card Ledger · ${escape(release.name)}</h1><p>${escape(langName(release.language))} · ${ctx.exportMode} · ${new Date().toLocaleDateString("en-GB")}</p><p>Known entries; incomplete reference checklist.</p>${table(state, rows)}`;
     window.print();

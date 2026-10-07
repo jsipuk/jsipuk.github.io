@@ -1,86 +1,76 @@
-# Collection schema v1
+# Collection schema v2 and reference contract
 
-Backups use an envelope with `format: "card-ledger-backup"`, `schemaVersion: 1`,
-`applicationVersion` and ISO `exportedAt`, containing the complete ledger in
-`collection`. The ledger has `format: "card-ledger"` and `version: 1`. Direct
-ledger backups from the first alpha remain importable. Unsupported versions are refused, never silently
-converted. Unknown extension fields are retained in valid v1 backup round trips.
+The external catalogue contract remains `/tcg-data/schema/reference-v1.md`, schema
+version 1. Application database version 2 and backup schema version 2 are separate
+versions. Curated files are not rewritten or supplemented by production fixtures.
 
-## Identity and reference
+## Reference and identity
 
-A card's app ID is the JSON tuple:
+The manifest supplies release IDs, languages/regions, printed denominators,
+numbered targets, status, readiness, aliases, card-file paths and provenance.
+Ready card files retain their Card Ledger-controlled IDs, display numbers,
+collector-number strings, variants, images and source/provider metadata.
 
-```js
-[game, region, releaseKey, language, collectorNumber];
-```
+The cache adds `name`/`releaseKey`/`printedTotal` aliases for existing presentation,
+`referenceIdentity` (game, region, release ID, language, opaque collector number),
+`catalogueSchemaVersion`, validated checklist coverage and imported data version.
+Legacy alpha cards retain their original JSON tuple IDs. Source/provider IDs do
+not define ownership. Card images accept safe HTTPS or same-origin catalogue
+paths; they do not affect identity.
 
-All values are nonempty strings. `collectorNumber` is an opaque reference string,
-not a global integer. Source numbers are preserved literally. Matching may
-normalize padded user input to discover candidates. A printed denominator filters
-eligible reference releases, but never uniquely identifies a release or card.
-Without full release/language context, every discovery result requires explicit
-confirmation of a complete card identity, even when there is only one candidate.
-Fully contextual matching remains a separate strict domain function.
+Collector normalization handles leading zeroes, case and presentation spaces,
+including TG12, SWSH123 and 30TH-P 004. It never changes the stored opaque number.
+A denominator narrows against the card's printed number or release metadata; it
+is never a global key. Unknown context requires confirmation, even for one result.
+Optional card-name filtering is deterministic. Retired IDs are excluded from entry.
 
-Release metadata separately contains `game`, `region`, `releaseKey`, `language`,
-name, date, printed total and checklist coverage. The curated app release key
-must not be changed when switching providers. A provider mapping is provenance,
-not the app key. Regional Chinese releases need new registry entries, not copied
-English numbers or translated English set IDs.
+## User ledger
 
-Each card retains real name, number, release/language, rarity, source provenance,
-image candidate/verification state, and supported variant records. A variant ID
-is a canonical JSON object of finish, printing, size, sorted stamps and foil,
-or the explicit `unspecified` bucket. Separate printing details such as shadowless
-and first edition are retained when the source explicitly provides them.
+A ledger has `format: card-ledger`, `version: 2`, `reference`, `quantities`,
+`trackedSets`, `draft`, `batch` and preserved extension fields (e.g. future notes,
+Rapid Entry context). New quantities and tracked sets start empty. Ownership keys
+are JSON `[cardId, variantId]` tuples; integer quantities range 0–999, including
+explicit zeroes. Variant buckets add to physical total; duplicates are total minus
+one; completion counts an owned card once.
 
-## Ownership
+A verified completion percentage requires a verified, imported checklist with
+an exact nonempty numbered target count. Printed denominator and numbered target
+are separate. Outdated/researching/partial checklists cannot claim verified 100%.
 
-A quantity key is the JSON tuple `[cardId, variantId]` in `quantities`.
-Quantities are integers from 0 to 999; total per card also caps at 999, preserving
-the prototype's quantity limit. Zero entries stay zero and reference metadata is
-retained. Missing quantity keys mean zero. Variant quantities add to the card's
-total. Got means total > 0; Need means zero; Duplicate means total > 1. The badge
-shows **total copies**, e.g. ×3, while catalogue spare count is total minus one.
+## IndexedDB v2
 
-Completion counts distinct tracked card IDs with any owned variant, never copies.
-A percentage requires `checklist.complete === true`, an explicit expected total,
-and an exact nonempty checklist size. Otherwise percent is null and completed
-is false, including when all currently known entries are owned. All shipped
-checklists have `complete: false`.
+- `referenceSets`: release metadata by release ID.
+- `referenceCards`: cards by Card Ledger ID, with a releaseId index.
+- `referenceVersions`: manifest/schema/data versions, release import versions,
+  provenance and canonical array ordering.
+- `collectionEntries`: per-card/variant quantities, supplied only by the user ledger.
+- `settings`: tracked sets, pending input/review, extension metadata and revision.
 
-## Backup, validation and persistence
+Reference updates change only cached reference records; exact quantity keys and
+values survive. Bad replacements are rejected before a transaction. Missing IDs
+and finish buckets are retained with a retired flag; saved quantities never move
+to a guessed replacement. The UI exposes retired saved records in Catalogue.
 
-The ledger includes the entire `reference`, all `quantities` (including explicit
-zeroes), saved input (`draft`), unresolved/ready review (`batch`) and extension
-metadata. JSON export/import therefore remains usable if a provider disappears.
-CSV omits restore-critical structure and is not the backup format.
+Writes are queued and check the persisted revision within the transaction. A
+failed/aborted transaction rolls back both reference and ownership. Unchanged
+reference is not rewritten for routine draft/quantity updates. BroadcastChannel
+refreshes other tabs. Cache-only reload remains usable during endpoint outages.
 
-Validation checks format/version, card/release identity relationships, unique IDs,
-variants, all quantity ranges and referenced keys, draft and pending review.
-Malformed imports never write storage. An import preview states copies, unique
-owned cards, releases and pending rows before replacement. There is no automatic
-merge or lossy matching during restore.
+The first alpha localStorage key `cardledger-alpha-v1` migrates on first use.
+Database v1's `reference`/`collection` stores migrate within the upgrade
+transaction. Original data stays intact for recovery; corrupt data blocks edits
+and can be downloaded, never silently replaced with an empty collection.
+Legacy migration preserves the previously displayed shelf as tracked saved
+references; new registry releases need explicit tracking. The demo key is excluded.
 
-All quantity and batch operations produce a new collection. UI state changes
-only after the IndexedDB transaction commits. Database `card-ledger` version 1
-has `reference` and `collection` stores, each with a `current` record. The latter
-stores `{ revision, state }`; `state` includes ownership, input, pending review
-and extensions but excludes reference metadata. Changed reference and ownership
-write in one transaction. Ordinary draft/quantity saves do not rewrite unchanged
-reference data. A saved reference is available on reload without a network fetch.
+## Backup and reset
 
-Writes are queued per tab and evaluate updates against the last committed state.
-Each write checks the persisted revision inside its read/write transaction;
-stale tabs cannot silently overwrite another tab. BroadcastChannel refreshes
-other open tabs. Failed or aborted transactions preserve both stores. Undo
-restores the previous complete ledger through the same persistence boundary.
-Reset clears only `quantities`, requires confirmation, offers a backup and Undo,
-and preserves reference, drafts, review and extension metadata.
+The JSON envelope has `format: card-ledger-backup`, `schemaVersion: 2`,
+`applicationVersion`, ISO `exportedAt` and the complete `collection`. Version 1
+ledger/envelope backups remain compatible through a deliberate migration.
+Unsupported schemas, orphan quantity IDs, duplicate IDs and invalid quantities
+fail with no partial write. Extension fields and Unicode survive round trips.
 
-On first open, a valid `cardledger-alpha-v1` localStorage ledger is migrated
-transactionally. Its original document remains untouched as a safety copy.
-Once IndexedDB has a collection it takes precedence over the legacy key. The
-demo key is never migrated. Invalid or newer saved data is preserved for download;
-editing is blocked until recovery. Explicit backup replacement can recover a
-corrupt database transactionally. Browser-cleared data still requires a backup.
+Reset requires deliberate confirmation and clears quantities only. It preserves
+reference, tracked releases, draft, review and notes; backup and Undo are available.
+Untracking a release only changes `trackedSets`, preserving every quantity.

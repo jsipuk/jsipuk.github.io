@@ -1,24 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
-const readSaved = (page) =>
-  page.evaluate(
-    () =>
-      new Promise((resolve, reject) => {
-        const request = indexedDB.open("card-ledger", 1);
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => {
-          const db = request.result,
-            tx = db.transaction(["reference", "collection"]);
-          const ref = tx.objectStore("reference").get("current"),
-            own = tx.objectStore("collection").get("current");
-          tx.oncomplete = () => {
-            db.close();
-            resolve({ ...own.result.state, reference: ref.result });
-          };
-          tx.onabort = () => reject(tx.error);
-        };
-      }),
-  );
+import { readSaved, seedLegacyEmpty } from "./browser-helpers.js";
+test.beforeEach(async ({ page }, testInfo) => {
+  if (!testInfo.title.startsWith("legacy migration"))
+    await seedLegacyEmpty(page);
+});
 const base = "pokemon:international:base-set-1999:en";
 const openBase = async (page) => {
   await page.locator('[data-nav="collection"]').click();
@@ -227,11 +213,11 @@ test("corrupt storage is not silently overwritten and can be recovered by import
   await page.evaluate(
     () =>
       new Promise((resolve) => {
-        const request = indexedDB.open("card-ledger", 1);
+        const request = indexedDB.open("card-ledger", 2);
         request.onsuccess = () => {
           const db = request.result,
-            tx = db.transaction("collection", "readwrite"),
-            store = tx.objectStore("collection"),
+            tx = db.transaction("settings", "readwrite"),
+            store = tx.objectStore("settings"),
             get = store.get("current");
           get.onsuccess = () => {
             const record = get.result;
@@ -310,7 +296,7 @@ test("legacy migration, safe reset, Undo and active binder context", async ({
 }, testInfo) => {
   const reference = JSON.parse(
     await readFile(
-      new URL("../public/data/reference.json", import.meta.url),
+      new URL("./fixtures/legacy-reference.json", import.meta.url),
       "utf8",
     ),
   );
@@ -339,7 +325,10 @@ test("legacy migration, safe reset, Undo and active binder context", async ({
   await page.goto("/tcg/");
   await openBase(page);
   await expect(charizard(page).locator(".count")).toHaveText("×3");
-  expect(await readSaved(page)).toEqual(legacy);
+  const migrated = await readSaved(page);
+  expect(migrated.quantities).toEqual(legacy.quantities);
+  expect(migrated.reference.cards).toEqual(reference.cards);
+  expect(migrated.version).toBe(2);
   await page.locator('[data-nav="catalogue"]').click();
   await page.locator("#reset-collection").click();
   await page.locator("#cancel-reset").click();
@@ -351,7 +340,7 @@ test("legacy migration, safe reset, Undo and active binder context", async ({
   expect(
     JSON.parse(await readFile(await (await download).path(), "utf8"))
       .collection,
-  ).toEqual(legacy);
+  ).toEqual(migrated);
   await page.screenshot({
     path: testInfo.outputPath("reset-confirmation.png"),
     fullPage: true,
@@ -369,7 +358,7 @@ test("legacy migration, safe reset, Undo and active binder context", async ({
   await page.reload();
   const reset = await readSaved(page);
   expect(reset.quantities).toEqual({});
-  expect(reset.reference).toEqual(reference);
+  expect(reset.reference).toEqual(migrated.reference);
   expect(reset.notes).toBe("收藏");
   expect(
     await page.evaluate(() => localStorage.getItem("cardledger-alpha-v1")),
@@ -399,7 +388,7 @@ test("IndexedDB updates synchronize across tabs and reference remains available 
   await page.locator("#commit").click();
   await expect(charizard(other).locator(".count")).toHaveText("×2");
   await expect(other.locator("#toast")).toContainText("another tab");
-  await other.route("**/data/reference.json", (route) => route.abort());
+  await other.route("**/tcg-data/manifest.json", (route) => route.abort());
   await other.reload();
   await openBase(other);
   await expect(charizard(other).locator(".count")).toHaveText("×2");

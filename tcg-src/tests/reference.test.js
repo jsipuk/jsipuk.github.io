@@ -9,7 +9,7 @@ import {
   completion,
   cardIdentity,
 } from "../src/domain/collection.js";
-import { adaptTCGdexSet, PINNED_REVISION } from "../src/providers/tcgdex.js";
+import { adaptTCGdexSet, PINNED_REVISION } from "../scripts/legacy/tcgdex.js";
 const reference = JSON.parse(
   await readFile(
     new URL("./fixtures/legacy-reference.json", import.meta.url),

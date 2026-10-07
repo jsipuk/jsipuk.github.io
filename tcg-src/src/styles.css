@@ -839,3 +839,8 @@ dialog::backdrop {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.rapid-number {
+  font-size: 26px;
+  min-height: 58px;
+}

@@ -1,3 +1,4 @@
+import { renderRapid } from "./rapid.js";
 import {
   searchCandidates,
   findCard,
@@ -12,10 +13,26 @@ import {
   langName,
   cardArt,
   bindImages,
+  languageOptions,
 } from "./helpers.js";
 export function renderAdd(ctx) {
+  if (ctx.rapid) return renderRapid(ctx);
   const { state } = ctx;
-  ctx.app.innerHTML = `<div class="form"><h1>Add cards</h1><p class="muted">Enter one card or a whole batch.</p>${note()}<div class="stack"><div><label for="set">Release</label><div class="field-row"><select id="set">${releaseOptions(state, state.draft.releaseId, true)}</select><button id="unknown-set">Don’t know</button></div></div><div><label for="language">Language</label><div class="field-row"><select id="language"><option value="" ${!state.draft.language ? "selected" : ""}>Don’t know</option><option value="en" ${state.draft.language === "en" ? "selected" : ""}>English</option><option value="zh-Hans" disabled>Simplified Chinese · not available yet</option></select><button id="unknown-lang">Don’t know</button></div></div><div><label for="numbers">Card numbers</label><textarea id="numbers" placeholder="4/102&#10;025/102, 026/102">${escape(state.draft.text)}</textarea><small>Separate numbers with commas or new lines. If you don’t know the release or language, confirm a verified match before adding.</small></div></div><div class="sample-actions"><button class="quiet" id="try">Try Charizard 4/102</button>${state.batch.length ? '<button id="resume">Resume review (' + state.batch.length + ")</button>" : ""}</div><button class="primary wide" id="find">Find cards</button></div>`;
+  const available = new Set(
+    state.reference.releases
+      .filter((r) => r.legacy || (r.registryReady !== false && r.readyForApp))
+      .map((r) => r.id),
+  );
+  const samples = state.reference.cards.filter(
+    (c) => !c.retired && available.has(c.releaseId),
+  );
+  const sample =
+    samples.find((c) => c.releaseId === state.draft.releaseId) || samples[0];
+  ctx.app.innerHTML = `<div class="form"><div class="row between"><h1>Add cards</h1><button class="quiet" id="rapid-mode">Rapid Entry</button></div><p class="muted">Enter one card or a whole batch.</p>${note()}<div class="stack"><div><label for="set">Release</label><div class="field-row"><select id="set">${releaseOptions(state, state.draft.releaseId, true)}</select><button id="unknown-set">Don’t know</button></div></div><div><label for="language">Language</label><div class="field-row"><select id="language">${languageOptions(state, state.draft.language)}</select><button id="unknown-lang">Don’t know</button></div></div><div><label for="numbers">Card numbers</label><textarea id="numbers" placeholder="4/102&#10;025/102, 026/102">${escape(state.draft.text)}</textarea><small>Separate numbers with commas or new lines. If you don’t know the release or language, confirm a verified match before adding.</small></div></div><div class="sample-actions">${sample ? '<button class="quiet" id="try">Use a reference example</button>' : ""}${state.batch.length ? '<button id="resume">Resume review (' + state.batch.length + ")</button>" : ""}</div><button class="primary wide" id="find">Find cards</button></div>`;
+  $("#rapid-mode").onclick = () => {
+    ctx.rapid = true;
+    ctx.render();
+  };
   const saveDraft = () => {
     const draft = {
       releaseId: $("#set").value,
@@ -38,24 +55,21 @@ export function renderAdd(ctx) {
     $("#language").value = "";
     saveDraft();
   };
-  $("#try").onclick = async () => {
-    const r = ctx.state.reference.releases.find(
-      (r) => r.releaseKey === "base-set-1999" && r.language === "en",
-    );
-    if (!r) return ctx.toast("Base Set is not in this backup’s reference.");
-    if (
-      await ctx.save((state) => ({
-        ...state,
-        draft: {
-          releaseId: r.id,
-          language: "en",
-          text: "4/102",
-          variant: "unspecified",
-        },
-      }))
-    )
-      renderAdd(ctx);
-  };
+  if ($("#try"))
+    $("#try").onclick = async () => {
+      if (
+        await ctx.save((state) => ({
+          ...state,
+          draft: {
+            releaseId: sample.releaseId,
+            language: sample.language,
+            text: sample.printedNumber || sample.collectorNumber,
+            variant: "unspecified",
+          },
+        }))
+      )
+        renderAdd(ctx);
+    };
   if ($("#resume"))
     $("#resume").onclick = async () => {
       await ctx.flush();

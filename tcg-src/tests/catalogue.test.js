@@ -177,3 +177,42 @@ test("bad release updates are rejected before cache mutation", () => {
   count.cards.pop();
   assert.throws(() => adaptPack(manifest, "perfect-order-en", count), /count/);
 });
+
+test("retracted readiness blocks new entry/tracking while keeping saved ownership and metadata", () => {
+  let state = trackRelease(imported(), "perfect-order-en");
+  state = setQuantity(state, state.reference.cards[93].id, "unspecified", 3);
+  const changed = structuredClone(manifest);
+  changed.releases[0].readyForApp = false;
+  const kept = mergeManifest(state, changed);
+  assert.deepEqual(kept.quantities, state.quantities);
+  assert.deepEqual(kept.trackedSets, state.trackedSets);
+  assert.throws(() => trackRelease(kept, "perfect-order-en"), /not ready/);
+  assert.equal(
+    searchCandidates(kept.reference, {
+      raw: "94",
+      releaseId: "perfect-order-en",
+      language: "en",
+    }).candidates.length,
+    0,
+  );
+  assert.equal(quantity(kept, "fixture:perfect-order-en:94"), 3);
+});
+test("opaque printed numbers can be ambiguous even inside a known release", () => {
+  const pack = structuredClone(packs["perfect-order-en"]);
+  pack.cards[0].id = "fixture:opaque:094";
+  pack.cards[0].collectorNumber = "094";
+  pack.cards[0].variants = ["regular", { id: "holo", finish: "Holo" }];
+  const state = mergePack(
+    mergeManifest(createCollection(emptyReference()), manifest),
+    adaptPack(manifest, "perfect-order-en", pack),
+  );
+  const match = searchCandidates(state.reference, {
+    raw: "94",
+    releaseId: "perfect-order-en",
+    language: "en",
+  });
+  assert.equal(match.candidates.length, 2);
+  assert.equal(match.requiresConfirmation, true);
+  assert.equal(state.reference.cards[0].collectorNumber, "094");
+  assert.equal(state.reference.cards[0].variants[2].label, "Holo");
+});
