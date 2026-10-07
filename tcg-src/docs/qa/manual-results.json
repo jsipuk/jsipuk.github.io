@@ -1,0 +1,74 @@
+[
+  {
+    "width": 1440,
+    "liveBlocked": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://jsip.uk/tcg/"
+  },
+  {
+    "width": 1440,
+    "cancelPreserved": "Alakazam, 1/102, needed",
+    "escapeFocus": "Alakazam, 1/102, needed",
+    "zoomOverflow": {
+      "scrollWidth": 478,
+      "clientWidth": 478
+    },
+    "lastPage": {
+      "label": "‹\nPage 12 of 12\n›",
+      "pockets": 9,
+      "cards": 3,
+      "nextDisabled": true
+    },
+    "swipePage": "‹\nPage 11 of 12\n›",
+    "review": "2 ready · 2 need checking",
+    "names": [
+      "Pokémon Communication · 196/181",
+      "Evelyn · 175/181"
+    ],
+    "got": [
+      "175/181EvelynGot",
+      "196/181Pokémon CommunicationGot"
+    ],
+    "multiTabToast": "Collection updated from another tab.",
+    "toastOcclusion": {
+      "message": "Could not save: QA storage full. Your saved collection is unchanged.",
+      "visible": true,
+      "elementAtCenter": "<button id=\"save\" class=\"primary wide\">Save changes</button>"
+    },
+    "pageErrors": []
+  },
+  {
+    "width": 390,
+    "liveBlocked": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://jsip.uk/tcg/"
+  },
+  {
+    "width": 390,
+    "cancelPreserved": "Alakazam, 1/102, needed",
+    "escapeFocus": "Alakazam, 1/102, needed",
+    "zoomOverflow": {
+      "scrollWidth": 364,
+      "clientWidth": 364
+    },
+    "lastPage": {
+      "label": "‹\nPage 12 of 12\n›",
+      "pockets": 9,
+      "cards": 3,
+      "nextDisabled": true
+    },
+    "swipePage": "‹\nPage 11 of 12\n›",
+    "review": "2 ready · 2 need checking",
+    "names": [
+      "Pokémon Communication · 196/181",
+      "Evelyn · 175/181"
+    ],
+    "got": [
+      "175/181EvelynGot",
+      "196/181Pokémon CommunicationGot"
+    ],
+    "multiTabToast": "Collection updated from another tab.",
+    "toastOcclusion": {
+      "message": "Could not save: QA storage full. Your saved collection is unchanged.",
+      "visible": true,
+      "elementAtCenter": "<dialog id=\"detail\" aria-labelledby=\"detail-title\" class=\"\" open=\"\"><div class=\"row between\"><small>Back to binder</small><button id=\"close\" aria-label=\"Close card\">×</button></div><div class=\"detail-art \" id=\"zoom\" role"
+    },
+    "pageErrors": []
+  }
+]

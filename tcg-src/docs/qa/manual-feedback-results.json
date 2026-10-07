@@ -1,0 +1,12 @@
+[
+  {
+    "width": 1440,
+    "message": "Could not save: QA storage full. Your saved collection is unchanged.",
+    "exposed": true
+  },
+  {
+    "width": 390,
+    "message": "Could not save: QA storage full. Your saved collection is unchanged.",
+    "exposed": true
+  }
+]

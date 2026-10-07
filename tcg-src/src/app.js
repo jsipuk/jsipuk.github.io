@@ -28,6 +28,22 @@ const ctx = {
   review: false,
 };
 ctx.toast = (message, undo) => {
+  if (modal.open) {
+    const toast = $("#toast");
+    clearTimeout(ctx.toast.timer);
+    toast.style.display = "none";
+    let feedback = modal.querySelector("#modal-feedback");
+    if (!feedback) {
+      feedback = document.createElement("div");
+      feedback.id = "modal-feedback";
+      feedback.className = "note";
+      feedback.setAttribute("role", "status");
+      modal.append(feedback);
+    }
+    feedback.textContent = message;
+    feedback.scrollIntoView({ block: "nearest" });
+    return;
+  }
   const el = $("#toast");
   el.innerHTML =
     escape(message) + (undo ? ' <button id="undo">Undo</button>' : "");

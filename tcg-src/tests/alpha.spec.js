@@ -118,13 +118,11 @@ test("real collection preserves binder UI, persists quantities and round-trips a
   await page.locator("#needed").click();
   await page.locator("#save").click();
   await page.locator('[data-nav="catalogue"]').click();
-  await page
-    .locator("#import-backup")
-    .setInputFiles({
-      name: "collection.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(backup),
-    });
+  await page.locator("#import-backup").setInputFiles({
+    name: "collection.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(backup),
+  });
   await expect(page.locator("#backup-preview")).toContainText("4 copies");
   await page.locator("#restore-backup").click();
   const saved = await page.evaluate(() =>
@@ -165,13 +163,11 @@ test("matching cannot use number alone; invalid backup and failed storage preser
   const before = await page.evaluate(() =>
     localStorage.getItem("cardledger-alpha-v1"),
   );
-  await page
-    .locator("#import-backup")
-    .setInputFiles({
-      name: "broken.json",
-      mimeType: "application/json",
-      buffer: Buffer.from("{broken"),
-    });
+  await page.locator("#import-backup").setInputFiles({
+    name: "broken.json",
+    mimeType: "application/json",
+    buffer: Buffer.from("{broken"),
+  });
   await expect(page.locator(".import-error")).toContainText("not valid JSON");
   expect(
     await page.evaluate(() => localStorage.getItem("cardledger-alpha-v1")),
@@ -185,7 +181,20 @@ test("matching cannot use number alone; invalid backup and failed storage preser
     };
   });
   await page.locator("#save").click();
-  await expect(page.locator("#toast")).toContainText("Could not save");
+  await expect(page.locator("#modal-feedback")).toContainText("Could not save");
+  await expect(page.locator("#modal-feedback")).toBeVisible();
+  const feedbackIsExposed = await page
+    .locator("#modal-feedback")
+    .evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      return el.contains(
+        document.elementFromPoint(
+          box.x + box.width / 2,
+          box.y + box.height / 2,
+        ),
+      );
+    });
+  expect(feedbackIsExposed).toBe(true);
   await expect(page.locator("#detail")).toBeVisible();
   expect(
     await page.evaluate(() => localStorage.getItem("cardledger-alpha-v1")),
@@ -208,13 +217,11 @@ test("corrupt storage is not silently overwritten and can be recovered by import
   expect(
     await page.evaluate(() => localStorage.getItem("cardledger-alpha-v1")),
   ).toBe("{damaged");
-  await page
-    .locator("#import-backup")
-    .setInputFiles({
-      name: "recover.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(backup),
-    });
+  await page.locator("#import-backup").setInputFiles({
+    name: "recover.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(backup),
+  });
   await page.locator("#restore-backup").click();
   await expect(page.locator("#storage-warning")).toBeEmpty();
   expect(
