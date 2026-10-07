@@ -11,6 +11,7 @@ import {
   status,
   completion,
   matchCards,
+  searchCandidates,
   exportBackup,
   importBackup,
 } from "../src/domain/collection.js";
@@ -233,5 +234,39 @@ test("backup must retain reference metadata even when nothing is owned", () => {
   assert.throws(
     () => importBackup(JSON.stringify(invalid)),
     /Invalid card metadata/,
+  );
+});
+
+test("unknown context discovers candidates without assigning identity", () => {
+  const ref = fresh().reference;
+  const unknown = searchCandidates(ref, { raw: "1" });
+  assert.equal(unknown.requiresConfirmation, true);
+  assert.ok(unknown.candidates.length > 1);
+  assert.equal(
+    searchCandidates(ref, { raw: "1/102", releaseId: releases[0].id })
+      .requiresConfirmation,
+    true,
+  );
+  assert.equal(
+    searchCandidates(ref, {
+      raw: "1/102",
+      releaseId: releases[0].id,
+      language: "en",
+    }).requiresConfirmation,
+    false,
+  );
+  assert.ok(
+    searchCandidates(ref, { raw: "1", language: "en" }).candidates.every(
+      (id) => ref.cards.find((c) => c.id === id).language === "en",
+    ),
+  );
+  assert.equal(
+    searchCandidates(ref, { raw: "1/103", releaseId: releases[0].id }).status,
+    "missing",
+  );
+  assert.equal(searchCandidates(ref, { raw: "1?" }).status, "invalid");
+  assert.equal(
+    searchCandidates(ref, { raw: "1", releaseId: "unknown" }).status,
+    "context",
   );
 });

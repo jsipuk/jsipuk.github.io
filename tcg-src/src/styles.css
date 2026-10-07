@@ -813,3 +813,22 @@ dialog::backdrop {
     font-size: 11px;
   }
 }
+
+.candidate-heading {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.candidate-art {
+  width: 70px;
+  height: 96px;
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--navy);
+  border-radius: 5px;
+}
+.candidate-art .real-card-art {
+  position: absolute;
+  inset: 0;
+}

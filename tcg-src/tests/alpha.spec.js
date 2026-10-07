@@ -155,10 +155,8 @@ test("matching cannot use number alone; invalid backup and failed storage preser
   await page.locator("#unknown-set").click();
   await page.locator("#numbers").fill("4/102");
   await page.locator("#find").click();
-  await expect(page.locator("#toast")).toContainText(
-    "Choose both release and language",
-  );
-  await expect(page.locator(".summary")).toHaveCount(0);
+  await expect(page.locator(".summary")).toHaveText("0 ready · 1 need checking");
+  await expect(page.locator("#commit")).toHaveCount(0);
   await page.locator('[data-nav="catalogue"]').click();
   const before = await page.evaluate(() =>
     localStorage.getItem("cardledger-alpha-v1"),
@@ -229,4 +227,54 @@ test("corrupt storage is not silently overwritten and can be recovered by import
       JSON.parse(localStorage.getItem("cardledger-alpha-v1")),
     ),
   ).toEqual(JSON.parse(backup));
+});
+
+test("Don't know discovers real cards and requires release/language confirmation", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/tcg/#add");
+  await page.locator("#unknown-set").click();
+  await page.locator("#unknown-lang").click();
+  await expect(page.locator("#set")).toHaveValue("");
+  await expect(page.locator("#set option:checked")).toHaveText("Don’t know");
+  await expect(page.locator("#language option:checked")).toHaveText(
+    "Don’t know",
+  );
+  await page.locator("#numbers").fill("4/102\n4");
+  await page.locator("#find").click();
+  await expect(page.locator(".summary")).toHaveText(
+    "0 ready · 2 need checking",
+  );
+  await page.locator('[data-review="1"]').click();
+  await expect(page.locator("#detail [data-choose]")).toHaveCount(9);
+  await expect(page.locator("#detail")).toContainText("Base Set · English");
+  await expect(page.locator("#detail")).toContainText("Jungle · English");
+  await page.locator("#close").click();
+  await expect(page.locator("#detail")).not.toBeVisible();
+  await page.locator('[data-review="0"]').click();
+  await expect(page.locator("#detail [data-choose]")).toHaveCount(1);
+  await expect(page.locator("#detail")).toContainText("Charizard");
+  await page.screenshot({
+    path: testInfo.outputPath("unknown-confirmation.png"),
+    fullPage: true,
+  });
+  await page.locator("[data-choose]").click();
+  await expect(page.locator(".summary")).toHaveText(
+    "1 ready · 1 need checking",
+  );
+  await page.locator("#commit").click();
+  await expect(page.locator(".summary")).toHaveText(
+    "0 ready · 1 need checking",
+  );
+  await page.reload();
+  await page.locator("#resume").click();
+  await expect(page.locator(".summary")).toHaveText(
+    "0 ready · 1 need checking",
+  );
+  await openBase(page);
+  await expect(charizard(page)).toHaveAttribute(
+    "aria-label",
+    /owned.*1/,
+  );
+  await expect(page.locator("#completion")).toContainText("1 / 102 unique");
 });

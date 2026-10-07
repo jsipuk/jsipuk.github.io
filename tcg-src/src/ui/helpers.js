@@ -19,7 +19,7 @@ export function note() {
 }
 export function releaseOptions(state, selected, unknown = false) {
   return (
-    (unknown ? '<option value="">Choose a release</option>' : "") +
+    (unknown ? '<option value="">Don’t know</option>' : "") +
     state.reference.releases
       .map(
         (r) =>

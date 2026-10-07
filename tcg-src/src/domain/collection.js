@@ -105,13 +105,22 @@ function numberToken(value) {
     ? `${m[1].toUpperCase()}${m[2].replace(/^0+(?=\d)/, "")}${m[3].toUpperCase()}`
     : null;
 }
-export function matchCards(reference, { releaseId, language, raw }) {
-  // A supplied release and language are mandatory even if a number looks unique.
-  if (!releaseId || !language) return { status: "context", candidates: [] };
-  const release = reference.releases.find(
-    (r) => r.id === releaseId && r.language === language,
+// Discovery lists possible identities; it never assigns ownership from a number alone.
+export function searchCandidates(
+  reference,
+  { releaseId = "", language = "", raw },
+) {
+  const result = (status, candidates = []) => ({
+    status,
+    candidates,
+    requiresConfirmation: !releaseId || !language || candidates.length !== 1,
+  });
+  const releases = reference.releases.filter(
+    (r) =>
+      (!releaseId || r.id === releaseId) &&
+      (!language || r.language === language),
   );
-  if (!release) return { status: "context", candidates: [] };
+  if (!releases.length) return result("context");
   const parts = String(raw).normalize("NFKC").trim().split("/");
   const token = numberToken(parts[0]);
   if (
@@ -119,21 +128,33 @@ export function matchCards(reference, { releaseId, language, raw }) {
     parts.length > 2 ||
     (parts.length === 2 && !numberToken(parts[1]))
   )
-    return { status: "invalid", candidates: [] };
-  if (
-    parts.length === 2 &&
-    numberToken(parts[1]) !== numberToken(release.printedTotal)
-  )
-    return { status: "missing", candidates: [] };
+    return result("invalid");
+  const eligible = new Set(
+    releases
+      .filter(
+        (r) =>
+          parts.length === 1 ||
+          numberToken(parts[1]) === numberToken(r.printedTotal),
+      )
+      .map((r) => r.id),
+  );
   const candidates = reference.cards
     .filter(
       (c) =>
-        c.releaseId === releaseId &&
-        c.language === language &&
-        numberToken(c.collectorNumber) === token,
+        eligible.has(c.releaseId) && numberToken(c.collectorNumber) === token,
     )
     .map((c) => c.id);
-  return { status: candidates.length ? "candidate" : "missing", candidates };
+  return result(candidates.length ? "candidate" : "missing", candidates);
+}
+export function matchCards(reference, { releaseId, language, raw }) {
+  // Authoritative matching still requires the full release and language context.
+  if (!releaseId || !language) return { status: "context", candidates: [] };
+  const { status, candidates } = searchCandidates(reference, {
+    releaseId,
+    language,
+    raw,
+  });
+  return { status, candidates };
 }
 export function exportBackup(state) {
   validateCollection(state);
