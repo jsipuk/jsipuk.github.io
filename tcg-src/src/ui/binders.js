@@ -9,6 +9,7 @@ import {
   swipe,
   cardArt,
   bindImages,
+  renderAndFocus,
 } from "./helpers.js";
 export function passes(state, card, filter) {
   const s = status(state, card.id);
@@ -56,7 +57,7 @@ export function renderCollection(ctx) {
     );
   const change = (dir) => {
     ctx.shelf = Math.max(0, Math.min(totalShelves - 1, ctx.shelf + dir));
-    renderCollection(ctx);
+    renderAndFocus(ctx, dir < 0 ? "#prev" : "#next");
   };
   $("#manage-sets").onclick = () => {
     ctx.manageSets = true;
@@ -76,7 +77,7 @@ function renderBinder(ctx) {
     pages = Math.max(1, Math.ceil(all.length / 9));
   ctx.page = Math.min(ctx.page, pages - 1);
   const visible = all.slice(ctx.page * 9, ctx.page * 9 + 9);
-  ctx.app.innerHTML = `<div class="row between"><button class="quiet" id="binders">‹ Binders</button><button id="rapid-entry">Rapid Entry</button></div><div class="row between"><div><h1>${escape(r.name)}</h1><p class="muted">${escape(langName(r.language))}${r.legacy ? " · saved reference" : ""}</p></div><div class="chips"><button id="grid" class="${!ctx.list ? "selected" : ""}">Binder</button><button id="list" class="${ctx.list ? "selected" : ""}">List</button></div></div><div class="row between"><span class="badge" id="completion">${checklistLabel(state, r.id)}</span><p id="physical-count" class="muted">Physical cards: ${all.reduce((n, c) => n + quantity(state, c.id), 0)} · Spare copies: ${all.reduce((n, c) => n + Math.max(0, quantity(state, c.id) - 1), 0)}</p><div class="chips">${["all", "got", "need", "duplicates"].map((f) => `<button data-filter="${f}" class="${ctx.filter === f ? "selected" : ""}">${f[0].toUpperCase() + f.slice(1)}</button>`).join("")}</div></div>${
+  ctx.app.innerHTML = `<div class="row between"><button class="quiet" id="binders">‹ Binders</button><button id="rapid-entry">Rapid Entry</button></div><div class="row between"><div><h1>${escape(r.name)}</h1><p class="muted">${escape(langName(r.language))}${r.legacy ? " · saved reference" : ""}</p></div><div class="chips" role="group" aria-label="Collection view"><button id="grid" aria-pressed="${!ctx.list}" class="${!ctx.list ? "selected" : ""}">Binder</button><button id="list" aria-pressed="${ctx.list}" class="${ctx.list ? "selected" : ""}">List</button></div></div><div class="row between"><span class="badge" id="completion">${checklistLabel(state, r.id)}</span><p id="physical-count" class="muted">Physical cards: ${all.reduce((n, c) => n + quantity(state, c.id), 0)} · Spare copies: ${all.reduce((n, c) => n + Math.max(0, quantity(state, c.id) - 1), 0)}</p><div class="chips" role="group" aria-label="Collection filter">${["all", "got", "need", "duplicates"].map((f) => `<button data-filter="${f}" aria-pressed="${ctx.filter === f}" class="${ctx.filter === f ? "selected" : ""}">${f[0].toUpperCase() + f.slice(1)}</button>`).join("")}</div></div>${
     ctx.list
       ? `<div class="panel">${
           all
@@ -108,17 +109,17 @@ function renderBinder(ctx) {
   };
   $("#grid").onclick = () => {
     ctx.list = false;
-    ctx.render();
+    renderAndFocus(ctx, "#grid");
   };
   $("#list").onclick = () => {
     ctx.list = true;
-    ctx.render();
+    renderAndFocus(ctx, "#list");
   };
   document.querySelectorAll("[data-filter]").forEach(
     (b) =>
       (b.onclick = () => {
         ctx.filter = b.dataset.filter;
-        ctx.render();
+        renderAndFocus(ctx, `[data-filter="${b.dataset.filter}"]`);
       }),
   );
   document
@@ -128,7 +129,7 @@ function renderBinder(ctx) {
   if (!ctx.list) {
     const change = (dir) => {
       ctx.page = Math.max(0, Math.min(pages - 1, ctx.page + dir));
-      ctx.render();
+      renderAndFocus(ctx, dir < 0 ? "#prev-page" : "#next-page");
     };
     $("#prev-page").onclick = () => change(-1);
     $("#next-page").onclick = () => change(1);

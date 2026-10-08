@@ -30,6 +30,8 @@ let storage,
   loaded,
   previousFocus,
   focusSelector,
+  collectionGeneration = 0,
+  referenceRequest = 0,
   renderVersion = 0;
 const ctx = {
   app,
@@ -114,6 +116,37 @@ ctx.save = (update, { recovery = false } = {}) => {
 };
 ctx.flush = () => pending;
 ctx.hasStorageError = () => Boolean(loaded?.error);
+// A backup or another tab can replace every identity in the current collection.
+// Pending reference requests and view-local IDs belong to the previous collection.
+ctx.collectionReplaced = ({ preserveView = false } = {}) => {
+  collectionGeneration++;
+  if (preserveView) {
+    const releases = new Set(ctx.state.reference.releases.map((r) => r.id));
+    const cards = new Set(ctx.state.reference.cards.map((c) => c.id));
+    if (!releases.has(ctx.currentRelease)) ctx.currentRelease = null;
+    if (!releases.has(ctx.exportRelease)) ctx.exportRelease = null;
+    if (!releases.has(ctx.rapidReleaseId)) {
+      ctx.rapidReleaseId = undefined;
+      ctx.rapidLanguage = undefined;
+    }
+    ctx.rapidHistory = (ctx.rapidHistory || []).filter((id) => cards.has(id));
+    ctx.review = ctx.review && ctx.state.batch.length > 0;
+  } else {
+    ctx.currentRelease = null;
+    ctx.exportRelease = null;
+    ctx.rapidReleaseId = undefined;
+    ctx.rapidLanguage = undefined;
+    ctx.rapidHistory = [];
+    ctx.rapid = false;
+    ctx.review = false;
+    ctx.manageSets = false;
+    ctx.page = 0;
+    ctx.shelf = 0;
+    ctx.filter = "all";
+  }
+  clearTimeout(ctx.closeTimer);
+  if (modal.open) modal.close();
+};
 ctx.change = async (
   update,
   message,
@@ -129,13 +162,22 @@ ctx.change = async (
       return typeof update === "function" ? update(state) : update;
     });
     if (!saved) return false;
+    const afterState = structuredClone(ctx.state);
     after();
     ctx.toast(message, async () => {
       if (
-        !(await ctx.save((state) => ({
-          ...before,
-          reference: state.reference,
-        })))
+        !(await ctx.save((state) => {
+          const next = { ...state };
+          for (const key of Object.keys(before)) {
+            if (
+              key !== "reference" &&
+              JSON.stringify(before[key]) !== JSON.stringify(afterState[key]) &&
+              JSON.stringify(state[key]) === JSON.stringify(afterState[key])
+            )
+              next[key] = before[key];
+          }
+          return next;
+        }))
       )
         return false;
       afterUndo();
@@ -147,6 +189,7 @@ ctx.change = async (
   }
 };
 ctx.importRelease = async (id) => {
+  const generation = collectionGeneration;
   const manifest = ctx.state.reference.manifest;
   const wire = manifest?.releases.find((r) => r.id === id);
   if (!wire?.readyForApp)
@@ -158,12 +201,18 @@ ctx.importRelease = async (id) => {
   )
     return true;
   const imported = await fetchPack(manifest, id);
-  return ctx.save((state) => mergePack(state, imported));
+  return ctx.save((state) => {
+    if (generation !== collectionGeneration)
+      throw Error("Collection changed while loading this release. Try again.");
+    return mergePack(state, imported);
+  });
 };
 ctx.track = async (id) => {
+  const generation = collectionGeneration;
   try {
     const release = ctx.state.reference.releases.find((r) => r.id === id);
     if (!release?.legacy && !(await ctx.importRelease(id))) return false;
+    if (generation !== collectionGeneration) return false;
     return ctx.change(
       (state) => trackRelease(state, id),
       "Set added to your collection.",
@@ -175,11 +224,24 @@ ctx.track = async (id) => {
 };
 ctx.refreshReference = async ({ interactive = false } = {}) => {
   const startedVersion = renderVersion;
+  const generation = collectionGeneration;
+  const request = ++referenceRequest;
+  const outdated = () =>
+    generation !== collectionGeneration || request !== referenceRequest;
   try {
     const manifest = await fetchManifest();
-    if (!(await ctx.save((state) => mergeManifest(state, manifest)))) return;
+    if (outdated()) return;
+    if (
+      !(await ctx.save((state) => {
+        if (outdated()) return state;
+        return mergeManifest(state, manifest);
+      }))
+    )
+      return;
+    if (outdated()) return;
     ctx.referenceWarning = "";
     for (const id of ctx.state.trackedSets) {
+      if (outdated()) return;
       if (!manifest.releases.some((r) => r.id === id && r.readyForApp))
         continue;
       try {
@@ -189,10 +251,12 @@ ctx.refreshReference = async ({ interactive = false } = {}) => {
       }
     }
   } catch (error) {
+    if (outdated()) return;
     ctx.referenceWarning = ctx.state.reference.cards.length
       ? "Reference update unavailable. Your saved collection and cached cards are still usable."
       : "Reference registry unavailable. Retry in Manage sets.";
   }
+  if (outdated()) return;
   if (
     interactive ||
     ctx.manageSets ||
@@ -255,9 +319,12 @@ ctx.updateReferenceWarning = () => {
 ctx.render = () => {
   renderVersion++;
   ctx.updateReferenceWarning();
-  document
-    .querySelectorAll("[data-nav]")
-    .forEach((b) => b.classList.toggle("selected", b.dataset.nav === ctx.view));
+  document.querySelectorAll("[data-nav]").forEach((b) => {
+    const selected = b.dataset.nav === ctx.view;
+    b.classList.toggle("selected", selected);
+    if (selected) b.setAttribute("aria-current", "page");
+    else b.removeAttribute("aria-current");
+  });
   if (ctx.view === "add") {
     if (ctx.review) renderReview(ctx);
     else renderAdd(ctx);
@@ -360,6 +427,7 @@ try {
     ) {
       ctx.view = view;
       ctx.review = false;
+      ctx.manageSets = false;
       ctx.render();
     }
   });
@@ -374,7 +442,7 @@ try {
           loaded.revision = fresh.revision;
           loaded.error = null;
           $("#storage-warning").innerHTML = "";
-          if (modal.open) modal.close();
+          ctx.collectionReplaced({ preserveView: true });
           ctx.render();
           ctx.toast("Collection updated from another tab.");
         } catch (error) {

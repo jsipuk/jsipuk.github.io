@@ -18,30 +18,54 @@ export function renderManageSets(ctx) {
             (w) => w.id === r.id,
           );
           const ready = wire?.readyForApp === true;
+          const cached = ctx.state.reference.cards.some(
+            (c) => c.releaseId === r.id && !c.retired,
+          );
+          const current =
+            cached &&
+            r.importedVersion === ctx.state.reference.manifest?.dataVersion;
           const label = r.legacy
             ? "Saved reference · outside current registry"
             : ready
-              ? "Ready to import"
+              ? current
+                ? "Ready · reference cached"
+                : cached
+                  ? "Ready · reference update available"
+                  : "Ready to import"
               : `${wire?.checklistStatus || r.checklistStatus || "unavailable"} · not app-ready`;
           return `<div class="panel"><h2>${escape(wire?.displayName || r.name)}</h2><p>${escape(langName(r.language))} · ${escape(r.region)}<br><small>${escape(label)}</small></p>${tracked ? `<button class="wide" data-untrack="${escape(r.id)}">Remove binder · keep quantities</button>` : `<button class="wide" data-track="${escape(r.id)}" ${!ready && !r.legacy ? "disabled" : ""}>${r.legacy ? "Show saved binder" : "Add set"}</button>`}</div>`;
         })
         .join("") ||
-      "<p>No releases match. A release will appear here automatically when it is added to the reference registry.</p>";
+      (ctx.setQuery
+        ? "<p>No releases match your search.</p>"
+        : "<p>No releases are available in the cached registry. Refresh the reference catalogue above to retry.</p>");
     document.querySelectorAll("[data-track]").forEach(
       (b) =>
         (b.onclick = async () => {
           b.disabled = true;
+          b.textContent = "Loading set…";
           const saved = await ctx.track(b.dataset.track);
-          if (!saved && b.isConnected) b.disabled = false;
+          if (!saved && b.isConnected) {
+            b.disabled = false;
+            b.textContent = "Retry adding set";
+          }
+          if (saved)
+            ctx.app
+              .querySelector(`[data-untrack="${CSS.escape(b.dataset.track)}"]`)
+              ?.focus();
         }),
     );
     document.querySelectorAll("[data-untrack]").forEach(
       (b) =>
         (b.onclick = async () => {
-          await ctx.change(
+          const saved = await ctx.change(
             (state) => trackRelease(state, b.dataset.untrack, false),
             "Binder removed. Its quantities are still saved.",
           );
+          if (saved)
+            ctx.app
+              .querySelector(`[data-track="${CSS.escape(b.dataset.untrack)}"]`)
+              ?.focus();
         }),
     );
   };

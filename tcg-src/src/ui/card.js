@@ -4,6 +4,7 @@ import {
   variantQuantity,
   setQuantity,
   addCopies,
+  canAddCopies,
 } from "../domain/collection.js";
 import { $, escape, langName, cardArt, bindImages } from "./helpers.js";
 export function openCard(ctx, id) {
@@ -34,9 +35,21 @@ export function openCard(ctx, id) {
     const total = Object.values(staged).reduce((a, b) => a + b, 0);
     $("#qty").textContent = staged[variantId];
     $("#total").textContent = `${total} total copies across variants`;
-    if ($("#add-missing")) $("#add-missing").disabled = total !== 0;
+    const available = canAddCopies(ctx.state, id, variantId);
+    if ($("#add-missing"))
+      $("#add-missing").disabled = total !== 0 || !available;
     $("#minus").disabled = staged[variantId] === 0;
-    $("#plus").disabled = total >= 999;
+    $("#plus").disabled = total >= 999 || !available;
+    let unavailable = $("#entry-unavailable");
+    if (!unavailable) {
+      unavailable = document.createElement("p");
+      unavailable.id = "entry-unavailable";
+      unavailable.className = "muted";
+      $("#total").after(unavailable);
+    }
+    unavailable.textContent = available
+      ? ""
+      : "This card or finish is outside the available checklist. Saved copies can still be reduced.";
   };
   $("#finish").onchange = (e) => {
     variantId = e.target.value;

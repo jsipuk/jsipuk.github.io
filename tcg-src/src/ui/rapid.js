@@ -11,8 +11,17 @@ import {
   langName,
   cardArt,
   bindImages,
+  cachedReleases,
+  renderEmptyEntry,
 } from "./helpers.js";
 export function renderRapid(ctx) {
+  if (!cachedReleases(ctx.state).length) {
+    renderEmptyEntry(ctx, "Rapid Entry");
+    return;
+  }
+  ctx.rapidHistory = (ctx.rapidHistory || []).filter((id) =>
+    ctx.state.reference.cards.some((c) => c.id === id),
+  );
   const state = ctx.state,
     saved = state.rapidContext;
   const releaseId =
@@ -26,7 +35,7 @@ export function renderRapid(ctx) {
     ctx.rapidLanguage ?? saved?.language ?? release?.language ?? "en";
   ctx.rapidReleaseId = releaseId;
   ctx.rapidLanguage = language;
-  ctx.app.innerHTML = `<div class="form"><div class="row between"><h1>Rapid Entry</h1><button id="batch-mode" class="quiet">Batch entry</button></div><p class="muted">Keep the release pinned. Enter a number and press Enter to add one copy.</p><label for="rapid-set">Release</label><select id="rapid-set">${releaseOptions(state, releaseId, true)}</select><label for="rapid-language">Language</label><select id="rapid-language"><option value="">Don’t know</option>${[...new Set(["en", ...state.reference.releases.filter((r) => r.legacy || r.readyForApp).map((r) => r.language)])].map((lang) => `<option value="${escape(lang)}" ${lang === language ? "selected" : ""}>${escape(langName(lang))}</option>`).join("")}</select><form id="rapid-form"><label for="rapid-number">Card number</label><input id="rapid-number" class="rapid-number" autocomplete="off" autocapitalize="characters" placeholder="94 or 094/088"><details><summary>Optional card name</summary><label for="rapid-name">Name to narrow candidates</label><input id="rapid-name" autocomplete="off"></details><button id="rapid-add" class="primary wide" type="submit">Add one copy</button></form><div id="rapid-recent" aria-live="polite">${(
+  ctx.app.innerHTML = `<div class="form"><div class="row between"><h1>Rapid Entry</h1><button id="batch-mode" class="quiet">Batch entry</button></div><p class="muted">Keep the release pinned. Enter a number and press Enter to add one copy.</p><label for="rapid-set">Release</label><select id="rapid-set">${releaseOptions(state, releaseId, true)}</select><label for="rapid-language">Language</label><select id="rapid-language"><option value="">Don’t know</option>${[...new Set(["en", ...state.reference.releases.filter((r) => r.legacy || (r.registryReady !== false && r.readyForApp)).map((r) => r.language)])].map((lang) => `<option value="${escape(lang)}" ${lang === language ? "selected" : ""}>${escape(langName(lang))}</option>`).join("")}</select><form id="rapid-form"><label for="rapid-number">Card number</label><input id="rapid-number" class="rapid-number" autocomplete="off" autocapitalize="characters" placeholder="94 or 094/088"><details><summary>Optional card name</summary><label for="rapid-name">Name to narrow candidates</label><input id="rapid-name" autocomplete="off"></details><button id="rapid-add" class="primary wide" type="submit">Add one copy</button></form><div id="rapid-recent" aria-live="polite">${(
     ctx.rapidHistory || []
   )
     .map((id) => {

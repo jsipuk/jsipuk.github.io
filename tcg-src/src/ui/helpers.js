@@ -18,15 +18,17 @@ export const pos = (i) => `${(i % 3) * 50}% ${Math.floor(i / 3) * 50}%`;
 export function note() {
   return '<div class="note">Private collection · Saved on this device. Use a JSON backup to keep a copy.</div>';
 }
-export function releaseOptions(state, selected, unknown = false) {
+export function cachedReleases(state, { forEntry = true } = {}) {
+  return state.reference.releases.filter(
+    (r) =>
+      (!forEntry || r.legacy || (r.registryReady !== false && r.readyForApp)) &&
+      state.reference.cards.some((c) => c.releaseId === r.id && !c.retired),
+  );
+}
+export function releaseOptions(state, selected, unknown = false, options = {}) {
   return (
     (unknown ? '<option value="">Don’t know</option>' : "") +
-    state.reference.releases
-      .filter(
-        (r) =>
-          (r.legacy || (r.registryReady !== false && r.readyForApp)) &&
-          state.reference.cards.some((c) => c.releaseId === r.id && !c.retired),
-      )
+    cachedReleases(state, options)
       .map(
         (r) =>
           `<option value="${escape(r.id)}" ${r.id === selected ? "selected" : ""}>${escape(r.name)} · ${escape(langName(r.language))}</option>`,
@@ -94,7 +96,7 @@ export function languageOptions(state, selected) {
     ...new Set([
       "en",
       ...state.reference.releases
-        .filter((r) => r.legacy || r.readyForApp)
+        .filter((r) => r.legacy || (r.registryReady !== false && r.readyForApp))
         .filter((r) => state.reference.cards.some((c) => c.releaseId === r.id))
         .map((r) => r.language),
     ]),
@@ -113,4 +115,42 @@ export function languageOptions(state, selected) {
       ? '<option value="zh-Hans" disabled>Simplified Chinese · no ready reference yet</option>'
       : "")
   );
+}
+
+// Entry must lead users to verified data rather than a search that cannot succeed.
+export function renderEmptyEntry(ctx, title) {
+  const ready = ctx.state.reference.releases.some(
+    (r) => r.readyForApp && r.registryReady !== false,
+  );
+  ctx.app.innerHTML = `<div class="form"><h1>${escape(title)}</h1>${note()}<div class="panel"><h2>Card reference needed</h2><p>${ready ? "Load a ready release in Manage sets before adding cards." : "No ready card checklist is available yet. Researching releases cannot be used for entry."}</p><p>Your saved collection is unchanged. You can also restore a collection backup with its saved reference data.</p><button class="primary wide" id="entry-manage-sets">Add / manage sets</button><button class="wide" id="entry-backup">Restore a collection backup</button>${ctx.state.batch.length ? `<button class="wide" id="resume">Resume review (${ctx.state.batch.length})</button>` : ""}</div></div>`;
+  $("#entry-manage-sets").onclick = async () => {
+    await ctx.navigate("collection");
+    ctx.manageSets = true;
+    ctx.render();
+  };
+  $("#entry-backup").onclick = () => ctx.navigate("catalogue");
+  if ($("#resume"))
+    $("#resume").onclick = async () => {
+      await ctx.flush();
+      ctx.review = true;
+      ctx.render();
+    };
+}
+export function renderAndFocus(ctx, selector) {
+  ctx.render();
+  const target = ctx.app.querySelector(selector);
+  if (target && !target.disabled) {
+    target.focus({ preventScroll: true });
+    const bounds = target.getBoundingClientRect();
+    const navigationTop =
+      document.querySelector("nav")?.getBoundingClientRect().top ?? innerHeight;
+    if (bounds.top < 8 || bounds.bottom > navigationTop - 8)
+      target.scrollIntoView({ block: "center", behavior: "instant" });
+  } else {
+    const heading = ctx.app.querySelector("h1");
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus();
+    }
+  }
 }

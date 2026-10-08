@@ -4,6 +4,7 @@ import {
   findCard,
   quantity,
   addCopies,
+  canAddCopies,
 } from "../domain/collection.js";
 import {
   $,
@@ -14,6 +15,7 @@ import {
   cardArt,
   bindImages,
   languageOptions,
+  renderEmptyEntry,
 } from "./helpers.js";
 export function renderAdd(ctx) {
   if (ctx.rapid) return renderRapid(ctx);
@@ -26,6 +28,10 @@ export function renderAdd(ctx) {
   const samples = state.reference.cards.filter(
     (c) => !c.retired && available.has(c.releaseId),
   );
+  if (!samples.length) {
+    renderEmptyEntry(ctx, "Add cards");
+    return;
+  }
   const sample =
     samples.find((c) => c.releaseId === state.draft.releaseId) || samples[0];
   ctx.app.innerHTML = `<div class="form"><div class="row between"><h1>Add cards</h1><button class="quiet" id="rapid-mode">Rapid Entry</button></div><p class="muted">Enter one card or a whole batch.</p>${note()}<div class="stack"><div><label for="set">Release</label><div class="field-row"><select id="set">${releaseOptions(state, state.draft.releaseId, true)}</select><button id="unknown-set">Don’t know</button></div></div><div><label for="language">Language</label><div class="field-row"><select id="language">${languageOptions(state, state.draft.language)}</select><button id="unknown-lang">Don’t know</button></div></div><div><label for="numbers">Card numbers</label><textarea id="numbers" placeholder="4/102&#10;025/102, 026/102">${escape(state.draft.text)}</textarea><small>Separate numbers with commas or new lines. If you don’t know the release or language, confirm a verified match before adding.</small></div></div><div class="sample-actions">${sample ? '<button class="quiet" id="try">Use a reference example</button>' : ""}${state.batch.length ? '<button id="resume">Resume review (' + state.batch.length + ")</button>" : ""}</div><button class="primary wide" id="find">Find cards</button></div>`;
@@ -117,10 +123,19 @@ export function renderAdd(ctx) {
     }
   };
 }
+function isReady(state, row) {
+  return Boolean(row.chosen && canAddCopies(state, row.chosen, row.variantId));
+}
+function currentCandidates(state, row) {
+  return row.candidates.filter((id) => {
+    const card = state.reference.cards.find((c) => c.id === id);
+    return card?.variants.some((v) => canAddCopies(state, id, v.id));
+  });
+}
 export function renderReview(ctx) {
-  const ready = ctx.state.batch.filter((r) => r.chosen),
-    needs = ctx.state.batch.filter((r) => !r.chosen);
-  ctx.app.innerHTML = `<div class="form"><button class="quiet" id="back">‹ Edit input</button><h1>Check your cards</h1><div class="summary">${ready.length} ready · ${needs.length} need checking</div><p class="muted">Nothing in this review has been added yet.</p>${note()}<div class="panel"><h2>Needs checking (${needs.length})</h2>${needs.length ? needs.map((r) => `<div class="review-row"><div><strong>${escape(r.raw)}</strong><div class="status">${r.status === "invalid" ? "Check the number" : r.candidates.length ? "Confirm a match" : "Not found in the available reference"}</div></div><button data-review="${r.i}">${r.candidates.length ? "Choose match" : "Edit number"}</button></div>`).join("") : "<p>All entries are ready.</p>"}</div><details class="panel" open><summary>Ready to add (${ready.length})</summary>${ready
+  const ready = ctx.state.batch.filter((r) => isReady(ctx.state, r)),
+    needs = ctx.state.batch.filter((r) => !isReady(ctx.state, r));
+  ctx.app.innerHTML = `<div class="form"><button class="quiet" id="back">‹ Edit input</button><h1>Check your cards</h1><div class="summary">${ready.length} ready · ${needs.length} need checking</div><p class="muted">Nothing in this review has been added yet.</p>${note()}<div class="panel"><h2>Needs checking (${needs.length})</h2>${needs.length ? needs.map((r) => `<div class="review-row"><div><strong>${escape(r.raw)}</strong><div class="status">${r.status === "invalid" ? "Check the number" : currentCandidates(ctx.state, r).length ? "Confirm a current match" : "Not found in the available reference"}</div></div><button data-review="${r.i}">${currentCandidates(ctx.state, r).length ? "Choose match" : "Edit number"}</button></div>`).join("") : "<p>All entries are ready.</p>"}</div><details class="panel" open><summary>Ready to add (${ready.length})</summary>${ready
     .map((r) => {
       const c = findCard(ctx.state, r.chosen),
         release = ctx.state.reference.releases.find(
@@ -144,12 +159,13 @@ export function renderReview(ctx) {
     $("#commit").onclick = async () => {
       await ctx.change(
         (state) => {
-          const ready = state.batch.filter((r) => r.chosen);
+          const ready = state.batch.filter((r) => isReady(state, r));
           const next = addCopies(
             state,
             ready.map((r) => ({ cardId: r.chosen, variantId: r.variantId })),
           );
-          next.batch = next.batch.filter((r) => !r.chosen);
+          const committed = new Set(ready.map((r) => r.i));
+          next.batch = next.batch.filter((r) => !committed.has(r.i));
           if (!next.batch.length) next.draft.text = "";
           return next;
         },
@@ -166,15 +182,24 @@ export function renderReview(ctx) {
     };
 }
 function reviewRow(ctx, i) {
-  const row = ctx.state.batch.find((r) => r.i === i);
+  const row = ctx.state.batch.find((r) => r.i === i),
+    candidates = currentCandidates(ctx.state, row);
   ctx.modal.innerHTML = `<div class="row between"><h2 id="detail-title">Check ${escape(row.raw)}</h2><button id="close" aria-label="Close">×</button></div><p class="muted">Confirm the card’s release, language and number. Nothing is added until you finish the review.</p>${
-    row.candidates
+    candidates
       .map((id) => {
         const c = findCard(ctx.state, id),
           release = ctx.state.reference.releases.find(
             (r) => r.id === c.releaseId,
           );
-        return `<div class="panel"><div class="candidate-heading"><div class="candidate-art">${cardArt(c)}</div><div><strong>${escape(c.name)} · ${escape(c.printedNumber || c.collectorNumber)}</strong><p>${escape(release.name)} · ${escape(langName(c.language))}<br><small>${escape(release.region)}</small></p></div></div><label for="variant-${escape(row.candidates.indexOf(id))}">Variant / finish</label><select id="variant-${row.candidates.indexOf(id)}">${c.variants.map((v) => `<option value="${escape(v.id)}" ${v.id === row.variantId ? "selected" : ""}>${escape(v.label)}</option>`).join("")}</select><button class="wide" data-choose="${escape(id)}" data-select="variant-${row.candidates.indexOf(id)}">Confirm this card</button></div>`;
+        return `<div class="panel"><div class="candidate-heading"><div class="candidate-art">${cardArt(c)}</div><div><strong>${escape(c.name)} · ${escape(c.printedNumber || c.collectorNumber)}</strong><p>${escape(release.name)} · ${escape(langName(c.language))}<br><small>${escape(release.region)}</small></p></div></div><label for="variant-${escape(candidates.indexOf(id))}">Variant / finish</label><select id="variant-${candidates.indexOf(id)}">${c.variants
+          .filter((v) => !v.retired)
+          .map(
+            (v) =>
+              `<option value="${escape(v.id)}" ${v.id === row.variantId ? "selected" : ""}>${escape(v.label)}</option>`,
+          )
+          .join(
+            "",
+          )}</select><button class="wide" data-choose="${escape(id)}" data-select="variant-${candidates.indexOf(id)}">Confirm this card</button></div>`;
       })
       .join("") ||
     "<p>No match. Correct the number or return to input to choose another release.</p>"
