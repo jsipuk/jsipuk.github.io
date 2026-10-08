@@ -149,11 +149,18 @@ export function adaptPack(manifest, releaseId, pack) {
       pack.language === undefined || pack.language === wire.language,
       "Release file language does not match the manifest",
     );
+    assert(
+      pack.source === undefined || record(pack.source),
+      "Invalid release provenance",
+    );
   }
   const release = {
     ...adaptRelease(wire),
     testFixture: manifest.testFixture === true,
     importedVersion: manifest.dataVersion,
+    ...(!Array.isArray(pack) && pack.source
+      ? { cardSource: structuredClone(pack.source) }
+      : {}),
   };
   const ids = new Set(),
     numbers = new Set();

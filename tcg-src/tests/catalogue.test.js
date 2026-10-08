@@ -27,7 +27,7 @@ const imported = () =>
     mergeManifest(createCollection(emptyReference()), manifest),
     adaptPack(manifest, "perfect-order-en", packs["perfect-order-en"]),
   );
-test("actual curated manifest parses; every current release is researching and unavailable", async () => {
+test("actual curated manifest exposes two ready releases and keeps researching sets unavailable", async () => {
   const actual = validateManifest(
     JSON.parse(
       await readFile(
@@ -36,20 +36,22 @@ test("actual curated manifest parses; every current release is researching and u
       ),
     ),
   );
-  assert.equal(actual.releases.length, 6);
-  assert.ok(
-    actual.releases.every(
-      (r) => !r.readyForApp && r.checklistStatus === "researching",
-    ),
+  assert.equal(actual.dataVersion, "2026-10-08.2");
+  assert.deepEqual(
+    actual.releases.filter((r) => r.readyForApp).map((r) => r.id),
+    ["perfect-order-en", "destined-rivals-en"],
   );
+  const researching = actual.releases.filter((r) => !r.readyForApp);
+  assert.equal(researching.length, 5);
+  assert.ok(researching.every((r) => r.checklistStatus === "researching"));
   const state = mergeManifest(createCollection(emptyReference()), actual);
-  assert.equal(state.reference.releases.length, 6);
+  assert.equal(state.reference.releases.length, 7);
   assert.equal(state.reference.cards.length, 0);
   assert.deepEqual(state.quantities, {});
-  assert.throws(() => trackRelease(state, actual.releases[0].id), /not ready/);
+  assert.throws(() => trackRelease(state, researching[0].id), /not ready/);
   let called = false;
   await assert.rejects(
-    fetchPack(actual, actual.releases[0].id, () => {
+    fetchPack(actual, researching[0].id, () => {
       called = true;
     }),
     /not app-ready/,

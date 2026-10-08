@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": "2026-10-07.1",
+  "generatedAt": "2026-10-07",
+  "releases": [
+    {
+      "id": "perfect-order-en",
+      "game": "pokemon",
+      "displayName": "Perfect Order",
+      "officialName": "Mega Evolution—Perfect Order",
+      "language": "en",
+      "region": "international",
+      "series": "Mega Evolution",
+      "releaseDate": "2026-03-27",
+      "setCode": "ME03",
+      "printedDenominator": 88,
+      "numberedCardCount": 124,
+      "checklistStatus": "researching",
+      "readyForApp": false,
+      "cardsFile": "sets/en/perfect-order.json",
+      "aliases": [
+        "Perfect Order",
+        "PO",
+        "ME03"
+      ],
+      "source": {
+        "primary": "https://www.pokemon.com/uk/pokemon-news/the-pokemon-tcg-mega-evolution-perfect-order-expansion-is-available-now",
+        "secondary": [
+          "https://www.tcgheart.com/set/perfect-order",
+          "https://www.tcgdex.net/database/me-mega-evolution/me03-perfect-order/109-forest-of-vitality"
+        ]
+      }
+    },
+    {
+      "id": "chaos-rising-en",
+      "game": "pokemon",
+      "displayName": "Chaos Rising",
+      "officialName": "Mega Evolution—Chaos Rising",
+      "language": "en",
+      "region": "international",
+      "series": "Mega Evolution",
+      "releaseDate": "2026-05-22",
+      "setCode": "CRI",
+      "printedDenominator": 86,
+      "numberedCardCount": 122,
+      "checklistStatus": "researching",
+      "readyForApp": false,
+      "cardsFile": "sets/en/chaos-rising.json",
+      "aliases": [
+        "Chaos Rising",
+        "Chaos",
+        "CRI"
+      ],
+      "source": {
+        "primary": "https://www.pokemon.com/uk/pokemon-news/the-pokemon-tcg-mega-evolution-chaos-rising-expansion-is-available-now",
+        "secondary": [
+          "https://www.ninepocket.net/sets/me4"
+        ]
+      }
+    },
+    {
+      "id": "pitch-black-en",
+      "game": "pokemon",
+      "displayName": "Pitch Black",
+      "officialName": "Mega Evolution—Pitch Black",
+      "language": "en",
+      "region": "international",
+      "series": "Mega Evolution",
+      "releaseDate": "2026-07-17",
+      "setCode": "PBL",
+      "printedDenominator": 84,
+      "numberedCardCount": 120,
+      "checklistStatus": "researching",
+      "readyForApp": false,
+      "cardsFile": "sets/en/pitch-black.json",
+      "aliases": [
+        "Pitch Black",
+        "Pitch",
+        "PBL"
+      ],
+      "source": {
+        "primary": "https://www.pokemon.com/uk/news/the-pokemon-tcg-mega-evolution-pitch-black-expansion-arrives-july-17-2026",
+        "secondary": [
+          "https://www.ninepocket.net/sets/me5"
+        ]
+      }
+    },
+    {
+      "id": "30th-celebration-en",
+      "game": "pokemon",
+      "displayName": "30th Celebration",
+      "officialName": "30th Celebration",
+      "language": "en",
+      "region": "international",
+      "series": "Mega Evolution",
+      "releaseDate": "2026-09-16",
+      "setCode": null,
+      "printedDenominator": 128,
+      "numberedCardCount": null,
+      "checklistStatus": "researching",
+      "readyForApp": false,
+      "cardsFile": "sets/en/30th-celebration.json",
+      "aliases": [
+        "30th Celebration",
+        "30th",
+        "30th Anniversary",
+        "English 30th"
+      ],
+      "source": {
+        "primary": "https://www.pokemon.com/us/news/the-pokemon-tcg-30th-celebration-expansion-is-available-now",
+        "secondary": [
+          "https://lunidex.app/en/tcg/sets/30th?tcgLang=en",
+          "https://tcgjoin.com/en/pokemon-30th-celebration-cards"
+        ]
+      }
+    },
+    {
+      "id": "30th-celebration-zh-hans",
+      "game": "pokemon",
+      "displayName": "30th Celebration",
+      "officialName": "30周年庆典",
+      "language": "zh-Hans",
+      "region": "CN",
+      "series": null,
+      "releaseDate": "2026-09-16",
+      "setCode": "30th C",
+      "printedDenominator": 103,
+      "numberedCardCount": null,
+      "checklistStatus": "researching",
+      "readyForApp": false,
+      "cardsFile": "sets/zh-Hans/30th-celebration.json",
+      "aliases": [
+        "30th Celebration Chinese",
+        "Chinese 30th",
+        "30th C",
+        "30周年庆典"
+      ],
+      "source": {
+        "primary": null,
+        "secondary": [
+          "https://www.tcgheart.com/set/30th-celebration-simplified-chinese",
+          "https://simplifiedcollector.com/simplified-chinese-30th-anniversary-card-list/",
+          "https://billsarchive.com/30th-celebration-cn.html"
+        ]
+      }
+    },
+    {
+      "id": "30th-p-promos-zh-hans",
+      "game": "pokemon",
+      "displayName": "30th-P Promos",
+      "officialName": "30th-P Promotional Cards",
+      "language": "zh-Hans",
+      "region": "CN",
+      "series": null,
+      "releaseDate": "2026-03-20",
+      "setCode": "30th-P",
+      "printedDenominator": null,
+      "numberedCardCount": null,
+      "checklistStatus": "researching",
+      "readyForApp": false,
+      "cardsFile": "sets/zh-Hans/30th-p-promos.json",
+      "aliases": [
+        "30th-P",
+        "30th Promos",
+        "Chinese 30th Promos",
+        "First Partner Illustration Collection"
+      ],
+      "source": {
+        "primary": null,
+        "secondary": [
+          "https://bulbapedia.bulbagarden.net/wiki/30th-P_Promotional_cards_%28SCTCG%29"
+        ]
+      }
+    }
+  ]
+}
