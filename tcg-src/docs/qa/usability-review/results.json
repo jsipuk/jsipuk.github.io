@@ -1,0 +1,23 @@
+{
+  "build": "app-RQI2ZYSV.js",
+  "origin": "http://127.0.0.1:4174/tcg/",
+  "liveOriginBrowser": "Blocked by environment network policy; local production build checked. Deployment tracked in review document.",
+  "results": [
+    {
+      "width": 1440,
+      "realRegistry": "6 researching releases disabled",
+      "realSavedReference": "Charizard 4/102 explicit unknown-context confirmation and Undo",
+      "fixture": "4 physical copies, 3 unique cards, \u00d72 on 94; fixed nine pockets; reload persisted",
+      "interactions": "Escape/cancel discard, keyboard zoom, missing-slot Add/Undo, reset cancel/confirm/Undo, 200% zoom",
+      "horizontalOverflowAt200Percent": 0
+    },
+    {
+      "width": 390,
+      "realRegistry": "6 researching releases disabled",
+      "realSavedReference": "Charizard 4/102 explicit unknown-context confirmation and Undo",
+      "fixture": "4 physical copies, 3 unique cards, \u00d72 on 94; fixed nine pockets; reload persisted",
+      "interactions": "Escape/cancel discard, keyboard zoom, missing-slot Add/Undo, reset cancel/confirm/Undo, 200% zoom",
+      "horizontalOverflowAt200Percent": 0
+    }
+  ]
+}
