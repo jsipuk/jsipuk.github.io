@@ -56,12 +56,30 @@ export function status(state, cardId) {
     badge: n > 1 ? `×${n}` : "",
   };
 }
+export function canAddCopies(state, cardId, variantId) {
+  const card = findCard(state, cardId);
+  const variant = card.variants.find((v) => v.id === variantId);
+  const release = state.reference.releases.find((r) => r.id === card.releaseId);
+  return Boolean(
+    variant &&
+      !card.retired &&
+      !variant.retired &&
+      (release.legacy || release.registryReady !== false),
+  );
+}
 export function setQuantity(state, cardId, variantId, value) {
   const card = findCard(state, cardId);
   if (!card.variants.some((v) => v.id === variantId))
     throw Error("Unknown card variant");
   if (!Number.isSafeInteger(value) || value < 0 || value > 999)
     throw Error("Quantity must be an integer from 0 to 999");
+  if (
+    value > variantQuantity(state, cardId, variantId) &&
+    !canAddCopies(state, cardId, variantId)
+  )
+    throw Error(
+      "This card or variant is unavailable for new entry. Saved quantities can still be reduced.",
+    );
   const next = structuredClone(state);
   next.quantities[ownershipIdentity(cardId, variantId)] = value;
   return validateCollection(next);

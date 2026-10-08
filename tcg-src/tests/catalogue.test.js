@@ -18,6 +18,8 @@ import {
   quantity,
   searchCandidates,
   completion,
+  addCopies,
+  canAddCopies,
 } from "../src/domain/collection.js";
 const { manifest, packs } = catalogueFixture();
 const imported = () =>
@@ -68,6 +70,24 @@ test("ready file imports dynamically; canonical IDs retain language, release, nu
   );
   const cn = adaptPack(manifest, "fixture-cn", packs["fixture-cn"]);
   assert.notEqual(cn.cards[93].id, c.id);
+});
+test("importing and refreshing ready checklists preserves the shelf release order", () => {
+  let state = mergeManifest(createCollection(emptyReference()), manifest);
+  const order = state.reference.releases.map((r) => r.id);
+  for (const id of ["fixture-second-en", "perfect-order-en", "fixture-cn"])
+    state = mergePack(state, adaptPack(manifest, id, packs[id]));
+  assert.deepEqual(
+    state.reference.releases.map((r) => r.id),
+    order,
+  );
+  const next = catalogueFixture("fixture-2");
+  state = mergeManifest(state, next.manifest);
+  for (const id of ["perfect-order-en", "fixture-cn", "fixture-second-en"])
+    state = mergePack(state, adaptPack(next.manifest, id, next.packs[id]));
+  assert.deepEqual(
+    state.reference.releases.map((r) => r.id),
+    order,
+  );
 });
 test("local resolver uses active context, leading zeroes and denominator; global ambiguities need confirmation", () => {
   let state = imported();
@@ -130,7 +150,7 @@ test("reference metadata updates keep exact quantities; removed IDs and finishes
   pack.cards[93].name = "Corrected reference name";
   pack.cards[93].variants = [];
   const refreshed = mergePack(
-    state,
+    mergeManifest(state, next.manifest),
     adaptPack(next.manifest, "perfect-order-en", pack),
   );
   assert.equal(refreshed.reference.cards[93].name, "Corrected reference name");
@@ -140,7 +160,7 @@ test("reference metadata updates keep exact quantities; removed IDs and finishes
   partial.releases[0].checklistStatus = "partial";
   pack.cards.splice(93, 1);
   const removed = mergePack(
-    refreshed,
+    mergeManifest(refreshed, partial),
     adaptPack(partial, "perfect-order-en", pack),
   );
   assert.equal(quantity(removed, c.id), 3);
@@ -196,6 +216,116 @@ test("retracted readiness blocks new entry/tracking while keeping saved ownershi
     0,
   );
   assert.equal(quantity(kept, "fixture:perfect-order-en:94"), 3);
+  assert.equal(
+    canAddCopies(kept, "fixture:perfect-order-en:94", "unspecified"),
+    false,
+  );
+  assert.throws(
+    () => setQuantity(kept, "fixture:perfect-order-en:94", "unspecified", 4),
+    /unavailable for new entry/,
+  );
+  assert.equal(
+    quantity(
+      setQuantity(kept, "fixture:perfect-order-en:94", "unspecified", 2),
+      "fixture:perfect-order-en:94",
+    ),
+    2,
+  );
+});
+
+test("a delayed pack cannot restore a retracted release or replace a newer reference", () => {
+  const initial = imported();
+  const oldPack = adaptPack(
+    manifest,
+    "perfect-order-en",
+    packs["perfect-order-en"],
+  );
+  const next = catalogueFixture("fixture-2");
+  next.packs["perfect-order-en"].cards[0].name = "Newer verified name";
+  let state = setQuantity(initial, initial.reference.cards[0].id, "regular", 3);
+  state = mergePack(
+    mergeManifest(state, next.manifest),
+    adaptPack(
+      next.manifest,
+      "perfect-order-en",
+      next.packs["perfect-order-en"],
+    ),
+  );
+  assert.throws(() => mergePack(state, oldPack), /Reference changed/);
+  assert.equal(state.reference.cards[0].name, "Newer verified name");
+  assert.equal(quantity(state, state.reference.cards[0].id), 3);
+  const retracted = structuredClone(next.manifest);
+  retracted.releases[0].readyForApp = false;
+  const unavailable = mergeManifest(state, retracted);
+  assert.throws(
+    () =>
+      mergePack(
+        unavailable,
+        adaptPack(
+          next.manifest,
+          "perfect-order-en",
+          next.packs["perfect-order-en"],
+        ),
+      ),
+    /Reference changed/,
+  );
+  assert.equal(
+    unavailable.reference.releases.find((r) => r.id === "perfect-order-en")
+      .registryReady,
+    false,
+  );
+  const changedContract = structuredClone(next.manifest);
+  changedContract.releases[0].cardsFile = "sets/en/replacement.json";
+  assert.throws(
+    () =>
+      mergePack(
+        mergeManifest(state, changedContract),
+        adaptPack(
+          next.manifest,
+          "perfect-order-en",
+          next.packs["perfect-order-en"],
+        ),
+      ),
+    /Reference changed/,
+  );
+});
+
+test("removed cards and finishes retain copies but cannot accept stale pending entry", () => {
+  const initial = imported(),
+    card = initial.reference.cards[93];
+  let state = setQuantity(initial, card.id, "regular", 3);
+  const next = catalogueFixture("fixture-2");
+  next.packs["perfect-order-en"].cards[93].variants = [];
+  state = mergePack(
+    mergeManifest(state, next.manifest),
+    adaptPack(
+      next.manifest,
+      "perfect-order-en",
+      next.packs["perfect-order-en"],
+    ),
+  );
+  assert.equal(canAddCopies(state, card.id, "regular"), false);
+  assert.equal(canAddCopies(state, card.id, "unspecified"), true);
+  assert.throws(
+    () => addCopies(state, [{ cardId: card.id, variantId: "regular" }]),
+    /unavailable for new entry/,
+  );
+  state = setQuantity(state, card.id, "regular", 2);
+  const partial = structuredClone(next.manifest);
+  partial.releases[0].checklistStatus = "partial";
+  next.packs["perfect-order-en"].cards.splice(93, 1);
+  state = mergePack(
+    mergeManifest(state, partial),
+    adaptPack(partial, "perfect-order-en", next.packs["perfect-order-en"]),
+  );
+  assert.equal(canAddCopies(state, card.id, "unspecified"), false);
+  assert.throws(
+    () => addCopies(state, [{ cardId: card.id, variantId: "unspecified" }]),
+    /unavailable for new entry/,
+  );
+  const zeroed = setQuantity(state, card.id, "regular", 0);
+  assert.equal(quantity(zeroed, card.id), 0);
+  assert.ok(zeroed.reference.cards.some((c) => c.id === card.id && c.retired));
 });
 test("opaque printed numbers can be ambiguous even inside a known release", () => {
   const pack = structuredClone(packs["perfect-order-en"]);

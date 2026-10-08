@@ -235,6 +235,27 @@ export function adaptPack(manifest, releaseId, pack) {
 }
 export function mergePack(state, imported) {
   imported = structuredClone(imported);
+  // Fetches run outside the storage transaction. Recheck their contract against
+  // the current registry before allowing a delayed response into the cache.
+  const manifest = state.reference.manifest;
+  const wire = manifest?.releases.find((r) => r.id === imported.release.id);
+  const contractFields = [
+    "id",
+    "game",
+    "region",
+    "language",
+    "cardsFile",
+    "readyForApp",
+    "checklistStatus",
+    "printedDenominator",
+    "numberedCardCount",
+  ];
+  assert(
+    wire?.readyForApp === true &&
+      imported.release.importedVersion === manifest.dataVersion &&
+      contractFields.every((field) => wire[field] === imported.release[field]),
+    "Reference changed while the card file was loading. Refresh the catalogue and try again",
+  );
   const next = structuredClone(state),
     ids = new Set(imported.cards.map((c) => c.id));
   for (const c of imported.cards) {
@@ -249,9 +270,9 @@ export function mergePack(state, imported) {
         if (!c.variants.some((n) => n.id === v.id))
           c.variants.push({ ...v, retired: true });
   }
-  next.reference.releases = next.reference.releases
-    .filter((r) => r.id !== imported.release.id)
-    .concat(imported.release);
+  next.reference.releases = next.reference.releases.map((r) =>
+    r.id === imported.release.id ? imported.release : r,
+  );
   next.reference.cards = next.reference.cards
     .filter((c) => c.releaseId !== imported.release.id)
     .concat(
