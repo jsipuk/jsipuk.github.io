@@ -1,0 +1,69 @@
+{
+  "origin": "http://127.0.0.1:4174/tcg/",
+  "bundle": "app-VTPPSWC5.js",
+  "liveOrigin": "Blocked by enforced network policy",
+  "results": [
+    {
+      "width": 1440,
+      "manifest": "2026-10-08.2",
+      "flow": "Add Perfect Order;94;reload;94 ×2;reset ownership;reference retained;Add Destined Rivals;49 and101",
+      "cards": 368,
+      "tracked": [
+        "perfect-order-en",
+        "destined-rivals-en"
+      ],
+      "images": [
+        {
+          "number": "94",
+          "url": "https://assets.tcgdex.net/en/me/me03/094/low.webp",
+          "width": 0,
+          "hidden": true
+        },
+        {
+          "number": "49",
+          "url": "https://assets.tcgdex.net/en/sv/sv10/049/low.webp",
+          "width": 0,
+          "hidden": true
+        },
+        {
+          "number": "101",
+          "url": "https://assets.tcgdex.net/en/sv/sv10/101/low.webp",
+          "width": 0,
+          "hidden": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 390,
+      "manifest": "2026-10-08.2",
+      "flow": "Add Perfect Order;94;reload;94 ×2;reset ownership;reference retained;Add Destined Rivals;49 and101",
+      "cards": 368,
+      "tracked": [
+        "perfect-order-en",
+        "destined-rivals-en"
+      ],
+      "images": [
+        {
+          "number": "94",
+          "url": "https://assets.tcgdex.net/en/me/me03/094/low.webp",
+          "width": 0,
+          "hidden": true
+        },
+        {
+          "number": "49",
+          "url": "https://assets.tcgdex.net/en/sv/sv10/049/low.webp",
+          "width": 0,
+          "hidden": true
+        },
+        {
+          "number": "101",
+          "url": "https://assets.tcgdex.net/en/sv/sv10/101/low.webp",
+          "width": 0,
+          "hidden": true
+        }
+      ],
+      "errors": []
+    }
+  ]
+}
