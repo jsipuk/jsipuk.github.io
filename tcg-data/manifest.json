@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": "2026-10-08.1",
+  "dataVersion": "2026-10-08.2",
   "generatedAt": "2026-10-08",
   "releases": [
     {
@@ -184,8 +184,8 @@
       "setCode": "DRI",
       "printedDenominator": 182,
       "numberedCardCount": 244,
-      "checklistStatus": "researching",
-      "readyForApp": false,
+      "checklistStatus": "verified",
+      "readyForApp": true,
       "cardsFile": "sets/en/destined-rivals.json",
       "aliases": [
         "Destined Rivals",
