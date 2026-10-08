@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "dataVersion": "2026-10-07.1",
-  "generatedAt": "2026-10-07",
+  "dataVersion": "2026-10-08.1",
+  "generatedAt": "2026-10-08",
   "releases": [
     {
       "id": "perfect-order-en",
@@ -15,8 +15,8 @@
       "setCode": "ME03",
       "printedDenominator": 88,
       "numberedCardCount": 124,
-      "checklistStatus": "researching",
-      "readyForApp": false,
+      "checklistStatus": "verified",
+      "readyForApp": true,
       "cardsFile": "sets/en/perfect-order.json",
       "aliases": [
         "Perfect Order",
@@ -169,6 +169,35 @@
         "primary": null,
         "secondary": [
           "https://bulbapedia.bulbagarden.net/wiki/30th-P_Promotional_cards_%28SCTCG%29"
+        ]
+      }
+    },
+    {
+      "id": "destined-rivals-en",
+      "game": "pokemon",
+      "displayName": "Destined Rivals",
+      "officialName": "Scarlet & Violet—Destined Rivals",
+      "language": "en",
+      "region": "international",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2025-05-30",
+      "setCode": "DRI",
+      "printedDenominator": 182,
+      "numberedCardCount": 244,
+      "checklistStatus": "researching",
+      "readyForApp": false,
+      "cardsFile": "sets/en/destined-rivals.json",
+      "aliases": [
+        "Destined Rivals",
+        "DR",
+        "DRI",
+        "SV10"
+      ],
+      "source": {
+        "primary": "https://tcgdex.online/sets/sv10",
+        "secondary": [
+          "https://www.tcgcollector.com/sets/11650/destined-rivals",
+          "https://github.com/tcgdex/cards-database/tree/master/data/Scarlet%20%26%20Violet/Destined%20Rivals"
         ]
       }
     }
