@@ -12,7 +12,7 @@ test("fresh entry explains unavailable reference and offers direct recovery rout
   await expect(page.locator("#find")).toHaveCount(0);
   await page.locator("#entry-manage-sets").click();
   await expect(page.locator("h1")).toHaveText("Manage sets");
-  await expect(page.locator("[data-track]")).toHaveCount(6);
+  await expect(page.locator("[data-track]")).toHaveCount(7);
   await page.locator('[data-nav="add"]').click();
   await page.locator("#entry-backup").click();
   await expect(page.locator("#import-backup")).toBeVisible();

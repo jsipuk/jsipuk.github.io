@@ -28,11 +28,11 @@ export function renderManageSets(ctx) {
             ? "Saved reference · outside current registry"
             : ready
               ? current
-                ? "Ready · reference cached"
+                ? "Ready · up to date"
                 : cached
-                  ? "Ready · reference update available"
-                  : "Ready to import"
-              : `${wire?.checklistStatus || r.checklistStatus || "unavailable"} · not app-ready`;
+                  ? "Ready · update available"
+                  : "Available"
+              : `${wire?.checklistStatus || r.checklistStatus || "unavailable"} · coming soon`;
           return `<div class="panel"><h2>${escape(wire?.displayName || r.name)}</h2><p>${escape(langName(r.language))} · ${escape(r.region)}<br><small>${escape(label)}</small></p>${tracked ? `<button class="wide" data-untrack="${escape(r.id)}">Remove binder · keep quantities</button>` : `<button class="wide" data-track="${escape(r.id)}" ${!ready && !r.legacy ? "disabled" : ""}>${r.legacy ? "Show saved binder" : "Add set"}</button>`}</div>`;
         })
         .join("") ||
@@ -43,7 +43,10 @@ export function renderManageSets(ctx) {
       (b) =>
         (b.onclick = async () => {
           b.disabled = true;
-          b.textContent = "Loading set…";
+          const name = ctx.state.reference.releases.find(
+            (r) => r.id === b.dataset.track,
+          ).name;
+          b.textContent = `Adding ${name}…`;
           const saved = await ctx.track(b.dataset.track);
           if (!saved && b.isConnected) {
             b.disabled = false;

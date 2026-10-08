@@ -17,12 +17,20 @@ npm run dev
 
 Open http://127.0.0.1:4174/tcg/. The loopback server serves only the generated
 `/tcg/` app and the repository's `/tcg-data/` reference files. Restart after edits.
-The current real manifest has six researching releases and no app-ready card
-files. A new production collection therefore starts with no tracked binders;
-Manage sets shows their availability honestly. Existing saved alpha collections
-keep their card metadata, images, quantities and binders as saved references.
+The real manifest `2026-10-08.2` has two verified English releases: Perfect Order
+(124 numbered cards, printed denominator 88) and Destined Rivals (244 numbered
+cards, printed denominator 182). Five other releases remain researching. A new
+collection starts with no ownership or tracked binders. Use Manage sets to add
+either ready release. Existing saved alpha collections keep their card metadata,
+images, quantities and binders as saved references.
 
-For the full architecture interaction, use the **isolated synthetic fixture**:
+Open Perfect Order → Rapid Entry and enter `94`, `094` or `094/088`: each adds
+one copy of Clefairy without a chooser in that binder context. In Destined Rivals,
+`49` is Misty's Gyarados and `101` is Regirock ex. Reload retains ownership;
+Reset Collection preserves the loaded reference. Unpinned ambiguous numbers
+require an explicit release/language choice.
+
+For isolated architecture edge cases, use the **synthetic fixture**:
 
 ```sh
 npm run dev:fixture
@@ -52,7 +60,9 @@ Empty variants use an explicit unspecified bucket. Supplied variants need explic
 use supplied labels/names/finish metadata. Unknown identities are rejected rather
 than guessed.
 
-Refresh validates every replacement before committing it. Bad/missing files keep
+Refresh updates all previously loaded ready releases, including untracked sets,
+without clearing ownership, settings or shelf membership. It validates every
+replacement before committing it. Bad/missing files keep
 cached cards and quantities usable. Removed IDs/finish metadata remain in the
 cache and backup; removed cards appear in Catalogue under saved entries outside
 the current checklist. No quantity is guessed onto a renamed ID. Checklists only

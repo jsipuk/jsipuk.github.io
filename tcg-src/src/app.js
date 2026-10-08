@@ -215,7 +215,7 @@ ctx.track = async (id) => {
     if (generation !== collectionGeneration) return false;
     return ctx.change(
       (state) => trackRelease(state, id),
-      "Set added to your collection.",
+      `${release.name} added.`,
     );
   } catch (error) {
     ctx.toast(error.message);
@@ -240,7 +240,13 @@ ctx.refreshReference = async ({ interactive = false } = {}) => {
       return;
     if (outdated()) return;
     ctx.referenceWarning = "";
-    for (const id of ctx.state.trackedSets) {
+    const loadedReleases = new Set([
+      ...ctx.state.trackedSets,
+      ...ctx.state.reference.releases
+        .filter((r) => r.importedVersion)
+        .map((r) => r.id),
+    ]);
+    for (const id of loadedReleases) {
       if (outdated()) return;
       if (!manifest.releases.some((r) => r.id === id && r.readyForApp))
         continue;
@@ -260,6 +266,9 @@ ctx.refreshReference = async ({ interactive = false } = {}) => {
   if (
     interactive ||
     ctx.manageSets ||
+    (ctx.view === "add" &&
+      !modal.open &&
+      document.querySelector("#entry-manage-sets")) ||
     (ctx.view !== "add" &&
       startedVersion === renderVersion &&
       !modal.open &&

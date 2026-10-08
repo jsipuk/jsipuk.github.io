@@ -22,12 +22,15 @@ test("real registry is cached, researching releases stay unavailable and product
 }, testInfo) => {
   await page.goto("/tcg/");
   await page.locator("#manage-sets").click();
-  await expect(page.locator("[data-track]")).toHaveCount(6);
-  for (const button of await page.locator("[data-track]").all())
+  await expect(page.locator("[data-track]")).toHaveCount(7);
+  for (const id of ["perfect-order-en", "destined-rivals-en"])
+    await expect(page.locator(`[data-track="${id}"]`)).toBeEnabled();
+  for (const button of await page.locator("[data-track]:disabled").all())
     await expect(button).toBeDisabled();
+  await expect(page.locator("[data-track]:disabled")).toHaveCount(5);
   const saved = await readSaved(page);
   expect(saved.reference.manifest.schemaVersion).toBe(1);
-  expect(saved.reference.releases).toHaveLength(6);
+  expect(saved.reference.releases).toHaveLength(7);
   expect(saved.reference.cards).toHaveLength(0);
   expect(saved.quantities).toEqual({});
   expect(saved.trackedSets).toEqual([]);
