@@ -183,6 +183,37 @@ export function matchCards(reference, { releaseId, language, raw }) {
   });
   return { status, candidates };
 }
+// A printed total can explain a miss without relaxing the selected-set match.
+export function setNumberMismatch(reference, query) {
+  if (!query.releaseId || searchCandidates(reference, query).status !== "missing")
+    return null;
+  const parts = String(query.raw).normalize("NFKC").trim().split("/");
+  if (parts.length !== 2) return null;
+  const release = reference.releases.find((r) => r.id === query.releaseId);
+  if (!release) return null;
+  const local = searchCandidates(reference, { ...query, raw: parts[0] });
+  const expectedTotals = [...new Set(
+    local.candidates.length
+      ? local.candidates.map((id) => {
+          const card = findCard({ reference }, id);
+          return card.printedNumber?.split("/")[1] || release.printedTotal;
+        })
+      : [release.printedTotal],
+  )].filter((total) => numberToken(total));
+  const total = numberToken(parts[1]);
+  if (!expectedTotals.length || expectedTotals.some((value) => numberToken(value) === total))
+    return null;
+  return {
+    releaseName: release.name,
+    expectedTotals,
+    matchingReleaseIds: reference.releases
+      .filter((r) => r.id !== release.id &&
+        (r.legacy || (r.registryReady !== false && r.readyForApp)) &&
+        (!query.language || r.language === query.language) &&
+        numberToken(r.printedTotal) === total)
+      .map((r) => r.id),
+  };
+}
 export function resetCollection(state) {
   return validateCollection({ ...structuredClone(state), quantities: {} });
 }

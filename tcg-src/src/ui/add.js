@@ -5,7 +5,10 @@ import {
   quantity,
   addCopies,
   canAddCopies,
+  setNumberMismatch,
+  trackRelease,
 } from "../domain/collection.js";
+import { mismatchMessage, otherSetCandidates } from "./entry-mismatch.js";
 import {
   $,
   escape,
@@ -132,10 +135,19 @@ function currentCandidates(state, row) {
     return card?.variants.some((v) => canAddCopies(state, id, v.id));
   });
 }
+function checkingRow(state, row) {
+  const mismatch = setNumberMismatch(state.reference, row);
+  const candidates = currentCandidates(state, row);
+  const message = mismatch
+    ? mismatchMessage(row.raw, mismatch)
+    : row.status === "invalid" ? "Check the number"
+      : candidates.length ? "Confirm a current match" : "Not found in the available reference";
+  return `<div class="review-row"><div><strong>${escape(row.raw)}</strong><div class="status">${escape(message)}</div></div><button data-review="${row.i}">${mismatch ? "Check set" : candidates.length ? "Choose match" : "Edit number"}</button></div>`;
+}
 export function renderReview(ctx) {
   const ready = ctx.state.batch.filter((r) => isReady(ctx.state, r)),
     needs = ctx.state.batch.filter((r) => !isReady(ctx.state, r));
-  ctx.app.innerHTML = `<div class="form"><button class="quiet" id="back">‹ Edit input</button><h1>Check your cards</h1><div class="summary">${ready.length} ready · ${needs.length} need checking</div><p class="muted">Nothing in this review has been added yet.</p>${note()}<div class="panel"><h2>Needs checking (${needs.length})</h2>${needs.length ? needs.map((r) => `<div class="review-row"><div><strong>${escape(r.raw)}</strong><div class="status">${r.status === "invalid" ? "Check the number" : currentCandidates(ctx.state, r).length ? "Confirm a current match" : "Not found in the available reference"}</div></div><button data-review="${r.i}">${currentCandidates(ctx.state, r).length ? "Choose match" : "Edit number"}</button></div>`).join("") : "<p>All entries are ready.</p>"}</div><details class="panel" open><summary>Ready to add (${ready.length})</summary>${ready
+  ctx.app.innerHTML = `<div class="form"><button class="quiet" id="back">‹ Edit input</button><h1>Check your cards</h1><div class="summary">${ready.length} ready · ${needs.length} need checking</div><p class="muted">Nothing in this review has been added yet.</p>${note()}<div class="panel"><h2>Needs checking (${needs.length})</h2>${needs.length ? needs.map((r) => checkingRow(ctx.state, r)).join("") : "<p>All entries are ready.</p>"}</div><details class="panel" open><summary>Ready to add (${ready.length})</summary>${ready
     .map((r) => {
       const c = findCard(ctx.state, r.chosen),
         release = ctx.state.reference.releases.find(
@@ -160,10 +172,15 @@ export function renderReview(ctx) {
       await ctx.change(
         (state) => {
           const ready = state.batch.filter((r) => isReady(state, r));
-          const next = addCopies(
+          let next = addCopies(
             state,
             ready.map((r) => ({ cardId: r.chosen, variantId: r.variantId })),
           );
+          for (const row of ready) {
+            const releaseId = findCard(next, row.chosen).releaseId;
+            if (row.setMismatchConfirmed && !next.trackedSets.includes(releaseId))
+              next = trackRelease(next, releaseId);
+          }
           const committed = new Set(ready.map((r) => r.i));
           next.batch = next.batch.filter((r) => !committed.has(r.i));
           if (!next.batch.length) next.draft.text = "";
@@ -181,10 +198,20 @@ export function renderReview(ctx) {
       );
     };
 }
-function reviewRow(ctx, i) {
-  const row = ctx.state.batch.find((r) => r.i === i),
-    candidates = currentCandidates(ctx.state, row);
-  ctx.modal.innerHTML = `<div class="row between"><h2 id="detail-title">Check ${escape(row.raw)}</h2><button id="close" aria-label="Close">×</button></div><p class="muted">Confirm the card’s release, language and number. Nothing is added until you finish the review.</p>${
+async function reviewRow(ctx, i) {
+  const request = ctx.reviewRequest = (ctx.reviewRequest || 0) + 1;
+  const view = ctx.app.firstElementChild;
+  const row = ctx.state.batch.find((r) => r.i === i);
+  if (!row) return;
+  const mismatch = setNumberMismatch(ctx.state.reference, row);
+  const candidates = mismatch
+    ? await otherSetCandidates(ctx, row, mismatch)
+    : currentCandidates(ctx.state, row);
+  const current = ctx.state.batch.find((r) => r.i === i);
+  if (request !== ctx.reviewRequest || !view.isConnected || !current || current.raw !== row.raw ||
+      current.releaseId !== row.releaseId || current.language !== row.language)
+    return;
+  ctx.modal.innerHTML = `<div class="row between"><h2 id="detail-title">Check ${escape(row.raw)}</h2><button id="close" aria-label="Close">×</button></div>${mismatch ? `<p>${escape(mismatchMessage(row.raw, mismatch))}</p>` : ""}<p class="muted">Confirm the card’s release, language and number. Nothing is added until you finish the review.</p>${
     candidates
       .map((id) => {
         const c = findCard(ctx.state, id),
@@ -217,6 +244,9 @@ function reviewRow(ctx, i) {
             const next = structuredClone(state),
               updated = next.batch.find((r) => r.i === i);
             updated.chosen = b.dataset.choose;
+            updated.candidates = candidates;
+            updated.status = "candidate";
+            updated.setMismatchConfirmed = Boolean(mismatch);
             const card = findCard(next, updated.chosen);
             updated.releaseId = card.releaseId;
             updated.language = card.language;
@@ -241,7 +271,7 @@ function reviewRow(ctx, i) {
         language: row.language,
         raw,
       }),
-      { raw, chosen: null, variantId: "unspecified" },
+      { raw, chosen: null, variantId: "unspecified", setMismatchConfirmed: false },
     );
     if (await ctx.save((state) => ({ ...state, batch: next.batch }))) {
       ctx.modal.close();

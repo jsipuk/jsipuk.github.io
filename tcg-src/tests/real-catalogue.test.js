@@ -16,6 +16,7 @@ import {
   completion,
   trackRelease,
   exportBackup,
+  setNumberMismatch,
 } from "../src/domain/collection.js";
 const read = async (file) =>
   JSON.parse(
@@ -97,6 +98,34 @@ test("real lookup resolves padded numbers inside release and requires global cho
   });
   assert.equal(global.candidates.length, 2);
   assert.equal(global.requiresConfirmation, true);
+});
+
+test("wrong-set printed totals offer ready releases without weakening exact matching", () => {
+  let state = mergePack(
+    mergeManifest(createCollection(emptyReference()), actual),
+    adaptPack(actual, "perfect-order-en", packs["perfect-order-en"]),
+  );
+  const query = { releaseId: "perfect-order-en", language: "en", raw: "119/182" };
+  const before = structuredClone(state);
+  assert.deepEqual(searchCandidates(state.reference, query).candidates, []);
+  assert.deepEqual(setNumberMismatch(state.reference, query), {
+    releaseName: "Perfect Order",
+    expectedTotals: ["088"],
+    matchingReleaseIds: ["destined-rivals-en"],
+  });
+  assert.deepEqual(state, before);
+  for (const raw of ["119", "119/088", "119/88", "999/88", "119/18?", "119/182/88"])
+    assert.equal(setNumberMismatch(state.reference, { ...query, raw }), null);
+  assert.equal(setNumberMismatch(state.reference, { ...query, releaseId: "" }), null);
+  assert.deepEqual(setNumberMismatch(state.reference, { ...query, raw: "119/999" }).matchingReleaseIds, []);
+  state = mergePack(state, adaptPack(actual, "destined-rivals-en", packs["destined-rivals-en"]));
+  assert.deepEqual(searchCandidates(state.reference, query).candidates, []);
+  const elsewhere = searchCandidates(state.reference, { ...query, releaseId: "" });
+  assert.equal(elsewhere.requiresConfirmation, true);
+  assert.deepEqual(elsewhere.candidates, ["pokemon:en:destined-rivals:119"]);
+  const restricted = structuredClone(state.reference);
+  restricted.releases.find((r) => r.id === "destined-rivals-en").readyForApp = false;
+  assert.deepEqual(setNumberMismatch(restricted, query).matchingReleaseIds, []);
 });
 
 test("real catalogue upgrade preserves incompatible old controlled IDs without inventing ownership", async () => {

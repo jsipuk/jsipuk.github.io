@@ -3,7 +3,10 @@ import {
   addCopies,
   findCard,
   quantity,
+  setNumberMismatch,
+  trackRelease,
 } from "../domain/collection.js";
+import { mismatchMessage, otherSetCandidates } from "./entry-mismatch.js";
 import {
   $,
   escape,
@@ -85,6 +88,21 @@ export function renderRapid(ctx) {
         name,
       });
       if (!match.candidates.length) {
+        const query = {
+          releaseId: ctx.rapidReleaseId,
+          language: ctx.rapidLanguage,
+          raw,
+          name,
+        };
+        const mismatch = setNumberMismatch(ctx.state.reference, query);
+        if (mismatch) {
+          const candidates = await otherSetCandidates(ctx, query, mismatch);
+          if (!input.isConnected || ctx.rapidReleaseId !== query.releaseId ||
+              ctx.rapidLanguage !== query.language || $("#rapid-name").value.trim() !== name)
+            return;
+          chooseRapid(ctx, candidates, raw, mismatch);
+          return;
+        }
         ctx.toast(
           match.status === "invalid"
             ? "Check the collector number."
@@ -105,12 +123,27 @@ export function renderRapid(ctx) {
   };
   $("#rapid-number").focus();
 }
-async function addRapid(ctx, id, variantId) {
+async function addRapid(ctx, id, variantId, switchSet = false) {
   const card = findCard(ctx.state, id);
+  const previousRelease = ctx.currentRelease;
   return ctx.change(
-    (state) => addCopies(state, [{ cardId: id, variantId }]),
+    (state) => {
+      let next = addCopies(state, [{ cardId: id, variantId }]);
+      if (switchSet) {
+        if (!next.trackedSets.includes(card.releaseId))
+          next = trackRelease(next, card.releaseId);
+        next.rapidContext = { releaseId: card.releaseId, language: card.language };
+      }
+      return next;
+    },
     `${card.name} added.`,
     () => {
+      if (switchSet) {
+        ctx.rapidReleaseId = card.releaseId;
+        ctx.rapidLanguage = card.language;
+        ctx.currentRelease = card.releaseId;
+        ctx.page = 0;
+      }
       ctx.rapidHistory = [
         id,
         ...(ctx.rapidHistory || []).filter((previous) => previous !== id),
@@ -119,10 +152,18 @@ async function addRapid(ctx, id, variantId) {
       ctx.render();
       $("#rapid-number")?.focus();
     },
+    () => {
+      if (switchSet) {
+        ctx.rapidReleaseId = ctx.state.rapidContext?.releaseId;
+        ctx.rapidLanguage = ctx.state.rapidContext?.language;
+        if (ctx.currentRelease === card.releaseId) ctx.currentRelease = previousRelease;
+      }
+      ctx.render();
+    },
   );
 }
-function chooseRapid(ctx, ids, raw) {
-  ctx.modal.innerHTML = `<div class="row between"><h2 id="detail-title">Choose ${escape(raw)}</h2><button id="close" aria-label="Cancel choice">×</button></div><p>Confirm the card, release and language before adding one copy.</p>${ids
+function chooseRapid(ctx, ids, raw, mismatch = null) {
+  ctx.modal.innerHTML = `<div class="row between"><h2 id="detail-title">${mismatch ? "Check the selected set" : "Choose " + escape(raw)}</h2><button id="close" aria-label="Cancel choice">×</button></div>${mismatch ? `<p>${escape(mismatchMessage(raw, mismatch))}</p>` : ""}<p>${ids.length ? "Confirm the card, release and language before adding one copy." : "No matching card was found in other available sets. Close this message to correct the number or choose another set."}</p>${ids
     .map((id, index) => {
       const c = findCard(ctx.state, id),
         r = ctx.state.reference.releases.find((r) => r.id === c.releaseId);
@@ -133,7 +174,7 @@ function chooseRapid(ctx, ids, raw) {
         )
         .join(
           "",
-        )}</select><button class="primary wide" data-rapid-choose="${escape(id)}" data-index="${index}">Add this card</button></div>`;
+        )}</select><button class="primary wide" data-rapid-choose="${escape(id)}" data-index="${index}">${mismatch ? "Switch to " + escape(r.name) + " and add" : "Add this card"}</button></div>`;
     })
     .join("")}`;
   bindImages(ctx.modal);
@@ -149,6 +190,7 @@ function chooseRapid(ctx, ids, raw) {
           ctx,
           b.dataset.rapidChoose,
           $(`#rapid-variant-${b.dataset.index}`).value,
+          Boolean(mismatch),
         );
         if (!saved && b.isConnected) b.disabled = false;
       }),
