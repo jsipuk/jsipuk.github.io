@@ -1,0 +1,49 @@
+name: Publish tested Card Ledger build to PR
+
+on:
+  push:
+    branches:
+      - codex/card-ledger-set-mismatch
+    paths:
+      - .github/workflows/tcg-publish-tested.yml
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish-tested-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out Card Ledger PR
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Retrieve successful Card Ledger production build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 37987097273 --repo "$GITHUB_REPOSITORY" --name card-ledger-production-build --dir "$RUNNER_TEMP/tcg-build"
+          test -s "$RUNNER_TEMP/tcg-build/index.html"
+          find "$RUNNER_TEMP/tcg-build" -maxdepth 2 -type f -print
+
+      - name: Synchronise only generated /tcg/ files
+        run: |
+          mkdir -p tcg
+          rsync -a --delete "$RUNNER_TEMP/tcg-build/" tcg/
+          test -s tcg/index.html
+          git status --short -- tcg/
+
+      - name: Commit tested artifact to PR branch (never main)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- tcg/
+          if git diff --cached --quiet; then
+            echo "No changes in generated build."
+          else
+            git commit -m "Publish CI-tested Card Ledger mismatch build"
+            git push origin HEAD:refs/heads/codex/card-ledger-set-mismatch
+          fi
