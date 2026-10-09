@@ -56,7 +56,47 @@ but excludes `registry.npmjs.org`. Registry access has been requested. No networ
 policy bypass was attempted. The full npm test suite, generated build, and live
 verification of this fix are pending. Published `/tcg/` artifacts remain unchanged.
 
-After registry access is available: install locked dependencies with `npm ci`,
-run the full unit and desktop/mobile browser suites, build `/tcg/`, publish the
-tested source and generated output, and repeat live acceptance plus the
-`119/182` mismatch-recovery flow using the approved isolated browser contexts.
+## Locked-dependency recheck — 9 October 2026
+
+The requested `npm ci` was run with the existing lockfile. It failed with
+`E403` fetching the pinned package:
+
+```text
+403 Forbidden - GET https://registry.npmjs.org/playwright-core/-/playwright-core-1.56.1.tgz
+```
+
+An independent HEAD request to that exact URL returned `HTTP/1.1 403 Forbidden`
+and `curl: (56) CONNECT tunnel failed, response 403`. The current enforced
+network policy (spec revision 16) allows only `assets.tcgdex.net`, `jsip.uk` and
+`www.jsip.uk`; the npm registry is still absent despite the expected allowlist
+update. No network policy or certificate stores were changed.
+
+The requested commands were also attempted:
+
+- `npm test`: 31 tests passed; the storage test file could not load because
+  `fake-indexeddb` is missing. This is not a complete unit-suite pass.
+- `npm run test:browser`: failed before collecting tests with
+  `error: unknown command 'test'`; the locked project Playwright test runner is
+  unavailable after the failed installation.
+- `npm run build`: failed with `ERR_MODULE_NOT_FOUND` for `esbuild`. No new
+  production output was generated.
+
+The legacy binder-opening discrepancy remains unresolved. Isolated diagnostic
+probes passed against both original and proposed source at both widths, and a
+delayed reference-save probe passed against the original source. Those probes
+do not establish a cause for the broader-suite failure. The test has not been
+skipped or weakened, and no speculative binder fix was added.
+
+Passing domain checks include preservation of quantities during reference
+updates, lossless backups, resets and incompatible legacy catalogue upgrades.
+Earlier source-browser checks passed explicit mismatch recovery, duplicate
+quantities, Undo and refresh persistence at both widths. Storage-suite and
+generated-build migration verification remain blocked, so there is no complete
+ownership-safety sign-off for this change.
+
+PR #50 remains draft and is not yet cleared to merge. Once the registry is
+actually allowed: run `npm ci`, complete both suites, resolve the binder failure,
+build and test the generated `/tcg/` output at 1440px and 390px, and verify the
+original live acceptance scenarios plus mismatch recovery. Then update the PR
+with the tested artifacts and make it ready for review. Published artifacts
+remain unchanged; no deployment of this fix is claimed.
