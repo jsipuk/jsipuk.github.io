@@ -1,0 +1,76 @@
+name: Card Ledger checks
+
+on:
+  pull_request:
+    paths:
+      - "tcg-src/**"
+      - "tcg-data/**"
+      - ".github/workflows/tcg-ci.yml"
+  push:
+    branches:
+      - codex/card-ledger-set-mismatch
+    paths:
+      - "tcg-src/**"
+      - "tcg-data/**"
+      - ".github/workflows/tcg-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: card-ledger-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: tcg-src
+
+    steps:
+      - name: Check out PR source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: tcg-src/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Unit, data and migration tests
+        run: npm test
+
+      - name: Build GitHub Pages output
+        run: npm run build
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests (desktop and 390px mobile)
+        run: npm run test:browser
+
+      - name: Upload browser test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: card-ledger-playwright-report
+          path: |
+            tcg-src/playwright-report/
+            tcg-src/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload production build for review (no deployment)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: card-ledger-production-build
+          path: tcg/
+          if-no-files-found: ignore
+          retention-days: 7
