@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<title>Your Website on GitHub, Run by AI · John Saunders</title>
+<meta name="description" content="A beginner's guide to a free GitHub Pages website that Claude or ChatGPT edits and publishes when you ask, plus a manual you paste into the AI.">
+<link rel="canonical" href="https://jsip.uk/website-guide/">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://jsip.uk/website-guide/">
+<meta property="og:title" content="Your Website on GitHub, Run by AI">
+<meta property="og:description" content="Set up a free website once, then ask Claude or ChatGPT for changes in plain English. A step-by-step guide plus an AI manual.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1117'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%236c63ff'/%3E%3C/svg%3E">
+<!-- Fonts are served from this site. Nothing on this page loads from anywhere else. -->
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --surface-2: #151827;
+    --accent: #6c63ff;
+    --accent-lt: #a89dff;
+    --text: #e6ebf2;
+    --body: #c2cbd9;
+    --muted: #8892a4;
+    --border: #2d3148;
+    --radius: 14px;
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: 5rem; }
+  body {
+    background: var(--bg); color: var(--body);
+    font-family: var(--font); font-size: 16.5px; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-lt); text-decoration: underline; text-decoration-color: rgba(168,157,255,.35); text-underline-offset: 3px; }
+  a:hover { color: #fff; text-decoration-color: #fff; }
+  :focus-visible { outline: 2px solid var(--accent-lt); outline-offset: 3px; border-radius: 4px; }
+  .skip { position: absolute; left: -999px; top: 0; z-index: 200; background: var(--accent); color: #fff; padding: .7rem 1.1rem; border-radius: 0 0 8px 0; }
+  .skip:focus { left: 0; }
+
+  /* header */
+  .site-head {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(15,17,23,.85); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav { max-width: 1180px; margin: 0 auto; padding: .9rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .logo { color: var(--text); font-weight: 700; font-size: 1.05rem; letter-spacing: -.3px; text-decoration: none; }
+  .nav-links { display: flex; gap: 1.4rem; list-style: none; }
+  .nav-links a { color: var(--muted); font-size: .9rem; font-weight: 500; text-decoration: none; }
+  .nav-links a:hover { color: var(--text); }
+
+  /* hero */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--border); padding: clamp(3rem, 9vw, 6rem) 1rem clamp(2.5rem, 6vw, 4rem); }
+  .hero-inner { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; }
+  .eyebrow { color: var(--accent-lt); font-size: .85rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1rem; }
+  .hero h1 { color: var(--text); font-size: clamp(2rem, 5.5vw, 3.4rem); line-height: 1.12; letter-spacing: -.03em; max-width: 18ch; margin-bottom: 1.2rem; }
+  .lede { font-size: clamp(1.05rem, 2.2vw, 1.25rem); max-width: 60ch; color: var(--body); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2rem; }
+  .glow { position: absolute; width: 640px; height: 640px; right: -200px; top: -260px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(108,99,255,.28), rgba(108,99,255,0) 65%); pointer-events: none; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px;
+    padding: .7rem 1.2rem; border-radius: 10px; font: 600 .95rem var(--font); text-decoration: none; cursor: pointer; border: 1px solid transparent; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #7d75ff; color: #fff; }
+  .btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
+  .btn-ghost:hover { border-color: var(--accent-lt); color: #fff; }
+
+  /* layout */
+  .layout { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem 4rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+  @media (min-width: 1040px) { .layout { grid-template-columns: 230px minmax(0, 1fr); gap: 3.5rem; } }
+  .toc { font-size: .9rem; }
+  .toc-inner { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
+  .toc summary { cursor: pointer; padding: .9rem 1.1rem; color: var(--text); font-weight: 600; list-style: none; }
+  .toc summary::-webkit-details-marker { display: none; }
+  .toc summary::after { content: "+"; float: right; color: var(--muted); }
+  .toc details[open] summary::after { content: "\2212"; }
+  .toc ol { list-style: none; padding: 0 .6rem .8rem; }
+  .toc li a { display: block; padding: .35rem .5rem; border-radius: 8px; color: var(--muted); text-decoration: none; line-height: 1.4; }
+  .toc li a:hover, .toc li a.active { color: var(--text); background: rgba(108,99,255,.12); }
+  @media (min-width: 1040px) {
+    .toc-inner { position: sticky; top: 5rem; max-height: calc(100vh - 6rem); overflow: auto; }
+  }
+
+  /* article */
+  article { max-width: 760px; min-width: 0; }
+  article > * + * { margin-top: 1.1rem; }
+  article h2 { color: var(--text); font-size: clamp(1.45rem, 3vw, 1.8rem); line-height: 1.25; letter-spacing: -.02em; margin-top: 3.2rem; padding-top: 1.6rem; border-top: 1px solid var(--border); }
+  article h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+  article h3 { color: var(--text); font-size: 1.15rem; margin-top: 2rem; }
+  article p, article li { color: var(--body); }
+  @media (min-width: 720px) { article p, article li { text-align: justify; hyphens: auto; -webkit-hyphens: auto; } }
+  article strong { color: var(--text); font-weight: 600; }
+  article ol, article ul { padding-left: 1.4rem; }
+  article li + li { margin-top: .5rem; }
+  article li::marker { color: var(--accent-lt); font-weight: 600; }
+  :not(pre) > code { font-family: var(--mono); font-size: .88em; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: .08em .38em; color: var(--text); white-space: nowrap; }
+  article p > strong:first-child { color: var(--accent-lt); }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+  th, td { text-align: left; vertical-align: top; padding: .7rem .9rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--text); background: var(--surface); font-weight: 600; white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td { color: var(--body); }
+  td:first-child { color: var(--text); font-weight: 500; }
+  td :not(pre) > code { white-space: normal; }
+
+  pre.code { background: #0b0d13; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; overflow-x: auto; font: 400 .84rem/1.6 var(--mono); color: #d6dcef; }
+  pre.manual { max-height: 34rem; overflow: auto; white-space: pre; }
+  .manual-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; }
+  .copy-status { color: var(--accent-lt); font-size: .9rem; font-weight: 500; }
+
+  /* flow diagram */
+  .flow { margin-top: 1.6rem; padding: 1.4rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
+  .flow-title { color: var(--text); font-weight: 600; font-size: 1.02rem; margin-bottom: 1.2rem; }
+  .flow-row { display: flex; align-items: stretch; gap: .6rem; }
+  .flow-row.split { gap: 1rem; }
+  .flow-row.split .node { flex: 1; }
+  .flow-row.centre { justify-content: center; }
+  .node { flex: 1; min-width: 0; border: 1px solid #3a3f5c; border-radius: 10px; padding: .75rem .9rem; background: var(--bg); }
+  .node b { display: block; color: var(--text); font-size: .95rem; }
+  .node span { display: block; color: var(--muted); font-size: .84rem; line-height: 1.45; margin-top: .2rem; }
+  .node.accent { border: 2px solid var(--accent); background: rgba(108,99,255,.12); max-width: 360px; }
+  .flow-row.centre .node { max-width: 300px; }
+  .arrow { align-self: center; color: var(--muted); font-size: 1.2rem; flex: 0 0 auto; }
+  .arrow.down { text-align: center; margin: .35rem 0; }
+  .flow-note { text-align: center; color: var(--muted); font-size: .82rem; margin: .5rem 0; }
+  .flow-note::before { content: "\2193  "; }
+  @media (max-width: 640px) {
+    .flow { padding: 1rem; }
+    .flow-row, .flow-row.split { flex-direction: column; gap: .4rem; }
+    .flow-row .node, .flow-row.centre .node, .node.accent { max-width: none; }
+    .arrow:not(.down) { transform: rotate(90deg); }
+  }
+
+  /* footer */
+  .site-foot { border-top: 1px solid var(--border); padding: 2rem 1rem; color: var(--muted); font-size: .9rem; }
+  .foot-inner { max-width: 1180px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
+  .foot-inner a { color: var(--muted); margin-left: 1.2rem; text-decoration: none; }
+  .foot-inner a:first-child { margin-left: 0; }
+  .foot-inner a:hover { color: var(--text); }
+
+  @media (max-width: 560px) { .nav-links .hide-sm { display: none; } body { font-size: 16px; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  @media print {
+    .site-head, .toc, .hero-actions, .manual-actions, .glow, .site-foot { display: none; }
+    body { background: #fff; color: #111; }
+    article p, article li, td { color: #111; }
+    article h2, article h3, .hero h1, strong { color: #000; }
+    pre.code, pre.manual { max-height: none; background: #f5f5f7; color: #111; white-space: pre-wrap; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to the guide</a>
+
+<header class="site-head">
+  <nav class="nav" aria-label="Main">
+    <a class="logo" href="/">John Saunders</a>
+    <ul class="nav-links">
+      <li><a href="/">All projects</a></li>
+      <li><a href="#ai-manual">AI manual</a></li>
+      <li class="hide-sm"><a href="https://github.com/jsipuk" target="_blank" rel="noopener">GitHub</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Guide · Version 1.0 · October 2026</p>
+      <h1>Your Website on GitHub, Run by AI</h1>
+      <p class="lede">Set up a free website once, in about an hour. After that, ask Claude or ChatGPT for a change in plain English, and it edits your site, publishes it, and tells you when it's live. This is how jsip.uk is run.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#step-1-create-the-repo-and-switch-on-pages">Start with Step 1</a>
+        <a class="btn btn-ghost" href="#ai-manual">Get the AI manual</a>
+      </div>
+    </div>
+    <div class="glow" aria-hidden="true"></div>
+  </section>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <div class="toc-inner">
+        <details id="toc-details" open>
+          <summary>Contents</summary>
+          <ol><li><a href="#what-you-ll-end-up-with">What you&#x27;ll end up with</a></li><li><a href="#before-you-start">Before you start</a></li><li><a href="#step-1-create-the-repo-and-switch-on-pages">Step 1: Create the repo and switch on Pages</a></li><li><a href="#step-2-optional-use-your-own-domain">Step 2 (optional): Use your own domain</a></li><li><a href="#step-2b-optional-put-cloudflare-in-front">Step 2b (optional): Put Cloudflare in front</a></li><li><a href="#step-3-connect-claude">Step 3: Connect Claude</a></li><li><a href="#step-4-connect-chatgpt-codex">Step 4: Connect ChatGPT (Codex)</a></li><li><a href="#step-5-ask-for-changes">Step 5: Ask for changes</a></li><li><a href="#undo-a-bad-change">Undo a bad change</a></li><li><a href="#house-rules">House rules</a></li><li><a href="#troubleshooting">Troubleshooting</a></li><li><a href="#hand-it-to-an-ai">Hand it to an AI</a></li><li><a href="#ai-manual">AI manual</a></li><li><a href="#about-this-guide">About this guide</a></li><li><a href="#sources">Sources</a></li></ol>
+        </details>
+      </div>
+    </nav>
+
+    <article id="guide">
+<h2 id="what-you-ll-end-up-with">What you'll end up with</h2>
+<p>You ask Claude or ChatGPT for a change in plain English, and a few minutes later it's live on your site. Setup takes about an hour, once; after that you don't touch code unless you want to.</p>
+
+<figure class="flow" aria-label="How a request becomes a live page">
+  <figcaption class="flow-title">Every change goes live once it reaches <code>main</code></figcaption>
+  <div class="flow-row">
+    <div class="node"><b>You ask</b><span>in claude.ai/code, or Codex in ChatGPT</span></div>
+    <div class="arrow" aria-hidden="true">&rarr;</div>
+    <div class="node"><b>AI edits a copy</b><span>clones your repo, edits and commits the files</span></div>
+    <div class="arrow back" aria-hidden="true">&larr;</div>
+    <div class="node"><b>AGENTS.md rules</b><span>read at the start of every session</span></div>
+  </div>
+  <p class="flow-note">route set in AGENTS.md</p>
+  <div class="flow-row split">
+    <div class="node"><b>Quick route</b><span>pushes straight to main; goes live with no review</span></div>
+    <div class="node"><b>Safe route</b><span>pushes a branch and opens a pull request; you review it, then click Merge</span></div>
+  </div>
+  <div class="arrow down" aria-hidden="true">&darr;</div>
+  <div class="flow-row centre">
+    <div class="node accent"><b>Change lands on main</b><span>the real copy of your site</span></div>
+  </div>
+  <div class="arrow down" aria-hidden="true">&darr;</div>
+  <div class="flow-row centre">
+    <div class="node"><b>GitHub Pages publishes</b><span>usually within a minute or two</span></div>
+    <div class="arrow" aria-hidden="true">&rarr;</div>
+    <div class="node"><b>It's live</b><span>at yourname.co.uk</span></div>
+  </div>
+</figure>
+
+<p>Both routes end on <code>main</code>. The safe route adds a pull request you approve first; GitHub Pages then publishes whatever is on <code>main</code>.</p>
+<h3>At a glance</h3>
+<p>You do the clicks in settings; the AI does everything inside the repo. In this setup the AI can't touch GitHub settings, DNS or Cloudflare, so those steps are always yours.</p>
+<div class="table-wrap"><table><thead><tr><th>Step</th><th>Who does it</th><th>Rough time</th><th>Cost</th></tr></thead><tbody><tr><td>1. Repo and Pages</td><td>You, in GitHub</td><td>10 minutes</td><td>Free</td></tr><tr><td>2. Your own domain</td><td>You, at your registrar</td><td>15 minutes, then up to 24 hours' wait</td><td>£5 to £15 a year</td></tr><tr><td>2b. Cloudflare (optional)</td><td>You, in Cloudflare</td><td>20 minutes, then up to 24 hours' wait</td><td>Free plan</td></tr><tr><td>3 and 4. Connect Claude or ChatGPT</td><td>You approve; the tool does the rest</td><td>5 minutes each</td><td>Paid AI plan</td></tr><tr><td>5. Changes, forever after</td><td>The AI edits and ships; you merge if you chose pull requests</td><td>A few minutes each</td><td>Included in your plan</td></tr></tbody></table></div>
+<h2 id="before-you-start">Before you start</h2>
+<p>You need one free account, one paid AI plan (two if you want both Claude and ChatGPT), and about an hour the first time.</p>
+<div class="table-wrap"><table><thead><tr><th>What</th><th>Why you need it</th><th>Cost (October 2026)</th></tr></thead><tbody><tr><td>GitHub account</td><td>Stores your site's files and publishes them</td><td>Free</td></tr><tr><td>Claude Pro or higher</td><td>Lets Claude edit your files and publish changes</td><td>$20 a month in the US, about £20 in the UK with VAT (<a href="https://claude.com/pricing" target="_blank" rel="noopener">check today's price</a>)</td></tr><tr><td>ChatGPT Plus or higher</td><td>Lets ChatGPT (Codex) do the same</td><td>$20 a month in the US, about £20 in the UK with VAT (<a href="https://chatgpt.com/pricing" target="_blank" rel="noopener">check today's price</a>)</td></tr><tr><td>Your own domain (optional)</td><td>A name like yourname.co.uk instead of yourname.github.io</td><td>Roughly £5 to £15 a year from a registrar</td></tr><tr><td>Cloudflare (optional)</td><td>Free extras: email forwarding, analytics, redirects</td><td>Free plan</td></tr></tbody></table></div>
+<p>You only need one AI plan. Pick whichever you already pay for.</p>
+<h3>Six words you'll see a lot</h3>
+<div class="table-wrap"><table><thead><tr><th>Word</th><th>Plain meaning</th></tr></thead><tbody><tr><td>Repo (repository)</td><td>A folder on GitHub that holds your site's files and their full history</td></tr><tr><td>Commit</td><td>A saved change, with a note saying what changed</td></tr><tr><td>Push</td><td>Sending commits from where they were made up to GitHub</td></tr><tr><td>Branch</td><td>A side copy of the files for trying changes; <code>main</code> is the real one</td></tr><tr><td>Pull request (PR)</td><td>A request to copy a branch's changes into <code>main</code>; you review, then click Merge</td></tr><tr><td>GitHub Pages</td><td>GitHub's free web hosting; it publishes whatever is on <code>main</code></td></tr></tbody></table></div>
+<p>One thing to know up front: on a free GitHub account, Pages only works on public repos. Anyone can read your site's files, so never put passwords, keys or private data in them.</p>
+<h2 id="step-1-create-the-repo-and-switch-on-pages">Step 1: Create the repo and switch on Pages</h2>
+<p>Six steps and one file; your site goes live at <code>https://YOURNAME.github.io</code>.</p>
+<ol><li>Sign up at <a href="https://github.com" target="_blank" rel="noopener">github.com</a>. Pick your username with care: it becomes part of your web address.</li><li>Click <strong>+</strong> (top right), then <strong>New repository</strong>.</li><li>Name it exactly <code>YOURNAME.github.io</code>, using your username. Choose <strong>Public</strong>, tick <strong>Add a README file</strong>, then click <strong>Create repository</strong>.</li><li>Click <strong>Add file</strong>, then <strong>Create new file</strong>. Name it <code>index.html</code>, paste the starter page below, and click <strong>Commit changes</strong>.</li><li>Open <strong>Settings</strong>, then <strong>Pages</strong>. Under <strong>Build and deployment</strong>, set Source to <strong>Deploy from a branch</strong>, Branch to <code>main</code>, folder <code>/ (root)</code>. Click <strong>Save</strong>.</li><li>Wait a minute or two, then open <code>https://YOURNAME.github.io</code>.</li></ol>
+<p>Starter page:</p>
+<pre class="code" data-lang="html"><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;title&gt;My site&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;It works&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>One repo can hold dozens of mini-sites. Put each in its own folder (<code>piano/index.html</code>) and it appears at <code>YOURNAME.github.io/piano</code>.</p>
+<p><strong>Check it worked:</strong> <strong>Settings</strong>, <strong>Pages</strong> says your site is live, and the address shows "It works".</p>
+<h2 id="step-2-optional-use-your-own-domain">Step 2 (optional): Use your own domain</h2>
+<p>Skip this if <code>YOURNAME.github.io</code> is fine. Order matters: tell GitHub about the domain first, then change DNS. GitHub warns that doing it the other way round can let someone else host a site on your domain.</p>
+<ol><li>Buy a domain from any registrar, such as Namecheap, 123-reg or Cloudflare.</li><li><strong>Recommended:</strong> verify the domain with GitHub, which stops anyone else claiming it. Click your profile picture, then <strong>Settings</strong>, then <strong>Pages</strong> (under Code, planning, and automation), then <strong>Add a domain</strong>. GitHub shows a TXT record; add it at your registrar, come back and click <strong>Verify</strong>. Keep that record for good. (<a href="https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/verifying-your-custom-domain-for-github-pages" target="_blank" rel="noopener">GitHub's steps</a>)</li><li>In your repo, open <strong>Settings</strong>, then <strong>Pages</strong>. Type your domain under <strong>Custom domain</strong> and click <strong>Save</strong>. GitHub adds a file called <code>CNAME</code> to your repo; leave it there.</li><li>At your registrar, open the DNS settings (sometimes called DNS management or Advanced DNS). <strong>Screenshot every record first</strong>, so you can put things back. Then delete only the records that send your website somewhere else, for <code>@</code> and <code>www</code>: <strong>A</strong>, <strong>AAAA</strong>, <strong>CNAME</strong>, <strong>ALIAS</strong>, and any <strong>URL redirect</strong> or <strong>forwarding</strong> record. They usually point at a parking page. Leave <strong>MX</strong> and <strong>TXT</strong> records alone: they run your email and the verification above. Then add these five:</li></ol>
+<div class="table-wrap"><table><thead><tr><th>Type</th><th>Host</th><th>Points to</th></tr></thead><tbody><tr><td>A</td><td>@</td><td>185.199.108.153</td></tr><tr><td>A</td><td>@</td><td>185.199.109.153</td></tr><tr><td>A</td><td>@</td><td>185.199.110.153</td></tr><tr><td>A</td><td>@</td><td>185.199.111.153</td></tr><tr><td>CNAME</td><td>www</td><td>YOURNAME.github.io</td></tr></tbody></table></div>
+<ol start="5"><li>Wait. DNS changes can take up to 24 hours to spread.</li><li>Back in your repo's <strong>Settings</strong>, <strong>Pages</strong>, tick <strong>Enforce HTTPS</strong>. The box can take up to 24 hours to appear.</li></ol>
+<p><strong>Check it worked:</strong> <strong>Settings</strong>, <strong>Pages</strong> shows the DNS check passing, and your domain opens with a padlock. Stuck? If your domain already has CAA records, one of them must <a href="https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/troubleshooting-custom-domains-and-github-pages" target="_blank" rel="noopener">allow letsencrypt.org</a>, the company GitHub uses for certificates.</p>
+<p>Two safety rules: never add a wildcard record (<code>*.yourname.co.uk</code>), and if you ever turn the site off, delete these DNS records the same day. Each repo takes one domain, so a second domain needs a second repo.</p>
+<h2 id="step-2b-optional-put-cloudflare-in-front">Step 2b (optional): Put Cloudflare in front</h2>
+<p>Cloudflare's free plan runs your domain's DNS and can sit between visitors and GitHub. That unlocks a few things GitHub Pages can't do on its own. Skip this until you want one of them.</p>
+<div class="table-wrap"><table><thead><tr><th>What you get</th><th>What it does for you</th><th>Needs the orange cloud?</th></tr></thead><tbody><tr><td><a href="https://developers.cloudflare.com/email-routing/" target="_blank" rel="noopener">Email Routing</a></td><td>hello@yourname.co.uk forwards to your Gmail. Free. It only receives; replies go from your Gmail. <strong>Only for a domain with no email set up yet</strong></td><td>No</td></tr><tr><td><a href="https://www.cloudflare.com/web-analytics/" target="_blank" rel="noopener">Web Analytics</a></td><td>Visitor counts without cookies or tracking. Free</td><td>No, if you paste its script into your pages</td></tr><tr><td>Redirect Rules</td><td>Send old links to new pages, so nothing you've shared breaks</td><td>Yes</td></tr><tr><td>Caching</td><td>Serves copies of your files from near each visitor</td><td>Yes</td></tr></tbody></table></div>
+<p>"Orange cloud" means Proxied: traffic flows through Cloudflare. "Grey cloud" means DNS only: Cloudflare just points visitors at GitHub.</p>
+<ol><li>Create a free account at cloudflare.com, add your domain, and pick the <strong>Free</strong> plan. Bought the domain from Cloudflare? It already runs your DNS, so skip to step 5.</li><li>Cloudflare copies your existing DNS records. Compare its list with your registrar's current list, and add anything missing. Then check your screenshot from Step 2: every <strong>MX</strong> and <strong>TXT</strong> record on it must be in Cloudflare, or your email stops when you switch.</li><li>At your registrar, turn <strong>DNSSEC</strong> off if it's on. Left on, it can <a href="https://developers.cloudflare.com/learning-paths/get-started/add-domain-to-cf/disable-dnssec" target="_blank" rel="noopener">take your site and email offline</a> during the switch. You can turn it back on later, from Cloudflare.</li><li>Still at your registrar, swap the nameservers for the two Cloudflare gives you. Wait until Cloudflare shows the domain as <strong>Active</strong> (up to 24 hours).</li><li>Set every website record to <strong>DNS only</strong> (grey); Cloudflare often brings them in as Proxied. Check GitHub's <strong>Settings</strong>, <strong>Pages</strong> still shows your domain working with <strong>Enforce HTTPS</strong> ticked.</li><li>Only if you want the orange-cloud features: switch the website records (the four A records and the <code>www</code> CNAME) to <strong>Proxied</strong>, then open <strong>SSL/TLS</strong> and set the encryption mode to <strong>Full (strict)</strong>.</li><li>Email Routing, only if nothing receives email at this domain yet: open <strong>Email Routing</strong>, add your new address and your real inbox, and click the link in the verification email. Cloudflare asks to delete any old MX records and won't switch on until you do. Already using Google Workspace, Microsoft 365 or a mailbox from your registrar here? Skip this step, because it would cut that inbox off. Add new addresses in that provider instead.</li></ol>
+<p><strong>Check it worked:</strong> the site loads with a padlock on your domain. If you set up Email Routing, a test email to the new address lands in your inbox.</p>
+<p>Three traps:</p>
+<ul><li><strong>Never pick Flexible</strong> encryption. GitHub sends every visitor to HTTPS, and Flexible talks to GitHub over plain HTTP, so the two bounce <a href="https://github.com/cloudflare/cloudflare-docs/blob/production/content/ssl/troubleshooting/too-many-redirects.md" target="_blank" rel="noopener">forever</a> ("too many redirects").</li><li><strong>Certificate renewals.</strong> GitHub renews its HTTPS certificate by checking your DNS. People <a href="https://community.letsencrypt.org/t/fyi-for-github-pages-or-vercel-netlify-with-cloudflare/231054" target="_blank" rel="noopener">report renewals failing</a> while the orange cloud is on; GitHub doesn't document this. If GitHub flags a certificate problem, go grey for a day, let it renew, then switch back.</li><li><strong>Nothing here makes a page private.</strong> A GitHub Pages site is public, and on a free account so is its source code. Never put anything confidential on it.</li></ul>
+<p>Want the source code kept private, or a preview link for every AI change before you merge? Cloudflare can host the site itself from a private repo, and it <a href="https://developers.cloudflare.com/changelog/post/2025-07-23-workers-preview-urls/" target="_blank" rel="noopener">posts a preview link on every pull request</a>. That's a bigger move away from GitHub Pages, so treat it as a later upgrade.</p>
+<h2 id="step-3-connect-claude">Step 3: Connect Claude</h2>
+<p>Claude edits your site through <a href="https://code.claude.com/docs/en/web-quickstart" target="_blank" rel="noopener">Claude Code in the cloud</a>, which you reach at claude.ai/code or the <strong>Code</strong> tab in the Claude phone app. It needs a Pro, Max or Team plan, or an Enterprise seat that includes Claude Code. On Team and Enterprise plans, an Owner must switch on the GitHub connector first.</p>
+<ol><li>Go to <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a> and sign in.</li><li>When it asks, click to connect GitHub, then approve on GitHub's page. You're sent back automatically.</li><li>Optional: install the <a href="https://github.com/apps/claude" target="_blank" rel="noopener">Claude GitHub App</a> on your account. A public repo works without it, but it's needed for private repos and lets Claude watch a pull request and fix failed checks.</li><li>On Pro and Max, Claude makes an environment called <strong>Default</strong> for you. On Team and Enterprise you'll see a short form instead: leave it as it is and click <strong>Create &amp; finish</strong>.</li><li>Pick your repo in the selector under the message box. Set the mode to <strong>Accept edits</strong> (Claude changes and pushes without stopping) or <strong>Plan</strong> (it shows you the plan first).</li><li>Type what you want. Claude does the work and ships it the way your rules say: straight to <code>main</code>, or on a branch. Until the AI manual's first run sets those rules, it pushes a branch; open the diff, click <strong>Create PR</strong>, then merge it on GitHub.</li></ol>
+<p><strong>Check it worked:</strong> your repo appears in the selector at claude.ai/code.</p>
+<p>Claude can also push straight to <code>main</code> if you tell it to; nothing on Claude's side blocks that. If you'd rather it couldn't, add a branch protection rule on GitHub (see House rules).</p>
+<p><strong>Make it remember your rules.</strong> At the start of every session Claude reads your repo's <code>CLAUDE.md</code>, or <code>AGENTS.md</code> if there's no <code>CLAUDE.md</code>. Put your house rules there once and you never repeat them; the AI manual's first run writes the file for you.</p>
+<p>To disconnect later, remove GitHub at claude.ai/customize/connectors.</p>
+<h2 id="step-4-connect-chatgpt-codex">Step 4: Connect ChatGPT (Codex)</h2>
+<p>ChatGPT edits your site through <a href="https://learn.chatgpt.com/codex/cloud" target="_blank" rel="noopener">Codex cloud</a>. OpenAI lists cloud tasks on Plus, Pro, Business, Edu and Enterprise; its <a href="https://learn.chatgpt.com/codex/pricing" target="_blank" rel="noopener">pricing page</a> doesn't confirm them for Free or Go.</p>
+<ol><li>Open ChatGPT on the web or the desktop app and sign in.</li><li>Choose <strong>Work in</strong>, then <strong>Cloud</strong>, and open <strong>Select environment</strong>.</li><li>Choose <strong>Create environment</strong>. Already made one for this repo? Select it and skip to step 6.</li><li>Pick your site's GitHub repo and select <strong>Get started</strong>. Connect GitHub if it asks, and give it access to that repo.</li><li>Codex checks the repo and tests the setup. Review it, save, and click <strong>Publish</strong>; wait for "Environment published". Do steps 2 to 5 on web or desktop, since the phone app can only pick an existing environment.</li><li>Select <strong>Start a new task</strong>, describe the change, and send it.</li><li>When it's finished, commit or open a pull request, then merge it on GitHub.</li></ol>
+<p><strong>Check it worked:</strong> you see "Environment published", and your repo is listed when you start a task.</p>
+<p>Codex usually works on a branch named <code>codex/…</code> and opens a pull request for you to merge. OpenAI's docs don't say whether it can push straight to <code>main</code>, so treat a pull request as its normal route.</p>
+<p><strong>Make it remember your rules.</strong> Codex <a href="https://learn.chatgpt.com/codex/agent-configuration/agents-md" target="_blank" rel="noopener">reads a file called </a><a href="https://learn.chatgpt.com/codex/agent-configuration/agents-md" target="_blank" rel="noopener"><code>AGENTS.md</code></a> in your repo, the same way Claude reads <code>CLAUDE.md</code>. House rules below shows how to keep one set of rules for both.</p>
+<h2 id="step-5-ask-for-changes">Step 5: Ask for changes</h2>
+<p>A good request names the file, the change, and how to ship it. Vague asks get vague edits.</p>
+<div class="table-wrap"><table><thead><tr><th>Instead of</th><th>Try</th></tr></thead><tbody><tr><td>"Make the site better"</td><td>"On <code>index.html</code>, add a contact section under the heading with an email link to hello@yourname.co.uk. Push to main."</td></tr><tr><td>"Add a new page"</td><td>"Create <code>piano/index.html</code> as one self-contained page, then add a card linking to it on the home page. Open a pull request."</td></tr><tr><td>"Fix it"</td><td>"On phones under 400px wide the menu covers the title. Fix it and push to main."</td></tr></tbody></table></div>
+<p>After you hit send:</p>
+<ol><li>The AI copies your repo, edits the files and commits them.</li><li>It pushes to <code>main</code>, or to a branch with a pull request for you to merge.</li><li>Once the change is on <code>main</code>, GitHub Pages republishes. Usually that takes a minute or two.</li><li>To check, open your repo's <strong>Actions</strong> tab: a green tick on "pages build and deployment" means it's live.</li><li>Still seeing the old page? Your browser kept a copy. Press Ctrl+Shift+R (Cmd+Shift+R on a Mac) to reload it fresh.</li></ol>
+<h2 id="undo-a-bad-change">Undo a bad change</h2>
+<p>Nothing is ever lost; every change sits in the repo's history. Undoing means adding a new change that reverses the bad one.</p>
+<div class="table-wrap"><table><thead><tr><th>You shipped by</th><th>Fastest undo</th></tr></thead><tbody><tr><td>Pull request</td><td>Open the merged pull request on GitHub, click <strong>Revert</strong>, then merge the new pull request it makes</td></tr><tr><td>Straight to <code>main</code></td><td>Ask the AI: "Revert the last change to <code>index.html</code> and ship it." GitHub's website only has a Revert button on pull requests</td></tr></tbody></table></div>
+<p>Never ask an AI to "force push" or "reset main". Both rewrite history, and they can wipe out work that's already live.</p>
+<h2 id="house-rules">House rules</h2>
+<p>Four rules stop most problems before they start.</p>
+<ol><li><strong>Pick one route per repo.</strong> Straight to <code>main</code> suits a small personal site (fast, and mistakes go live). Pull requests suit anything other people rely on (one extra click, and you see every change first).</li><li><strong>One AI at a time per repo.</strong> If Claude and Codex both have open branches touching the same file, the second one to merge hits a conflict. Merge one before starting the other.</li><li><strong>Nothing secret in a public repo.</strong> No passwords, API keys or personal data. Deleting a file later doesn't help; the history keeps it.</li><li><strong>One rulebook for both AIs.</strong> Put your rules in <code>AGENTS.md</code> at the top of the repo. Codex reads it, and Claude Code <a href="https://code.claude.com/docs/en/memory.md" target="_blank" rel="noopener">reads it too</a> when there's no <code>CLAUDE.md</code>. If you do keep a <code>CLAUDE.md</code>, make its first line <code>@AGENTS.md</code> so Claude pulls the same rules in.</li></ol>
+<p>Want pull requests enforced rather than just requested? In GitHub, open <strong>Settings</strong>, then <strong>Branches</strong>, and add a rule for <code>main</code> with <strong>Require a pull request before merging</strong> ticked. If <strong>Require approvals</strong> is ticked underneath it, untick it: GitHub won't let you approve your own pull requests, and the AI's pull requests count as yours. Then tick <strong>Do not allow bypassing the above settings</strong>, or your own account (and any AI working as you) can still push straight in.</p>
+<p>The AI manual's first run writes a fuller <code>AGENTS.md</code> for you. To write your own instead, start here:</p>
+<pre class="code" data-lang="markdown"><code># Site rules
+
+- This is a static GitHub Pages site. No build step, no frameworks.
+- Each project is one self-contained index.html in its own top-level folder.
+- Link every new project from the home page (/index.html).
+- Never commit passwords, API keys or other people's personal data. The repo is public.
+- Keep the CNAME and .nojekyll files. Only change CNAME if I ask to change the domain.
+- Ship changes by: [pushing straight to main | opening a pull request].
+- If another agent has an open branch touching the same files, stop and ask me first.
+- Stop and ask before anything that could affect the domain, DNS or email.
+- After shipping, reply with the live link to check.</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p>Most problems match one of these rows.</p>
+<div class="table-wrap"><table><thead><tr><th>What you see</th><th>Likely cause</th><th>Fix</th></tr></thead><tbody><tr><td>404 at <code>YOURNAME.github.io</code></td><td>Pages isn't on, or there's no <code>index.html</code> at the top level</td><td>Check <strong>Settings</strong>, <strong>Pages</strong> (branch <code>main</code>, folder <code>/ (root)</code>); the file must be named <code>index.html</code> in lower case</td></tr><tr><td>Change pushed, site unchanged</td><td>Still publishing, old copy in your browser, or the change is on a branch</td><td>Check the <strong>Actions</strong> tab, press Ctrl+Shift+R, merge the pull request</td></tr><tr><td>Custom domain stopped working</td><td>The <code>CNAME</code> file was deleted or overwritten</td><td>Re-enter the domain in <strong>Settings</strong>, <strong>Pages</strong></td></tr><tr><td>GitHub's DNS check fails</td><td>DNS hasn't spread yet, or a record is wrong</td><td>Wait up to 24 hours, then compare your records with Step 2</td></tr><tr><td><strong>Enforce HTTPS</strong> is greyed out</td><td>The certificate is still being issued, or Cloudflare's orange cloud is on</td><td>Wait up to 24 hours; if you use Cloudflare, set the records to DNS only</td></tr><tr><td>A folder starting with <code>_</code> doesn't appear</td><td>GitHub's Jekyll step hides it</td><td>Add an empty <code>.nojekyll</code> file at the top level</td></tr><tr><td>Claude can't see your repo</td><td>Private repo without the Claude GitHub App</td><td>Install it at <a href="https://github.com/apps/claude" target="_blank" rel="noopener">github.com/apps/claude</a></td></tr><tr><td>Codex can't see your repo</td><td>GitHub access not granted to that repo</td><td>Reconnect GitHub in Codex and add the repo</td></tr><tr><td>"Merge conflict" on a pull request</td><td>Two AIs (or you and an AI) changed the same lines</td><td>Ask the AI that opened the PR to update it from <code>main</code> and fix the conflict</td></tr><tr><td>"Too many redirects" error</td><td>Cloudflare encryption is set to Flexible</td><td>In Cloudflare, open SSL/TLS and set Full (strict)</td></tr><tr><td>Your domain shows an old version; YOURNAME.github.io shows the new one</td><td>Cloudflare is serving a saved copy</td><td>In Cloudflare, open Caching and click Purge Everything</td></tr><tr><td>GitHub says it can't issue or renew the certificate</td><td>Records are Proxied (orange cloud) in Cloudflare</td><td>Switch them to DNS only for a day, then back</td></tr><tr><td>Email stopped arriving after a DNS change</td><td>MX or TXT records were deleted, or weren't copied to Cloudflare</td><td>Put them back from your screenshot; your email provider's help pages list the right values</td></tr><tr><td>Site and email went down after switching to Cloudflare</td><td>DNSSEC was still on at your registrar</td><td>Turn DNSSEC off at the registrar; turn it back on later from Cloudflare</td></tr></tbody></table></div>
+<h2 id="hand-it-to-an-ai">Hand it to an AI</h2>
+<p>The <a href="#ai-manual">AI manual</a> below holds everything in this guide, written as rules an AI can follow. Copy it (or download the file) into Claude or ChatGPT, fill in section 0, and set the MODE line.</p>
+<div class="table-wrap"><table><thead><tr><th>You want</th><th>Paste the manual into</th><th>MODE line</th></tr></thead><tbody><tr><td>Help with Steps 1 to 4</td><td>Any normal chat in Claude or ChatGPT</td><td><code>SETUP</code></td></tr><tr><td>The AI to take over your repo</td><td>A new session in claude.ai/code or Codex cloud, with your repo selected</td><td><code>FIRST RUN</code></td></tr><tr><td>A change, any time after that</td><td>Nothing to paste: the first run saved the rules into <code>AGENTS.md</code></td><td>Not needed; just ask</td></tr></tbody></table></div>
+<p>After the first run, a request as short as "add a dark mode toggle to the piano page" is enough.</p>
+
+<h2 id="ai-manual">AI manual</h2>
+<p>This is the guide rewritten as rules for an AI. Paste it into Claude or ChatGPT, fill in section 0, and set the MODE line. Its step numbers match the guide above.</p>
+<div class="manual-actions">
+  <button type="button" class="btn btn-primary" id="copy-manual">Copy the manual</button>
+  <a class="btn btn-ghost" href="github-pages-ai-manual-v1.0.md" download>Download as a file (.md)</a>
+  <span class="copy-status" id="copy-status" role="status" aria-live="polite"></span>
+</div>
+<pre class="code manual" id="manual-text"><code># GitHub Pages site manual (for AI assistants)
+Version 1.0, 2026-10-23. For Claude (Claude Code) and ChatGPT (Codex).
+Independent guide; not affiliated with GitHub, Anthropic, OpenAI or Cloudflare. Licence: CC BY 4.0.
+Follow this manual. If it conflicts with your general habits, the manual wins.
+If it conflicts with the user's latest message, the user wins.
+Setup step numbers match the human Guide (Steps 1 to 5).
+
+## 0. Site values (the user fills these in)
+SITE_OWNER:      [GitHub username]
+REPO:            [username/username.github.io]
+DOMAIN:          [yourname.co.uk | none]
+DNS_HOST:        [registrar name | Cloudflare | none]
+EMAIL_ON_DOMAIN: [yes, with provider name | no | no domain]
+SHIP_ROUTE:      [main | pull-request]
+MODE:            [SETUP | FIRST RUN | OPERATE]
+If any value is blank or still in brackets, ask for it before acting.
+In SETUP mode, SITE_OWNER and REPO may not exist yet: help the user choose them in Step 1.
+
+## 1. Your job in each mode
+- SETUP: coach the user through section 4, one step at a time. You can't click for them.
+  Give the exact clicks, then wait for "done", a paste or a screenshot.
+  Confirm the step's CHECK passed before the next step.
+  Screens change. If the user's screen doesn't match, ask what they see and adapt.
+- FIRST RUN: you are in a session with REPO open. Do section 6 once, then switch to OPERATE.
+- OPERATE: do what the user asks, following AGENTS.md in the repo
+  (or this manual, if AGENTS.md is missing). Report as in section 9.
+
+## 2. How the site works
+User asks -&gt; AI edits a copy of REPO -&gt; ships by SHIP_ROUTE
+(push to main, or push a branch and open a pull request the user merges)
+-&gt; GitHub Pages publishes main, usually within a minute or two
+-&gt; live at https://DOMAIN, or https://SITE_OWNER.github.io if DOMAIN is none.
+Pages serves branch main, folder / (root). No build step.
+Folders become addresses: piano/index.html is served at /piano/.
+Website DNS records for DOMAIN (set by the user at DNS_HOST):
+  A     @    185.199.108.153
+  A     @    185.199.109.153
+  A     @    185.199.110.153
+  A     @    185.199.111.153
+  CNAME www  SITE_OWNER.github.io
+  Optional IPv6, as well as the A records:
+  AAAA  @    2606:50c0:8000::153, 2606:50c0:8001::153, 2606:50c0:8002::153, 2606:50c0:8003::153
+  Never wildcard (*) records.
+
+## 3. Who can do what
+| Task | Who |
+| --- | --- |
+| GitHub sign-up, repo creation, GitHub settings | User only |
+| Buying a domain, DNS records, Cloudflare dashboard | User only |
+| Email accounts, mailboxes, aliases and forwarding | User only |
+| Connecting GitHub to Claude or ChatGPT, paid plans | User only |
+| Creating, editing and deleting files in REPO | AI |
+| Commits, pushes, branches, pull requests | AI |
+| Merging a pull request | User, unless they tell you to |
+For "User only" tasks, give the user clear steps. Never claim you did them.
+
+## 4. Setup steps (SETUP mode)
+Each step has DO and CHECK. Don't move on until CHECK passes.
+Step 1 Repo and Pages.
+  DO: (a) Create a PUBLIC repo named SITE_OWNER.github.io with a README.
+          Free GitHub accounts can only publish public repos.
+      (b) Add index.html: a simple starter page.
+      (c) Repo Settings &gt; Pages &gt; Build and deployment: Source "Deploy from a branch",
+          Branch main, folder / (root), Save.
+  CHECK: Settings &gt; Pages says the site is live; https://SITE_OWNER.github.io shows the page.
+Step 2 Domain (skip if DOMAIN is none). Order matters.
+  DO: (a) Recommended: verify the domain. Profile picture &gt; Settings &gt; Pages (under
+          "Code, planning, and automation") &gt; Add a domain. Add the TXT record GitHub shows
+          (host _github-pages-challenge-SITE_OWNER) at DNS_HOST, then click Verify.
+          The TXT record must stay.
+      (b) Repo Settings &gt; Pages &gt; Custom domain: enter DOMAIN, Save. This commits a CNAME file.
+      (c) At DNS_HOST, have the user screenshot every existing record before changing anything.
+      (d) Delete ONLY the records for @ and www that send the website elsewhere:
+          A, AAAA, CNAME, ALIAS/ANAME, and URL redirect or forwarding records
+          (usually parking-page defaults). Never delete MX or TXT records.
+      (e) Add the website DNS records in section 2.
+  CHECK: Settings &gt; Pages shows the DNS check passing. Allow up to 24 hours.
+         Then tick Enforce HTTPS (it can take up to 24 hours to appear).
+         If the domain has CAA records, one must allow letsencrypt.org.
+Step 2b Cloudflare (optional). Follow section 8.
+Step 3 Connect Claude. Plan: Pro, Max or Team, or an Enterprise seat with Claude Code.
+  DO: claude.ai/code (or the Code tab in the Claude app) &gt; connect GitHub &gt; approve.
+      Team and Enterprise: an Owner must turn on the GitHub connector first, and the user
+      sees a "Create your first cloud environment" form; leave it as it is.
+      Optional: install the Claude GitHub App at github.com/apps/claude.
+      It's required for private repos and for auto-fixing pull requests.
+  CHECK: REPO appears in the repository selector.
+Step 4 Connect ChatGPT. Plan: Plus, Pro, Business, Edu or Enterprise.
+  DO: ChatGPT on web or desktop &gt; Work in &gt; Cloud &gt; Select environment &gt; Create environment &gt;
+      choose REPO &gt; Get started (connect GitHub if asked) &gt; review the setup and test results &gt;
+      save &gt; Publish. The phone app can only pick an existing environment.
+  CHECK: "Environment published", then REPO is available under Start a new task.
+Step 5 Hand-off. Tell the user to start a session in the connected tool with REPO selected,
+  then paste this manual with section 0 filled in and MODE: FIRST RUN.
+
+## 5. Repo conventions
+- Static files only. No build step, frameworks, package.json or bundlers unless the user asks.
+- One project = one top-level folder named after it (/piano/), holding a self-contained
+  index.html (inline CSS and JS), unless the user names another path.
+  Link every project from /index.html.
+- Use relative links (href="piano/"), so pages work on both DOMAIN and github.io.
+- Keep CNAME (one line: DOMAIN) and .nojekyll at the root.
+  Don't edit or delete them unless the user asks to change the domain.
+- Never commit secrets: API keys, passwords or tokens. Never add other people's personal
+  details. A contact email or name the user asks you to publish is fine.
+  Everything in REPO, AGENTS.md included, is public and served on the live site,
+  and git history keeps deleted files.
+- Don't invent facts about the user or their business. Use clearly marked placeholders,
+  such as [YOUR PHONE NUMBER], and list them in item 4 of your report.
+- One commit per request. Commit messages: "Area: what changed", under 72 characters.
+  Area is the folder or page changed (for example "piano: add practice log"),
+  or "site" for changes across several root files.
+- Write in UK English unless the user says otherwise.
+
+## 6. First run (FIRST RUN mode)
+1. Inspect REPO. Start your reply with a summary of five lines or fewer: pages and folders,
+   the domain in CNAME, and anything broken (no index.html, broken links).
+2. Add an empty .nojekyll file at the root if it's missing.
+3. Create or update AGENTS.md at the root, in this shape:
+     # AGENTS.md: rules for AI assistants on this site
+     Made from the GitHub Pages site manual v1.0. Everything in this repo is public.
+     If these rules conflict with the user's latest message, the user wins.
+     ## Site values
+     (the six value lines from section 0, filled in; leave out MODE)
+     (then sections 2, 3, 5, 7, 8, 9, 10 and 11 of this manual, word for word, in that
+      order, keeping their headings; leave out section 8 if DNS_HOST isn't Cloudflare)
+   Keep any rules already in AGENTS.md. If one conflicts with this manual, ask which wins.
+   If CLAUDE.md exists, make its first line @AGENTS.md.
+   (Codex reads AGENTS.md. Claude Code reads it when there is no CLAUDE.md.)
+4. Test: add &lt;footer&gt;&lt;p&gt;Last updated: 23 October 2026&lt;/p&gt;&lt;/footer&gt; (with today's date in that
+   format) just before &lt;/body&gt; in /index.html. If a footer exists, add the line inside it.
+   It's a one-off test: don't keep the date updated unless the user asks.
+5. Ship all of this as one commit, following section 7. End your reply with the section 9 report.
+
+## 7. Shipping rules
+- SHIP_ROUTE main: commit to main and push.
+- SHIP_ROUTE pull-request: push a branch named claude/&lt;topic&gt; or codex/&lt;topic&gt; and open a
+  pull request. Title: the commit message. Body: a one-paragraph summary and how to test it.
+  Don't merge unless told.
+- If your tool can't push straight to main, open a pull request instead and say so in item 4.
+- Before starting, check for other agents' unmerged work on the same files: open pull requests
+  (if your tool can see them) and unmerged branches (git branch -r --no-merged origin/main).
+  If you find any, stop and ask.
+- Never force-push, rewrite history, or delete branches you didn't create.
+- Ask before deleting files or folders the user didn't name, or renaming a published folder
+  (that breaks old links).
+- Ask before changing any repo file that could affect the domain, DNS or email (such as CNAME).
+- For user-only tasks (section 3), make no repo change for that part: give the user clear
+  steps instead, and note it in item 4.
+- To undo: git revert the bad commit and ship the revert by SHIP_ROUTE. Never reset main.
+
+## 8. Cloudflare (only if DNS_HOST is Cloudflare)
+Setup is user-only:
+- Free plan; add the domain. (A domain bought from Cloudflare is already there: skip to proxy status.)
+- Compare Cloudflare's imported records with the registrar's current list and add anything
+  missing. Check the screenshot of DNS records the user took before changing anything:
+  every MX and TXT record must be present, or email stops.
+- Turn DNSSEC off at the registrar before switching nameservers, or the domain and its email
+  can go offline. It can be turned back on from Cloudflare afterwards.
+- Switch nameservers at the registrar; wait for the zone to show Active.
+- Website records are the ones in section 2.
+Proxy status:
+- DNS only (grey cloud): the safe default; set it on every website record, because Cloudflare
+  often imports them as Proxied. GitHub issues and renews its HTTPS certificate normally.
+  Email Routing and Web Analytics (script version) work in this mode.
+- Proxied (orange cloud): needed for Redirect Rules and caching. Proxy only the website
+  records (the A records and the www CNAME). Set SSL/TLS encryption mode to Full (strict).
+  Never Flexible: GitHub redirects HTTP to HTTPS, so Flexible loops (ERR_TOO_MANY_REDIRECTS).
+- Switch to Proxied only after GitHub shows Enforce HTTPS ticked. If GitHub later reports a
+  certificate problem, set the records to DNS only, wait for renewal, then switch back.
+  (Users report renewals failing while proxied. GitHub doesn't document this.)
+Features:
+- Email Routing: only if EMAIL_ON_DOMAIN is no. Forwards hello@DOMAIN to a verified inbox.
+  Free. Adds MX and SPF TXT records, and won't switch on until other MX records are deleted,
+  which would cut off an existing mailbox. Receive only: replies come from the destination inbox.
+  If EMAIL_ON_DOMAIN is yes, new addresses and forwarding are set up in that provider instead
+  (for example an alias or a forwarding rule in Google Workspace or Microsoft 365).
+- Web Analytics: free, no cookies. Script beacon in any mode, or automatic when proxied.
+- Redirect Rules (proxied): send old paths to new ones. GitHub already redirects www.
+- If DOMAIN shows an old version but SITE_OWNER.github.io shows the new one,
+  the user should purge the Cloudflare cache (Caching &gt; Purge Everything).
+GitHub Pages sites are always public. Never put confidential content in REPO or on the site.
+Alternative host: Cloudflare Workers (static assets) deploys from a private repo, which keeps
+the source private, and posts a preview link on each pull request. Suggest it only if the
+user needs private source or previews.
+
+## 9. How to report back
+After every task, including ones where nothing in the repo changed, end your reply with:
+1. One line: what changed, or "no repo changes".
+2. Where it went: the commit on main, the pull request link, or "nowhere".
+3. The live link to check (on the pull-request route, after the merge), plus
+   "allow a minute or two, then hard refresh (Ctrl+Shift+R)".
+4. What you didn't do and why, any placeholders to fill in, and anything the user must do
+   next (merge, a setting, DNS, an email alias). If there's nothing, say "nothing".
+No code dumps unless asked.
+
+## 10. Diagnostics
+| Symptom | Check | Fix |
+| --- | --- | --- |
+| 404 on the site | Pages source setting; index.html at root, lower case | Fix the setting or file name |
+| Change not visible | On main? Actions tab "pages build and deployment" green? | Merge, wait, hard refresh; purge Cloudflare cache if proxied |
+| Custom domain broken | CNAME file present and holding DOMAIN? | Re-enter DOMAIN in repo Settings &gt; Pages |
+| DNS check fails | Records match section 2? | Fix records, wait up to 24 hours |
+| Enforce HTTPS unavailable | Certificate still issuing? Cloudflare proxy on? | Wait up to 24 hours; set DNS only |
+| ERR_TOO_MANY_REDIRECTS | Cloudflare encryption mode | Set Full (strict) |
+| Email stopped arriving | MX or TXT records deleted, or not copied to Cloudflare | Restore from the user's pre-change screenshot or the email provider's setup page |
+| Site and email down after a nameserver change | DNSSEC still on at the registrar? | Turn DNSSEC off at the registrar |
+| Folder starting with _ missing | .nojekyll present? | Add .nojekyll |
+| AI can't see REPO | Private repo without the Claude GitHub App? Codex repo access? | Install the app or grant access |
+| Merge conflict | Two agents changed the same lines | Update the branch from main, resolve, push |
+
+## 11. Limits of your environment
+- Cloud sessions often block general web access, so you may not be able to open the live site.
+  If so, ask the user to check it and tell you what they see.
+- You can't see GitHub settings, DNS, Cloudflare or email. Ask for a screenshot when you need
+  their state, and don't assume the Site values are still true if the user says otherwise.
+- If you're unsure whether an action could break the live site, DNS or email, stop and ask.
+</code></pre>
+<h2 id="about-this-guide">About this guide</h2>
+<p>Version 1.0, 23 October 2026. It's an independent guide: GitHub, Anthropic, OpenAI and Cloudflare haven't reviewed or endorsed it, and their product names belong to them.</p>
+<p>Every step was checked against each company's own documentation in October 2026 (listed under Sources). These products change often. If a screen doesn't match, paste the AI manual into Claude or ChatGPT with <code>MODE: SETUP</code> and describe what you see.</p>
+<p>Written by John Saunders. Free to share and adapt with credit, under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Found a step that's changed? Tell me on <a href="https://www.linkedin.com/in/saundersjohn/" target="_blank" rel="noopener">LinkedIn</a>.</p>
+<h2 id="sources">Sources</h2>
+<ul><li>GitHub: <a href="https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site" target="_blank" rel="noopener">Managing a custom domain for your GitHub Pages site</a></li><li>GitHub: <a href="https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/troubleshooting-custom-domains-and-github-pages" target="_blank" rel="noopener">Troubleshooting custom domains and GitHub Pages</a></li><li>Anthropic: <a href="https://code.claude.com/docs/en/web-quickstart" target="_blank" rel="noopener">Get started with Claude Code in the cloud</a></li><li>Anthropic: <a href="https://code.claude.com/docs/en/claude-code-on-the-web" target="_blank" rel="noopener">Use Claude Code in the cloud</a></li><li>Anthropic: <a href="https://code.claude.com/docs/en/cloud-environments" target="_blank" rel="noopener">Configure cloud environments</a> (push restrictions)</li><li>Anthropic: <a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener">How Claude remembers your project</a> (AGENTS.md support)</li><li>OpenAI: <a href="https://learn.chatgpt.com/codex/cloud" target="_blank" rel="noopener">Codex cloud</a></li><li>OpenAI: <a href="https://learn.chatgpt.com/codex/pricing" target="_blank" rel="noopener">Codex pricing</a></li><li>OpenAI: <a href="https://learn.chatgpt.com/codex/agent-configuration/agents-md" target="_blank" rel="noopener">Custom instructions with AGENTS.md</a></li><li>OpenAI: <a href="https://learn.chatgpt.com/codex/third-party/github" target="_blank" rel="noopener">Review GitHub pull requests with Codex</a></li><li>Cloudflare: <a href="https://developers.cloudflare.com/email-routing/" target="_blank" rel="noopener">Email Routing</a></li><li>Cloudflare: <a href="https://www.cloudflare.com/web-analytics/" target="_blank" rel="noopener">Web Analytics</a></li><li>Cloudflare: <a href="https://github.com/cloudflare/cloudflare-docs/blob/production/content/ssl/troubleshooting/too-many-redirects.md" target="_blank" rel="noopener">Too many redirects</a></li><li>Cloudflare: <a href="https://developers.cloudflare.com/changelog/post/2025-07-23-workers-preview-urls/" target="_blank" rel="noopener">Per-branch preview URLs for Workers</a></li><li>Let's Encrypt community: <a href="https://community.letsencrypt.org/t/fyi-for-github-pages-or-vercel-netlify-with-cloudflare/231054" target="_blank" rel="noopener">GitHub Pages with Cloudflare</a> (certificate renewal reports)</li><li>Prices: <a href="https://kingy.ai/blog/chatgpt-claude-gemini-prices-uk/" target="_blank" rel="noopener">ChatGPT, Claude and Gemini prices in the UK</a> (checked 19 October 2026) and <a href="https://aitoolsreview.co.uk/insights/claude-pricing" target="_blank" rel="noopener">Claude pricing compared</a> (US prices)</li></ul>
+    </article>
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="foot-inner">
+    <p>John Saunders · CC BY 4.0</p>
+    <p><a href="/">All projects</a><a href="https://www.linkedin.com/in/saundersjohn/" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/jsipuk" target="_blank" rel="noopener">GitHub</a></p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Contents: open on wide screens, folded on phones.
+    var det = document.getElementById('toc-details');
+    var wide = window.matchMedia('(min-width: 1040px)');
+    function setToc() { det.open = wide.matches; }
+    setToc();
+    if (wide.addEventListener) wide.addEventListener('change', setToc);
+    det.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A' && !wide.matches) det.open = false;
+    });
+
+    // Highlight the section being read.
+    var links = {};
+    Array.prototype.forEach.call(det.querySelectorAll('a'), function (a) { links[a.getAttribute('href').slice(1)] = a; });
+    var heads = Array.prototype.slice.call(document.querySelectorAll('article h2[id]'));
+    var ticking = false;
+    function mark() {
+      ticking = false;
+      var line = window.innerHeight * 0.3, current = null;
+      heads.forEach(function (h) { if (h.getBoundingClientRect().top < line) current = h; });
+      Object.keys(links).forEach(function (k) { links[k].classList.remove('active'); });
+      if (current && links[current.id]) links[current.id].classList.add('active');
+    }
+    window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(mark); } }, { passive: true });
+    mark();
+
+    // Copy the AI manual.
+    var btn = document.getElementById('copy-manual');
+    var status = document.getElementById('copy-status');
+    var text = document.getElementById('manual-text').textContent;
+    function done(msg) { status.textContent = msg; setTimeout(function () { status.textContent = ''; }, 4000); }
+    btn.addEventListener('click', function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done('Copied. Paste it into Claude or ChatGPT.'); },
+          function () { fallback(); });
+      } else { fallback(); }
+    });
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done('Copied. Paste it into Claude or ChatGPT.'); }
+      catch (e) { done('Copy failed: select the text below and copy it.'); }
+      document.body.removeChild(ta);
+    }
+  }());
+</script>
+</body>
+</html>
