@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Less Noise</title>
+<meta name="description" content="A quiet companion for two weeks off.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Less Noise">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#CF9886" id="themeColor">
+<meta name="color-scheme" content="light dark">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<style>
+:root{
+  --ink:#1E2233;
+  --ink-2:rgba(30,34,51,.66);
+  --ink-3:rgba(30,34,51,.42);
+  --line:rgba(30,34,51,.10);
+  --fill:rgba(30,34,51,.07);
+  --fill-press:rgba(30,34,51,.13);
+  --glass:rgba(255,255,255,.58);
+  --glass-strong:rgba(255,255,255,.86);
+  --glass-edge:rgba(255,255,255,.7);
+  --shadow:0 14px 34px rgba(46,36,70,.10);
+  --done:#4E7A68;
+  --on-done:#fff;
+  --scrim:rgba(20,18,30,.28);
+  --round:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Roboto,sans-serif;
+  --text:-apple-system,BlinkMacSystemFont,system-ui,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  --sky-top:#CF9886;--sky-mid:#EBB9A2;--sky-low:#F8E3D3;--glow:#FFD9B8;
+}
+body[data-mode="reset"]{--sky-top:#8DAFC0;--sky-mid:#C6D7DC;--sky-low:#F3E8DA;--glow:#FFE9C9}
+body[data-mode="trip"]{--sky-top:#79ACD3;--sky-mid:#B8D4E6;--sky-low:#F6E5BF;--glow:#FFE6A6}
+body[data-mode="rest"]{--sky-top:#9B92C2;--sky-mid:#CDBFDD;--sky-low:#F2E6EE;--glow:#F7D2DF}
+body[data-mode="return"]{--sky-top:#7FB4A3;--sky-mid:#BCD9CC;--sky-low:#EEF3EA;--glow:#FFF0C8}
+
+@media (prefers-color-scheme:dark){
+  :root{
+    --ink:#F1EDF4;
+    --ink-2:rgba(241,237,244,.70);
+    --ink-3:rgba(241,237,244,.44);
+    --line:rgba(255,255,255,.10);
+    --fill:rgba(255,255,255,.09);
+    --fill-press:rgba(255,255,255,.16);
+    --glass:rgba(26,28,42,.50);
+    --glass-strong:rgba(30,32,48,.92);
+    --glass-edge:rgba(255,255,255,.09);
+    --shadow:0 14px 34px rgba(0,0,0,.28);
+    --done:#8CC5AC;
+    --on-done:#11201A;
+    --scrim:rgba(0,0,0,.5);
+    --sky-top:#151A2D;--sky-mid:#2D2540;--sky-low:#4B2F38;--glow:#8A4E45;
+  }
+  body[data-mode="reset"]{--sky-top:#121C28;--sky-mid:#1F2E3B;--sky-low:#36393E;--glow:#5E5140}
+  body[data-mode="trip"]{--sky-top:#0E1D30;--sky-mid:#1B3249;--sky-low:#3D3830;--glow:#7A6234}
+  body[data-mode="rest"]{--sky-top:#14152A;--sky-mid:#24213E;--sky-low:#3A2C48;--glow:#5E3F64}
+  body[data-mode="return"]{--sky-top:#0F1F1D;--sky-mid:#1C3230;--sky-low:#2F3A35;--glow:#5D6448}
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;background:var(--sky-low)}
+body{
+  margin:0;min-height:100dvh;color:var(--ink);font-family:var(--text);
+  font-size:17px;line-height:1.4;background:transparent;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--ink) 55%,transparent);outline-offset:3px;border-radius:14px}
+
+/* The sky: the one memorable thing */
+.sky{position:fixed;inset:0;z-index:-1;overflow:hidden;
+  background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 42%,var(--sky-low) 78%,var(--sky-low) 100%)}
+.sky::before{content:"";position:absolute;width:120vmax;height:120vmax;left:20%;top:12%;
+  background:radial-gradient(closest-side,var(--glow),transparent 70%);opacity:.75;
+  animation:drift 36s ease-in-out infinite alternate}
+.sky::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(120% 60% at 50% 0%,rgba(255,255,255,.10),transparent 60%)}
+@keyframes drift{from{transform:translate3d(-8%,0,0) scale(1)}to{transform:translate3d(6%,-6%,0) scale(1.08)}}
+
+main{max-width:560px;margin:0 auto;padding:0 18px calc(120px + env(safe-area-inset-bottom))}
+.view{animation:fade .35s ease both}
+.view[hidden]{display:none}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+/* Today hero */
+.hero{padding:calc(env(safe-area-inset-top) + 44px) 6px 26px}
+.label{margin:0 0 6px;font:600 17px/1.2 var(--round);color:var(--ink-2)}
+.date{margin:0;font-family:var(--round);font-size:42px;line-height:1.04;letter-spacing:-.02em}
+.date .wd{display:block;font-weight:700}
+.date .dm{display:block;font-weight:400;color:var(--ink-2)}
+.msg{margin:26px 0 0;font:600 25px/1.22 var(--round);letter-spacing:-.01em;max-width:19ch;text-wrap:balance}
+.sub{margin:10px 0 0;font-size:17px;color:var(--ink-2);max-width:32ch;text-wrap:pretty}
+
+body.intro .hero > *{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+body.intro .hero > :nth-child(2){animation-delay:.08s}
+body.intro .hero > :nth-child(3){animation-delay:.22s}
+body.intro .hero > :nth-child(4){animation-delay:.32s}
+body.intro .stack{animation:rise .9s .42s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.stack{display:flex;flex-direction:column;gap:14px}
+
+.card{background:var(--glass);border:1px solid var(--glass-edge);border-radius:26px;padding:18px;
+  box-shadow:var(--shadow);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6)}
+.card h2{margin:0;font:600 19px/1.25 var(--round)}
+.card .meta{margin:3px 0 0;font-size:15px;color:var(--ink-2)}
+
+/* Tasks */
+.task{display:grid;grid-template-columns:46px 1fr;column-gap:10px;align-items:start}
+.task.soft{background:color-mix(in srgb,var(--glass) 70%,transparent);box-shadow:none}
+.check{width:46px;height:46px;margin:-6px 0 0 -6px;border:0;background:none;padding:0;display:grid;place-items:center;border-radius:50%}
+.check span{width:30px;height:30px;border-radius:50%;border:2px solid var(--ink-3);display:grid;place-items:center;transition:background .25s,border-color .25s,transform .25s}
+.check svg{width:16px;height:16px;opacity:0;transition:opacity .2s}
+.check:active span{transform:scale(.9)}
+.task.done .check span{background:var(--done);border-color:var(--done)}
+.task.done .check svg{opacity:1}
+.task.just .check span{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.7)}100%{transform:scale(1)}}
+.task.done h2,.task.skipped h2{color:var(--ink-2)}
+
+details{margin-top:6px}
+summary{list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:15px;font-weight:600;color:var(--ink-2);cursor:pointer}
+summary::-webkit-details-marker{display:none}
+summary svg{width:12px;height:12px;transition:transform .25s}
+details[open] summary svg{transform:rotate(90deg)}
+ol.steps{margin:6px 0 4px;padding-left:20px;font-size:16px;line-height:1.45}
+ol.steps li{margin:4px 0;padding-left:2px}
+
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.pill{min-height:44px;padding:0 18px;border-radius:22px;border:0;background:var(--fill);font-size:15px;font-weight:600}
+.pill:active{background:var(--fill-press)}
+
+.three{margin:12px 0 2px;display:grid;gap:8px}
+.three p{margin:0;font-size:15px;color:var(--ink-2)}
+.three input{width:100%;min-height:46px;border-radius:14px;border:1px solid var(--line);background:color-mix(in srgb,var(--glass-strong) 60%,transparent);padding:0 14px;font-size:16px}
+.three input::placeholder{color:var(--ink-3)}
+
+/* Gentle blocks */
+.present{padding:8px 6px 4px}
+.present h2{margin:0;font:600 20px/1.25 var(--round)}
+.present p{margin:6px 0 0;font-size:16px;color:var(--ink-2);max-width:34ch}
+
+.fancy .ask{margin:0;font-size:15px;color:var(--ink-2)}
+.fancy .idea{margin:4px 0 0;font:500 20px/1.3 var(--round);text-wrap:pretty}
+.fancy .or{margin:8px 0 0;font-size:14px;color:var(--ink-3)}
+
+ul.calm{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:10px}
+ul.calm li{display:grid;grid-template-columns:14px 1fr;gap:10px;font-size:16px;line-height:1.4}
+ul.calm li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink-3);margin-top:8px}
+ol.first{margin:10px 0 0;padding-left:22px;font:500 19px/1.4 var(--round)}
+ol.first li{margin:6px 0}
+
+.quiet{margin:54px 0 0;text-align:center;color:var(--ink-2)}
+.quiet p{margin:0 auto;font:500 20px/1.3 var(--round);max-width:20ch;text-wrap:balance}
+.quiet svg{display:block;width:120px;height:24px;margin:22px auto 0;color:var(--ink-3)}
+
+/* Fortnight */
+.ftop{padding:calc(env(safe-area-inset-top) + 44px) 6px 22px}
+.ftop h1{margin:0;font:700 34px/1.1 var(--round);letter-spacing:-.02em}
+.ftop p{margin:8px 0 0;color:var(--ink-2);max-width:34ch}
+.section-title{margin:26px 6px 10px;font:600 20px/1.2 var(--round)}
+.section-note{margin:-4px 6px 12px;font-size:15px;color:var(--ink-2)}
+.list{padding:4px 0}
+.row{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:14px 18px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .when{font:600 15px/1.35 var(--round);color:var(--ink-2)}
+.row .what{font-size:16px;line-height:1.4}
+.row.now{background:color-mix(in srgb,var(--glass-strong) 55%,transparent)}
+.row.now:first-child{border-radius:26px 26px 0 0}
+.row.now:last-child{border-radius:0 0 26px 26px}
+.tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;background:var(--fill);font-size:12px;font-weight:600;color:var(--ink-2);vertical-align:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:12px;background:var(--fill);font-size:13px;font-weight:600;color:var(--ink-2)}
+.chip.done{background:color-mix(in srgb,var(--done) 22%,transparent);color:var(--ink)}
+.chip svg{width:11px;height:11px}
+
+.reset{display:grid;grid-template-columns:46px 1fr;column-gap:10px;padding:16px 18px;border-top:1px solid var(--line)}
+.reset:first-child{border-top:0}
+.reset h3{margin:0;font:600 17px/1.3 var(--round)}
+.reset .meta{margin:2px 0 0;font-size:14px;color:var(--ink-2)}
+.reset .actions{margin-top:10px}
+.reset .pill{min-height:40px;padding:0 15px;font-size:14px}
+.reset.done .check span{background:var(--done);border-color:var(--done)}
+.reset.done .check svg{opacity:1}
+.reset.just .check span{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+
+/* Tab bar */
+.tabs{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  display:flex;gap:4px;padding:5px;border-radius:30px;background:var(--glass);border:1px solid var(--glass-edge);
+  box-shadow:0 10px 30px rgba(30,20,50,.16);-webkit-backdrop-filter:blur(26px) saturate(1.7);backdrop-filter:blur(26px) saturate(1.7);z-index:5}
+.tabs button{min-width:112px;min-height:46px;border:0;border-radius:24px;background:none;font:600 16px var(--round);color:var(--ink-2);transition:background .25s,color .25s}
+.tabs button[aria-pressed="true"]{background:var(--glass-strong);color:var(--ink);box-shadow:0 2px 8px rgba(30,20,50,.10)}
+
+/* Move sheet */
+.scrim{position:fixed;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:10;max-width:560px;margin:0 auto;
+  background:var(--glass-strong);border-radius:28px 28px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom));
+  -webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px);transform:translateY(105%);visibility:hidden;
+  transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s .32s;max-height:86dvh;overflow:auto}
+.sheet.open{transform:none;visibility:visible;transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--ink-3);margin:2px auto 14px;opacity:.6}
+.sheet h2{margin:0 4px 14px;font:600 20px/1.25 var(--round)}
+.days{display:grid;gap:8px}
+.days button{min-height:52px;border:0;border-radius:16px;background:var(--fill);text-align:left;padding:0 16px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+.days button:active{background:var(--fill-press)}
+.days button[aria-current="true"]{box-shadow:inset 0 0 0 2px var(--ink-3)}
+.days small{font-size:14px;color:var(--ink-2)}
+.cancel{margin-top:12px;width:100%;min-height:52px;border:0;border-radius:16px;background:none;font:600 17px var(--round);color:var(--ink-2)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body class="intro" data-mode="free">
+<div class="sky" aria-hidden="true"></div>
+
+<main>
+  <section class="view" id="today" aria-label="Today"></section>
+  <section class="view" id="fortnight" aria-label="The fortnight" hidden></section>
+</main>
+
+<nav class="tabs" aria-label="Views">
+  <button type="button" data-view="today" aria-pressed="true">Today</button>
+  <button type="button" data-view="fortnight" aria-pressed="false">Fortnight</button>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="grab" aria-hidden="true"></div>
+  <h2 id="sheetTitle">Move</h2>
+  <div class="days" id="sheetDays"></div>
+  <button type="button" class="cancel" data-act="close-sheet">Cancel</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Fixed facts ---------- */
+const START = "2026-10-24", LAST = "2026-11-08", OP = "2026-11-03", BACK = "2026-11-09";
+const WD = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MO = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MOVE_DAYS = ["2026-10-24","2026-10-25","2026-10-26","2026-10-30","2026-10-31","2026-11-01","2026-11-02"];
+const WHITEBOARD_FALLBACK = ["2026-10-31","2026-11-01","2026-11-02"];
+
+const TASKS = {
+  email: {title:"Email reset", mins:45, day:"2026-10-26", line:"Urgent things only. Inbox zero is off the table.",
+    steps:["Scan for anything genuinely urgent and deal with it.","Archive freely. Old threads can go.","Stop at 45 minutes, whatever's left."]},
+  paperwork: {title:"Paperwork", mins:60, day:"2026-10-30", line:"Keep, action, bin.",
+    steps:["Make three piles: keep, action, bin.","Write anything unresolved on one list. No need to solve it.","Stop at 60 minutes."]},
+  whiteboard: {title:"Whiteboard reset", mins:45, day:"2026-10-30", optional:true, line:"Only if you've got energy left.",
+    steps:["Take a photo of the board as it is.","Wipe it clean.","Write back only active priorities, waiting items and next actions."]},
+  plan: {title:"Return-to-work plan", mins:45, day:"2026-11-02", line:"Pick the first three things for the 9th.",
+    steps:["Skim your ongoing projects.","Note what genuinely matters.","Choose the first three actions for Monday 9 November."]}
+};
+const ORDER = ["email","paperwork","whiteboard","plan"];
+
+const SCHEDULE = [
+  {when:"Sat 24 to Sun 25 Oct", dates:["2026-10-24","2026-10-25"], what:"Family weekend. Relax, get the puzzle out."},
+  {when:"Mon 26 Oct", dates:["2026-10-26"], what:"A short email reset, then free."},
+  {when:"Tue 27 to Thu 29 Oct", dates:["2026-10-27","2026-10-28","2026-10-29"], what:"Family trip. No work, paperwork or admin.", fixed:true},
+  {when:"Fri 30 Oct", dates:["2026-10-30"], what:"Paperwork. Whiteboard only if there's energy."},
+  {when:"Sat 31 Oct to Sun 1 Nov", dates:["2026-10-31","2026-11-01"], what:"Family, LEGO, puzzle, Marvel, downtime."},
+  {when:"Mon 2 Nov", dates:["2026-11-02"], what:"Plan for the 9th. Get ready for Tuesday."},
+  {when:"Tue 3 Nov", dates:["2026-11-03"], what:"Procedure. Nothing else.", fixed:true},
+  {when:"Wed 4 to Sun 8 Nov", dates:["2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08"], what:"Recovery. Rest, gentle hobbies, family."},
+  {when:"Mon 9 Nov", dates:["2026-11-09"], what:"Back to work. Three priorities, no big catch-up.", fixed:true}
+];
+
+const NOTES = {
+  "2026-10-24":"First day off. Get the puzzle out, if you fancy it.",
+  "2026-10-25":"The clocks went back last night. An extra hour, with nothing in it.",
+  "2026-10-27":"Day one of three.",
+  "2026-10-28":"Day two of three.",
+  "2026-10-29":"Last day of the trip.",
+  "2026-10-31":"It's Halloween. LEGO, the puzzle, Marvel, or nothing at all.",
+  "2026-11-01":"A slow Sunday. That's the whole plan.",
+  "2026-11-02":"Tomorrow's the appointment. Keep today light.",
+  "2026-11-03":"Rest starts the moment you're home.",
+  "2026-11-04":"Sofa, slow, and let people help.",
+  "2026-11-05":"It's Bonfire Night. Watching from the window counts.",
+  "2026-11-06":"If your energy's low, that's allowed.",
+  "2026-11-07":"Feeling better? Keep it gentle anyway."
+};
+
+const IDEAS = {
+  puzzle:"Fifteen minutes on last Christmas's puzzle.",
+  lego:"Build some LEGO you already own. No need to finish.",
+  marvel:"An episode of the Vision series. Just the show, no second screen."
+};
+const REST_IDEAS = [
+  "An episode of the Vision series from the sofa.",
+  "Read something. A chapter is plenty.",
+  "A few pieces of the puzzle, if sitting at the table is comfy.",
+  "A small LEGO build on a tray."
+];
+
+/* ---------- Dates (UK time) ---------- */
+function londonISO(d){
+  try{
+    const p = new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);
+    const g = t => p.find(x=>x.type===t).value;
+    return g("year")+"-"+g("month")+"-"+g("day");
+  }catch(e){
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+}
+function today(){
+  const q = new URLSearchParams(location.search).get("date");
+  if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) return q;
+  return londonISO(new Date());
+}
+function parts(iso){ const [y,m,d] = iso.split("-").map(Number); return {y,m,d,wd:new Date(Date.UTC(y,m-1,d)).getUTCDay()}; }
+function dayDiff(a,b){ const A=parts(a),B=parts(b); return Math.round((Date.UTC(B.y,B.m-1,B.d)-Date.UTC(A.y,A.m-1,A.d))/864e5); }
+function shortDay(iso){ const p=parts(iso); return WD[p.wd].slice(0,3)+" "+p.d+" "+MO[p.m-1].slice(0,3); }
+function longDay(iso){ const p=parts(iso); return WD[p.wd]+" "+p.d+" "+MO[p.m-1]; }
+
+function phaseOf(iso){
+  if (iso < START) return "before";
+  if (iso > BACK) return "after";
+  if (iso === BACK) return "return";
+  if (iso === OP) return "procedure";
+  if (iso > OP) return "recovery";
+  if (iso >= "2026-10-27" && iso <= "2026-10-29") return "trip";
+  if (iso === "2026-10-26" || iso === "2026-10-30" || iso === "2026-11-02") return "reset";
+  return "free";
+}
+const MODE = {before:"free",free:"free",reset:"reset",trip:"trip",procedure:"rest",recovery:"rest",return:"return",after:"free"};
+
+/* ---------- Saved state ---------- */
+const KEY = "lessnoise.v1";
+function fresh(){
+  const t = {}; ORDER.forEach(id => t[id] = {status:"open", day:TASKS[id].day});
+  return {tasks:t, three:["","",""]};
+}
+function load(){
+  const s = fresh();
+  try{
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return s;
+    const d = JSON.parse(raw);
+    ORDER.forEach(id => {
+      const x = d && d.tasks && d.tasks[id];
+      if (x && ["open","done","skipped"].includes(x.status)) s.tasks[id].status = x.status;
+      if (x && (x.day === null || MOVE_DAYS.includes(x.day))) s.tasks[id].day = x.day;
+    });
+    if (d && Array.isArray(d.three)) s.three = [0,1,2].map(i => typeof d.three[i]==="string" ? d.three[i] : "");
+  }catch(e){}
+  return s;
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+let state = load();
+let just = null;
+const openDetails = new Set();
+
+/* ---------- Bits ---------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const TICK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.2 8.4l3 3 6.6-7" fill="none" stroke="var(--on-done)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CHEV = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const WAVE = '<svg viewBox="0 0 120 24" aria-hidden="true"><path d="M2.0 12.00 L4.3 14.87 L6.6 16.82 L9.0 17.58 L11.3 17.16 L13.6 15.79 L15.9 13.89 L18.2 11.89 L20.6 10.23 L22.9 9.17 L25.2 8.84 L27.5 9.19 L29.8 10.02 L32.2 11.08 L34.5 12.11 L36.8 12.90 L39.1 13.34 L41.4 13.41 L43.8 13.18 L46.1 12.77 L48.4 12.32 L50.7 11.95 L53.0 11.70 L55.4 11.61 L57.7 11.65 L60.0 11.75 L62.3 11.87 L64.6 11.96 L67.0 12.01 L69.3 12.02 L71.6 12.01 L73.9 12.00 L118.0 12.00" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function canMove(t){ return MOVE_DAYS.some(d => d >= t); }
+
+function threeInputs(){
+  return '<div class="three"><p>First three for Monday 9th, if you like.</p>' +
+    [0,1,2].map(i => '<input type="text" inputmode="text" autocomplete="off" enterkeyhint="done" data-three="'+i+'" value="'+esc(state.three[i])+'" placeholder="'+["First","Second","Third"][i]+'" aria-label="Priority '+(i+1)+'">').join("") +
+    '</div>';
+}
+
+function taskCard(id, t, context){
+  const T = TASKS[id], s = state.tasks[id];
+  const cls = ["card","task"];
+  if (s.status==="done") cls.push("done");
+  if (s.status==="skipped") cls.push("skipped");
+  if (T.optional || context==="fallback") cls.push("soft");
+  if (just===id) cls.push("just");
+
+  let meta;
+  if (s.status==="done") meta = "Done. The rest of the day is yours.";
+  else if (s.status==="skipped") meta = "Skipped. That's fine.";
+  else if (context==="fallback") meta = T.mins+" minutes. " + (t==="2026-11-02" ? "Only if it's needed and manageable." : "Only if it's genuinely convenient.");
+  else meta = T.mins+" minutes. "+T.line;
+
+  let body = '<div><h2>'+esc(T.title)+'</h2><p class="meta">'+esc(meta)+'</p>';
+  if (s.status==="open"){
+    const key = id+":"+t;
+    body += '<details data-key="'+key+'"'+(openDetails.has(key)?" open":"")+'><summary>'+CHEV+'How it goes</summary><ol class="steps">' +
+      T.steps.map(x=>'<li>'+esc(x)+'</li>').join("") + '</ol>' + (id==="plan" ? threeInputs() : "") + '</details>';
+    body += '<div class="actions">' + (canMove(t) ? '<button type="button" class="pill" data-act="move" data-task="'+id+'">Move</button>' : "") +
+      '<button type="button" class="pill" data-act="skip" data-task="'+id+'">Skip</button></div>';
+  } else if (s.status==="skipped"){
+    body += '<div class="actions"><button type="button" class="pill" data-act="undo" data-task="'+id+'">Undo</button></div>';
+  }
+  body += '</div>';
+
+  const checkLabel = s.status==="done" ? "Mark "+T.title+" as not done" : "Mark "+T.title+" as done";
+  const check = s.status==="skipped" ? '<span aria-hidden="true"></span>' :
+    '<button type="button" class="check" data-act="toggle" data-task="'+id+'" aria-label="'+esc(checkLabel)+'"><span>'+TICK+'</span></button>';
+  return '<article class="'+cls.join(" ")+'">'+check+body+'</article>';
+}
+
+/* ---------- Today ---------- */
+function todayContent(t){
+  const phase = phaseOf(t);
+  const mine = ORDER.filter(id => state.tasks[id].day === t);
+  const firm = mine.filter(id => !TASKS[id].optional);
+  const firmOpen = firm.filter(id => state.tasks[id].status==="open");
+  let msg, sub = NOTES[t] || "";
+
+  if (phase==="before"){ msg = "Your break starts on Saturday 24 October."; sub = "Nothing to do here until then."; }
+  else if (phase==="after"){ msg = "The break's done."; sub = "You can remove Less Noise from your Home Screen whenever you like."; }
+  else if (phase==="trip"){ msg = "Today is for making memories. Nothing else needs doing."; }
+  else if (phase==="procedure"){ msg = "Just the appointment today. Nothing else."; }
+  else if (phase==="recovery"){
+    msg = "Rest is the plan today.";
+    if (t===LAST) sub = state.three.some(x=>x.trim()) ? "Tomorrow's first three are written down. They'll keep until the morning." : "Tomorrow can start small. Three things is plenty.";
+  }
+  else if (phase==="return"){ msg = "Welcome back. Three things, then see how you feel."; sub = "No need to catch up on everything today."; }
+  else if (firmOpen.length===1){ msg = "One small job, then you're free."; }
+  else if (firmOpen.length>1){ msg = "Two small jobs, then you're free."; }
+  else if (firm.length && firm.some(id=>state.tasks[id].status==="done")){ msg = "That's done. The rest of the day is yours."; }
+  else { msg = "Nothing you need to achieve today."; }
+  return {phase, msg, sub, mine};
+}
+
+function renderToday(){
+  const t = today(), p = parts(t), c = todayContent(t);
+  document.body.dataset.mode = MODE[c.phase];
+  const tc = document.getElementById("themeColor");
+  if (tc) tc.content = getComputedStyle(document.body).getPropertyValue("--sky-top").trim() || "#CF9886";
+
+  let h = '<header class="hero"><p class="label">Today</p>' +
+    '<h1 class="date"><span class="wd">'+WD[p.wd]+'</span><span class="dm">'+p.d+' '+MO[p.m-1]+'</span></h1>' +
+    '<p class="msg">'+esc(c.msg)+'</p>' + (c.sub ? '<p class="sub">'+esc(c.sub)+'</p>' : "") + '</header><div class="stack">';
+
+  const inBreak = c.phase!=="before" && c.phase!=="after";
+
+  // Tasks for today (never on trip, procedure or recovery days)
+  if (["free","reset"].includes(c.phase)){
+    const firm = c.mine.filter(id=>!TASKS[id].optional), soft = c.mine.filter(id=>TASKS[id].optional);
+    firm.concat(soft).forEach(id => h += taskCard(id, t, "today"));
+    const wb = state.tasks.whiteboard;
+    if (WHITEBOARD_FALLBACK.includes(t) && wb.status==="open" && wb.day && wb.day < t)
+      h += taskCard("whiteboard", t, "fallback");
+  }
+
+  if (t==="2026-11-02"){
+    h += '<section class="card"><h2>Ready for tomorrow</h2><ul class="calm">' +
+      '<li>Check your appointment time and the clinic\'s instructions.</li>' +
+      '<li>Sort out how you\'re getting home.</li>' +
+      '<li>Ask for help lifting the kids for a few days.</li>' +
+      '<li>Line up the sofa, snacks and the Vision series.</li></ul></section>';
+  }
+
+  if (c.phase==="procedure" || c.phase==="recovery"){
+    h += '<section class="card"><h2>Looking after yourself</h2><ul class="calm">' +
+      '<li>Follow your clinician\'s discharge instructions. They come first.</li>' +
+      '<li>Let someone else lift the kids for now.</li>' +
+      '<li>If something doesn\'t feel right, call the clinic or NHS 111.</li></ul></section>';
+  }
+
+  if (c.phase==="return"){
+    const three = state.three.filter(x=>x.trim());
+    h += '<section class="card"><h2>Your first three</h2>' +
+      (three.length ? '<ol class="first">'+three.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ol>' :
+        '<p class="meta">Pick three things for today. Everything else can wait.</p>'+threeInputs()) + '</section>';
+  }
+
+  if (inBreak){
+    let pb = "After breakfast works well. Put the phone in another room and just be there.";
+    if (c.phase==="trip") pb = "Leave it in the bag for ten minutes. Longer, if it feels good.";
+    if (c.phase==="procedure"||c.phase==="recovery") pb = "Sitting down counts. Put the phone out of reach and just be there.";
+    if (c.phase==="return") pb = "Before work starts. Phone in another room, ten minutes with the family.";
+    h += '<section class="present"><h2>Ten minutes, phone elsewhere.</h2><p>'+pb+'</p></section>';
+  }
+
+  if (inBreak && c.phase!=="trip"){
+    let idea;
+    if (c.phase==="procedure"||c.phase==="recovery") idea = REST_IDEAS[dayDiff(OP,t) % REST_IDEAS.length];
+    else if (c.phase==="return") idea = "Tonight, maybe an episode of the Vision series.";
+    else idea = IDEAS[["puzzle","lego","marvel"][dayDiff(START,t) % 3]];
+    h += '<section class="card fancy"><p class="ask">Fancy doing something?</p><p class="idea">'+esc(idea)+'</p><p class="or">Or nothing. That\'s fine too.</p></section>';
+  }
+
+  h += '</div><footer class="quiet"><p>Is this actually what I want to be doing right now?</p>'+WAVE+'</footer>';
+  document.getElementById("today").innerHTML = h;
+}
+
+/* ---------- Fortnight ---------- */
+function renderFortnight(){
+  const t = today();
+  let h = '<header class="ftop"><h1>The fortnight</h1><p>24 October to 8 November. Back at work on Monday 9 November.</p></header>';
+
+  h += '<div class="card list" style="padding:0">';
+  SCHEDULE.forEach(r => {
+    const now = r.dates.includes(t);
+    const here = ORDER.filter(id => r.dates.includes(state.tasks[id].day));
+    const chips = here.map(id => {
+      const s = state.tasks[id], T = TASKS[id];
+      const pre = r.dates.length>1 ? WD[parts(s.day).wd].slice(0,3)+": " : "";
+      const st = s.status==="done" ? TICK.replace('var(--on-done)','currentColor') : "";
+      const tail = s.status==="skipped" ? ", skipped" : (T.optional ? ", if there's energy" : "");
+      return '<span class="chip'+(s.status==="done"?" done":"")+'">'+st+esc(pre+T.title+", "+T.mins+" min"+tail)+'</span>';
+    }).join("");
+    h += '<div class="row'+(now?" now":"")+'"><div class="when">'+esc(r.when)+'</div><div class="what">'+esc(r.what) +
+      (r.fixed ? '<span class="tag">Fixed</span>' : "") + (now ? '<span class="tag">Today</span>' : "") +
+      (chips ? '<div class="chips">'+chips+'</div>' : "") + '</div></div>';
+  });
+  h += '</div>';
+
+  h += '<h2 class="section-title">The four resets</h2><p class="section-note">3 hours 15 minutes in all. Move or skip anything.</p>';
+  h += '<div class="card" style="padding:0">';
+  ORDER.forEach(id => {
+    const T = TASKS[id], s = state.tasks[id];
+    const cls = ["reset"]; if (s.status==="done") cls.push("done"); if (just===id) cls.push("just");
+    const when = s.day ? shortDay(s.day) : "No set day";
+    let meta = T.mins+" min, "+when + (T.optional && s.status==="open" ? ", if there's energy" : "");
+    if (s.status==="done") meta = "Done";
+    if (s.status==="skipped") meta = "Skipped. That's fine.";
+    const check = s.status==="skipped" ? '<span aria-hidden="true"></span>' :
+      '<button type="button" class="check" data-act="toggle" data-task="'+id+'" aria-label="'+esc((s.status==="done"?"Mark "+T.title+" as not done":"Mark "+T.title+" as done"))+'"><span>'+TICK+'</span></button>';
+    let actions = "";
+    if (s.status==="open") actions = (canMove(t) ? '<button type="button" class="pill" data-act="move" data-task="'+id+'">Move</button>' : "") + '<button type="button" class="pill" data-act="skip" data-task="'+id+'">Skip</button>';
+    else if (s.status==="skipped") actions = '<button type="button" class="pill" data-act="undo" data-task="'+id+'">Undo</button>';
+    let extra = "";
+    if (id==="plan" && s.status!=="skipped"){
+      const key = "plan:fortnight";
+      extra = '<details data-key="'+key+'"'+(openDetails.has(key)?" open":"")+'><summary>'+CHEV+'First three for the 9th</summary>'+threeInputs()+'</details>';
+    }
+    h += '<div class="'+cls.join(" ")+'">'+check+'<div><h3>'+esc(T.title)+'</h3><p class="meta">'+esc(meta)+'</p>' + extra +
+      (actions ? '<div class="actions">'+actions+'</div>' : "") + '</div></div>';
+  });
+  h += '</div>';
+
+  h += '<footer class="quiet"><p>Less is enough.</p>'+WAVE+'</footer>';
+  document.getElementById("fortnight").innerHTML = h;
+}
+
+/* ---------- Move sheet ---------- */
+let moving = null;
+function openSheet(id){
+  moving = id;
+  const t = today(), s = state.tasks[id];
+  document.getElementById("sheetTitle").textContent = "Move "+TASKS[id].title.toLowerCase()+" to";
+  const days = MOVE_DAYS.filter(d => d >= t);
+  document.getElementById("sheetDays").innerHTML =
+    days.map(d => '<button type="button" data-act="move-to" data-day="'+d+'"'+(s.day===d?' aria-current="true"':"")+'><span>'+esc(longDay(d))+'</span><small>'+(d===t?"Today":(s.day===d?"Current":""))+'</small></button>').join("") +
+    '<button type="button" data-act="move-to" data-day=""'+(s.day===null?' aria-current="true"':"")+'><span>No set day</span><small>Whenever, or never</small></button>';
+  document.getElementById("scrim").classList.add("open");
+  document.getElementById("sheet").classList.add("open");
+  setTimeout(()=>{ const b=document.querySelector("#sheetDays button"); if(b) b.focus({preventScroll:true}); }, 320);
+}
+function closeSheet(){
+  moving = null;
+  document.getElementById("scrim").classList.remove("open");
+  document.getElementById("sheet").classList.remove("open");
+}
+
+/* ---------- Wiring ---------- */
+let view = "today";
+function render(){
+  document.body.dataset.mode = MODE[phaseOf(today())];
+  renderToday(); renderFortnight();
+  just = null;
+}
+function show(v){
+  view = v;
+  document.getElementById("today").hidden = v!=="today";
+  document.getElementById("fortnight").hidden = v!=="fortnight";
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view===v)));
+  window.scrollTo(0,0);
+}
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act],[data-view]");
+  if (!el) return;
+  if (el.dataset.view){ show(el.dataset.view); return; }
+  const id = el.dataset.task, act = el.dataset.act;
+  if (act==="toggle"){
+    const s = state.tasks[id];
+    s.status = s.status==="done" ? "open" : "done";
+    if (s.status==="done") just = id;
+  } else if (act==="skip"){ state.tasks[id].status = "skipped"; }
+  else if (act==="undo"){ state.tasks[id].status = "open"; }
+  else if (act==="move"){ openSheet(id); return; }
+  else if (act==="move-to"){
+    if (moving){ state.tasks[moving].day = el.dataset.day || null; state.tasks[moving].status = "open"; }
+    closeSheet();
+  }
+  else if (act==="close-sheet"){ closeSheet(); return; }
+  save(); render();
+});
+document.getElementById("scrim").addEventListener("click", closeSheet);
+document.addEventListener("keydown", e => { if (e.key==="Escape" && moving) closeSheet(); });
+
+document.addEventListener("input", e => {
+  const i = e.target.dataset && e.target.dataset.three;
+  if (i===undefined) return;
+  state.three[Number(i)] = e.target.value.slice(0,120);
+  save();
+  document.querySelectorAll('input[data-three="'+i+'"]').forEach(x => { if (x!==e.target) x.value = e.target.value; });
+});
+document.addEventListener("keydown", e => { if (e.key==="Enter" && e.target.dataset && e.target.dataset.three!==undefined) e.target.blur(); });
+document.addEventListener("toggle", e => {
+  const d = e.target; if (!d.dataset || !d.dataset.key) return;
+  d.open ? openDetails.add(d.dataset.key) : openDetails.delete(d.dataset.key);
+}, true);
+
+// Keep the date right: re-check when the app comes back and just after UK midnight.
+let shownDay = today();
+function refreshIfNewDay(){ const t = today(); if (t!==shownDay){ shownDay = t; render(); } }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshIfNewDay(); });
+window.addEventListener("pageshow", refreshIfNewDay);
+setInterval(refreshIfNewDay, 60000);
+
+render();
+setTimeout(()=>document.body.classList.remove("intro"), 1600);
+
+try{ if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+if ("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost" || location.hostname==="127.0.0.1")){
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(()=>{}); });
+}
+})();
+</script>
+</body>
+</html>
