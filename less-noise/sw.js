@@ -1,5 +1,5 @@
 // Less Noise: keeps the app working offline.
-const CACHE = "less-noise-v2";
+const CACHE = "less-noise-v3";
 const FILES = [
   "./",
   "./index.html",
@@ -12,7 +12,7 @@ const FILES = [
 ];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(f => new Request(f, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", e => {
@@ -32,7 +32,7 @@ self.addEventListener("fetch", e => {
   e.respondWith(
     caches.open(CACHE).then(cache =>
       cache.match(key, { ignoreSearch: true }).then(hit => {
-        const net = fetch(req).then(res => {
+        const net = fetch(req, { cache: "no-cache" }).then(res => {
           if (res && res.ok) cache.put(key, res.clone());
           return res;
         }).catch(() => hit);
