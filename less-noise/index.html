@@ -95,6 +95,12 @@ main{max-width:560px;margin:0 auto;padding:0 18px calc(120px + env(safe-area-ins
 .date .dm{display:block;font-weight:400;color:var(--ink-2)}
 .msg{margin:26px 0 0;font:600 25px/1.22 var(--round);letter-spacing:-.01em;max-width:19ch;text-wrap:balance}
 .sub{margin:10px 0 0;font-size:17px;color:var(--ink-2);max-width:32ch;text-wrap:pretty}
+.sub.edit{display:block;margin:4px 0 0;padding:7px 0;min-height:44px;border:0;background:none;text-align:left;line-height:1.4;max-width:34ch}
+.sub.edit svg{display:inline-block;width:14px;height:14px;margin-left:7px;vertical-align:-1px;opacity:.55}
+.sub .ghost{color:var(--ink-3)}
+.note-input{width:100%;min-height:54px;border-radius:16px;border:1px solid var(--line);background:var(--fill);padding:0 16px;font-size:17px}
+.note-input::placeholder{color:var(--ink-3)}
+.days button.save{justify-content:center;background:var(--ink);color:var(--glass-strong);font-weight:600}
 
 body.intro .hero > *{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
 body.intro .hero > :nth-child(2){animation-delay:.08s}
@@ -275,7 +281,7 @@ const SCHEDULE = [
 ];
 
 const NOTES = {
-  "2026-10-24":"First day off. Get the puzzle out, if you fancy it.",
+  "2026-10-24":"A day out with the family, then an evening together.",
   "2026-10-25":"The clocks went back last night. An extra hour, with nothing in it.",
   "2026-10-27":"Day one of three.",
   "2026-10-28":"Day two of three.",
@@ -338,7 +344,7 @@ const MODE = {before:"free",free:"free",reset:"reset",trip:"trip",procedure:"res
 const KEY = "lessnoise.v1";
 function fresh(){
   const t = {}; ORDER.forEach(id => t[id] = {status:"open", day:TASKS[id].day});
-  return {tasks:t, three:["","",""]};
+  return {tasks:t, three:["","",""], notes:{}};
 }
 function load(){
   const s = fresh();
@@ -352,6 +358,9 @@ function load(){
       if (x && (x.day === null || MOVE_DAYS.includes(x.day))) s.tasks[id].day = x.day;
     });
     if (d && Array.isArray(d.three)) s.three = [0,1,2].map(i => typeof d.three[i]==="string" ? d.three[i] : "");
+    if (d && d.notes && typeof d.notes==="object") Object.keys(d.notes).forEach(k => {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(k) && typeof d.notes[k]==="string" && d.notes[k].trim()) s.notes[k] = d.notes[k].slice(0,140);
+    });
   }catch(e){}
   return s;
 }
@@ -407,6 +416,12 @@ function taskCard(id, t, context){
 }
 
 /* ---------- Today ---------- */
+const PENCIL = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.6 2.6l2.8 2.8M2.5 13.5l.7-3.4 7.4-7.5 2.8 2.8-7.5 7.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+function subLine(c){
+  if (c.phase==="before" || c.phase==="after") return c.sub ? '<p class="sub">'+esc(c.sub)+'</p>' : "";
+  return '<button type="button" class="sub edit" data-act="edit-note" aria-label="Change today\'s line">' +
+    (c.sub ? esc(c.sub) : '<span class="ghost">Add a line for today</span>') + PENCIL + '</button>';
+}
 function todayContent(t){
   const phase = phaseOf(t);
   const mine = ORDER.filter(id => state.tasks[id].day === t);
@@ -427,7 +442,9 @@ function todayContent(t){
   else if (firmOpen.length>1){ msg = "Two small jobs, then you're free."; }
   else if (firm.length && firm.some(id=>state.tasks[id].status==="done")){ msg = "That's done. The rest of the day is yours."; }
   else { msg = "Nothing you need to achieve today."; }
-  return {phase, msg, sub, mine};
+  const own = phase!=="before" && phase!=="after" && state.notes[t];
+  if (own) sub = own;
+  return {phase, msg, sub, mine, own:!!own};
 }
 
 function renderToday(){
@@ -438,7 +455,7 @@ function renderToday(){
 
   let h = '<header class="hero"><p class="label">Today</p>' +
     '<h1 class="date"><span class="wd">'+WD[p.wd]+'</span><span class="dm">'+p.d+' '+MO[p.m-1]+'</span></h1>' +
-    '<p class="msg">'+esc(c.msg)+'</p>' + (c.sub ? '<p class="sub">'+esc(c.sub)+'</p>' : "") + '</header><div class="stack">';
+    '<p class="msg">'+esc(c.msg)+'</p>' + subLine(c) + '</header><div class="stack">';
 
   const inBreak = c.phase!=="before" && c.phase!=="after";
 
@@ -557,8 +574,30 @@ function openSheet(id){
   document.getElementById("sheet").classList.add("open");
   setTimeout(()=>{ const b=document.querySelector("#sheetDays button"); if(b) b.focus({preventScroll:true}); }, 320);
 }
+let noteDay = null;
+function openNote(){
+  moving = null; noteDay = today();
+  const own = state.notes[noteDay] || "";
+  const original = NOTES[noteDay] || "Say what today's about";
+  document.getElementById("sheetTitle").textContent = "Today's plan";
+  document.getElementById("sheetDays").innerHTML =
+    '<input id="noteInput" class="note-input" type="text" maxlength="140" enterkeyhint="done" autocomplete="off" aria-label="Today\'s plan" value="'+esc(own || (NOTES[noteDay]||""))+'" placeholder="'+esc(original)+'">' +
+    '<button type="button" class="save" data-act="save-note">Save</button>' +
+    (own ? '<button type="button" data-act="reset-note"><span>Use the original line</span></button>' : "");
+  document.getElementById("scrim").classList.add("open");
+  document.getElementById("sheet").classList.add("open");
+  const i = document.getElementById("noteInput");
+  i.focus({preventScroll:true}); i.select();
+}
+function saveNote(){
+  const i = document.getElementById("noteInput");
+  const v = i ? i.value.trim().slice(0,140) : "";
+  if (noteDay){ if (v && v!==(NOTES[noteDay]||"")) state.notes[noteDay] = v; else delete state.notes[noteDay]; }
+  closeSheet(); save(); render();
+}
 function closeSheet(){
-  moving = null;
+  moving = null; noteDay = null;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   document.getElementById("scrim").classList.remove("open");
   document.getElementById("sheet").classList.remove("open");
 }
@@ -595,10 +634,16 @@ document.addEventListener("click", e => {
     closeSheet();
   }
   else if (act==="close-sheet"){ closeSheet(); return; }
+  else if (act==="edit-note"){ openNote(); return; }
+  else if (act==="save-note"){ saveNote(); return; }
+  else if (act==="reset-note"){ if (noteDay) delete state.notes[noteDay]; closeSheet(); }
   save(); render();
 });
 document.getElementById("scrim").addEventListener("click", closeSheet);
-document.addEventListener("keydown", e => { if (e.key==="Escape" && moving) closeSheet(); });
+document.addEventListener("keydown", e => {
+  if (e.key==="Escape" && document.getElementById("sheet").classList.contains("open")) closeSheet();
+  if (e.key==="Enter" && e.target.id==="noteInput"){ e.preventDefault(); saveNote(); }
+});
 
 document.addEventListener("input", e => {
   const i = e.target.dataset && e.target.dataset.three;
