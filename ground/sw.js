@@ -35,7 +35,7 @@ self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (keys) {
       return Promise.all(keys.map(function (k) {
-        return k === CACHE ? null : caches.delete(k);
+        return (k === CACHE || k.indexOf('ground-') !== 0) ? null : caches.delete(k); // Apps on jsip.uk share one origin: only remove this app's own old caches.
       }));
     }).then(function () { return self.clients.claim(); })
   );

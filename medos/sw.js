@@ -13,7 +13,7 @@ self.addEventListener("activate", (event) => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))
+        keys.filter((k) => k.startsWith("med-os-") && k !== CACHE) /* Apps on jsip.uk share one origin: only remove this app's own old caches. */.map((k) => caches.delete(k))
       );
       await self.clients.claim();
     })()

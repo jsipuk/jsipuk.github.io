@@ -38,7 +38,7 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
+        Promise.all(keys.filter((key) => key.startsWith('merge-life-') && key !== CACHE_NAME) /* Apps on jsip.uk share one origin: only remove this app's own old caches. */.map((key) => caches.delete(key))),
       )
       .then(() => self.clients.claim()),
   );

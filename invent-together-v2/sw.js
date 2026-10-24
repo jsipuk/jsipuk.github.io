@@ -24,7 +24,7 @@ self.addEventListener("activate", function (event) {
   event.waitUntil(
     caches.keys().then(function (keys) {
       return Promise.all(keys.map(function (key) {
-        return key === CACHE ? null : caches.delete(key);
+        return (key === CACHE || key.indexOf('invent-together-v2-') !== 0) ? null : caches.delete(key); // Apps on jsip.uk share one origin: only remove this app's own old caches.
       }));
     }).then(function () { return self.clients.claim(); })
   );
