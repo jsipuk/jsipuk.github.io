@@ -1,5 +1,5 @@
 // Less Noise: keeps the app working offline.
-const CACHE = "less-noise-v3";
+const CACHE = "less-noise-v4";
 const FILES = [
   "./",
   "./index.html",
@@ -18,7 +18,8 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      // jsip.uk hosts other apps on the same origin: only remove Less Noise's own old caches.
+      .then(keys => Promise.all(keys.filter(k => k.startsWith("less-noise-") && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -40,4 +41,12 @@ self.addEventListener("fetch", e => {
       })
     )
   );
+});
+
+// If another app on this site cleared our cache, put back anything missing.
+self.addEventListener("message", e => {
+  if (e.data !== "refill") return;
+  e.waitUntil(caches.open(CACHE).then(cache => Promise.all(FILES.map(f =>
+    cache.match(f).then(hit => hit || cache.add(new Request(f, { cache: "reload" })).catch(() => {}))
+  ))));
 });

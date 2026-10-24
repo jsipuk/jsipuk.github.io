@@ -78,8 +78,10 @@ button{cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-se
 .sky::before{content:"";position:absolute;width:120vmax;height:120vmax;left:20%;top:12%;
   background:radial-gradient(closest-side,var(--glow),transparent 70%);opacity:.75;
   animation:drift 36s ease-in-out infinite alternate}
-.sky::after{content:"";position:absolute;inset:0;
-  background:radial-gradient(120% 60% at 50% 0%,rgba(255,255,255,.10),transparent 60%)}
+.sky::after{content:"";position:absolute;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 40px);
+  background:linear-gradient(rgba(40,24,48,.14),transparent)}
+@media (prefers-color-scheme:dark){.sky::after{background:linear-gradient(rgba(0,0,0,.25),transparent)}}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @keyframes drift{from{transform:translate3d(-8%,0,0) scale(1)}to{transform:translate3d(6%,-6%,0) scale(1.08)}}
 
 main{max-width:560px;margin:0 auto;padding:0 18px calc(120px + env(safe-area-inset-bottom))}
@@ -379,7 +381,7 @@ function canMove(t){ return MOVE_DAYS.some(d => d >= t); }
 
 function threeInputs(){
   return '<div class="three"><p>First three for Monday 9th, if you like.</p>' +
-    [0,1,2].map(i => '<input type="text" inputmode="text" autocomplete="off" enterkeyhint="done" data-three="'+i+'" value="'+esc(state.three[i])+'" placeholder="'+["First","Second","Third"][i]+'" aria-label="Priority '+(i+1)+'">').join("") +
+    [0,1,2].map(i => '<input type="text" inputmode="text" autocomplete="off" enterkeyhint="done" maxlength="120" data-three="'+i+'" value="'+esc(state.three[i])+'" placeholder="'+["First","Second","Third"][i]+'" aria-label="Priority '+(i+1)+'">').join("") +
     '</div>';
 }
 
@@ -419,8 +421,8 @@ function taskCard(id, t, context){
 const PENCIL = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.6 2.6l2.8 2.8M2.5 13.5l.7-3.4 7.4-7.5 2.8 2.8-7.5 7.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>';
 function subLine(c){
   if (c.phase==="before" || c.phase==="after") return c.sub ? '<p class="sub">'+esc(c.sub)+'</p>' : "";
-  return '<button type="button" class="sub edit" data-act="edit-note" aria-label="Change today\'s line">' +
-    (c.sub ? esc(c.sub) : '<span class="ghost">Add a line for today</span>') + PENCIL + '</button>';
+  return '<button type="button" class="sub edit" data-act="edit-note">' +
+    (c.sub ? esc(c.sub) : '<span class="ghost">Add a line for today</span>') + PENCIL + '<span class="vh">, edit</span></button>';
 }
 function todayContent(t){
   const phase = phaseOf(t);
@@ -439,7 +441,7 @@ function todayContent(t){
   }
   else if (phase==="return"){ msg = "Welcome back. Three things, then see how you feel."; sub = "No need to catch up on everything today."; }
   else if (firmOpen.length===1){ msg = "One small job, then you're free."; }
-  else if (firmOpen.length>1){ msg = "Two small jobs, then you're free."; }
+  else if (firmOpen.length>1){ msg = ["","","Two","Three"][firmOpen.length]+" small jobs, then you're free."; }
   else if (firm.length && firm.some(id=>state.tasks[id].status==="done")){ msg = "That's done. The rest of the day is yours."; }
   else { msg = "Nothing you need to achieve today."; }
   const own = phase!=="before" && phase!=="after" && state.notes[t];
@@ -588,6 +590,7 @@ function openNote(){
   document.getElementById("sheet").classList.add("open");
   const i = document.getElementById("noteInput");
   i.focus({preventScroll:true}); i.select();
+  setTimeout(fitSheet, 350);
 }
 function saveNote(){
   const i = document.getElementById("noteInput");
@@ -595,8 +598,17 @@ function saveNote(){
   if (noteDay){ if (v && v!==(NOTES[noteDay]||"")) state.notes[noteDay] = v; else delete state.notes[noteDay]; }
   closeSheet(); save(); render();
 }
+const vv = window.visualViewport;
+function fitSheet(){
+  const sh = document.getElementById("sheet");
+  if (!vv || !sh.classList.contains("open")){ sh.style.bottom = ""; return; }
+  const kb = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+  sh.style.bottom = kb > 40 ? kb+"px" : "";
+}
+if (vv){ vv.addEventListener("resize", fitSheet); vv.addEventListener("scroll", fitSheet); }
 function closeSheet(){
   moving = null; noteDay = null;
+  document.getElementById("sheet").style.bottom = "";
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   document.getElementById("scrim").classList.remove("open");
   document.getElementById("sheet").classList.remove("open");
@@ -604,6 +616,7 @@ function closeSheet(){
 
 /* ---------- Wiring ---------- */
 let view = "today";
+try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => render()); }catch(e){}
 function render(){
   document.body.dataset.mode = MODE[phaseOf(today())];
   renderToday(); renderFortnight();
@@ -670,7 +683,10 @@ setTimeout(()=>document.body.classList.remove("intro"), 1600);
 
 try{ if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
 if ("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost" || location.hostname==="127.0.0.1")){
-  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(()=>{}); });
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+    navigator.serviceWorker.ready.then(r => { if (r.active) r.active.postMessage("refill"); }).catch(()=>{});
+  });
 }
 })();
 </script>
