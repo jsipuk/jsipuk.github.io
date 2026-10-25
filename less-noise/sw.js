@@ -1,5 +1,5 @@
 // Less Noise: keeps the app working offline.
-const CACHE = "less-noise-v5";
+const CACHE = "less-noise-v6";
 const FILES = [
   "./",
   "./index.html",
