@@ -39,6 +39,13 @@
     .scene-title{font-size:clamp(24px,2.7vw,36px);font-weight:400;line-height:1.16;letter-spacing:-.025em;color:#ffebca;margin:0 0 18px;}
     .scene-body{font-size:clamp(16px,1.4vw,19px);line-height:1.7;color:#cbd0d4;min-height:8.5em;max-width:540px;margin:0;}
     .scene-body .note{color:#ffe2ac;font-style:italic;}
+    .keeper-note{max-width:540px;margin:23px 0 0;padding-left:17px;border-left:1px solid rgba(242,204,135,.35);font:italic clamp(15px,1.2vw,17px)/1.65 Georgia,'Times New Roman',serif;color:#abb8c3;}
+    .keeper-note:empty{display:none;}
+    .release{display:inline-flex;align-items:center;justify-content:center;gap:12px;margin-top:25px;min-height:48px;padding:13px 23px;border:1px solid rgba(242,204,135,.7);border-radius:3px;background:linear-gradient(135deg,rgba(242,204,135,.19),rgba(242,204,135,.06));color:#ffe5b5;font:12px system-ui,-apple-system,sans-serif;letter-spacing:.09em;cursor:pointer;transition:background .25s,transform .25s,box-shadow .25s;}
+    .release[hidden]{display:none;}
+    .release:hover{background:rgba(242,204,135,.24);transform:translateY(-2px);box-shadow:0 0 24px rgba(242,204,135,.13);}
+    .release:focus-visible{outline:2px solid #ffe7b5;outline-offset:4px;}
+    .ready .beacon.visited svg{filter:drop-shadow(0 0 17px rgba(179,243,226,.88));}
     .divider{height:1px;background:var(--line);margin:48px 0 22px;}
     .progress-row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
     .progress-label{font:11px system-ui,-apple-system,sans-serif;letter-spacing:.1em;color:#b4bdc8;}
@@ -152,11 +159,11 @@
       <g class="sun" id="sun"><circle cx="335" cy="200" r="122" fill="url(#sunlight)"/><circle cx="335" cy="200" r="24" fill="#ffecb7"/><circle cx="335" cy="200" r="17" fill="#fff4d1"/></g>
     </svg>
     <div class="final-message">The morning has found its way home.</div>
-    <button type="button" class="beacon" id="beacon0" aria-label="Discover the first light: a promise kept"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
-    <button type="button" class="beacon" id="beacon1" aria-label="Discover the second light: an unseen kindness"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
-    <button type="button" class="beacon" id="beacon2" aria-label="Discover the third light: an unfinished song"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
-    <button type="button" class="beacon" id="beacon3" aria-label="Discover the fourth light: the first apology"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
-    <button type="button" class="beacon" id="beacon4" aria-label="Discover the fifth light: the lamp left on"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <button type="button" class="beacon" id="beacon0" aria-label="Discover a light: a promise kept"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <button type="button" class="beacon" id="beacon1" aria-label="Discover a light: an unseen kindness"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <button type="button" class="beacon" id="beacon2" aria-label="Discover a light: an unfinished song"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <button type="button" class="beacon" id="beacon3" aria-label="Discover a light: the apology"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <button type="button" class="beacon" id="beacon4" aria-label="Discover a light: the lamp left on"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
     <div class="instruction" id="instruction">Choose a light in the sky</div>
   </section>
   <section class="panel" aria-live="polite" aria-atomic="false">
@@ -166,7 +173,9 @@
       <div class="fine-rule"></div>
       <p class="scene-kicker" id="kicker">A story in five lights</p>
       <h2 class="scene-title" id="sceneTitle">The morning that went missing</h2>
-      <p class="scene-body" id="sceneBody">The sun did not rise on Tuesday. By midday, the coast was still dark and the tide had climbed the lighthouse steps.<br><br>On the lantern glass, someone had written in salt: <span class="note">Morning has lost its way. Give it five lights to follow.</span></p>
+      <p class="scene-body" id="sceneBody">The sun did not rise on Tuesday. By midday, the coast was still dark and the tide had climbed the lighthouse steps. The keeper rang the harbour bell until her hands hurt. No boat answered.<br><br>On the lantern glass, someone had written in salt: <span class="note">Morning has lost its way. Give it five lights to follow.</span><br><br>Above the black water, five small lights waited. The keeper had no map for what came next.</p>
+      <p class="keeper-note" id="keeperNote"></p>
+      <button class="release" id="release" type="button" hidden>Release the stars</button>
     </div>
     <div>
       <div class="divider"></div>
@@ -177,13 +186,37 @@
 </main>
 <script>
 (() => {
+  // Every light is an independent memory: the visitor can discover them in any order.
   const stories = [
-    {name:'The promise', body:'Inside the first light lived a ferryman who turned his boat round in a storm. He had promised to come back, and on a night when nobody would have blamed him for breaking that promise, he kept it.'},
-    {name:'The kindness nobody saw', body:'The second light was scarcely larger than a pin. It held a hospital cleaner replacing a dying plant beside a stranger\'s bed. Nobody knew who had done it. The light had seen.'},
-    {name:'The unfinished song', body:'The third hummed when the keeper touched it. Somewhere, a woman with trembling hands was teaching her granddaughter a melody, pausing at every line until the child could carry it without her.'},
-    {name:'The first apology', body:'Inside the fourth, two brothers stood on opposite sides of a garden gate. The younger pushed it open. The older had been waiting three years to hear the latch.'},
-    {name:'The lamp left on', body:'The fifth showed an ordinary kitchen long after midnight. One cup stood washed beside the sink; a second had been left on the table. Someone was expected home, and someone else believed they would arrive.'}
-  ];
+  {
+    "name": "The promise",
+    "body": "Inside a light lived a ferryman who turned his boat round in a storm. He had promised to come back, and on a night when nobody would have blamed him for breaking that promise, he kept it."
+  },
+  {
+    "name": "The kindness nobody saw",
+    "body": "A light scarcely larger than a pin held a hospital cleaner replacing a dying plant beside a stranger’s bed. Nobody knew who had done it. The light had seen."
+  },
+  {
+    "name": "The unfinished song",
+    "body": "A light hummed when the keeper touched it. Somewhere, a woman with trembling hands was teaching her granddaughter a melody, pausing at every line until the child could carry it without her."
+  },
+  {
+    "name": "The apology",
+    "body": "Inside a light, two brothers stood on opposite sides of a garden gate. The younger pushed it open. The older had been waiting three years to hear the latch."
+  },
+  {
+    "name": "The lamp left on",
+    "body": "A light showed an ordinary kitchen long after midnight. One cup stood washed beside the sink; a second had been left on the table. Someone was expected home, and someone else believed they would arrive."
+  }
+];
+  const keeperNarration = [
+  "",
+  "The keeper held the light close to the lantern glass. Beyond it, the sea was still dark. But something in the darkness had answered.",
+  "A current began to move against the tide. The keeper watched the horizon, certain now that something was listening.",
+  "A low, impossible sound passed beneath the lighthouse. It was almost a song, though no ship had answered the harbour bell.",
+  "The writing in salt began to shine. Far out at sea, an enormous shadow moved beneath the stars.",
+  "All five lights were safe in the keeper’s hands. The sea grew quiet, as though it were waiting for her to make one last choice."
+];
   const seen = new Set();
   const world = document.getElementById('world');
   const sceneTitle = document.getElementById('sceneTitle');
@@ -192,11 +225,12 @@
   const dots = [...document.querySelectorAll('.dot')];
   const markers = [...document.querySelectorAll('.beacon')];
   const replay = document.getElementById('replay');
+  const release = document.getElementById('release');
+  const keeperNote = document.getElementById('keeperNote');
   const instruction = document.getElementById('instruction');
   const hint = document.getElementById('hint');
   const progressLabel = document.getElementById('progressLabel');
   let revealed = false;
-  let revealTimeout;
   // Fixed seed gives every visitor the same sky and a reproducible work of art.
   let seed = 28644019;
   const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
@@ -219,36 +253,49 @@
     whaleStars.appendChild(c);
   }
   const finish = () => {
-    if (revealed) return;
-    revealed=true;
+    if (revealed || seen.size !== stories.length) return;
+    revealed = true;
+    release.hidden = true;
+    keeperNote.textContent = '';
+    world.classList.remove('ready');
     world.classList.add('revealed');
     markers.forEach(b=>b.classList.add('done'));
-    instruction.style.opacity='0';
-    kicker.textContent='The sixth light';
-    sceneTitle.textContent='A creature made of dawn';
-    sceneBody.innerHTML='The five lights left the keeper’s hands and climbed into the sky. They were not a constellation. They were the bones of an enormous whale, swimming through the dark with morning glowing inside its ribs.<br><br>Above the lighthouse, the creature opened its mouth and released a small golden sun, looking rather surprised to be born.<br><br>Daybreak came fourteen hours late. The keeper put the kettle on and left the lantern burning. Some things, she thought, need a light to find their way home.';
-    progressLabel.textContent='All five lights found';
-    hint.textContent='The end. Or perhaps the beginning.';
+    instruction.style.opacity = '0';
+    kicker.textContent = 'The sixth light';
+    sceneTitle.textContent = 'A creature made of dawn';
+    sceneBody.innerHTML = 'The five lights left the keeper’s hands and climbed into the sky. They were not a constellation. They were the bones of an enormous whale, swimming through the dark with morning glowing inside its ribs.<br><br>Above the lighthouse, the creature opened its mouth and released a small golden sun, looking rather surprised to be born.<br><br>Daybreak came fourteen hours late. The keeper put the kettle on and left the lantern burning. Some things, she thought, need a light to find their way home.';
+    progressLabel.textContent = 'All five lights found';
+    hint.textContent = 'The end. Or perhaps the beginning.';
     replay.classList.add('visible');
   };
   markers.forEach((button,i)=>button.addEventListener('click',()=>{
-    if(revealed)return;
-    seen.add(i); button.classList.add('visited');
-    kicker.textContent=`Light ${i+1} · of five`;
-    sceneTitle.textContent=stories[i].name;
-    sceneBody.textContent=stories[i].body;
-    progressLabel.textContent=`${seen.size} of 5 lights found`;
+    if (revealed) return;
+    // Never infer a story order from the position or number of a star.
+    seen.add(i);
+    button.classList.add('visited');
+    kicker.textContent = 'A light held in the dark';
+    sceneTitle.textContent = stories[i].name;
+    sceneBody.textContent = stories[i].body;
+    keeperNote.textContent = keeperNarration[seen.size];
+    progressLabel.textContent = `${seen.size} of ${stories.length} lights found`;
     dots.forEach((d,j)=>d.classList.toggle('active',j<seen.size));
-    hint.textContent=seen.size===5?'Look up. The lights are joining.':`${5-seen.size} ${5-seen.size===1?'light remains':'lights remain'} in the sky.`;
-    if(seen.size===5)revealTimeout=setTimeout(finish,1550);
+    const allFound = seen.size === stories.length;
+    release.hidden = !allFound;
+    world.classList.toggle('ready',allFound);
+    instruction.textContent = allFound ? 'All five lights found' : 'Choose a light in the sky';
+    hint.textContent = allFound ? 'Take your time. The sky will wait.' : `${stories.length-seen.size} ${stories.length-seen.size===1?'light remains':'lights remain'} in the sky.`;
   }));
+  // The final story stays visible indefinitely. Only an intentional click reveals dawn.
+  release.addEventListener('click',finish);
   replay.addEventListener('click',()=>{
-    if(revealTimeout)clearTimeout(revealTimeout);
-    revealed=false;seen.clear();world.classList.remove('revealed');
+    revealed=false;seen.clear();world.classList.remove('revealed','ready');
+    release.hidden = true;
+    keeperNote.textContent = '';
+    instruction.textContent = 'Choose a light in the sky';
     markers.forEach(b=>{b.classList.remove('done','visited');});
     dots.forEach(d=>d.classList.remove('active'));
     kicker.textContent='A story in five lights';sceneTitle.textContent='The morning that went missing';
-    sceneBody.innerHTML='The sun did not rise on Tuesday. By midday, the coast was still dark and the tide had climbed the lighthouse steps.<br><br>On the lantern glass, someone had written in salt: <span class="note">Morning has lost its way. Give it five lights to follow.</span>';
+    sceneBody.innerHTML='The sun did not rise on Tuesday. By midday, the coast was still dark and the tide had climbed the lighthouse steps. The keeper rang the harbour bell until her hands hurt. No boat answered.<br><br>On the lantern glass, someone had written in salt: <span class="note">Morning has lost its way. Give it five lights to follow.</span><br><br>Above the black water, five small lights waited. The keeper had no map for what came next.';
     hint.textContent='There is something in the dark worth finding.';
     progressLabel.textContent='0 of 5 lights found';instruction.style.opacity='1';replay.classList.remove('visible');
   });
