@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07101f">
+  <meta name="description" content="An original interactive dream about a lighthouse, five lights, and the morning that lost its way.">
+  <title>When the Night Learned to Swim | An Interactive Dream</title>
+  <style>
+    :root { color-scheme: dark; --bg:#07101f; --paper:#eae6dd; --muted:#a6b1c3; --line:rgba(210,224,238,.13); --gold:#f2cc87; --gold2:#ffe7b5; }
+    * { box-sizing:border-box; }
+    html { min-height:100%; background:var(--bg); }
+    body { margin:0; min-height:100vh; font-family:Georgia,'Times New Roman',serif; background:var(--bg); color:var(--paper); overflow-x:hidden; }
+    .layout { width:100%; min-height:100vh; min-height:100svh; display:grid; grid-template-columns:minmax(0,1.75fr) minmax(340px,.8fr); }
+    .world { position:relative; min-height:100vh; min-height:100svh; isolation:isolate; overflow:hidden; background:radial-gradient(ellipse at 56% 31%,#1a3046 0%,#0a172a 45%,#050d1c 87%); }
+    .world:after{content:"";pointer-events:none;position:absolute;inset:0;box-shadow:inset 0 0 160px 30px rgba(0,0,0,.30);z-index:4;}
+    .landscape {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .small-brand {position:absolute;top:35px;left:40px;z-index:7;color:rgba(239,234,224,.60);font-family:system-ui,-apple-system,sans-serif;font-size:10px;letter-spacing:.3em;text-transform:uppercase;}
+    .instruction {position:absolute;bottom:40px;left:0;right:0;z-index:7;text-align:center;color:rgba(234,230,221,.70);font:11px system-ui,sans-serif;letter-spacing:.19em;text-transform:uppercase;pointer-events:none;transition:opacity 1s;}
+    .beacon {position:absolute;z-index:8;appearance:none;border:0;background:none;padding:0;aspect-ratio:1;width:65px;display:grid;place-items:center;cursor:pointer;transform:translate(-50%,-50%);transition:opacity .7s,filter .2s;touch-action:manipulation;}
+    .beacon:before{content:"";position:absolute;width:46px;height:46px;background:radial-gradient(circle,rgba(255,226,173,.19),rgba(255,226,173,0) 72%);border-radius:50%;animation:pulse 3.7s infinite ease-in-out;}
+    .beacon svg {overflow:visible;width:30px;height:30px;filter:drop-shadow(0 0 9px rgba(254,221,163,.8));transition:transform .25s, filter .25s;}
+    .beacon .star-core{fill:#ffeac0;transition:fill .3s;}
+    .beacon:hover svg,.beacon:focus-visible svg{transform:scale(1.35);filter:drop-shadow(0 0 16px #ffdb8c);}
+    .beacon:focus-visible{outline:2px solid #ffe7b5;outline-offset:-3px;border-radius:50%;}
+    .beacon.visited svg {filter:drop-shadow(0 0 14px rgba(140,231,237,.8));}
+    .beacon.visited .star-core {fill:#b9f4ef;}
+    .beacon.done {opacity:0;pointer-events:none;}
+    #beacon0{left:26%;top:25%;animation:driftOne 7s infinite ease-in-out;}
+    #beacon1{left:46%;top:15%;animation:driftTwo 8s infinite ease-in-out;}
+    #beacon2{left:75%;top:25%;animation:driftOne 9s infinite ease-in-out reverse;}
+    #beacon3{left:64%;top:44%;animation:driftTwo 7.5s infinite ease-in-out reverse;}
+    #beacon4{left:36%;top:46%;animation:driftOne 8.5s infinite ease-in-out;}
+    .panel{position:relative;z-index:11;background:linear-gradient(155deg,#101c2c 0%,#0a1222 58%,#080e1b 100%);border-left:1px solid var(--line);padding:clamp(35px,5.4vw,82px) clamp(28px,4.5vw,74px) 48px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:-18px 0 90px rgba(0,0,0,.16);}
+    .eyebrow{font:11px system-ui,-apple-system,sans-serif;letter-spacing:.23em;color:#d9b478;text-transform:uppercase;margin-bottom:27px;}
+    .title{font-weight:400;letter-spacing:-.045em;line-height:1.04;font-size:clamp(48px,5.4vw,83px);margin:0 0 30px;max-width:600px;text-wrap:balance;}
+    .fine-rule{width:46px;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin-bottom:30px;}
+    .scene-kicker{font:10px system-ui,-apple-system,sans-serif;letter-spacing:.23em;color:#9aa9b9;text-transform:uppercase;margin:0 0 16px;}
+    .scene-title{font-size:clamp(24px,2.7vw,36px);font-weight:400;line-height:1.16;letter-spacing:-.025em;color:#ffebca;margin:0 0 18px;}
+    .scene-body{font-size:clamp(16px,1.4vw,19px);line-height:1.7;color:#cbd0d4;min-height:8.5em;max-width:540px;margin:0;}
+    .scene-body .note{color:#ffe2ac;font-style:italic;}
+    .divider{height:1px;background:var(--line);margin:48px 0 22px;}
+    .progress-row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+    .progress-label{font:11px system-ui,-apple-system,sans-serif;letter-spacing:.1em;color:#b4bdc8;}
+    .progress-dots{display:flex;gap:8px;}
+    .dot{width:7px;height:7px;border-radius:50%;border:1px solid #907e67;background:transparent;transition:background .4s,box-shadow .4s;}
+    .dot.active{border-color:#f7ca7a;background:#f7ca7a;box-shadow:0 0 12px rgba(255,207,135,.7);}
+    .small-actions{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:27px;}
+    .hint{font:12px/1.5 system-ui,-apple-system,sans-serif;color:#8797a8;}
+    .replay{display:none;appearance:none;border:1px solid rgba(240,203,139,.40);border-radius:2px;padding:11px 18px;background:rgba(255,226,175,.06);color:#ffe0ab;cursor:pointer;font:12px system-ui,-apple-system,sans-serif;letter-spacing:.05em;}
+    .replay:hover,.replay:focus-visible{background:rgba(255,226,175,.15);}
+    .replay.visible{display:block;}
+    .horizon-glow{opacity:0;transition:opacity 4.5s ease-in;}
+    .sun {opacity:0;transform:translate(0,0) scale(.35);transform-origin:center;}
+    .revealed .horizon-glow{opacity:1;}
+    .revealed .sun{opacity:1;animation:sunfloat 8s 1 ease-out forwards;}
+    .whale{opacity:0;transform:translateY(25px);filter:drop-shadow(0 0 28px rgba(145,208,241,.38));transition:opacity 3.4s ease,transform 5s ease;}
+    .revealed .whale{opacity:1;transform:translateY(0);}
+    .whale-lines {animation:whaleShimmer 7s ease-in-out infinite alternate;}
+    .lightbeam {animation:beam 8s infinite ease-in-out;transform-origin:304px 422px;}
+    .foam {animation:foammove 9s infinite linear alternate;}
+    .final-message{position:absolute;z-index:6;left:50%;top:13%;text-align:center;transform:translateX(-50%);color:#ffe8ba;letter-spacing:.22em;text-transform:uppercase;font:11px/1.6 system-ui,-apple-system,sans-serif;white-space:nowrap;opacity:0;transition:opacity 3s 4s;pointer-events:none;text-shadow:0 0 30px #ac783c;}
+    .revealed .final-message{opacity:1;}
+    @keyframes pulse{0%,100%{opacity:.7;transform:scale(.8)}50%{opacity:1;transform:scale(1.4)}}
+    @keyframes driftOne{0%,100%{translate:0 0}50%{translate:0 -10px}}
+    @keyframes driftTwo{0%,100%{translate:0 0}50%{translate:6px 8px}}
+    @keyframes whaleShimmer{from{opacity:.52}to{opacity:1}}
+    @keyframes foammove{from{transform:translateX(-7px)}to{transform:translateX(12px)}}
+    @keyframes beam{0%,100%{opacity:.37;transform:rotate(-8deg)}50%{opacity:.64;transform:rotate(7deg)}}
+    @keyframes sunfloat{0%{transform:translate(0,0) scale(.35);opacity:0}25%{opacity:1}100%{transform:translate(70px,-85px) scale(1.08);opacity:1}}
+    @media(max-width:900px){
+      .layout{display:flex;flex-direction:column;}
+      .world{height:57svh;min-height:390px;flex:none;}
+      .panel{min-height:43svh;padding:33px 29px 31px;border-left:0;border-top:1px solid var(--line);}
+      .small-brand{top:20px;left:24px;font-size:9px;}
+      .instruction{bottom:18px;font-size:9px;}
+      .title{font-size:clamp(40px,7.8vw,59px);margin-bottom:23px;}
+      .eyebrow{margin-bottom:18px;}
+      .fine-rule{margin-bottom:22px;}
+      .scene-body{min-height:unset;font-size:17px;}
+      .divider{margin:33px 0 18px;}
+    }
+    @media(max-width:440px){
+      .world{height:47svh;min-height:300px;}
+      .panel{padding:26px 25px 32px;}
+      .title{font-size:41px;}
+      .scene-body{font-size:16px;line-height:1.62;}
+      .beacon{width:52px;}
+      .beacon svg{width:26px;height:26px;}
+      .final-message{font-size:8px;white-space:normal;width:90%;top:12%;}
+      .hint{font-size:11px;}
+    }
+    @media(prefers-reduced-motion:reduce){
+      *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}
+      .sun{transform:translate(70px,-85px) scale(1)!important;}
+    }
+  </style>
+</head>
+<body>
+<main class="layout">
+  <section class="world" id="world" aria-label="The midnight sea. Five glowing stars can be selected to discover the story.">
+    <div class="small-brand">An impossible place / no. 001</div>
+    <svg class="landscape" viewBox="0 0 1000 650" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A remote lighthouse shines over a dark ocean. The five lights will reveal a celestial whale and a new sunrise.">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#050d1d"/><stop offset=".55" stop-color="#132842"/><stop offset="1" stop-color="#183145"/></linearGradient>
+        <radialGradient id="skyglow"><stop stop-color="#aeb0ba" stop-opacity=".15"/><stop offset="1" stop-color="#50617b" stop-opacity="0"/></radialGradient>
+        <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#112b3e"/><stop offset="1" stop-color="#030916"/></linearGradient>
+        <linearGradient id="whaleFill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a8e1e6" stop-opacity=".46"/><stop offset=".53" stop-color="#2d7190" stop-opacity=".33"/><stop offset="1" stop-color="#f3cd87" stop-opacity=".14"/></linearGradient>
+        <radialGradient id="sunlight"><stop stop-color="#fff3c3"/><stop offset=".13" stop-color="#ffdd8e"/><stop offset=".35" stop-color="#ffc678" stop-opacity=".55"/><stop offset="1" stop-color="#ffd088" stop-opacity="0"/></radialGradient>
+        <linearGradient id="dawn" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#ffd690" stop-opacity="0"/><stop offset=".65" stop-color="#f8b26c" stop-opacity=".08"/><stop offset="1" stop-color="#ffd08a" stop-opacity=".55"/></linearGradient>
+        <clipPath id="whaleClip"><path d="M326,282 C339,237 394,213 454,225 C507,224 570,251 621,280 C649,294 683,285 716,257 C738,237 746,216 749,199 C761,230 758,257 747,278 C771,277 788,269 805,245 C806,283 779,313 747,319 C719,324 694,319 674,330 C635,354 591,374 544,367 C513,362 481,350 466,348 C430,350 394,345 365,327 C343,314 330,301 326,282 Z"/></clipPath>
+      </defs>
+      <rect width="1000" height="650" fill="url(#sky)"/>
+      <ellipse cx="503" cy="245" rx="490" ry="360" fill="url(#skyglow)"/>
+      <g id="farstars"></g>
+      <g opacity=".3"><path d="M0 425 Q110 415 245 421 T510 418 T750 420 T1000 414" fill="none" stroke="#73909f" stroke-width="1"/></g>
+      <g class="horizon-glow"><rect x="0" y="190" width="1000" height="295" fill="url(#dawn)"/><ellipse cx="502" cy="445" rx="420" ry="65" fill="url(#sunlight)" opacity=".5"/></g>
+      <g class="lightbeam"><path d="M304 417 L0 330 L0 526 Z" fill="#e7d7b3" opacity=".13"/></g>
+      <!-- The old lighthouse and its island -->
+      <path d="M0 473 C46 453 80 449 108 453 C158 443 204 447 243 471 C270 480 311 479 347 483 L347 542 L0 549Z" fill="#06111d"/>
+      <g transform="translate(135,0)"><path d="M113 459 L134 286 L202 286 L225 459Z" fill="#14212b" stroke="#435366" stroke-width="2"/>
+      <path d="M134 286 L147 270 L191 270 L202 286Z" fill="#263340" stroke="#526574" stroke-width="2"/>
+      <rect x="139" y="245" width="60" height="24" fill="#253647" stroke="#65808a" stroke-width="2"/>
+      <path d="M132 244 L169 224 L206 244 Z" fill="#111c27" stroke="#586f83" stroke-width="2"/>
+      <rect x="165" y="215" width="8" height="13" fill="#1d2b37"/>
+      <rect x="150" y="251" width="36" height="13" fill="#ffd794" opacity=".88"/>
+      <path d="M147 254 H190" stroke="#f7e5c2" stroke-width="1.5"/>
+      <path d="M134 318 L202 309" stroke="#435260" stroke-width="6" opacity=".65"/>
+      <path d="M129 353 L209 344" stroke="#435260" stroke-width="6" opacity=".65"/>
+      <path d="M124 389 L215 380" stroke="#435260" stroke-width="6" opacity=".65"/>
+      <rect x="158" y="354" width="22" height="32" rx="11" fill="#d0a56e" opacity=".7"/>
+      <path d="M165 457 L165 415 Q168 396 180 415 L183 457" fill="#030914" stroke="#5a6770" stroke-width="1.5"/>
+      </g><path d="M0 483 C69 453 154 464 227 482 S366 486 408 490 L0 545Z" fill="#081723" opacity=".8"/>
+      <!-- The ocean is many separate ribbons to suggest depth -->
+      <path d="M0 483 Q92 474 198 486 T410 485 T645 480 T1000 484 L1000 650 L0 650Z" fill="url(#water)"/>
+      <g class="foam" fill="none" stroke-linecap="round">
+        <path d="M-50 501 Q60 493 172 502 T410 499 T650 500 T1040 496" stroke="#9ab9bd" stroke-opacity=".15" stroke-width="2"/>
+        <path d="M-40 528 Q110 519 215 528 T470 527 T705 522 T1050 530" stroke="#8faab4" stroke-opacity=".12" stroke-width="2"/>
+        <path d="M-30 559 Q100 551 230 558 T510 557 T765 555 T1040 552" stroke="#a2c7d0" stroke-opacity=".12" stroke-width="2"/>
+        <path d="M-30 605 Q130 597 260 608 T540 602 T770 606 T1040 600" stroke="#a5c1c7" stroke-opacity=".10" stroke-width="2"/>
+        <path d="M398 508 h75 M569 541 h100 M747 515 h69 M246 576 h101 M790 589 h65" stroke="#dbecdd" stroke-opacity=".21" stroke-width="1.4"/>
+      </g>
+      <!-- A giant sky-whale, initially invisible -->
+      <g class="whale" id="whale"><g transform="translate(0,-92)">
+        <path d="M326,282 C339,237 394,213 454,225 C507,224 570,251 621,280 C649,294 683,285 716,257 C738,237 746,216 749,199 C761,230 758,257 747,278 C771,277 788,269 805,245 C806,283 779,313 747,319 C719,324 694,319 674,330 C635,354 591,374 544,367 C513,362 481,350 466,348 C430,350 394,345 365,327 C343,314 330,301 326,282 Z" fill="url(#whaleFill)" stroke="#a9deed" stroke-opacity=".96" stroke-width="1.8"/>
+        <path d="M523 338 C537 355 547 379 562 412 C593 405 615 390 622 360 C598 353 576 346 555 339" fill="url(#whaleFill)" stroke="#a6dce8" stroke-opacity=".67" stroke-width="1.5"/>
+        <g clip-path="url(#whaleClip)"><g id="whaleStars"></g><path class="whale-lines" d="M348 280 Q410 265 455 284 T561 307 T688 304" stroke="#a8e0e6" stroke-width="1" fill="none" stroke-dasharray="3 6" opacity=".5"/><path class="whale-lines" d="M385 320 Q477 325 547 332 T667 311" fill="none" stroke="#f8d89e" stroke-opacity=".55" stroke-width="1"/></g>
+        <path d="M348 315 Q394 332 455 324" fill="none" stroke="#b5e6ed" stroke-opacity=".66" stroke-width="1.5"/>
+        <circle cx="380" cy="285" r="4.5" fill="#fff3d5"/><circle cx="380" cy="285" r="10" fill="#ffe4aa" opacity=".16"/>
+        <path d="M465 233 L480 215 L491 238" fill="none" stroke="#b9e1ea" opacity=".5"/>
+      </g></g>
+      <g class="sun" id="sun"><circle cx="335" cy="200" r="122" fill="url(#sunlight)"/><circle cx="335" cy="200" r="24" fill="#ffecb7"/><circle cx="335" cy="200" r="17" fill="#fff4d1"/></g>
+    </svg>
+    <div class="final-message">The morning has found its way home.</div>
+    <button type="button" class="beacon" id="beacon0" aria-label="Discover the first light: a promise kept"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <button type="button" class="beacon" id="beacon1" aria-label="Discover the second light: an unseen kindness"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <button type="button" class="beacon" id="beacon2" aria-label="Discover the third light: an unfinished song"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <button type="button" class="beacon" id="beacon3" aria-label="Discover the fourth light: the first apology"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <button type="button" class="beacon" id="beacon4" aria-label="Discover the fifth light: the lamp left on"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="star-core" d="M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16Z"/></svg></button>
+    <div class="instruction" id="instruction">Choose a light in the sky</div>
+  </section>
+  <section class="panel" aria-live="polite" aria-atomic="false">
+    <div>
+      <div class="eyebrow">An interactive dream</div>
+      <h1 class="title">When the Night Learned to Swim</h1>
+      <div class="fine-rule"></div>
+      <p class="scene-kicker" id="kicker">A story in five lights</p>
+      <h2 class="scene-title" id="sceneTitle">The morning that went missing</h2>
+      <p class="scene-body" id="sceneBody">The sun did not rise on Tuesday. By midday, the coast was still dark and the tide had climbed the lighthouse steps.<br><br>On the lantern glass, someone had written in salt: <span class="note">Morning has lost its way. Give it five lights to follow.</span></p>
+    </div>
+    <div>
+      <div class="divider"></div>
+      <div class="progress-row"><span class="progress-label" id="progressLabel">0 of 5 lights found</span><div class="progress-dots" id="progressDots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+      <div class="small-actions"><span class="hint" id="hint">There is something in the dark worth finding.</span><button class="replay" id="replay" type="button">Dream again</button></div>
+    </div>
+  </section>
+</main>
+<script>
+(() => {
+  const stories = [
+    {name:'The promise', body:'Inside the first light lived a ferryman who turned his boat round in a storm. He had promised to come back, and on a night when nobody would have blamed him for breaking that promise, he kept it.'},
+    {name:'The kindness nobody saw', body:'The second light was scarcely larger than a pin. It held a hospital cleaner replacing a dying plant beside a stranger\'s bed. Nobody knew who had done it. The light had seen.'},
+    {name:'The unfinished song', body:'The third hummed when the keeper touched it. Somewhere, a woman with trembling hands was teaching her granddaughter a melody, pausing at every line until the child could carry it without her.'},
+    {name:'The first apology', body:'Inside the fourth, two brothers stood on opposite sides of a garden gate. The younger pushed it open. The older had been waiting three years to hear the latch.'},
+    {name:'The lamp left on', body:'The fifth showed an ordinary kitchen long after midnight. One cup stood washed beside the sink; a second had been left on the table. Someone was expected home, and someone else believed they would arrive.'}
+  ];
+  const seen = new Set();
+  const world = document.getElementById('world');
+  const sceneTitle = document.getElementById('sceneTitle');
+  const sceneBody = document.getElementById('sceneBody');
+  const kicker = document.getElementById('kicker');
+  const dots = [...document.querySelectorAll('.dot')];
+  const markers = [...document.querySelectorAll('.beacon')];
+  const replay = document.getElementById('replay');
+  const instruction = document.getElementById('instruction');
+  const hint = document.getElementById('hint');
+  const progressLabel = document.getElementById('progressLabel');
+  let revealed = false;
+  let revealTimeout;
+  // Fixed seed gives every visitor the same sky and a reproducible work of art.
+  let seed = 28644019;
+  const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const sky = document.getElementById('farstars');
+  for (let i=0; i<220; i++) {
+    const x=random()*1000, y=random()*465, r=.35+random()*1.15;
+    const c=document.createElementNS(svgNS,'circle');
+    c.setAttribute('cx',x.toFixed(1)); c.setAttribute('cy',y.toFixed(1)); c.setAttribute('r',r.toFixed(2));
+    c.setAttribute('fill',random()>.83?'#f6d4a4':'#c9e2ec');c.setAttribute('opacity',(.18+random()*.62).toFixed(2));
+    sky.appendChild(c);
+  }
+  const whaleStars=document.getElementById('whaleStars');
+  for(let i=0;i<290;i++) {
+    const c=document.createElementNS(svgNS,'circle');
+    c.setAttribute('cx',(320+random()*510).toFixed(1));c.setAttribute('cy',(198+random()*200).toFixed(1));
+    c.setAttribute('r',(.4+random()*1.45).toFixed(2));
+    c.setAttribute('fill',random()>.75?'#ffe7ae':'#d4f9fa');
+    c.setAttribute('opacity',(.3+random()*.67).toFixed(2));
+    whaleStars.appendChild(c);
+  }
+  const finish = () => {
+    if (revealed) return;
+    revealed=true;
+    world.classList.add('revealed');
+    markers.forEach(b=>b.classList.add('done'));
+    instruction.style.opacity='0';
+    kicker.textContent='The sixth light';
+    sceneTitle.textContent='A creature made of dawn';
+    sceneBody.innerHTML='The five lights left the keeper’s hands and climbed into the sky. They were not a constellation. They were the bones of an enormous whale, swimming through the dark with morning glowing inside its ribs.<br><br>Above the lighthouse, the creature opened its mouth and released a small golden sun, looking rather surprised to be born.<br><br>Daybreak came fourteen hours late. The keeper put the kettle on and left the lantern burning. Some things, she thought, need a light to find their way home.';
+    progressLabel.textContent='All five lights found';
+    hint.textContent='The end. Or perhaps the beginning.';
+    replay.classList.add('visible');
+  };
+  markers.forEach((button,i)=>button.addEventListener('click',()=>{
+    if(revealed)return;
+    seen.add(i); button.classList.add('visited');
+    kicker.textContent=`Light ${i+1} · of five`;
+    sceneTitle.textContent=stories[i].name;
+    sceneBody.textContent=stories[i].body;
+    progressLabel.textContent=`${seen.size} of 5 lights found`;
+    dots.forEach((d,j)=>d.classList.toggle('active',j<seen.size));
+    hint.textContent=seen.size===5?'Look up. The lights are joining.':`${5-seen.size} ${5-seen.size===1?'light remains':'lights remain'} in the sky.`;
+    if(seen.size===5)revealTimeout=setTimeout(finish,1550);
+  }));
+  replay.addEventListener('click',()=>{
+    if(revealTimeout)clearTimeout(revealTimeout);
+    revealed=false;seen.clear();world.classList.remove('revealed');
+    markers.forEach(b=>{b.classList.remove('done','visited');});
+    dots.forEach(d=>d.classList.remove('active'));
+    kicker.textContent='A story in five lights';sceneTitle.textContent='The morning that went missing';
+    sceneBody.innerHTML='The sun did not rise on Tuesday. By midday, the coast was still dark and the tide had climbed the lighthouse steps.<br><br>On the lantern glass, someone had written in salt: <span class="note">Morning has lost its way. Give it five lights to follow.</span>';
+    hint.textContent='There is something in the dark worth finding.';
+    progressLabel.textContent='0 of 5 lights found';instruction.style.opacity='1';replay.classList.remove('visible');
+  });
+})();
+</script>
+</body>
+</html>
