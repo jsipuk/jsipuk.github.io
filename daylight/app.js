@@ -187,7 +187,13 @@
     root.setProperty("--sky-top", S.rgb(top));
     root.setProperty("--sky-bot", S.rgb(bot));
     meta.setAttribute("content", S.rgb(top));
-    starOpacity = Math.max(0, Math.min(1, (-alt - 3) / 10));
+    // Cloud from the forecast greys the sky and hides the stars.
+    let cloud = 0;
+    if (prefs.wx && wx) { const h = W.hourAt(wx, t); if (h) cloud = h.cloud / 100; }
+    const veil = $("veil");
+    veil.style.opacity = (Math.pow(cloud, 1.4) * .7).toFixed(2);
+    veil.style.setProperty("--veil", alt > -4 ? "rgba(150,158,174,.75)" : "rgba(26,30,42,.8)");
+    starOpacity = Math.max(0, Math.min(1, (-alt - 3) / 10)) * (1 - .9 * cloud);
     $("stars").style.opacity = starOpacity.toFixed(2);
     const g = Math.max(0, 1 - Math.abs(alt + 1) / 9);
     const glow = $("glow");
@@ -304,10 +310,9 @@
     if (fx && best) {
       note.innerHTML = `Best hour outside: <b>${hm(best.t)}</b>. ${Math.round(best.cloud)}% cloud${best.temp != null ? ", " + Math.round(best.temp) + "°C" : ""}, ${Math.round(best.rain)}% chance of rain.`;
     } else if (prefs.wx && !fx) {
-      note.textContent = wx && wx.error ? "Couldn't fetch the forecast. Showing the Sun's height each hour instead." : "No forecast for this day yet. Bars show the Sun's height each hour.";
+      note.textContent = wxError ? "Couldn't fetch the forecast. Showing the Sun's height each hour instead." : "No forecast for this day yet. Bars show the Sun's height each hour.";
     } else {
-      note.innerHTML = `Bars show how high the Sun climbs each hour. <button type="button" class="link-btn" id="wx-on">Add the cloud forecast</button> to find the brightest dry hour.`;
-      $("wx-on").onclick = () => openSettings(true);
+      note.innerHTML = `Bars show how high the Sun climbs each hour. Turn on the weather to find the brightest dry hour.`;
     }
   }
 
@@ -411,34 +416,8 @@
       return `<li><span class="dot" style="background:${PCOL[x.body]};box-shadow:0 0 10px ${PCOL[x.body]}"></span><div><p class="n">${x.body}<small>mag ${magStr}${x.constellation ? " · in " + x.constellation : ""}</small></p><p class="d">${start}${bestStr}${end}. ${x.words}</p></div></li>`;
     }).join("") : `<li><span class="empty">No bright planets well placed tonight.</span></li>`;
 
-    // Extras: meteor shower, eclipses.
-    const ex = [];
-    const sh = S.nextShower(t);
-    if (sh.days <= 45) {
-      ex.push(extra("meteor", sh.name + " " + (sh.days <= 0 ? "peak tonight" : "peak " + inDays(sh.peak, t)),
-        `${fmtDay(sh.peak)}. Up to ${sh.zhr} an hour under a perfect sky. ${sh.tip} ${sh.moonVerdict}`));
-    }
-    const ecl = S.nextEclipses(t, p);
-    const list = [];
-    if (ecl.solar) list.push(["solar", ecl.solar]);
-    if (ecl.lunar) list.push(["lunar", ecl.lunar]);
-    list.sort((a, b) => a[1].date - b[1].date);
-    if (list.length) {
-      const [k, e] = list[0];
-      const d = e.date;
-      ex.push(extra(k, `Next eclipse you can see: ${e.kind} ${k}`, k === "solar"
-        ? `${fmtDayYear(d)}, peak ${hm(d)}. The Moon covers ${Math.round(e.obscuration * 100)}% of the Sun. Never look straight at it: use eclipse glasses or a pinhole.`
-        : `${fmtDayYear(d)}, peak ${hm(d)}. The Moon turns ${e.kind === "total" ? "copper-red" : "partly dark"}. Safe to watch with bare eyes.`));
-    }
-    $("extras").innerHTML = ex.join("");
+    renderTonightExtras(t);
   }
-  const EXIC = {
-    meteor: '<svg viewBox="0 0 24 24" fill="none" stroke="#ffd27a" stroke-width="2" stroke-linecap="round"><path d="M4 4l9 9M8 3l7 7M3 8l7 7" opacity=".55"/><circle cx="17" cy="17" r="3" fill="#ffd27a"/></svg>',
-    solar: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#ffd27a"/><circle cx="15" cy="10" r="7.5" fill="#12162f"/></svg>',
-    lunar: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#c8553d"/><circle cx="9" cy="10" r="2" fill="#000" opacity=".15"/></svg>'
-  };
-  const extra = (ic, t, d) => `<div class="extra">${EXIC[ic]}<div><p class="t">${esc(t)}</p><p class="d">${esc(d)}</p></div></div>`;
-
   function cloudTonight(nw) {
     if (!prefs.wx || !wx || !wx.hours) return "";
     const end = new Date(Math.min(+nw.end, +nw.start + 9 * 3600e3));
@@ -522,29 +501,180 @@
       `Longest day ${dur(long.length)}, shortest ${dur(short.length)}.` + (pct != null ? ` ${view ? "That day sits" : "Today sits"} ${pct}% of the way from the darkest day to the brightest.` : "");
   }
 
-  /* ── forecast (opt-in) ───────────────────────────────────────────── */
+  /* ── weather (opt-in) ────────────────────────────────────────────── */
+  const W = window.Weather;
+  const wxKey = () => place().lat.toFixed(1) + "," + place().lon.toFixed(1);
+  let wxBusy = false, wxError = false;
   function wxFromCache() {
     const c = load(WXKEY);
-    if (!c || c.key !== wxKey()) return null;
-    return { at: c.at, hours: c.hours.map(h => ({ t: new Date(h[0] * 1000), cloud: h[1], rain: h[2], temp: h[3] })) };
+    if (!c || c.key !== wxKey() || !c.json) return null;
+    try { return W.parse(c.json, c.at); } catch (e) { return null; }
   }
-  const wxKey = () => place().lat.toFixed(1) + "," + place().lon.toFixed(1);
-  let wxBusy = false;
   function loadWx(force) {
     if (!prefs.wx) { wx = null; return; }
-    wx = wxFromCache() || wx;
-    if (wx && wx.key && wx.key !== wxKey()) wx = null;
-    const fresh = wx && wx.at && Date.now() - wx.at < 45 * 60e3;
-    if ((fresh && !force) || wxBusy || !navigator.onLine) return;
-    wxBusy = true;
-    const [la, lo] = wxKey().split(",");
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&hourly=cloud_cover,precipitation_probability,temperature_2m&forecast_days=3&past_days=1&timeformat=unixtime&timezone=GMT`;
-    fetch(url, { credentials: "omit", referrerPolicy: "no-referrer" }).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(j => {
-      const hh = j.hourly;
-      const rows = hh.time.map((s, i) => [s, hh.cloud_cover[i] ?? 0, hh.precipitation_probability[i] ?? 0, hh.temperature_2m[i]]);
-      save(WXKEY, { key: wxKey(), at: Date.now(), hours: rows });
-      wx = wxFromCache();
-    }).catch(() => { wx = wx || { error: true }; }).finally(() => { wxBusy = false; renderDay(true); });
+    if (!wx) wx = wxFromCache();
+    const fresh = wx && wx.at && Date.now() - wx.at < 30 * 60e3;
+    if ((fresh && !force) || wxBusy) return;
+    if (!navigator.onLine) { renderWeather(); return; }
+    wxBusy = true; wxError = false;
+    renderWeather();
+    const key = wxKey(), [la, lo] = key.split(",");
+    fetch(W.url(la, lo), { credentials: "omit", referrerPolicy: "no-referrer" })
+      .then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(j && j.reason || r.status), () => Promise.reject(r.status)))
+      .then(j => {
+        if (key !== wxKey()) return;
+        const at = Date.now();
+        wx = W.parse(j, at);
+        save(WXKEY, { key, at, json: j });
+      })
+      .catch(() => { wxError = true; })
+      .finally(() => { wxBusy = false; renderWeather(); renderDay(true); paintSky(now()); });
+  }
+
+  function tempCol(c) {
+    const stops = [[-5, [122, 170, 255]], [5, [140, 196, 255]], [12, [155, 227, 176]], [20, [255, 210, 122]], [28, [255, 139, 94]]];
+    if (c <= stops[0][0]) return stops[0][1];
+    for (let i = 1; i < stops.length; i++) if (c <= stops[i][0]) {
+      const f = (c - stops[i - 1][0]) / (stops[i][0] - stops[i - 1][0]);
+      return stops[i - 1][1].map((v, k) => v + (stops[i][1][k] - v) * f);
+    }
+    return stops[stops.length - 1][1];
+  }
+  const tdeg = v => v == null ? "–" : Math.round(v) + "°";
+
+  function renderWeather() {
+    const box = $("wx-body");
+    if (!prefs.wx) {
+      box.innerHTML = `<p class="wx-pitch">Today's weather, the next 24 hours and the week ahead, plus what to wear.</p>
+        <button type="button" class="btn-wide" id="wx-start">Show the weather</button>
+        <p class="muted small wx-fine">Everything else here is worked out on your phone. The forecast has to come from <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>, so this sends your location rounded to about 10 km. No account, no cookies, no tracking. Turn it off any time from the location button.</p>`;
+      $("wx-start").onclick = () => { prefs.wx = true; savePrefs(); loadWx(true); };
+      return;
+    }
+    if (!wx || !wx.hours || !wx.hours.length) {
+      box.innerHTML = `<p class="muted">${wxBusy ? "Getting the forecast…" : wxError ? "Couldn't get the forecast. It'll try again when you're back online." : "No forecast yet. It'll load when you're online."}</p>`;
+      return;
+    }
+    const t = new Date(), p = place();
+    const cur = W.nowAt(wx, t);
+    const old = Date.now() - wx.at > 3 * 3600e3;
+    let html = "";
+    if (cur) {
+      const [words, kind] = W.describe(cur.code);
+      const alt = S.fastSunAlt(+t, p.lat, p.lon);
+      html += `<div class="wx-now">${W.icon(kind, alt > -3)}<div>
+        <p class="wx-temp">${tdeg(cur.temp)}</p>
+        <p class="wx-words">${words}${cur.feels != null && Math.abs(cur.feels - cur.temp) >= 2 ? " · feels " + tdeg(cur.feels) : ""}</p>
+        <p class="muted small">${cur.wind != null ? "Wind " + Math.round(cur.wind) + " mph" : ""}${cur.gust != null ? (cur.wind != null ? ", gusts " : "Gusts ") + Math.round(cur.gust) : ""}${cur.gust != null || cur.wind != null ? " · " : ""}<span class="${old ? "stale" : ""}">Updated ${relTime(wx.at)}</span></p>
+      </div></div>`;
+    }
+    const today = day(t);
+    const wear = W.wear(wx, t, today.sunset && t < today.sunset ? new Date(Math.max(+today.sunset, +S.atLocal(t, 17 * 60))) : null);
+    const rain = W.rainLine(wx, t);
+    if (wear || rain) {
+      const w = wear ? `<b>${wear.label}:</b> ${esc(wear.text)}` : "";
+      html += `<p class="wx-wear">${wear && wear.label === "Tomorrow" ? `${esc(rain)} ${w}` : `${w} ${esc(rain)}`}</p>`;
+    }
+
+    // Next 24 hours, with sunrise and sunset slotted in.
+    const h0 = new Date(t); h0.setMinutes(0, 0, 0);
+    const hrs = wx.hours.filter(h => h.t >= h0 && h.t < new Date(+h0 + 24 * 3600e3));
+    const tom = day(S.addDays(t, 1));
+    const marks = [[today.sunrise, "rise"], [today.sunset, "set"], [tom.sunrise, "rise"], [tom.sunset, "set"]]
+      .filter(m => m[0] && m[0] > t && m[0] < new Date(+h0 + 24 * 3600e3));
+    const cells = [];
+    hrs.forEach((h, i) => {
+      const [, kind] = W.describe(h.code);
+      cells.push(`<li><span class="wh-t">${i === 0 ? "Now" : String(h.t.getHours()).padStart(2, "0")}</span>${W.icon(kind, h.isDay)}<span class="wh-v">${tdeg(h.temp)}</span><span class="wh-r">${h.rain >= 20 ? Math.round(h.rain) + "%" : ""}</span></li>`);
+      marks.filter(m => m[0] >= h.t && m[0] < new Date(+h.t + 3600e3)).forEach(m => {
+        cells.push(`<li class="wh-sun"><span class="wh-t">${hm(m[0])}</span><svg viewBox="0 0 24 24" fill="none" stroke="#ffd27a" stroke-width="2" stroke-linecap="round"><path d="M3 18h18M7 18a5 5 0 0 1 10 0"/><path d="${m[1] === "rise" ? "M12 3v6M9 6l3-3 3 3" : "M12 3v6M9 6l3 3 3-3"}"/></svg><span class="wh-v">${m[1] === "rise" ? "Sunrise" : "Sunset"}</span><span class="wh-r"></span></li>`);
+      });
+    });
+    html += `<ol class="wx-hours" aria-label="Next 24 hours">${cells.join("")}</ol>`;
+
+    // The week.
+    const t0 = S.startOfDay(t);
+    const days = wx.days.filter(d => d.date >= t0).slice(0, 7);
+    if (days.length) {
+      const lo = Math.min(...days.map(d => d.min)), hi = Math.max(...days.map(d => d.max)), span = Math.max(1, hi - lo);
+      html += `<ol class="wx-days">` + days.map((d, i) => {
+        const [words, kind] = W.describe(d.code);
+        const a = (d.min - lo) / span * 100, b = (d.max - lo) / span * 100;
+        const c1 = S.rgb(tempCol(d.min)), c2 = S.rgb(tempCol(d.max));
+        const nowDot = i === 0 && cur && cur.temp != null ? `<i class="wd-now" style="left:${Math.max(0, Math.min(100, (cur.temp - lo) / span * 100)).toFixed(1)}%"></i>` : "";
+        return `<li title="${esc(words)}"><span class="wd-n">${i === 0 ? "Today" : d.date.toLocaleDateString("en-GB", { weekday: "short" })}</span>${W.icon(kind, true)}<span class="wd-r">${d.rain >= 20 ? Math.round(d.rain) + "%" : ""}</span><span class="wd-lo">${tdeg(d.min)}</span><span class="wd-bar"><b style="left:${a.toFixed(1)}%;right:${(100 - b).toFixed(1)}%;background:linear-gradient(90deg,${c1},${c2})"></b>${nowDot}</span><span class="wd-hi">${tdeg(d.max)}</span></li>`;
+      }).join("") + `</ol>`;
+    }
+    box.innerHTML = html;
+  }
+  function relTime(ms) {
+    const m = Math.round((Date.now() - ms) / 60e3);
+    if (m < 2) return "just now";
+    if (m < 60) return m + " min ago";
+    const d = new Date(ms);
+    return S.sameDay(d, new Date()) ? "at " + hm(d) : fmtDay(d) + " " + hm(d);
+  }
+
+  /* ── sky calendar (worked out in a background worker) ─────────────── */
+  const CALKEY = "daylight:cal:v1";
+  let cal = null, calFor = "", calWorker = null, calSeq = 0, calOpen = false;
+  function calKey(t) { return placeKey() + "|" + S.dayKey(t); }
+  function loadCalendar(t) {
+    const k = calKey(t);
+    if (k === calFor && cal) return;
+    calFor = k;
+    const c = load(CALKEY);
+    if (c && c.key === k) { cal = c.events.map(e => Object.assign({}, e, { date: new Date(e.date) })); renderCalendar(); return; }
+    cal = null; renderCalendar();
+    const msg = { id: ++calSeq, from: +S.startOfDay(t), place: { lat: place().lat, lon: place().lon }, days: 120 };
+    const done = events => {
+      if (calFor !== k) return;
+      cal = events.map(e => Object.assign({}, e, { date: new Date(e.date) }));
+      save(CALKEY, { key: k, events });
+      renderCalendar();
+    };
+    try {
+      if (!calWorker) calWorker = new Worker("calendar-worker.js");
+      calWorker.onmessage = e => { if (e.data.id === calSeq && !e.data.error) done(e.data.events); };
+      calWorker.postMessage(msg);
+    } catch (e) {
+      setTimeout(() => done(S.skyEvents(new Date(msg.from), msg.place, msg.days).map(ev => Object.assign({}, ev, { date: +ev.date }))), 50);
+    }
+  }
+  const CALIC = {
+    moon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#ece8dc"/><circle cx="9" cy="10" r="1.6" fill="#000" opacity=".1"/><circle cx="14.5" cy="14" r="2.2" fill="#000" opacity=".08"/></svg>',
+    supermoon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fff" opacity=".18"/><circle cx="12" cy="12" r="9" fill="#f4efe2"/><circle cx="9" cy="10" r="1.8" fill="#000" opacity=".1"/><circle cx="15" cy="14.5" r="2.4" fill="#000" opacity=".08"/></svg>',
+    meteor: '<svg viewBox="0 0 24 24" fill="none" stroke="#ffd27a" stroke-width="2" stroke-linecap="round"><path d="M4 4l9 9M8 3l7 7M3 8l7 7" opacity=".55"/><circle cx="17" cy="17" r="3" fill="#ffd27a"/></svg>',
+    solar: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#ffd27a"/><circle cx="15" cy="10" r="7.5" fill="#12162f"/></svg>',
+    lunar: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#c8553d"/><circle cx="9" cy="10" r="2" fill="#000" opacity=".15"/></svg>',
+    planet: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10.5" ry="3.2" fill="none" stroke="#e9d38f" stroke-width="1.4" transform="rotate(-18 12 12)"/><circle cx="12" cy="12" r="5.5" fill="#f3dcb4"/></svg>',
+    pair: '<svg viewBox="0 0 24 24"><path d="M10 4a8 8 0 1 0 0 16 10 10 0 0 1 0-16Z" fill="#ece8dc"/><circle cx="18" cy="8" r="2.6" fill="#f3dcb4"/></svg>'
+  };
+  function renderCalendar() {
+    const t = now();
+    const list = $("cal-list"), more = $("cal-more");
+    $("cal-lead").textContent = "The next four months, worked out for " + (place().name.startsWith("Near ") ? "near " + place().name.slice(5) : place().name) + ".";
+    if (!cal) { list.innerHTML = `<li class="cal-wait muted">Working out the sky…</li>`; more.hidden = true; renderTonightExtras(t); return; }
+    const upcoming = cal.filter(e => e.date >= S.startOfDay(t));
+    const shown = calOpen ? upcoming : upcoming.slice(0, 6);
+    list.innerHTML = shown.map(e => {
+      const n = S.daysBetween(t, e.date);
+      const when = n === 0 ? "tonight" : n === 1 ? "tomorrow" : "in " + n + " days";
+      return `<li class="cal-${e.kind}${e.far ? " far" : ""}">${CALIC[e.kind] || CALIC.planet}<div><div class="row"><span class="t">${esc(e.title)}</span><span class="when"><b>${when}</b> · ${e.far || n > 300 ? fmtDayYear(e.date) : fmtDay(e.date)}</span></div><p class="d">${esc(e.detail)}</p></div></li>`;
+    }).join("") || `<li class="muted">Nothing special in the next four months.</li>`;
+    more.hidden = upcoming.length <= 6;
+    more.textContent = calOpen ? "Show fewer" : "Show all " + upcoming.length;
+    renderTonightExtras(t);
+  }
+  $("cal-more").addEventListener("click", () => { calOpen = !calOpen; renderCalendar(); });
+  function renderTonightExtras(t) {
+    const box = $("extras");
+    if (!cal) { box.innerHTML = ""; return; }
+    const soon = cal.filter(e => { const n = S.daysBetween(t, e.date); return n >= 0 && n <= 1; });
+    box.innerHTML = soon.map(e => {
+      const n = S.daysBetween(t, e.date);
+      return `<div class="extra">${CALIC[e.kind] || CALIC.planet}<div><p class="t">${n === 0 ? "Tonight" : "Tomorrow"}: ${esc(e.title)}</p><p class="d">${esc(e.detail)}</p></div></div>`;
+    }).join("");
   }
 
   /* ── rendering pipeline ──────────────────────────────────────────── */
@@ -559,6 +689,8 @@
     renderRoad(t);
     renderTonight(t);
     renderYearFacts(t);
+    renderWeather();
+    loadCalendar(t);
   }
   let heavyTimer = 0;
   function renderMoment(deferHeavy) {
@@ -654,7 +786,7 @@
   });
   $("wx-toggle").addEventListener("change", e => {
     prefs.wx = e.target.checked; savePrefs();
-    if (prefs.wx) loadWx(true); else { wx = null; try { localStorage.removeItem(WXKEY); } catch (er) { } renderDay(true); }
+    if (prefs.wx) loadWx(true); else { wx = null; try { localStorage.removeItem(WXKEY); } catch (er) { } renderDay(true); paintSky(now()); }
   });
 
   /* ── go ───────────────────────────────────────────────────────────── */

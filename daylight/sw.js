@@ -1,11 +1,13 @@
 // Daylight: keeps the app working offline. The forecast (opt-in) is never cached here.
-const CACHE = "daylight-v1";
+const CACHE = "daylight-v2";
 const FILES = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
   "./sky.js",
+  "./weather.js",
+  "./calendar-worker.js",
   "./astronomy.min.js",
   "./manifest.webmanifest",
   "./icons/icon-180.png",

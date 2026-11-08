@@ -383,6 +383,180 @@
     });
   }
 
+  /* ── sky calendar: the notable things coming up ──────────────────── */
+  /* Is a body worth looking for on this date? Try the evening, then the morning. */
+  function dusks(date, obs) {
+    const d0 = startOfDay(date);
+    return { civilDawn: onDay(altCross(obs, +1, d0, -6, 1), d0), civilDusk: onDay(altCross(obs, -1, d0, -6, 1), d0) };
+  }
+  function lookFor(body, date, obs) {
+    const d = dusks(date, obs);
+    const tries = [];
+    if (d.civilDusk) tries.push(new Date(+d.civilDusk + 40 * MIN));
+    if (d.civilDawn) tries.push(new Date(+d.civilDawn - 40 * MIN));
+    for (const t of tries) {
+      const p = horizontal(body, t, obs);
+      if (p.alt > 6) return { t, alt: p.alt, az: p.az };
+    }
+    // Late evening, for things that rise later.
+    const late = atLocal(date, 22 * 60);
+    const p = horizontal(body, late, obs);
+    if (p.alt > 12 && sunAlt(late, obs) < -8) return { t: late, alt: p.alt, az: p.az };
+    return null;
+  }
+  function lookWords(l) {
+    return "Look " + simpleDir(l.az) + (l.alt > 40 ? ", high up," : l.alt < 15 ? ", low down," : "") + " around " + hm(l.t) + ".";
+  }
+
+  function skyEvents(from, place, days) {
+    days = days || 120;
+    const obs = observer(place);
+    const start = startOfDay(from), end = addDays(start, days);
+    const ev = [];
+    const add = (date, kind, title, detail, extra) => { if (date >= start && date <= end) ev.push(Object.assign({ date, kind, title, detail }, extra || {})); };
+
+    // Full moons, with supermoons flagged.
+    let t = new Date(+start - DAY);
+    for (let i = 0; i < 8; i++) {
+      let f; try { f = A.SearchMoonPhase(180, t, 40); } catch (e) { f = null; }
+      if (!f || f.date > end) break;
+      const km = A.GeoMoon(f).Length() * A.KM_PER_AU;
+      const name = MOON_NAMES[f.date.getMonth()] + " Moon";
+      const rise = riseSet("Moon", obs, +1, atLocal(f.date, 12 * 60), 1);
+      const sup = km < 362000;
+      add(f.date, sup ? "supermoon" : "moon", (sup ? "Supermoon: " : "Full Moon: ") + name,
+        (sup ? "Closer than usual, so a touch bigger and brighter. " : "") + (rise ? "Rises at " + hm(rise) + " in the east." : ""));
+      t = new Date(+f.date + DAY);
+    }
+
+    // Meteor showers.
+    [start.getFullYear(), start.getFullYear() + 1].forEach(y => SHOWERS.forEach(sh => {
+      const peak = new Date(y, sh.m, sh.d, 2, 0, 0);
+      if (peak < start || peak > end) return;
+      const mf = A.Illumination("Moon", peak).phase_fraction;
+      const moonWord = mf < 0.25 ? "Dark Moon, so a good year for it." : mf < 0.6 ? "Some moonlight." : "Bright Moon will wash out the faint ones.";
+      add(startOfDay(peak), "meteor", sh.name + " meteor shower", "Up to " + sh.zhr + " an hour under a perfect sky. " + sh.tip + " " + moonWord);
+    }));
+
+    // Eclipses visible from here (including the subtle penumbral ones).
+    try {
+      let l = A.SearchLunarEclipse(start);
+      while (l && l.peak.date <= end) {
+        const alt = horizontal("Moon", l.peak.date, obs).alt;
+        if (alt > 3) add(l.peak.date, "lunar", (l.kind === "penumbral" ? "Subtle lunar eclipse" : l.kind[0].toUpperCase() + l.kind.slice(1) + " lunar eclipse"),
+          "Peak " + hm(l.peak.date) + ". " + (l.kind === "total" ? "The Moon turns copper-red." : l.kind === "partial" ? "Earth's shadow takes a bite out of the Moon." : "A faint shading on one side of the Moon. Easy to miss.") + " Safe to watch.");
+        l = A.NextLunarEclipse(l.peak);
+      }
+    } catch (e) { }
+    try {
+      let s = A.SearchLocalSolarEclipse(start, obs);
+      while (s && s.peak.time.date <= end) {
+        if (s.peak.altitude > 2) add(s.peak.time.date, "solar", s.kind[0].toUpperCase() + s.kind.slice(1) + " solar eclipse",
+          "Peak " + hm(s.peak.time.date) + ", " + Math.round(s.obscuration * 100) + "% of the Sun covered. Never look straight at it: eclipse glasses or a pinhole only.");
+        s = A.NextLocalSolarEclipse(s.peak.time, obs);
+      }
+    } catch (e) { }
+
+    // Outer planets at opposition: closest, brightest, up all night.
+    ["Mars", "Jupiter", "Saturn"].forEach(body => {
+      try {
+        const o = A.SearchRelativeLongitude(body, 0, start);
+        if (o && o.date <= end) add(o.date, "planet", body + " at its best",
+          "Opposite the Sun, so it rises at sunset and is up all night. As close and bright as it gets this year.");
+      } catch (e) { }
+    });
+
+    // Venus and Mercury at their greatest distance from the Sun.
+    ["Venus", "Mercury"].forEach(body => {
+      let t2 = start;
+      for (let i = 0; i < 4; i++) {
+        let e; try { e = A.SearchMaxElongation(body, t2); } catch (er) { break; }
+        if (!e || e.time.date > end) break;
+        const date = e.time.date;
+        const evening = e.visibility === "evening";
+        const di = dusks(date, obs);
+        const at = evening ? (di.civilDusk && new Date(+di.civilDusk + 15 * MIN)) : (di.civilDawn && new Date(+di.civilDawn - 15 * MIN));
+        const pos = at ? horizontal(body, at, obs) : null;
+        if (pos && pos.alt > (body === "Mercury" ? 5 : 3)) {
+          add(date, "planet",
+            body === "Mercury" ? "Best chance to see Mercury" : "Venus at its highest " + (evening ? "evening" : "morning") + " star",
+            (evening ? "After sunset" : "Before sunrise") + ", " + (pos.alt < 15 ? "low " : "") + "in the " + simpleDir(pos.az) + " around " + hm(at) + "." +
+            (body === "Mercury" ? " It's quick: you need a clear, flat horizon." : ""));
+        }
+        t2 = new Date(+date + 10 * DAY);
+      }
+    });
+
+    // Planet positions once a day, interpolated in between (planets barely move in a day).
+    const PL = ["Venus", "Jupiter", "Saturn", "Mars"];
+    const daily = {};
+    PL.forEach(body => {
+      daily[body] = [];
+      for (let k = 0; k <= days / 2 + 1; k++) daily[body].push(A.GeoVector(body, new Date(+start + k * 2 * DAY), true));
+    });
+    const planetAt = (body, ms) => {
+      const k = (ms - start) / (2 * DAY), i = Math.max(0, Math.min(daily[body].length - 2, Math.floor(k))), f = k - i;
+      const a = daily[body][i], b = daily[body][i + 1];
+      return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, z: a.z + (b.z - a.z) * f };
+    };
+    const sepDeg = (a, b) => {
+      const d = (a.x * b.x + a.y * b.y + a.z * b.z) / Math.sqrt((a.x * a.x + a.y * a.y + a.z * a.z) * (b.x * b.x + b.y * b.y + b.z * b.z));
+      return Math.acos(Math.max(-1, Math.min(1, d))) / RAD;
+    };
+    const fingers = sep => sep <= 1.5 ? "about a finger's width at arm's length" : sep <= 3 ? "about two fingers at arm's length" : "about three fingers at arm's length";
+
+    // The Moon passing close to a bright planet.
+    PL.forEach(body => {
+      const sepAt = ms => sepDeg(A.GeoMoon(new Date(ms)), planetAt(body, ms));
+      let p2 = null, p1 = null;
+      for (let ms = +start; ms <= +end; ms += 3 * HOUR) {
+        const sep = sepAt(ms);
+        if (p1 && p2 && p1.sep < p2.sep && p1.sep <= sep && p1.sep < 5) {
+          let best = p1;
+          for (let m2 = p1.ms - 3 * HOUR; m2 <= p1.ms + 3 * HOUR; m2 += 20 * MIN) { const s2 = sepAt(m2); if (s2 < best.sep) best = { ms: m2, sep: s2 }; }
+          const bt = new Date(best.ms);
+          const el = A.Elongation(body, bt).elongation;
+          const look = best.sep < 4.5 && el > 25 ? lookFor(body, bt, obs) : null;
+          if (look) add(startOfDay(bt), "pair", "The Moon meets " + body,
+            "Just " + Math.max(1, Math.round(best.sep)) + "° apart, " + fingers(best.sep) + ". " + lookWords(look), { body });
+        }
+        p2 = p1; p1 = { ms, sep };
+      }
+    });
+
+    // Two bright planets close together.
+    for (let i = 0; i < PL.length; i++) for (let j = i + 1; j < PL.length; j++) {
+      let p2 = null, p1 = null;
+      for (let k = 0; k <= days; k++) {
+        const ms = +start + k * DAY;
+        const sep = sepDeg(planetAt(PL[i], ms), planetAt(PL[j], ms));
+        if (p1 && p2 && p1.sep < p2.sep && p1.sep <= sep && p1.sep < 3) {
+          const tt = new Date(p1.ms);
+          const look = A.Elongation(PL[i], tt).elongation > 20 ? lookFor(PL[i], tt, obs) : null;
+          if (look) add(startOfDay(tt), "pair", PL[i] + " and " + PL[j] + " side by side",
+            "Just " + p1.sep.toFixed(1) + "° apart, " + fingers(p1.sep) + ". " + lookWords(look));
+        }
+        p2 = p1; p1 = { ms, sep };
+      }
+    }
+
+    ev.sort((a, b) => a.date - b.date);
+    // Always end with the next eclipse you can see, even if it's a long way off.
+    if (!ev.some(e => e.kind === "solar" || e.kind === "lunar")) {
+      const ne = nextEclipses(start, place);
+      const list = [];
+      if (ne.solar) list.push(["solar", ne.solar]);
+      if (ne.lunar) list.push(["lunar", ne.lunar]);
+      list.sort((a, b) => a[1].date - b[1].date);
+      if (list.length) {
+        const [k, e] = list[0];
+        ev.push({ date: e.date, kind: k, far: true, title: "Next eclipse you can see: " + e.kind + " " + k,
+          detail: k === "solar" ? "Peak " + hm(e.date) + ", " + Math.round(e.obscuration * 100) + "% of the Sun covered. Never look straight at it." : "Peak " + hm(e.date) + ". Safe to watch with bare eyes." });
+      }
+    }
+    return ev;
+  }
+
   root.Sky = {
     RAD, MIN, HOUR, DAY,
     startOfDay, addDays, atLocal, minutesOfDay, dayKey, sameDay, daysBetween, hm,
@@ -390,6 +564,6 @@
     observer, horizontal, sunAlt, dayInfo, milestones, seasonStory,
     moonInfo, moonWindow, moonPath, phaseName,
     nightWindow, planetsTonight, compass, compassShort, simpleDir,
-    nextShower, nextEclipses, scoreHours
+    nextShower, nextEclipses, scoreHours, skyEvents
   };
 })(typeof window !== "undefined" ? window : globalThis);

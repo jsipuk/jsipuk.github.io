@@ -7,7 +7,8 @@ const ctx = vm.createContext({ console, Date, Math });
 ctx.globalThis = ctx;
 vm.runInContext(fs.readFileSync(path.join(dir, "astronomy.min.js"), "utf8"), ctx);
 vm.runInContext(fs.readFileSync(path.join(dir, "sky.js"), "utf8"), ctx);
-const S = ctx.Sky;
+vm.runInContext(fs.readFileSync(path.join(dir, "weather.js"), "utf8"), ctx);
+const S = ctx.Sky, W = ctx.Weather;
 
 let fails = 0, passes = 0;
 function ok(cond, msg) { if (cond) passes++; else { fails++; console.log("FAIL", msg); } }
@@ -90,6 +91,39 @@ ok(nw.start.getDate() === 8 && nw.end.getDate() === 9, "2am belongs to the night
 const hrs = [9, 12, 15, 20].map(h => ({ t: new Date(2026, 10, 8, h), cloud: h === 12 ? 10 : 90, rain: 0 }));
 const sc = S.scoreHours(hrs, london);
 ok(sc[1].score > sc[0].score && sc[1].score > sc[2].score && sc[3].score === 0, "scoring");
+
+// 11. Sky calendar, 120 days from 8 Nov 2026.
+const t0 = Date.now();
+const ev = S.skyEvents(new Date(2026, 10, 8), london, 120);
+console.log("  sky calendar: " + ev.length + " events in " + (Date.now() - t0) + "ms");
+const has = (re, m, d) => ev.some(e => re.test(e.title) && e.date.getMonth() === m && (d == null || Math.abs(e.date.getDate() - d) <= 1));
+ok(has(/Supermoon: Beaver Moon/, 10, 24), "supermoon 24 Nov 2026");
+ok(has(/Geminids/, 11, 14), "Geminids 14 Dec");
+ok(has(/Jupiter at its best/, 1, 11), "Jupiter opposition ~11 Feb 2027");
+ok(has(/lunar eclipse/i, 1, 20), "penumbral lunar eclipse 20 Feb 2027");
+ok(has(/Jupiter and Mars side by side/, 10, 16), "Jupiter-Mars conjunction mid Nov 2026");
+ok(ev.every((e, i) => i === 0 || ev[i - 1].date <= e.date || e.far), "calendar sorted");
+
+// 12. Weather parsing and advice.
+const base = Date.UTC(2026, 10, 8) / 1000;
+const hourly = { time: [], temperature_2m: [], apparent_temperature: [], precipitation_probability: [], precipitation: [], weather_code: [], cloud_cover: [], wind_gusts_10m: [], is_day: [] };
+for (let i = 0; i < 48; i++) {
+  const h = i % 24, wet = i >= 15 && i <= 17;
+  hourly.time.push(base + i * 3600); hourly.temperature_2m.push(9); hourly.apparent_temperature.push(6);
+  hourly.precipitation_probability.push(wet ? 80 : 5); hourly.precipitation.push(wet ? 1 : 0);
+  hourly.weather_code.push(wet ? 61 : 3); hourly.cloud_cover.push(wet ? 100 : 60); hourly.wind_gusts_10m.push(20); hourly.is_day.push(h > 7 && h < 16 ? 1 : 0);
+}
+const wx = W.parse({ hourly, daily: { time: [base, base + 86400], weather_code: [61, 3], temperature_2m_max: [10, 9], temperature_2m_min: [4, 3], precipitation_probability_max: [80, 5], wind_gusts_10m_max: [20, 20], uv_index_max: [1, 1] }, current: { time: base + 9 * 3600, temperature_2m: 9, apparent_temperature: 6, weather_code: 3, is_day: 1, cloud_cover: 60, wind_speed_10m: 8, wind_gusts_10m: 20, precipitation: 0 } }, Date.now());
+ok(wx.hours.length === 48 && wx.days.length === 2 && wx.current.temp === 9, "weather parses");
+ok(wx.days[0].date.getDate() === 8, "daily rows land on the right date");
+ok(W.rainLine(wx, new Date(2026, 10, 8, 9)) === "Rain likely from 15:00.", "rain timing: " + W.rainLine(wx, new Date(2026, 10, 8, 9)));
+ok(/drying up around 18:00/.test(W.rainLine(wx, new Date(2026, 10, 8, 16, 10))), "rain stopping");
+const wr = W.wear(wx, new Date(2026, 10, 8, 9), new Date(2026, 10, 8, 17));
+ok(wr.label === "Today" && wr.text === "Warm coat and waterproofs.", "what to wear: " + wr.text);
+ok(W.wear(wx, new Date(2026, 10, 8, 20), null).label === "Tomorrow", "after dark, advice is for tomorrow");
+ok(W.describe(95)[1] === "thunder" && /<svg/.test(W.icon("rain", true)), "codes and icons");
+let threw = false; try { W.parse({ error: true, reason: "bad" }, 0); } catch (e) { threw = true; }
+ok(threw, "API errors are rejected");
 
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);
