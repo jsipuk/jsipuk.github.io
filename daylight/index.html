@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#141a46">
+<meta name="description" content="A live sky clock and weather. When the light goes, when it comes back, what to wear, and what's up there tonight.">
+<meta property="og:title" content="Daylight">
+<meta property="og:description" content="When the light goes, when it comes back, and what's up there tonight.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Daylight">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="style.css?v=2">
+<title>Daylight</title>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="glow" id="glow" aria-hidden="true"></div>
+<div class="veil" id="veil" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="home" href="/" aria-label="Back to jsip.uk">jsip.uk</a>
+  <h1 class="brand">Daylight</h1>
+  <button class="chip" id="place-btn" type="button" aria-haspopup="dialog">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.6" fill="currentColor"/></svg>
+    <span id="place-name">London</span>
+  </button>
+</header>
+
+<main class="layout">
+  <section class="hero" aria-label="Sky clock">
+    <div class="dial-wrap">
+      <svg id="dial" viewBox="-230 -230 460 460" role="slider" tabindex="0"
+           aria-label="Time of day. Drag or use arrow keys to move through the day."
+           aria-valuemin="0" aria-valuemax="1439" aria-valuenow="0"></svg>
+      <div class="dial-center" aria-live="off">
+        <p class="h-label" id="h-label">&nbsp;</p>
+        <p class="h-value" id="h-value">&nbsp;</p>
+        <p class="h-sub" id="h-sub">&nbsp;</p>
+      </div>
+    </div>
+    <div class="travel" id="travel" hidden>
+      <span id="travel-label"></span>
+      <button type="button" class="btn-now" id="now-btn">Back to now</button>
+    </div>
+    <p class="hint" id="hint">Drag the ring to move through the day.</p>
+  </section>
+
+  <div class="stack">
+    <section class="card" id="weather" aria-labelledby="wx-title">
+      <h2 id="wx-title">Weather</h2>
+      <div id="wx-body"></div>
+    </section>
+
+    <section class="tiles" id="tiles" aria-label="Today"></section>
+
+    <section class="card" id="plan">
+      <h2>Your light today</h2>
+      <ol class="plan" id="plan-list"></ol>
+      <div class="hours" id="hours" aria-hidden="true"></div>
+      <p class="hours-note" id="hours-note"></p>
+    </section>
+
+    <section class="card" id="road">
+      <h2 id="road-title">Coming up</h2>
+      <p class="lead" id="road-lead"></p>
+      <ol class="timeline" id="road-list"></ol>
+    </section>
+
+    <section class="card" id="tonight">
+      <h2 id="tonight-title">Tonight</h2>
+      <div class="moon-row">
+        <svg id="moon" viewBox="-60 -60 120 120" aria-hidden="true"></svg>
+        <div>
+          <p class="moon-name" id="moon-name"></p>
+          <p class="muted" id="moon-times"></p>
+          <p class="muted" id="moon-next"></p>
+        </div>
+      </div>
+      <p class="kids" id="kids"></p>
+      <p class="dark" id="dark"></p>
+      <ul class="planets" id="planets"></ul>
+      <div class="extras" id="extras"></div>
+    </section>
+
+    <section class="card" id="calendar">
+      <h2>Sky calendar</h2>
+      <p class="muted small" id="cal-lead"></p>
+      <ol class="cal" id="cal-list"></ol>
+      <button type="button" class="btn-ghost" id="cal-more" hidden></button>
+    </section>
+
+    <section class="card" id="year">
+      <h2>Your year of light</h2>
+      <p class="muted small">Each column is a day, top to bottom is midnight to midnight. Tap a day to visit it.</p>
+      <div class="ribbon-wrap">
+        <canvas id="ribbon" aria-label="Chart of daylight across the year"></canvas>
+      </div>
+      <ul class="legend" aria-hidden="true">
+        <li><i style="background:#0b1026"></i>Night</li>
+        <li><i style="background:#3b3577"></i>Twilight</li>
+        <li><i style="background:#f2a35a"></i>Golden hour</li>
+        <li><i style="background:#68ade6"></i>Day</li>
+      </ul>
+      <p class="muted small" id="year-facts"></p>
+    </section>
+
+    <footer class="foot">
+      <p>Every number on this page is worked out on your phone from the date and your location. Nothing is sent anywhere, unless you switch on the weather.</p>
+      <p>Astronomy by <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noopener">Astronomy Engine</a> (MIT). Forecasts, if on, by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>. Times are in your device's time zone.</p>
+      <p><a href="/">More from jsip.uk</a></p>
+    </footer>
+  </div>
+</main>
+
+<dialog id="settings" aria-labelledby="settings-title">
+  <form method="dialog" class="sheet">
+    <div class="sheet-head">
+      <h2 id="settings-title">Where are you?</h2>
+      <button class="x" value="close" aria-label="Close">&times;</button>
+    </div>
+    <button type="button" class="btn-wide" id="geo-btn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3" stroke="currentColor" stroke-width="2"/></svg>
+      Use my location
+    </button>
+    <p class="muted small" id="geo-msg">Rounded to about 1 km and kept on this device.</p>
+    <div class="cities" id="cities"></div>
+
+    <h3>Weather</h3>
+    <label class="toggle">
+      <input type="checkbox" id="wx-toggle">
+      <span class="track" aria-hidden="true"></span>
+      <span>Show the weather forecast</span>
+    </label>
+    <p class="muted small">Off until you switch it on. It's the only thing that makes Daylight use the internet: it asks Open-Meteo for the forecast, sending your location rounded to about 10 km. No account, no cookies.</p>
+  </form>
+</dialog>
+
+<script src="astronomy.min.js"></script>
+<script src="sky.js?v=2"></script>
+<script src="weather.js?v=2"></script>
+<script src="app.js?v=2"></script>
+</body>
+</html>
