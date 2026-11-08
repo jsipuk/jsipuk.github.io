@@ -1,1 +1,45 @@
-const CACHE='little-museum-v1';const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).then(res=>{if(res.ok&&new URL(e.request.url).pathname.startsWith(new URL(self.registration.scope).pathname)){const copy=res.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return res}).catch(()=>caches.match('./index.html'))))});
+// Little Museum offline support. The site's pages are refreshed online and kept for offline use.
+const CACHE = 'little-museum-v2';
+const PREFIX = 'little-museum-';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+const indexURL = new URL('./index.html', self.registration.scope).href;
+const scopePath = new URL(self.registration.scope).pathname;
+
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE)
+    .then(cache => cache.addAll(ASSETS))
+    .then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys()
+    .then(names => Promise.all(names
+      .filter(name => name.startsWith(PREFIX) && name !== CACHE)
+      .map(name => caches.delete(name))))
+    .then(() => self.clients.claim()));
+});
+
+async function fetchAndRemember(request) {
+  const response = await fetch(request);
+  if (response.ok) {
+    try {
+      const cache = await caches.open(CACHE);
+      await cache.put(request.mode === 'navigate' ? indexURL : request, response.clone());
+    } catch (_) { /* Cache full or unavailable: serve the network response anyway. */ }
+  }
+  return response;
+}
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  const url = new URL(request.url);
+  if (request.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith(scopePath)) return;
+
+  event.respondWith((async () => {
+    if (request.mode === 'navigate') {
+      try { return await fetchAndRemember(request); }
+      catch (_) { return await caches.match(indexURL) || Response.error(); }
+    }
+    return await caches.match(request) || await fetchAndRemember(request);
+  })());
+});
