@@ -56,6 +56,8 @@ function handleEvents(events: GameEvent[]): void {
         scene?.pop(`Parked · ${formatSeconds(e.lapSeconds)}`, session.van, PALETTE_AMBER);
         break;
       case 'logged': {
+        // A plain DOM hook for test harnesses; the game itself sends nothing anywhere.
+        window.dispatchEvent(new CustomEvent('lowbridge:lap', { detail: { ...e.record, build: BUILD } }));
         const laps = appendLap(e.record, BUILD);
         hud.renderLaps(laps);
         const bumps = e.record.bumps === 0 ? 'no bumps' : `${e.record.bumps} bump${e.record.bumps === 1 ? '' : 's'}`;

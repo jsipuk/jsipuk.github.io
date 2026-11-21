@@ -48,3 +48,21 @@ test('no input produces no movement in either preset', () => {
     assert.equal(c.brake, false);
   }
 });
+
+test('pad pulled back from a standstill reverses', () => {
+  const c = vehicleControls({ ...NO_INPUT, padY: 1 }, 'pad', NORTH, 0);
+  assert.equal(c.brake, true, 'brake/reverse engaged');
+  assert.equal(c.throttle, 0);
+  assert.ok(Math.abs(c.steer) < 1e-9, 'straight back');
+});
+
+test('pad pulled back while driving forwards brakes in a straight line first', () => {
+  const c = vehicleControls({ ...NO_INPUT, padY: 1, padX: 0.3 }, 'pad', NORTH, 120);
+  assert.deepEqual(c, { throttle: 0, steer: 0, brake: true });
+});
+
+test('pad to the side drives forwards from a standstill, but keeps reversing once moving back', () => {
+  const side = { ...NO_INPUT, padX: 1, padY: 0.25 }; // about 104° off a north-facing van
+  assert.equal(vehicleControls(side, 'pad', NORTH, 0).brake, false, 'standstill: drive forwards');
+  assert.equal(vehicleControls(side, 'pad', NORTH, -30).brake, true, 'already reversing: stay in reverse');
+});

@@ -260,7 +260,7 @@ export function stepSession(s: Session, raw: RawInput, dt: number): GameEvent[] 
   s.simTime += dt;
 
   if (s.locomotion === 'van') {
-    const controls = vehicleControls(raw, s.preset, s.van.heading);
+    const controls = vehicleControls(raw, s.preset, s.van.heading, s.van.speed);
     const driving = controls.throttle > 0 || controls.brake || Math.abs(s.van.speed) > 1;
     if (driving && !s.run.presetsUsed.includes(s.preset)) s.run.presetsUsed.push(s.preset);
     const result = stepVehicle(VAN, s.van, controls, dt, {

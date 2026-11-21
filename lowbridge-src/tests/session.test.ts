@@ -151,3 +151,18 @@ test('with no input after an interruption the van stays put', () => {
   for (let t = 0; t < 2; t += STEP) stepSession(s, NO_INPUT, STEP);
   assert.equal(s.van.x, x);
 });
+
+test('pad preset: pull the pad back and the van backs up the way the thumb points', () => {
+  const s = fresh('pad');
+  walkTo(s, { x: 76, y: 664 });
+  interact(s);
+  // Facing east in the forecourt. Pull the pad west: it should reverse, nose still east.
+  const x = s.van.x;
+  for (let t = 0; t < 0.4; t += STEP) stepSession(s, { ...NO_INPUT, padX: -1 }, STEP);
+  assert.ok(s.van.speed < 0, `reversing at ${s.van.speed.toFixed(1)} px/s`);
+  assert.ok(s.van.x < x - 5, 'moved west');
+  assert.ok(Math.abs(s.van.heading) < 0.05, 'still facing east');
+  // Push east again: it stops reversing and drives forwards.
+  for (let t = 0; t < 1; t += STEP) stepSession(s, { ...NO_INPUT, padX: 1 }, STEP);
+  assert.ok(s.van.speed > 0);
+});

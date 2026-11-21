@@ -1,8 +1,9 @@
 // Turns raw thumb and key state into semantic movement for the current preset.
 //
-// Preset A, "pad": push a thumb pad towards a screen direction; the van steers
-// to face it and drives. Let go and it rolls to a stop. Brake/Reverse is a
-// separate control; while it is held the pad aims the rear of the van.
+// Preset A, "pad": the van moves towards the thumb. Push ahead or to the side
+// and it steers to face that way and drives. Pull back (well behind where it
+// faces) and it brakes, then reverses with its rear swinging towards the thumb.
+// Let go and it rolls to a stop. Brake/Reverse is also a separate button.
 // Preset B, "wheel": left/right steer, Go is the throttle, let go to slow.
 // Brake/Reverse is the same separate control.
 // Walking always uses the screen-relative pad in both presets.
@@ -17,7 +18,7 @@ export const PRESETS: Record<SteeringPreset, { letter: string; name: string; sum
   pad: {
     letter: 'A',
     name: 'Thumb pad',
-    summary: 'Push towards where you want to go. Let go to stop.',
+    summary: 'Push where you want to go. Pull back to reverse. Let go to stop.',
   },
   wheel: {
     letter: 'B',
@@ -63,8 +64,17 @@ export const walkVector = (raw: RawInput): Vec => padVector(raw);
 
 /** Angle error (radians) that gives full steering lock in the pad preset. */
 const PAD_FULL_LOCK = 0.45;
+/** Pull the pad further than this from the van's facing (about 115°) and it backs up. */
+export const PAD_REVERSE_START = 2.0;
+/** Once reversing, it stays in reverse until the thumb is back within about 80°. */
+export const PAD_REVERSE_HOLD = 1.4;
 
-export function vehicleControls(raw: RawInput, preset: SteeringPreset, heading: number): VehicleControls {
+export function vehicleControls(
+  raw: RawInput,
+  preset: SteeringPreset,
+  heading: number,
+  speed = 0,
+): VehicleControls {
   if (preset === 'wheel') {
     return {
       throttle: clamp(raw.wheelThrottle, 0, 1),
@@ -77,16 +87,19 @@ export function vehicleControls(raw: RawInput, preset: SteeringPreset, heading: 
   const mag = Math.hypot(pad.x, pad.y);
   if (mag === 0) return { throttle: 0, steer: 0, brake: raw.brake };
   const target = Math.atan2(pad.y, pad.x);
-
-  if (raw.brake) {
-    // Reversing: swing the rear towards the pushed direction.
-    const diff = angleDiff(target, heading + Math.PI);
-    return { throttle: 0, steer: clamp(-diff / PAD_FULL_LOCK, -1, 1), brake: true };
-  }
-
   const diff = angleDiff(target, heading);
   const off = Math.abs(diff);
+  const backwards = off > (speed < -2 ? PAD_REVERSE_HOLD : PAD_REVERSE_START);
+
+  if (backwards || raw.brake) {
+    // Still rolling forwards: brake first. Pulling back brakes in a straight line.
+    if (speed > 4) return { throttle: 0, steer: backwards ? 0 : clamp(diff / PAD_FULL_LOCK, -1, 1), brake: true };
+    // Stopped or reversing: back up, swinging the rear towards the thumb.
+    const rear = angleDiff(target, heading + Math.PI);
+    return { throttle: 0, steer: clamp(-rear / PAD_FULL_LOCK, -1, 1), brake: true };
+  }
+
   // Ease off while swinging round so a sharp push turns rather than overshoots.
-  const ease = off > 2.3 ? 0.55 : off > 1.2 ? 0.75 : 1;
+  const ease = off > 1.2 ? 0.75 : 1;
   return { throttle: mag * ease, steer: clamp(diff / PAD_FULL_LOCK, -1, 1), brake: false };
 }

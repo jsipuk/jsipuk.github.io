@@ -169,7 +169,8 @@ async function lap(page, preset) {
   return record;
 }
 
-// Pad preset, short check: drive north, let go and roll to a stop, reverse, get out.
+// Pad preset, short check: drive north, let go and roll to a stop, pull back to
+// reverse, reverse on the Brake button, get out.
 // The 8-way keyboard pad weaves on long runs, so full pad laps are covered by
 // `npm test` with analogue input instead.
 async function padCheck(page) {
@@ -199,6 +200,12 @@ async function padCheck(page) {
   const moving = (await snap()).van;
   await page.waitForTimeout(1500);
   const rolled = (await snap()).van;
+  // Pull the pad back (down, with the van facing north): it should reverse.
+  await page.keyboard.down(KEYS.down);
+  await page.waitForTimeout(700);
+  const pulledBack = (await snap()).van;
+  await page.keyboard.up(KEYS.down);
+  await page.waitForTimeout(1200);
   await page.keyboard.down(KEYS.brake);
   await page.waitForTimeout(900);
   const reversing = (await snap()).van;
@@ -209,12 +216,13 @@ async function padCheck(page) {
   const checks = {
     'drove north': start.y - moving.y > 30,
     'let go and rolled to a stop': rolled.speed === 0,
+    'pulled the pad back and reversed': pulledBack.speed < 0 && pulledBack.y > rolled.y,
     'reversed on Brake': reversing.speed < 0,
     'got out': out.locomotion === 'foot',
   };
   const failed = Object.entries(checks).filter(([, ok]) => !ok).map(([name]) => name);
   if (failed.length) throw new Error(`pad check failed: ${failed.join(', ')}`);
-  console.log(`pad: drove ${Math.round(start.y - moving.y)} px north, rolled to a stop, reversed, got out`);
+  console.log(`pad: drove ${Math.round(start.y - moving.y)} px north, rolled to a stop, pulled back to reverse ${Math.round(pulledBack.y - rolled.y)} px, reversed on Brake, got out`);
 }
 
 const browser = await chromium.launch();

@@ -47,6 +47,7 @@ Simulated and physical results stay in separate rows. Copy the build ID from the
 | Date | Build | Device, iOS, browser | Test | Physical? | Result | Preferred scheme, overshot junctions, thumb occlusion, notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-11-21 | m0-2026-11-21 (pre-commit) | Linux container, headless Chromium 844 × 390 | A01 keyboard lap, both presets; held key through blur | No (simulated) | See build board M0 record | Scripted driver, not a person. |
+| 2026-11-21 | m0-2026-11-21-27de4d6 | iPhone (model and iOS not recorded), private claude.ai page | Free play, both presets | Yes, but framed inside claude.ai | Smooth | Pad plus separate Reverse button felt tricky. Pull-back reverse added in the next build. |
 | | | iPhone ___, iOS ___, Safari | Two-minute M0 test, tester 1 | Yes | Pending | |
 | | | iPhone ___, iOS ___, Safari | Two-minute M0 test, tester 2 | Yes | Pending | |
 | | | iPhone ___, iOS ___, Safari | Two-minute M0 test, tester 3 | Yes | Pending | |

@@ -59,7 +59,7 @@ Built 21 November 2026 in `jsipuk.github.io/lowbridge-src/`, beside the site's o
 | Landmarks | Depot and forecourt west of Depot Lane. Ticket office on the south side of Station Road. A shut builders' yard gate north of Station Road at x 20–24, where T04's yard road leaves ticket_office (22,30). | Keeps x 22 north of Station Road clear for the yard road and shutter. |
 | Bay and phone | Bay on the northbound (left-hand) kerb of Depot Lane; payphone on the pavement beside its north end. | Fixture puts the payphone at the depot. The lap ends where it started: park, get out, answer. |
 | Phone | Rings at spawn, as in Q01. Answering early plays Mo's line. It rings again once you park after a lap; answering then logs the lap. | Both "answer first" and "ignore it" stay valid, and each preset run still ends on answering. |
-| Pad preset (A) | The van steers to face the pushed direction (full lock at 26° off), easing throttle on sharp turns. Release rolls to a stop. With Brake held the pad aims the rear. | Same physics as B; only the input mapping differs. |
+| Pad preset (A) | The van moves towards the thumb. Ahead or to the side: it steers to face that way (full lock at 26° off), easing throttle on sharp turns. Pulled back more than about 115° from its facing: it brakes in a straight line, then reverses with the rear swinging towards the thumb, and stays in reverse until the thumb is back within about 80°. Release rolls to a stop. The Brake/Reverse button still works, with the same rear-towards-thumb steering. | Same physics as B; only the input mapping differs. Pull-back reverse added on 21 November after the first phone session found the pad plus a separate reverse button tricky. |
 | Wheel preset (B) | Left/Right steer zone (a thumb can slide across), Go, separate Brake/Reverse. On a keyboard, Down also brakes. | As specified. |
 | Stopping near points of interest | Rolling drag doubles within 56 px of the bay. | "Short stopping distance near points of interest." |
 | Kerbs | Pavements are drivable but cap the van at 80 px/s. Buildings, lamp posts, the phone box and the barrier are solid. | Readable bumps without trapping the van. |
@@ -68,6 +68,7 @@ Built 21 November 2026 in `jsipuk.github.io/lowbridge-src/`, beside the site's o
 | Time | Fixed 1/60 s step; a frame counts at most 0.1 s; accumulated time resets on resume. | No giant step after backgrounding. |
 | Camera | North-up. Zoom shows about 26 tiles across and at least 14 tiles top to bottom (1.74× on an 844 × 390 iPhone, 3× cap on desktop). Look-ahead is 0.6 s of travel, capped at 28% of the view. Bounds extend 10 tiles past the block so the courier stays mid-screen, clear of the thumb controls. | First screenshot showed the pad covering the van at the map edge. |
 | Storage | Steering, sound, reduced motion and a lap log in `localStorage`, guarded. | Convenience only. Story saves go to IndexedDB in M1. |
+| Playtest capture | The game sends nothing anywhere. It fires a `lowbridge:lap` DOM event when a lap is logged. Only the private claude.ai test page listens for it, saving each lap and any page error (with build ID, screen size and browser) to that page's own store for Claude to read. | Requested by the owner so remote phone sessions can be reviewed. The technical plan's no-telemetry rule still holds for the jsip.uk build. |
 | Rendering | Canvas-drawn placeholder art at 2×; device pixel ratio capped at 2. | Crisp on iPhone without rendering 3× pixels. |
 
 ### Van tune (src/rules/vehicle.ts)
@@ -78,18 +79,20 @@ Top speed 150 px/s (9.4 tiles/s), reverse 55, accel 200 px/s², brake 460, coast
 
 | Check | Result | Environment |
 | --- | --- | --- |
-| Fresh `npm ci`, `npm run typecheck`, `npm test`, `npm run build` | Pass. 24 of 24 tests. JS 370 KB gzipped (budget 5 MB). | Linux container, Node 22.23.5, npm 10.9.9 |
+| Fresh `npm ci`, `npm run typecheck`, `npm test`, `npm run build` | Pass. 28 of 28 tests after pull-back reverse. JS 370 KB gzipped (budget 5 MB). | Linux container, Node 22.23.5, npm 10.9.9 |
 | Rules: both presets complete the lap, park, get out on the pavement and answer (scripted, no rendering) | Pass, no bumps | `npm test` |
 | Preview at `/lowbridge/` loads with no page errors | Pass | Headless Chromium (Playwright 1.63), 844 × 390 |
-| Keyboard lap in the browser | Wheel preset: walk, get in, lap, park, get out, answer, lap logged; 36 s, 0 bumps (scripted driver, cautious). Pad preset: drove 82 px north, let go and rolled to a stop, reversed, got out. | `scripts/smoke-m0.mjs` |
+| Keyboard lap in the browser | Wheel preset: walk, get in, lap, park, get out, answer, lap logged; 36 s, 0 bumps (scripted driver, cautious). Pad preset: drove 82 px north, let go and rolled to a stop, pulled back and reversed 29 px, reversed on Brake, got out. | `scripts/smoke-m0.mjs` |
 | Hold a key, lose focus, resume with the key still down | Pass. Paused on blur; 0 px of movement after resume until a fresh press. | `scripts/smoke-m0.mjs` |
-| Two thumbs at once, rotation, Safari, Home Screen | **Not run.** Needs a phone. | |
+| First phone session (owner) | "Felt smooth." Pad steering with the separate reverse button was tricky, which led to pull-back reverse. | iPhone, inside the private claude.ai page, not standalone Safari. Device and iOS version not recorded. |
+| Two thumbs at once, rotation, standalone Safari, Home Screen | **Not run.** | |
 | M0 gate: three people, iPhone, lap/park/exit/answer, preferred scheme | **Pending** | |
 
 ### Known issues and things to watch on the phone
 
+- Pull-back reverse is new and untested on a phone. Check that pulling back to stop and reverse feels natural, and that nobody triggers it by accident when swinging round a corner.
 - Keyboard in the pad preset gives eight directions only. A diagonal means "turn 45°", so a scripted driver weaved on straights and overshot corners. Touch is analogue and the rules tests lap cleanly with it, but watch for overshot junctions in the pad preset.
-- Turning late into a wall with the pad preset scrapes along it; Brake/Reverse backs out. Note whether testers find that without coaching.
+- Turning late into a wall with the pad preset scrapes along it; pulling back or Brake/Reverse backs out. Note whether testers find that without coaching.
 - Look-ahead and zoom were tuned on desktop emulation. Check on the phone that the next junction is visible before you reach it.
 - Each iPhone tap on Get in, Get out and Answer fires on release. Check it feels immediate while the other thumb holds the pad.
 - Audio is synthesised and quiet. Starts only after the Start tap.
