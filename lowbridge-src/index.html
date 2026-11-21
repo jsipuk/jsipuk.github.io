@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#0b1417" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="robots" content="noindex" />
+    <title>Lowbridge After Dark</title>
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div id="game" aria-hidden="true"></div>
+
+    <div id="hud" data-loco="foot" data-preset="pad" data-touch="0" data-mode="paused">
+      <div class="job" id="job" role="status" aria-live="polite">
+        <span class="job-arrow" id="job-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 12h12M11 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span id="job-text">Walk to the van</span>
+      </div>
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+      <button class="hud-btn" id="pause-btn" type="button" tabindex="-1" aria-label="Pause">
+        <span aria-hidden="true">❚❚</span> Pause
+      </button>
+      <div class="caption" id="caption" role="status" aria-live="polite" hidden></div>
+
+      <div class="pad-zone touch-only" id="pad-zone">
+        <div class="pad-base" id="pad-base">
+          <div class="pad-knob" id="pad-knob"></div>
+          <span class="pad-label" id="pad-label">Walk</span>
+        </div>
+      </div>
+      <div class="steer-zone touch-only" id="steer-zone" role="group" aria-label="Steering">
+        <div class="steer-half" data-dir="-1"><span aria-hidden="true">◀</span> Left</div>
+        <div class="steer-half" data-dir="1">Right <span aria-hidden="true">▶</span></div>
+      </div>
+      <button class="hud-btn hold touch-only" id="go-btn" type="button" tabindex="-1">Go</button>
+      <button class="hud-btn hold touch-only" id="brake-btn" type="button" tabindex="-1">Brake<br />Reverse</button>
+      <button class="hud-btn act" id="act-btn" type="button" tabindex="-1" hidden>
+        <span id="act-verb">Get in</span>
+        <small id="act-reason"></small>
+      </button>
+      <div class="keys desktop-only" aria-hidden="true">
+        <span><kbd>WASD</kbd>/<kbd>arrows</kbd> move</span>
+        <span><kbd>Space</kbd> brake/reverse</span>
+        <span><kbd>E</kbd> act</span>
+        <span><kbd>Esc</kbd> pause</span>
+      </div>
+    </div>
+
+    <div class="dialogue" id="dialogue" role="dialog" aria-labelledby="dlg-speaker" hidden>
+      <p class="dlg-speaker"><span id="dlg-speaker">Mo Vale</span> <small id="dlg-role"></small></p>
+      <p class="dlg-text" id="dlg-text"></p>
+      <button class="primary" id="dlg-close" type="button">Hang up</button>
+    </div>
+
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+      <div class="sheet-body">
+        <p class="eyebrow">M0 · handling test</p>
+        <h1 id="sheet-title">Lowbridge After Dark</h1>
+        <p class="lede" id="sheet-lede">
+          Walk to the van. Drive round the block, park in the marked bay by the phone box, get out and answer the
+          phone.
+        </p>
+        <p class="portrait-hint" id="portrait-hint">Turn your phone sideways for driving. This menu works either way.</p>
+        <button class="primary" id="resume-btn" type="button">Start</button>
+
+        <fieldset class="presets">
+          <legend>Steering</legend>
+          <label class="preset">
+            <input type="radio" name="preset" value="pad" />
+            <span><b>A · Thumb pad</b> <span>Push towards where you want to go. Let go to stop.</span></span>
+          </label>
+          <label class="preset">
+            <input type="radio" name="preset" value="wheel" />
+            <span><b>B · Wheel and pedals</b> <span>Left and right steer. Hold Go. Let go to slow down.</span></span>
+          </label>
+          <p class="note">Both use the same van. Brake/Reverse is its own button in both.</p>
+        </fieldset>
+
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="mute" /> Sound off</label>
+          <label class="toggle"><input type="checkbox" id="reduce-motion" /> Reduce motion</label>
+        </div>
+
+        <section class="laps" aria-labelledby="laps-title">
+          <h2 id="laps-title">Lap log</h2>
+          <p class="note" id="laps-empty">No laps yet. A lap is logged when you answer the phone after parking.</p>
+          <ol id="lap-log"></ol>
+        </section>
+
+        <div class="row">
+          <button type="button" id="restart-btn">Restart the test</button>
+          <button type="button" id="clear-log-btn">Clear lap log</button>
+        </div>
+
+        <details class="keyhelp">
+          <summary>Keyboard</summary>
+          <ul>
+            <li><kbd>W A S D</kbd> or arrows: walk, or drive with the pad preset (B: left/right steer, up is Go, down brakes)</li>
+            <li><kbd>Space</kbd>: brake, then reverse</li>
+            <li><kbd>E</kbd> or <kbd>Enter</kbd>: the action on the button (Get in, Get out, Answer, Hang up)</li>
+            <li><kbd>Esc</kbd> or <kbd>P</kbd>: pause · <kbd>1</kbd>/<kbd>2</kbd>: steering A/B · <kbd>M</kbd>: sound</li>
+          </ul>
+        </details>
+        <p class="build">Build <span id="build-id"></span> · local placeholder art</p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,186 @@
+{
+  "format": "lowbridge-design-fixture",
+  "version": 1,
+  "district": "riverside",
+  "map": {
+    "widthTiles": 72,
+    "heightTiles": 48,
+    "tilePixels": 16
+  },
+  "nodes": {
+    "depot": [
+      9,
+      39
+    ],
+    "depot_corner": [
+      9,
+      30
+    ],
+    "ticket_office": [
+      22,
+      30
+    ],
+    "ring_east": [
+      61,
+      30
+    ],
+    "ring_north": [
+      61,
+      12
+    ],
+    "yard_in": [
+      22,
+      20
+    ],
+    "yard_out": [
+      34,
+      20
+    ],
+    "merge": [
+      34,
+      12
+    ],
+    "fork": [
+      34,
+      7
+    ],
+    "quay": [
+      12,
+      7
+    ],
+    "market": [
+      56,
+      7
+    ]
+  },
+  "edgeConvention": "Bidirectional. An omitted flag means always traversable. Distances use tile centres.",
+  "roads": [
+    [
+      "depot",
+      "depot_corner"
+    ],
+    [
+      "depot_corner",
+      "ticket_office"
+    ],
+    [
+      "ticket_office",
+      "ring_east"
+    ],
+    [
+      "ring_east",
+      "ring_north"
+    ],
+    [
+      "ring_north",
+      "merge"
+    ],
+    [
+      "ticket_office",
+      "yard_in"
+    ],
+    [
+      "yard_in",
+      "yard_out",
+      "yard_shutter_open"
+    ],
+    [
+      "yard_out",
+      "merge"
+    ],
+    [
+      "merge",
+      "fork"
+    ],
+    [
+      "fork",
+      "quay"
+    ],
+    [
+      "fork",
+      "market"
+    ]
+  ],
+  "actors": {
+    "player_spawn": "depot",
+    "payphone": "depot",
+    "van": "depot",
+    "express_car": "ticket_office",
+    "wild_clatterjack": "ticket_office",
+    "shutter_interact": "yard_in",
+    "mo_vale": "quay",
+    "nell_price": "market"
+  },
+  "initial": {
+    "team": [
+      "wickwing"
+    ],
+    "roster": [
+      "wickwing"
+    ],
+    "trust": {
+      "ferry": 0,
+      "market": 0
+    },
+    "flags": [],
+    "cargo": [],
+    "heat": 0
+  },
+  "job": {
+    "id": "Q01",
+    "name": "One good battery",
+    "exclusiveOutcomeGroup": "Q01_battery_handover",
+    "stages": [
+      "offered",
+      "carrying",
+      "delivered"
+    ],
+    "item": "spare_battery",
+    "counterofferTrigger": "first_departure_from_depot_while_carrying",
+    "itemFollowsPlayer": true,
+    "canCompleteWithoutRecruit": true,
+    "recoverAt": "depot",
+    "encounter": {
+      "id": "ticket_crab",
+      "startPose": "raised_claws",
+      "calmAction": "dim",
+      "calmPose": "claws_lowered",
+      "offer": "washer",
+      "invalidOfferConsumesItem": false,
+      "recruit": "clatterjack",
+      "opensWithFieldUse": {
+        "action": "lift",
+        "flag": "yard_shutter_open"
+      }
+    },
+    "branches": [
+      {
+        "recipient": "mo_vale",
+        "location": "quay",
+        "trustDelta": {
+          "ferry": 1,
+          "market": -1
+        },
+        "addsFlag": "ferry_running",
+        "nextJob": "Q02F"
+      },
+      {
+        "recipient": "nell_price",
+        "location": "market",
+        "trustDelta": {
+          "ferry": -1,
+          "market": 1
+        },
+        "addsFlag": "market_lit",
+        "nextJob": "Q02M"
+      }
+    ]
+  },
+  "shiftOneNext": {
+    "Q02F": "Q03",
+    "Q02M": "Q03",
+    "Q03": "Q04",
+    "Q04": "SHIFT_01_CLOSE",
+    "SHIFT_01_CLOSE": "SHIFT_02"
+  }
+}

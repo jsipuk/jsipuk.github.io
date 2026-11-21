@@ -1,0 +1,245 @@
+// Keyboard and touch both become one RawInput snapshot. Held state is dropped
+// on any interruption, and a key still physically held afterwards must be
+// pressed again before it counts.
+
+import type { RawInput, SteeringPreset } from './rules/controls.ts';
+import { NO_INPUT } from './rules/controls.ts';
+import { clamp } from './rules/math.ts';
+
+export interface InputHandlers {
+  onInteract(): void;
+  onPauseToggle(): void;
+  onPreset(preset: SteeringPreset): void;
+  onMuteToggle(): void;
+  /** Any press: used to unlock audio. */
+  onGesture(): void;
+  onTouchSeen(): void;
+  /** False while the pause sheet is open, so its form controls get the keys. */
+  worldKeysActive(): boolean;
+}
+
+export interface Input {
+  read(): RawInput;
+  clear(): void;
+}
+
+const KEYS = {
+  up: ['ArrowUp', 'KeyW'],
+  down: ['ArrowDown', 'KeyS'],
+  left: ['ArrowLeft', 'KeyA'],
+  right: ['ArrowRight', 'KeyD'],
+  brake: ['Space'],
+};
+const HELD_KEYS = new Set(Object.values(KEYS).flat());
+const PAD_TRAVEL = 52;
+
+const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+export function createInput(h: InputHandlers): Input {
+  const held = new Set<string>();
+  const any = (codes: string[]) => codes.some((c) => held.has(c));
+
+  // ---------------------------------------------------------- keyboard
+  window.addEventListener('keydown', (e) => {
+    h.onGesture();
+    const target = e.target as HTMLElement | null;
+    const onControl = !!target?.closest?.('.sheet, .dialogue');
+    if (e.code === 'Escape' || e.code === 'KeyP') {
+      e.preventDefault();
+      if (!e.repeat) h.onPauseToggle();
+      return;
+    }
+    if (!h.worldKeysActive() || onControl) return;
+    if (HELD_KEYS.has(e.code)) {
+      e.preventDefault();
+      // A repeat for a key we are not tracking means it was held through an interruption.
+      if (e.repeat && !held.has(e.code)) return;
+      held.add(e.code);
+      return;
+    }
+    if (e.repeat) return;
+    if (e.code === 'KeyE' || e.code === 'Enter') {
+      e.preventDefault();
+      h.onInteract();
+    } else if (e.code === 'Digit1') h.onPreset('pad');
+    else if (e.code === 'Digit2') h.onPreset('wheel');
+    else if (e.code === 'KeyM') h.onMuteToggle();
+  });
+  window.addEventListener('keyup', (e) => {
+    held.delete(e.code);
+  });
+
+  // ------------------------------------------------------------- touch
+  window.addEventListener(
+    'pointerdown',
+    (e) => {
+      h.onGesture();
+      if (e.pointerType === 'touch') h.onTouchSeen();
+    },
+    { capture: true, passive: true },
+  );
+
+  const zone = $('pad-zone');
+  const base = $('pad-base');
+  const knob = $('pad-knob');
+  let padPointer: number | null = null;
+  let origin = { x: 0, y: 0 };
+  let pad = { x: 0, y: 0 };
+
+  const resetPad = () => {
+    padPointer = null;
+    pad = { x: 0, y: 0 };
+    base.style.transform = '';
+    knob.style.transform = '';
+    base.classList.remove('active');
+  };
+  const movePad = (e: PointerEvent) => {
+    const dx = e.clientX - origin.x;
+    const dy = e.clientY - origin.y;
+    const len = Math.hypot(dx, dy);
+    const k = len > PAD_TRAVEL ? PAD_TRAVEL / len : 1;
+    knob.style.transform = `translate(${dx * k}px, ${dy * k}px)`;
+    pad = { x: (dx * k) / PAD_TRAVEL, y: (dy * k) / PAD_TRAVEL };
+  };
+  zone.addEventListener('pointerdown', (e) => {
+    if (padPointer !== null) return;
+    e.preventDefault();
+    padPointer = e.pointerId;
+    zone.setPointerCapture(e.pointerId);
+    // The pad re-centres under the thumb, kept inside its zone.
+    const zr = zone.getBoundingClientRect();
+    const br = base.getBoundingClientRect();
+    const half = br.width / 2;
+    const cx = clamp(e.clientX, zr.left + half, zr.right - half);
+    const cy = clamp(e.clientY, zr.top + half, zr.bottom - half);
+    base.style.transform = `translate(${cx - (br.left + half)}px, ${cy - (br.top + half)}px)`;
+    base.classList.add('active');
+    origin = { x: cx, y: cy };
+    movePad(e);
+  });
+  zone.addEventListener('pointermove', (e) => {
+    if (e.pointerId === padPointer) movePad(e);
+  });
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+    zone.addEventListener(type, (e) => {
+      if (e.pointerId === padPointer) resetPad();
+    });
+  }
+
+  // Wheel preset: one zone so a thumb can slide between left and right.
+  const steerZone = $('steer-zone');
+  const halves = Array.from(steerZone.querySelectorAll<HTMLElement>('.steer-half'));
+  const steerPointers = new Map<number, number>();
+  const steerValue = () => clamp([...steerPointers.values()].reduce((a, b) => a + b, 0), -1, 1);
+  const paintSteer = () => {
+    const dirs = new Set(steerPointers.values());
+    for (const half of halves) half.classList.toggle('pressed', dirs.has(Number(half.dataset.dir)));
+  };
+  const steerDir = (e: PointerEvent) => {
+    const r = steerZone.getBoundingClientRect();
+    return e.clientX < r.left + r.width / 2 ? -1 : 1;
+  };
+  steerZone.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    steerZone.setPointerCapture(e.pointerId);
+    steerPointers.set(e.pointerId, steerDir(e));
+    paintSteer();
+  });
+  steerZone.addEventListener('pointermove', (e) => {
+    if (!steerPointers.has(e.pointerId)) return;
+    steerPointers.set(e.pointerId, steerDir(e));
+    paintSteer();
+  });
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+    steerZone.addEventListener(type, (e) => {
+      steerPointers.delete(e.pointerId);
+      paintSteer();
+    });
+  }
+
+  const holdButton = (el: HTMLElement) => {
+    const pointers = new Set<number>();
+    el.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      el.setPointerCapture(e.pointerId);
+      pointers.add(e.pointerId);
+      el.classList.add('pressed');
+    });
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+      el.addEventListener(type, (e) => {
+        pointers.delete(e.pointerId);
+        el.classList.toggle('pressed', pointers.size > 0);
+      });
+    }
+    el.addEventListener('contextmenu', (e) => e.preventDefault());
+    return {
+      held: () => pointers.size > 0,
+      clear: () => {
+        pointers.clear();
+        el.classList.remove('pressed');
+      },
+    };
+  };
+  const go = holdButton($('go-btn'));
+  const brake = holdButton($('brake-btn'));
+
+  const tapButton = (el: HTMLElement, fn: () => void) => {
+    let lastPointerTap = 0;
+    el.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      el.setPointerCapture(e.pointerId);
+      el.classList.add('pressed');
+    });
+    el.addEventListener('pointerup', (e) => {
+      el.classList.remove('pressed');
+      const r = el.getBoundingClientRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+        lastPointerTap = performance.now();
+        fn();
+      }
+    });
+    el.addEventListener('pointercancel', () => el.classList.remove('pressed'));
+    // Screen readers and switch access arrive as plain clicks.
+    el.addEventListener('click', () => {
+      if (performance.now() - lastPointerTap > 700) fn();
+    });
+  };
+  tapButton($('act-btn'), () => h.onInteract());
+  tapButton($('pause-btn'), () => h.onPauseToggle());
+
+  return {
+    read(): RawInput {
+      const up = any(KEYS.up);
+      const down = any(KEYS.down);
+      const left = any(KEYS.left);
+      const right = any(KEYS.right);
+      let padX = pad.x;
+      let padY = pad.y;
+      if (padPointer === null) {
+        const kx = Number(right) - Number(left);
+        const ky = Number(down) - Number(up);
+        const len = Math.hypot(kx, ky);
+        padX = len ? kx / len : 0;
+        padY = len ? ky / len : 0;
+      }
+      const touchSteer = steerValue();
+      return {
+        ...NO_INPUT,
+        padX,
+        padY,
+        wheelSteer: touchSteer !== 0 ? touchSteer : Number(right) - Number(left),
+        wheelThrottle: go.held() || up ? 1 : 0,
+        brake: brake.held() || any(KEYS.brake),
+        keyDown: down,
+      };
+    },
+    clear() {
+      held.clear();
+      resetPad();
+      steerPointers.clear();
+      paintSteer();
+      go.clear();
+      brake.clear();
+    },
+  };
+}

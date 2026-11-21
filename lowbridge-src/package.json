@@ -1,0 +1,27 @@
+{
+  "name": "lowbridge",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Lowbridge After Dark: a top-down night-courier game for iPhone. M0 handling test.",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:lan": "vite --host",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.ts",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "preview:lan": "vite preview --host"
+  },
+  "dependencies": {
+    "phaser": "4.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.6"
+  }
+}
