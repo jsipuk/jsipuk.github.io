@@ -610,6 +610,68 @@ const scenarios = {
     return `${log.join('; ')}; stats ${JSON.stringify(st)}; ${ev.filter((e) => e.type === 'pigeons').length} pigeon events; style kept on reload; errors ${errors.length}`;
   },
 
+  async nostorage(browser) {
+    // The Claude app on iPhone: IndexedDB is there but every write is refused.
+    const breakIdb = () => {
+      IDBDatabase.prototype.transaction = function () {
+        throw new DOMException('The operation is insecure.', 'SecurityError');
+      };
+    };
+    // With the test page's save slot (faked here with sessionStorage, which survives a reload).
+    const hostSlot = () => {
+      const key = 'fake-host-slot';
+      const read = () => JSON.parse(sessionStorage.getItem(key) || '{"current":null,"previous":null}');
+      window.lowbridgeHostStore = Promise.resolve({
+        async load() { return read().current; },
+        async loadPrevious() { return read().previous; },
+        async commit(expected, next) {
+          const b = read();
+          if ((b.current ? b.current.revision : 0) !== expected) return { ok: false, reason: 'conflict', current: b.current };
+          sessionStorage.setItem(key, JSON.stringify({ current: next, previous: b.current }));
+          return { ok: true, envelope: next };
+        },
+        async clear() { sessionStorage.removeItem(key); },
+      });
+    };
+    const results = [];
+    for (const host of [true, false]) {
+      const ctx = await browser.newContext({ viewport: { width: 844, height: 390 } });
+      await ctx.addInitScript(breakIdb);
+      if (host) await ctx.addInitScript(hostSlot);
+      const page = await ctx.newPage();
+      const errors = [];
+      page.on('pageerror', (e) => errors.push(e.message));
+      await page.goto(url);
+      await page.waitForFunction(() => window.lowbridge?.snapshot());
+      const where = await page.evaluate(() => window.lowbridge.saveStatus().where);
+      const next = await page.textContent('#sheet-next');
+      await page.click('#resume-btn');
+      const p = player(page);
+      await p.walkTo({ x: 92, y: 566 }, (s) => s.action.kind === 'answer');
+      await p.press('KeyE');
+      await p.press('KeyE');
+      await page.waitForTimeout(300);
+      const bar = await page.isVisible('#savebar');
+      if (bar) throw new Error(`red save bar shown (${host ? 'host slot' : 'no storage'})`);
+      if ((await p.snap()).progress.story.stage !== 'carrying') throw new Error('answering did not take');
+      if (host) {
+        if (where !== 'host' || !/test page/.test(next)) throw new Error(`expected the host slot, got ${where}: ${next}`);
+        await page.reload();
+        await page.waitForFunction(() => window.lowbridge?.snapshot());
+        const back = await page.textContent('#sheet-eyebrow');
+        const stage = (await p.snap()).progress.story.stage;
+        if (stage !== 'carrying') throw new Error(`host slot lost progress on reload (${stage}, “${back}”)`);
+        results.push(`host slot: saved, reload says “${back}”`);
+      } else {
+        if (where !== 'memory' || !/can’t save/.test(next)) throw new Error(`expected memory, got ${where}: ${next}`);
+        results.push(`no storage: start screen says “${next.slice(next.indexOf('This'), next.indexOf('This') + 24)}…”, no red bar`);
+      }
+      if (errors.length) throw new Error(errors.join(' | '));
+      await ctx.close();
+    }
+    return results.join('; ');
+  },
+
   async failsave(browser) {
     const { ctx, page, errors, p } = await newPage(browser, '?failsave=1');
     await p.walkTo({ x: 92, y: 566 }, (s) => s.action.kind === 'answer');

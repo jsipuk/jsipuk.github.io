@@ -13,6 +13,7 @@ export const DB_NAME = 'lowbridge';
 const STORE = 'saves';
 const CURRENT = 'current';
 const PREVIOUS = 'previous';
+const PROBE = 'probe';
 
 export interface PoseData {
   x: number;
@@ -52,6 +53,8 @@ export interface SaveStore {
   /** Write `next` (revision expected + 1) only if the stored revision is `expected`. */
   commit(expected: number, next: SaveEnvelope): Promise<CommitResult>;
   clear(): Promise<void>;
+  /** Can this store actually write here? Some embedded browsers expose storage that always fails. */
+  probe?(timeoutMs?: number): Promise<boolean>;
 }
 
 export function freshEnvelope(): SaveEnvelope {
@@ -229,6 +232,23 @@ export function createIdbStore(idb: IDBFactory, name = DB_NAME): SaveStore {
   return {
     load: () => read(CURRENT),
     loadPrevious: () => read(PREVIOUS),
+    async probe(timeoutMs = 2500) {
+      // Write and delete a scratch key. Some views hang instead of failing, so give up after a moment.
+      const attempt = (async () => {
+        const db = await open();
+        return await new Promise<boolean>((resolve) => {
+          const tx = db.transaction(STORE, 'readwrite');
+          const st = tx.objectStore(STORE);
+          st.put({ at: Date.now() }, PROBE);
+          st.delete(PROBE);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+          tx.onabort = () => resolve(false);
+        });
+      })().catch(() => false);
+      const timeout = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), timeoutMs));
+      return Promise.race([attempt, timeout]);
+    },
     async commit(expected, next) {
       try {
         const db = await open();

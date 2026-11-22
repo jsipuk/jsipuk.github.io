@@ -79,3 +79,26 @@ test('a checkpoint save queued beside a story change never writes the older prog
   assert.equal(saved!.progress.story.stage, 'carrying');
   assert.equal(saved!.checkpoint!.player.x, 1);
 });
+
+test('the storage probe passes where IndexedDB writes, and fails fast where it cannot', async () => {
+  assert.equal(await createIdbStore(new IDBFactory()).probe!(), true);
+  // Opens, but every transaction is refused (as in some embedded iPhone views).
+  const refusing = new IDBFactory();
+  const realOpen = refusing.open.bind(refusing);
+  refusing.open = ((name: string, v?: number) => {
+    const req = realOpen(name, v);
+    req.addEventListener('success', () => {
+      const db = req.result;
+      db.transaction = (() => {
+        throw new DOMException('The operation is insecure.', 'SecurityError');
+      }) as typeof db.transaction;
+    });
+    return req;
+  }) as typeof refusing.open;
+  assert.equal(await createIdbStore(refusing).probe!(), false);
+  // Never answers at all: the probe gives up instead of hanging the boot.
+  const silent = { open: () => ({}) } as unknown as IDBFactory;
+  const t0 = Date.now();
+  assert.equal(await createIdbStore(silent).probe!(50), false);
+  assert.ok(Date.now() - t0 < 1000);
+});

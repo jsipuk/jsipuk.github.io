@@ -263,3 +263,18 @@ Asked for after M2: "People will not simply follow the instructions and the stor
 - People and pigeons don't block vehicles or the courier; they step aside or fly. Fine for now; a crowded market might want real blocking later.
 - Shops are menus over a paused street. There's no in-world changing room or spray animation yet.
 - The scripted browser walker is timing-sensitive; rerun a failed scenario alone before suspecting the game.
+
+## Phone fix • saving inside the Claude app (2026-11-22)
+
+First phone session on build m2fp-2026-11-22-f455cff (iPhone, iOS 18.7, Claude app, 750 × 324): a chat at 10.07 s, then "Progress hasn't saved" at 10.1 s, with no script errors. The commit failed with a storage error, not a conflict. The Claude app's page viewer on iPhone exposes IndexedDB but refuses every write.
+
+| Area | Built | Why |
+| --- | --- | --- |
+| Storage probe | At boot the game writes and deletes a scratch key (2.5 s limit, because some views hang instead of failing). If that works, saves go to IndexedDB as before. | Find out before play, instead of a red bar ten seconds in. |
+| Host save slot | If the probe fails and the page offers `window.lowbridgeHostStore`, saves go there. The claude.ai test page offers one in its database under the viewer's private `data/users/<id>/lowbridge-save` (current and previous save in one document). Checkpoints drop to every 15 s there. | The test sheet's reopen and split-run checks need saving inside the Claude app. |
+| No storage at all | Progress lives in memory. The start screen says "This view can't save, so progress lasts until you close it", and Pause names Export as the way to keep a copy. No red bar. | Honest, and not alarming. |
+| Test page tooling | `scripts/test-page/capture.js` (event log and save slot) and `scripts/test-page/build.mjs` (assembles the page from `dist`) are now in the repo. | They lived only in a scratch folder. |
+
+Evidence: `tests/save.test.ts` covers the probe against working, refusing and silent IndexedDB. `scripts/smoke.mjs` nostorage breaks IndexedDB in Chromium: with a host slot the answered call survives a reload ("Welcome back"); without one the start screen says it can't save and no red bar appears. **Pending:** the same on the phone.
+
+Full screen: the Claude app's viewer keeps its own bar and frame round the page, and iPhone browsers don't let a page go full screen. Real full screen comes from jsip.uk/lowbridge added to the Home Screen (the manifest opens it standalone, landscape). That needs the release step.

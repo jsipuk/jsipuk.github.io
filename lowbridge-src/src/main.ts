@@ -67,6 +67,36 @@ function makeStore(): { store: SaveStore; note: string } {
 
 let { store, note: storageNote } = makeStore();
 let saves = new SaveController(store);
+/** Where progress is kept: this browser, a store the host page offers (the claude.ai test page), or nowhere. */
+let saveWhere: 'device' | 'host' | 'memory' = 'device';
+/** Seconds between position checkpoints during ordinary play. */
+let checkpointEvery = 5;
+
+/**
+ * Some embedded browsers (the Claude app's page viewer on iPhone) expose IndexedDB but every
+ * write fails. Find that out before play starts, then save to the host page's store if it
+ * offers one, or keep progress in memory and say so on the start screen.
+ */
+async function pickStore(): Promise<void> {
+  if (params.has('failsave')) return;
+  if (store.probe && (await store.probe())) return;
+  const offered = (window as { lowbridgeHostStore?: Promise<SaveStore | null> }).lowbridgeHostStore;
+  const hosted = offered
+    ? await Promise.race([offered.catch(() => null), new Promise<null>((r) => setTimeout(() => r(null), 8000))])
+    : null;
+  if (hosted) {
+    store = hosted;
+    saves = new SaveController(store);
+    saveWhere = 'host';
+    checkpointEvery = 15;
+    storageNote = 'Saving to the test page, because this view has no browser storage.';
+    return;
+  }
+  store = createMemoryStore();
+  saves = new SaveController(store);
+  saveWhere = 'memory';
+  storageNote = 'This view can’t save on this device. Progress lasts until you close it; Pause → Your save → Export keeps a copy.';
+}
 let session: Session;
 let scene: StreetScene | null = null;
 
@@ -145,7 +175,12 @@ function sheetFor(kind: 'start' | 'pause' | 'parked', p: Progress): SheetInfo {
     eyebrow: 'Riverside · shift one',
     title: 'Lowbridge After Dark',
     lede: 'You drive nights for the depot in a British river town. Two crews need the same spare battery, and something small is living in the ticket machine.',
-    next: 'About 5 minutes to a delivery. Progress saves on this device.',
+    next:
+      saveWhere === 'device'
+        ? 'About 5 minutes to a delivery. Progress saves on this device.'
+        : saveWhere === 'host'
+          ? 'About 5 minutes to a delivery. Progress saves to this test page.'
+          : 'About 5 minutes to a delivery. This view can’t save, so progress lasts until you close it.',
     button: 'Start',
   };
 }
@@ -161,6 +196,7 @@ function openSheet(kind: 'pause' | 'parked'): void {
 let startedWall = 0;
 
 function closeSheet(): void {
+  if (!session) return; // Still loading the save.
   if (!startedWall) startedWall = performance.now();
   input.clear();
   sfx.unlock();
@@ -522,6 +558,7 @@ try {
 let welcome: 'new' | 'back' | 'recovered' | 'newer' = 'new';
 
 async function loadSave(): Promise<{ progress: Progress; cp: Checkpoint | null }> {
+  await pickStore();
   try {
     const v = await saves.load();
     if (!v) return { progress: initialProgress(), cp: null };
@@ -604,7 +641,7 @@ async function boot(): Promise<void> {
       const p = session.pursuit;
       sfx.updateSiren(!!p && p.delay <= 0 && world, p ? Math.hypot(p.car.x - focus.x, p.car.y - focus.y) : 0);
       // Save where things are every five seconds of ordinary play, but not mid-chase.
-      if (world && !p && session.simTime - lastCheckpoint > 5) {
+      if (world && !p && session.simTime - lastCheckpoint > checkpointEvery) {
         lastCheckpoint = session.simTime;
         saveCheckpoint();
       }
@@ -621,7 +658,7 @@ Object.defineProperty(window, 'lowbridge', {
   value: Object.freeze({
     build: BUILD,
     snapshot: () => (session ? snapshot(session) : null),
-    saveStatus: () => ({ status: saves.status, revision: saves.revision, offlineReady }),
+    saveStatus: () => ({ status: saves.status, revision: saves.revision, offlineReady, where: saveWhere }),
   }),
 });
 
