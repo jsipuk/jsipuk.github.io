@@ -2,7 +2,7 @@
 // captions, the phone dialogue and the pause/start sheet.
 
 import type { Vec } from './rules/math.ts';
-import { PRESETS } from './rules/controls.ts';
+import { PRESETS, RETIRED_PRESETS } from './rules/controls.ts';
 import type { Session } from './rules/session.ts';
 import { availableAction, objective } from './rules/session.ts';
 import type { Settings, StoredLap } from './settings.ts';
@@ -27,7 +27,9 @@ export const formatSeconds = (sec: number): string => {
 };
 
 export const presetLabel = (p: string): string =>
-  p in PRESETS ? `${PRESETS[p as keyof typeof PRESETS].letter} · ${PRESETS[p as keyof typeof PRESETS].name}` : 'Mixed steering';
+  p in PRESETS
+    ? `${PRESETS[p as keyof typeof PRESETS].letter} · ${PRESETS[p as keyof typeof PRESETS].name}`
+    : (RETIRED_PRESETS[p] ?? 'Mixed steering');
 
 export function createHud(): Hud {
   const root = $('hud');

@@ -3,7 +3,6 @@
 // pressed again before it counts.
 
 import type { RawInput, SteeringPreset } from './rules/controls.ts';
-import { NO_INPUT } from './rules/controls.ts';
 import { clamp } from './rules/math.ts';
 
 export interface InputHandlers {
@@ -63,7 +62,6 @@ export function createInput(h: InputHandlers): Input {
       e.preventDefault();
       h.onInteract();
     } else if (e.code === 'Digit1') h.onPreset('pad');
-    else if (e.code === 'Digit2') h.onPreset('wheel');
     else if (e.code === 'Digit3') h.onPreset('hybrid');
     else if (e.code === 'KeyM') h.onMuteToggle();
   });
@@ -128,37 +126,6 @@ export function createInput(h: InputHandlers): Input {
     });
   }
 
-  // Wheel preset: one zone so a thumb can slide between left and right.
-  const steerZone = $('steer-zone');
-  const halves = Array.from(steerZone.querySelectorAll<HTMLElement>('.steer-half'));
-  const steerPointers = new Map<number, number>();
-  const steerValue = () => clamp([...steerPointers.values()].reduce((a, b) => a + b, 0), -1, 1);
-  const paintSteer = () => {
-    const dirs = new Set(steerPointers.values());
-    for (const half of halves) half.classList.toggle('pressed', dirs.has(Number(half.dataset.dir)));
-  };
-  const steerDir = (e: PointerEvent) => {
-    const r = steerZone.getBoundingClientRect();
-    return e.clientX < r.left + r.width / 2 ? -1 : 1;
-  };
-  steerZone.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    steerZone.setPointerCapture(e.pointerId);
-    steerPointers.set(e.pointerId, steerDir(e));
-    paintSteer();
-  });
-  steerZone.addEventListener('pointermove', (e) => {
-    if (!steerPointers.has(e.pointerId)) return;
-    steerPointers.set(e.pointerId, steerDir(e));
-    paintSteer();
-  });
-  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
-    steerZone.addEventListener(type, (e) => {
-      steerPointers.delete(e.pointerId);
-      paintSteer();
-    });
-  }
-
   const holdButton = (el: HTMLElement) => {
     const pointers = new Set<number>();
     el.addEventListener('pointerdown', (e) => {
@@ -211,36 +178,25 @@ export function createInput(h: InputHandlers): Input {
 
   return {
     read(): RawInput {
-      const up = any(KEYS.up);
-      const down = any(KEYS.down);
-      const left = any(KEYS.left);
-      const right = any(KEYS.right);
       let padX = pad.x;
       let padY = pad.y;
       if (padPointer === null) {
-        const kx = Number(right) - Number(left);
-        const ky = Number(down) - Number(up);
+        const kx = Number(any(KEYS.right)) - Number(any(KEYS.left));
+        const ky = Number(any(KEYS.down)) - Number(any(KEYS.up));
         const len = Math.hypot(kx, ky);
         padX = len ? kx / len : 0;
         padY = len ? ky / len : 0;
       }
-      const touchSteer = steerValue();
       return {
-        ...NO_INPUT,
         padX,
         padY,
-        wheelSteer: touchSteer !== 0 ? touchSteer : Number(right) - Number(left),
-        wheelThrottle: go.held() || up ? 1 : 0,
         goButton: go.held() || any(KEYS.go) ? 1 : 0,
         brake: brake.held() || any(KEYS.brake),
-        keyDown: down,
       };
     },
     clear() {
       held.clear();
       resetPad();
-      steerPointers.clear();
-      paintSteer();
       go.clear();
       brake.clear();
     },

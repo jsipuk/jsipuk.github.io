@@ -1,7 +1,6 @@
 // Test helpers: a scripted driver that completes the M0 lap with either preset.
 import type { RawInput, SteeringPreset } from '../src/rules/controls.ts';
 import { NO_INPUT } from '../src/rules/controls.ts';
-import { angleDiff, clamp } from '../src/rules/math.ts';
 import type { Vec } from '../src/rules/math.ts';
 import type { GameEvent, Session } from '../src/rules/session.ts';
 import { stepSession } from '../src/rules/session.ts';
@@ -32,16 +31,7 @@ export function inputTowards(s: Session, target: Vec, preset: SteeringPreset, sp
   if (preset === 'pad') {
     return { ...NO_INPUT, padX: (dx / d) * speedLimit, padY: (dy / d) * speedLimit };
   }
-  if (preset === 'hybrid') {
-    return { ...NO_INPUT, padX: dx / d, padY: dy / d, goButton: s.van.speed < VAN.maxForward * speedLimit ? 1 : 0 };
-  }
-  const diff = angleDiff(Math.atan2(dy, dx), s.van.heading);
-  const wantSlow = Math.abs(diff) > 0.6;
-  return {
-    ...NO_INPUT,
-    wheelSteer: clamp(diff / 0.35, -1, 1),
-    wheelThrottle: s.van.speed > VAN.maxForward * speedLimit || (wantSlow && s.van.speed > 70) ? 0 : 1,
-  };
+  return { ...NO_INPUT, padX: dx / d, padY: dy / d, goButton: s.van.speed < VAN.maxForward * speedLimit ? 1 : 0 };
 }
 
 /** Point `ahead` px further along the polyline from the van's projection onto segment `seg`. */

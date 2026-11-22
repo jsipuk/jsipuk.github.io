@@ -6,6 +6,7 @@ import type { Vec } from './math.ts';
 import { angleDiff, boxCorners, distanceToBox, forward, pointInRect, rectCentre, rightOf } from './math.ts';
 import type { StreetMap } from './map.ts';
 import { Surface, inBay, isBlocked, surfaceAt } from './map.ts';
+import { nextWaypoint } from './route.ts';
 import type { RawInput, SteeringPreset } from './controls.ts';
 import { vehicleControls, walkVector } from './controls.ts';
 import type { VehicleState, WalkerState } from './vehicle.ts';
@@ -339,14 +340,15 @@ export function objective(s: Session): Objective {
   if (run.enteredAt === null) {
     return { text: run.n === 1 ? 'Walk to the van' : `Lap ${run.n} · get back in the van`, target: van };
   }
+  // While driving, the arrow points at the next junction along the roads, never through buildings.
   if (!run.lap) {
     return inVan
-      ? { text: 'Drive round the block by Ticket Street', target: rectCentre(map.lapCheckpoint.rect) }
+      ? { text: 'Drive round the block by Ticket Street', target: nextWaypoint(map, van, rectCentre(map.lapCheckpoint.rect)) }
       : { text: 'Get back in the van', target: van };
   }
   if (!run.parked) {
     return inVan
-      ? { text: 'Park in the marked bay by the phone box', target: rectCentre(map.bay.rect) }
+      ? { text: 'Park in the marked bay by the phone box', target: nextWaypoint(map, van, rectCentre(map.bay.rect)) }
       : { text: 'Get back in the van', target: van };
   }
   if (inVan) return { text: 'Parked. Get out', target: null };

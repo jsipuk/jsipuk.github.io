@@ -14,7 +14,7 @@ import {
 } from '../src/rules/session.ts';
 import { STEP, driveLap, walkTo } from './helpers.ts';
 
-const fresh = (preset: 'pad' | 'wheel' | 'hybrid' = 'pad') => createSession(buildM0Map(), preset);
+const fresh = (preset: 'pad' | 'hybrid' = 'pad') => createSession(buildM0Map(), preset);
 
 test('spawn: on the pavement, van outside the depot, phone ringing', () => {
   const s = fresh();
@@ -80,7 +80,7 @@ test('walkers cannot pass through buildings or the van', () => {
   assert.ok(Math.abs(s2.player.y - 700) > 5 || Math.abs(s2.player.x - 60) > 5);
 });
 
-for (const preset of ['pad', 'wheel', 'hybrid'] as const) {
+for (const preset of ['hybrid', 'pad'] as const) {
   test(`full M0 lap with the ${preset} preset: drive, park, get out on the pavement, answer`, () => {
     const s = fresh(preset);
     walkTo(s, { x: 76, y: 664 });

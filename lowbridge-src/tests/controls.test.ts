@@ -33,15 +33,8 @@ test('pad with brake aims the rear of the van', () => {
   assert.equal(c.steer, 1);
 });
 
-test('wheel preset maps buttons directly; down key brakes only in this preset', () => {
-  const raw = { ...NO_INPUT, wheelSteer: -1, wheelThrottle: 1, keyDown: true, padY: 1 };
-  assert.deepEqual(vehicleControls(raw, 'wheel', 0), { throttle: 1, steer: -1, brake: true });
-  const pad = vehicleControls(raw, 'pad', 0);
-  assert.equal(pad.brake, false, 'down key is a direction in the pad preset');
-});
-
 test('no input produces no movement in either preset', () => {
-  for (const preset of ['pad', 'wheel'] as const) {
+  for (const preset of ['pad', 'hybrid'] as const) {
     const c = vehicleControls(NO_INPUT, preset, 0);
     assert.equal(c.throttle, 0);
     assert.equal(c.steer, 0);
@@ -83,8 +76,8 @@ test('steering C: Go only drives forwards; pointing behind swings round', () => 
   assert.equal(behind.brake, false, 'never reverses on Go');
   assert.ok(behind.throttle > 0 && behind.throttle < 1, 'eases off to turn round');
   assert.equal(Math.abs(behind.steer), 1);
-  const upKey = vehicleControls({ ...NO_INPUT, padY: -1, wheelThrottle: 1 }, 'hybrid', NORTH, 0);
-  assert.equal(upKey.throttle, 0, 'the up key points; it is not Go');
+  const pointOnly = vehicleControls({ ...NO_INPUT, padY: -1 }, 'hybrid', NORTH, 0);
+  assert.equal(pointOnly.throttle, 0, 'pointing is not Go');
 });
 
 test('steering C: Brake/Reverse backs up straight, and the pad still sets where the front points', () => {

@@ -1,7 +1,7 @@
 // M0 smoke check in a real browser, using only the player's keyboard controls:
-// a full lap with the wheel preset (walk, get in, drive, park, get out, answer),
+// a full lap with steering C (walk, get in, drive, park, get out, answer),
 // short drives with steering A and C, and a held key through a lost-focus interruption.
-// SMOKE_LAPS=pad,wheel also tries a full keyboard lap with the pad preset.
+// SMOKE_LAPS=hybrid,pad also tries a full keyboard lap with steering A.
 //
 //   npm run build && npm run preview      (in one terminal)
 //   node scripts/smoke-m0.mjs [url]       (in another; needs Playwright + Chromium)
@@ -40,7 +40,7 @@ const PATH = [
   { x: 128, y: 620 },
 ];
 const BAY = { x: 128, y: 570 };
-const KEYS = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', brake: 'Space' };
+const KEYS = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', brake: 'Space', go: 'ShiftLeft' };
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 
 function pursuit(path, seg, from, ahead) {
@@ -90,7 +90,7 @@ async function lap(page, preset) {
     await hold(new Set());
   };
 
-  await page.keyboard.press(preset === 'pad' ? 'Digit1' : 'Digit2');
+  await page.keyboard.press(preset === 'pad' ? 'Digit1' : 'Digit3');
   let s = await snap();
   await walkTo({ x: s.van.x + 8, y: s.van.y - 17 }, (x) => x.action.kind === 'enter');
   await page.keyboard.press('KeyE');
@@ -142,10 +142,14 @@ async function lap(page, preset) {
           if (dy < -0.5) want.add(KEYS.up);
         }
       } else {
-        const diff = wrap(ang - v.heading);
-        if (diff > 0.1) want.add(KEYS.right);
-        if (diff < -0.1) want.add(KEYS.left);
-        if (v.speed < (Math.abs(diff) > 0.6 ? Math.min(limit, 55) : limit)) want.add(KEYS.up);
+        // Steering C: arrows point the front (eight directions), Shift is Go.
+        const dx = Math.cos(ang);
+        const dy = Math.sin(ang);
+        if (dx > 0.38) want.add(KEYS.right);
+        if (dx < -0.38) want.add(KEYS.left);
+        if (dy > 0.38) want.add(KEYS.down);
+        if (dy < -0.38) want.add(KEYS.up);
+        if (v.speed < Math.min(limit, 80)) want.add(KEYS.go);
       }
     }
     await hold(want);
@@ -277,7 +281,7 @@ page.on('pageerror', (e) => errors.push(e.message));
 await page.goto(url);
 await page.click('#resume-btn');
 const results = [];
-for (const preset of (process.env.SMOKE_LAPS ?? 'wheel').split(',')) {
+for (const preset of (process.env.SMOKE_LAPS ?? 'hybrid').split(',')) {
   const r = await lap(page, preset);
   results.push(r);
   console.log(`${preset}: parked and answered · lap ${r.lapSeconds.toFixed(1)} s · ${r.bumps} bump(s) · logged as ${r.preset}`);
@@ -286,7 +290,7 @@ await padCheck(page);
 await hybridCheck(page);
 
 // Interruption: hold the throttle, lose focus, come back. Nothing may move until a fresh press.
-await page.keyboard.press('Digit2');
+await page.keyboard.press('Digit3');
 await page.keyboard.down('ArrowUp');
 await page.evaluate(() => window.dispatchEvent(new Event('blur')));
 const s = await page.evaluate(() => window.lowbridge.snapshot());

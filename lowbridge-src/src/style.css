@@ -154,8 +154,7 @@ kbd {
   cursor: pointer;
 }
 
-.hud-btn.pressed,
-.steer-half.pressed {
+.hud-btn.pressed {
   background: var(--cream);
   color: var(--ink);
   border-color: var(--cream);
@@ -279,31 +278,6 @@ kbd {
   text-shadow: 0 1px 3px #000;
 }
 
-.steer-zone {
-  position: absolute;
-  left: calc(var(--sa-left) + 16px);
-  bottom: calc(var(--sa-bottom) + 16px);
-  width: 240px;
-  height: 100px;
-  display: flex;
-  gap: 6px;
-  pointer-events: auto;
-  touch-action: none;
-}
-
-.steer-half {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: 2px solid var(--line);
-  border-radius: 16px;
-  background: var(--panel);
-  font-weight: 700;
-  font-size: 16px;
-}
-
 .keys {
   position: absolute;
   left: calc(var(--sa-left) + 12px);
@@ -325,12 +299,8 @@ kbd {
 #hud[data-mode='dialogue'] .touch-only,
 #hud[data-mode='paused'] #act-btn,
 #hud[data-mode='dialogue'] #act-btn,
-#hud[data-loco='foot'] .steer-zone,
 #hud[data-loco='foot'] #go-btn,
 #hud[data-loco='foot'] #brake-btn,
-#hud[data-loco='van'][data-preset='wheel'] .pad-zone,
-#hud[data-loco='van'][data-preset='pad'] .steer-zone,
-#hud[data-loco='van'][data-preset='hybrid'] .steer-zone,
 #hud[data-loco='van'][data-preset='pad'] #go-btn {
   display: none;
 }

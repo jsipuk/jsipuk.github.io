@@ -3,6 +3,7 @@
 // game runs without it. Story progress moves to IndexedDB in M1.
 
 import type { SteeringPreset } from './rules/controls.ts';
+import { DEFAULT_PRESET } from './rules/controls.ts';
 import type { LapRecord } from './rules/session.ts';
 
 const SETTINGS_KEY = 'lowbridge.settings.v1';
@@ -21,7 +22,7 @@ export interface StoredLap extends LapRecord {
   at: string;
 }
 
-const DEFAULTS: Settings = { preset: 'pad', muted: false, reduceMotion: null };
+const DEFAULTS: Settings = { preset: DEFAULT_PRESET, muted: false, reduceMotion: null };
 
 function read<T>(key: string): T | null {
   try {
@@ -43,7 +44,8 @@ function write(key: string, value: unknown): void {
 export function loadSettings(): Settings {
   const s = read<Partial<Settings>>(SETTINGS_KEY) ?? {};
   return {
-    preset: s.preset === 'wheel' || s.preset === 'hybrid' ? s.preset : DEFAULTS.preset,
+    // Saved choices of the retired steering B fall back to the default.
+    preset: s.preset === 'pad' || s.preset === 'hybrid' ? s.preset : DEFAULTS.preset,
     muted: s.muted === true,
     reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : null,
   };

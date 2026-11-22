@@ -32,10 +32,6 @@
           <span class="pad-label" id="pad-label">Walk</span>
         </div>
       </div>
-      <div class="steer-zone touch-only" id="steer-zone" role="group" aria-label="Steering">
-        <div class="steer-half" data-dir="-1"><span aria-hidden="true">◀</span> Left</div>
-        <div class="steer-half" data-dir="1">Right <span aria-hidden="true">▶</span></div>
-      </div>
       <button class="hud-btn hold touch-only" id="go-btn" type="button" tabindex="-1">Go</button>
       <button class="hud-btn hold touch-only" id="brake-btn" type="button" tabindex="-1">Brake<br />Reverse</button>
       <button class="hud-btn act" id="act-btn" type="button" tabindex="-1" hidden>
@@ -44,6 +40,7 @@
       </button>
       <div class="keys desktop-only" aria-hidden="true">
         <span><kbd>WASD</kbd>/<kbd>arrows</kbd> move</span>
+        <span><kbd>Shift</kbd> go</span>
         <span><kbd>Space</kbd> brake/reverse</span>
         <span><kbd>E</kbd> act</span>
         <span><kbd>Esc</kbd> pause</span>
@@ -70,18 +67,14 @@
         <fieldset class="presets">
           <legend>Steering</legend>
           <label class="preset">
-            <input type="radio" name="preset" value="pad" />
-            <span><b>A · Thumb pad</b> <span>Push where you want to go. Pull back to reverse. Let go to stop.</span></span>
-          </label>
-          <label class="preset">
-            <input type="radio" name="preset" value="wheel" />
-            <span><b>B · Wheel and pedals</b> <span>Left and right steer. Hold Go. Let go to slow down.</span></span>
-          </label>
-          <label class="preset">
             <input type="radio" name="preset" value="hybrid" />
             <span><b>C · Pad and pedals</b> <span>Point the pad where the front should face. Go drives forwards. Brake/Reverse backs up.</span></span>
           </label>
-          <p class="note">All three drive the same van, and all have a Brake/Reverse button.</p>
+          <label class="preset">
+            <input type="radio" name="preset" value="pad" />
+            <span><b>A · Thumb pad</b> <span>Push where you want to go. Pull back to reverse. Let go to stop.</span></span>
+          </label>
+          <p class="note">Both drive the same van, and both have a Brake/Reverse button. Change this any time from Pause.</p>
         </fieldset>
 
         <div class="toggles">
@@ -103,11 +96,11 @@
         <details class="keyhelp">
           <summary>Keyboard</summary>
           <ul>
-            <li><kbd>W A S D</kbd> or arrows: walk, or drive with the pad preset (B: left/right steer, up is Go, down brakes)</li>
+            <li><kbd>W A S D</kbd> or arrows: walk, and point the pad while driving</li>
+            <li><kbd>Shift</kbd>: Go (steering C)</li>
             <li><kbd>Space</kbd>: brake, then reverse</li>
             <li><kbd>E</kbd> or <kbd>Enter</kbd>: the action on the button (Get in, Get out, Answer, Hang up)</li>
-            <li>Steering C: arrows point, <kbd>Shift</kbd> is Go</li>
-            <li><kbd>Esc</kbd> or <kbd>P</kbd>: pause · <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd>: steering A/B/C · <kbd>M</kbd>: sound</li>
+            <li><kbd>Esc</kbd> or <kbd>P</kbd>: pause · <kbd>1</kbd>/<kbd>3</kbd>: steering A/C · <kbd>M</kbd>: sound</li>
           </ul>
         </details>
         <p class="build">Build <span id="build-id"></span> · local placeholder art</p>

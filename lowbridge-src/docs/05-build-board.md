@@ -60,13 +60,15 @@ Built 21 November 2026 in `jsipuk.github.io/lowbridge-src/`, beside the site's o
 | Bay and phone | Bay on the northbound (left-hand) kerb of Depot Lane; payphone on the pavement beside its north end. | Fixture puts the payphone at the depot. The lap ends where it started: park, get out, answer. |
 | Phone | Rings at spawn, as in Q01. Answering early plays Mo's line. It rings again once you park after a lap; answering then logs the lap. | Both "answer first" and "ignore it" stay valid, and each preset run still ends on answering. |
 | Pad preset (A) | The van moves towards the thumb. Ahead or to the side: it steers to face that way (full lock at 26° off), easing throttle on sharp turns. Pulled back more than about 115° from its facing: it brakes in a straight line, then reverses with the rear swinging towards the thumb, and stays in reverse until the thumb is back within about 80°. Release rolls to a stop. The Brake/Reverse button still works, with the same rear-towards-thumb steering. | Same physics as B; only the input mapping differs. Pull-back reverse added on 21 November after the first phone session found the pad plus a separate reverse button tricky. |
-| Wheel preset (B) | Left/Right steer zone (a thumb can slide across), Go, separate Brake/Reverse. On a keyboard, Down also brakes. | As specified. |
+| Wheel preset (B), retired | Left/Right steer buttons, Go, separate Brake/Reverse. Removed from the game on 22 November. | The owner liked its Go and Brake but not the big Left/Right buttons; steering C keeps the pedals with a pad instead. Older lap logs show it as "B · Wheel and pedals (retired)". |
 | Third preset (C, "Pad and pedals") | Thumb pad on the left (label "Steer") always says which way the front of the van should point, going forwards or backwards. Go on the right only drives forwards; pointing behind with Go swings the van round. Brake/Reverse is the only way back and reverses straight with the pad idle. Keyboard: arrows point, Shift is Go, Space reverses, 3 selects it. | Owner liked B's pedals but not its big Left/Right buttons, and asked for a direction pad on the left with Go on the right. Added beside A and B, not replacing B, so lap records stay comparable. The first version also reversed on Go with the pad pulled back; the owner found the forward/back rules counterintuitive, so C now has one rule per control. |
 | Stopping near points of interest | Rolling drag doubles within 56 px of the bay. | "Short stopping distance near points of interest." |
 | Kerbs | Pavements are drivable but cap the van at 80 px/s. Buildings, lamp posts, the phone box and the barrier are solid. | Readable bumps without trapping the van. |
 | Getting out | Allowed below 14 px/s. Tries the driver's door (right, right-hand drive), the left door, a longer step to the kerb, then rear and front, preferring pavement. | "Exit only when slow and a walkable exit point exists." |
 | Interruptions | Blur, hidden page and pagehide clear held input and pause. Orientation change clears held input. A key held through an interruption must be pressed again. | A01 and the two-minute test. |
 | Time | Fixed 1/60 s step; a frame counts at most 0.1 s; accumulated time resets on resume. | No giant step after backgrounding. |
+| Job arrow | While driving, the arrow points at the next junction along the roads (shortest way round), or straight at the target when it is on the same road. Built from the roads' overlaps in `src/rules/route.ts`. | The spec asks for "an arrow towards its street junction". The first build pointed straight at the target, which on Station Road meant through the ticket office; the owner's only bump on 4100c9d was that wall. |
+| Steering choice | Settings offer C (default) and A. | Owner, 22 November: keep both as options; slightly prefers C, final call depends on real missions. |
 | Camera | North-up. Zoom shows about 26 tiles across and at least 14 tiles top to bottom (1.74× on an 844 × 390 iPhone, 3× cap on desktop). Look-ahead is 0.6 s of travel, capped at 28% of the view. Bounds extend 10 tiles past the block so the courier stays mid-screen, clear of the thumb controls. | First screenshot showed the pad covering the van at the map edge. |
 | Storage | Steering, sound, reduced motion and a lap log in `localStorage`, guarded. | Convenience only. Story saves go to IndexedDB in M1. |
 | Playtest capture | The game sends nothing anywhere. It fires a `lowbridge:lap` DOM event when a lap is logged, including what each bump hit and its tile (`hits`). Only the private claude.ai test page listens for it, saving each lap and any page error (with build ID, screen size and browser) to that page's own store for Claude to read. | Requested by the owner so remote phone sessions can be reviewed. The technical plan's no-telemetry rule still holds for the jsip.uk build. |
@@ -82,12 +84,13 @@ Top speed 110 px/s (6.9 tiles/s), reverse 45, pavement 60, accel 150 px/s², bra
 
 | Check | Result | Environment |
 | --- | --- | --- |
-| Fresh `npm ci`, `npm run typecheck`, `npm test`, `npm run build` | Pass. 35 of 35 tests after the slower van and simpler C (full scripted lap with A, B and C). JS 370 KB gzipped (budget 5 MB). | Linux container, Node 22.23.5, npm 10.9.9 |
+| Fresh `npm ci`, `npm run typecheck`, `npm test`, `npm run build` | Pass. 37 of 37 tests: full scripted laps with C and A, and a sweep from over 500 road positions showing the job arrow never points through a building. JS about 370 KB gzipped (budget 5 MB). | Linux container, Node 22.23.5, npm 10.9.9 |
 | Rules: both presets complete the lap, park, get out on the pavement and answer (scripted, no rendering) | Pass, no bumps | `npm test` |
 | Preview at `/lowbridge/` loads with no page errors | Pass | Headless Chromium (Playwright 1.63), 844 × 390 |
-| Keyboard lap in the browser | Wheel preset: walk, get in, lap, park, get out, answer, lap logged; 36 s, 0 bumps (scripted driver, cautious). Pad preset: drove 82 px north, let go and rolled to a stop, pulled back and reversed 29 px, reversed on Brake, got out. | `scripts/smoke-m0.mjs` |
+| Keyboard lap in the browser | Steering C: walk, get in, lap, park, get out, answer, lap logged; 32 s, 0 bumps. Steering A: drove north, let go and rolled to a stop, pulled back and reversed, reversed on Brake, got out. Steering C short check: pointing alone stays put, Go drives. | `scripts/smoke-m0.mjs` |
 | Hold a key, lose focus, resume with the key still down | Pass. Paused on blur; 0 px of movement after resume until a fresh press. | `scripts/smoke-m0.mjs` |
 | First phone session (owner) | "Felt smooth." Pad steering with the separate reverse button was tricky, which led to pull-back reverse. | iPhone, inside the private claude.ai page, not standalone Safari. Device and iOS version not recorded. |
+| Fifth phone session (owner), slower van | C: 0:17 with no bumps, then 0:27 with 1 ("wall at 23,34", the ticket office front). A: 0:34, no bumps. Owner slightly prefers C; keep A as an option. | Same iPhone and Claude app, build 4100c9d. |
 | Fourth phone session (owner), first steering C | Two laps: 0:45 with 3 bumps, 0:31 with 2. Still "a bit tricky"; forward/back and Go/reverse felt counterintuitive; asked for a slower van. Led to the slower tune, the simpler C and bump logging. | Same iPhone and Claude app. Lamps already moved for these laps. |
 | Third phone session (owner), steering B | Two laps: 0:41 with 3 bumps, then 0:17 with no bumps (fastest so far). Liked the pedals, not the big Left/Right buttons. Led to steering C. | Same iPhone and Claude app as above. |
 | Second phone session (owner), pull-back reverse | Two full laps logged with steering A: 28 s and 36 s, 2 bumps each, no page errors. | iPhone, iOS 18.7, inside the Claude app at 750 × 324. Captured automatically. |
@@ -103,6 +106,10 @@ Top speed 110 px/s (6.9 tiles/s), reverse 45, pavement 60, accel 150 px/s², bra
 - Look-ahead and zoom were tuned on desktop emulation. Check on the phone that the next junction is visible before you reach it.
 - Each iPhone tap on Get in, Get out and Answer fires on release. Check it feels immediate while the other thumb holds the pad.
 - Audio is synthesised and quiet. Starts only after the Start tap.
+
+### M0 gate status
+
+The owner has completed laps with every scheme on a physical iPhone, but inside the Claude app rather than standalone Safari, and alone. Preferred scheme so far: C, with A kept as an option. Still to do for the formal gate: three people, Safari, without coaching.
 
 ### Next ticket
 
