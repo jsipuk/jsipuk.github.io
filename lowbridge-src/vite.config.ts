@@ -14,7 +14,7 @@ function buildId(): string {
       .trim();
     return `m0-${day}-${hash}${dirty ? '-dirty' : ''}`;
   } catch {
-    return `m0-${day}-local`;
+    return `m1-${day}-local`;
   }
 }
 
