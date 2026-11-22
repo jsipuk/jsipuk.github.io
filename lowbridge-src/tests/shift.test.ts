@@ -18,7 +18,7 @@ import {
   startQuick,
   takeCall,
 } from '../src/rules/progress.ts';
-import { SaveController, checkImport, createMemoryStore, exportSave, freshEnvelope } from '../src/rules/save.ts';
+import { SCHEMA_VERSION, SaveController, checkImport, createMemoryStore, exportSave, freshEnvelope } from '../src/rules/save.ts';
 import type { Session } from '../src/rules/session.ts';
 import { availableAction, choose, currentStep, openBoard, pause, resume, settled } from '../src/rules/session.ts';
 import { STEP, act, harness, relaunch, run, travelTo, walkTo } from './helpers.ts';
@@ -109,13 +109,13 @@ test('rules: dropping a quick job returns its cargo and changes nothing else', (
   assert.equal(p.quick.bests.quiet, null);
 });
 
-test('A10: a saved M1 export migrates to schema 2 and keeps everything earned', () => {
+test('A10: a saved M1 export migrates to the current schema and keeps everything earned', () => {
   const text = readFileSync(new URL('./fixtures/save-v1-mo.json', import.meta.url), 'utf8');
   const c = checkImport(text);
   assert.ok(c.ok);
   assert.equal(c.migratedFrom, 1);
   const p = c.envelope.progress;
-  assert.equal(c.envelope.schemaVersion, 2);
+  assert.equal(c.envelope.schemaVersion, SCHEMA_VERSION);
   assert.equal(p.recipient, 'mo_vale');
   assert.ok(p.flags.includes('yard_shutter_open'));
   assert.ok(p.roster.includes('clatterjack'));

@@ -4,10 +4,10 @@
 // snapshot is kept as a backup in the same transaction.
 
 import type { Progress } from './progress.ts';
-import { initialProgress, migrateProgressV1 } from './progress.ts';
+import { STYLE_CATALOGUE, initialProgress, migrateProgressV1, migrateProgressV2 } from './progress.ts';
 
-/** 1: M1 (Q01). 2: M2 adds shift beats, quick jobs, journal and sightings. */
-export const SCHEMA_VERSION = 2;
+/** 1: M1 (Q01). 2: M2 adds shift beats, quick jobs, journal and sightings. 3: free-play style and stats. */
+export const SCHEMA_VERSION = 3;
 export const EXPORT_FORMAT = 'lowbridge-save';
 export const DB_NAME = 'lowbridge';
 const STORE = 'saves';
@@ -79,9 +79,13 @@ export function validateEnvelope(raw: unknown): Validation {
   if (!p || typeof p !== 'object') return bad('progress');
   let migratedFrom: number | undefined;
   if (e.schemaVersion === 1) {
-    // Older supported format: migrate in memory; the next commit writes schema 2.
+    // Older supported formats migrate in memory; the next commit writes the current schema.
     p = migrateProgressV1(p);
     migratedFrom = 1;
+  }
+  if ((e.schemaVersion as number) <= 2) {
+    p = migrateProgressV2(p);
+    migratedFrom ??= 2;
   }
   if (!['offered', 'carrying', 'delivered'].includes(p.story?.stage)) return bad('story.stage');
   if (!Array.isArray(p.cargo) || !Array.isArray(p.flags) || !Array.isArray(p.completed)) return bad('lists');
@@ -106,6 +110,13 @@ export function validateEnvelope(raw: unknown): Validation {
     if (v !== null && (!isNum(v) || v < 0)) return bad(`quick.bests.${k}`);
   }
   if (!Array.isArray(p.journal) || !Array.isArray(p.sightings)) return bad('journal');
+  for (const part of ['jacket', 'hat', 'vanBody', 'vanStripe'] as const) {
+    if (!STYLE_CATALOGUE[part].some((i) => i.id === p!.style?.[part])) return bad(`style.${part}`);
+  }
+  for (const k of ['pigeons', 'chats', 'chips', 'calls', 'honks', 'pedBumps'] as const) {
+    if (!isInt(p.stats?.[k]) || p.stats[k] < 0) return bad(`stats.${k}`);
+  }
+  if (!Array.isArray(p.chatted)) return bad('chatted');
   const cp = e.checkpoint;
   if (cp) {
     const poses = [cp.player, cp.van, cp.express];

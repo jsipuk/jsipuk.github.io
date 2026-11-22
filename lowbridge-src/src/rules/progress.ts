@@ -2,9 +2,13 @@
 // each transition returns the next Progress (or a refusal) so the caller can
 // commit it in one storage transaction before any effect plays.
 
-import type { BeatId, CreatureId, Line, LostSiteId, NextJobId, PersonId, QuickId, SymbolId } from './content.ts';
+import type { BeatId, CreatureId, Line, LostSiteId, NextJobId, PersonId, QuickId, StyleItem, SymbolId, UnlockId } from './content.ts';
 import {
   BEATS,
+  HAT_STYLES,
+  JACKET_STYLES,
+  VAN_BODIES,
+  VAN_STRIPES,
   BRANCH_SYMBOL,
   CREWS,
   LINES,
@@ -73,7 +77,41 @@ export interface Progress {
   /** Journal entry keys, in the order they were written. */
   journal: string[];
   sightings: string[];
+  /** How the courier and the van look. */
+  style: Style;
+  /** Free-play counts: things done around town. */
+  stats: Stats;
+  /** People the courier has chatted with at least once. */
+  chatted: string[];
 }
+
+export interface Style {
+  jacket: string;
+  hat: string;
+  vanBody: string;
+  vanStripe: string;
+}
+
+export interface Stats {
+  pigeons: number;
+  chats: number;
+  chips: number;
+  calls: number;
+  honks: number;
+  pedBumps: number;
+}
+
+export type StylePart = keyof Style;
+
+export const STYLE_CATALOGUE: Record<StylePart, StyleItem[]> = {
+  jacket: JACKET_STYLES,
+  hat: HAT_STYLES,
+  vanBody: VAN_BODIES,
+  vanStripe: VAN_STRIPES,
+};
+
+export const DEFAULT_STYLE: Style = { jacket: 'amber', hat: 'none', vanBody: 'cream', vanStripe: 'teal' };
+export const ZERO_STATS: Stats = { pigeons: 0, chats: 0, chips: 0, calls: 0, honks: 0, pedBumps: 0 };
 
 export type GameEvent =
   | { type: 'accepted' }
@@ -100,7 +138,8 @@ export type GameEvent =
       site: LostSiteId | null;
       newSite: boolean;
     }
-  | { type: 'quick_dropped'; job: QuickId };
+  | { type: 'quick_dropped'; job: QuickId }
+  | { type: 'unlocked'; items: string[] };
 
 export type Result = { ok: true; progress: Progress; events: GameEvent[] } | { ok: false; reason: string };
 
@@ -127,6 +166,9 @@ export function initialProgress(instance = 'q01-1'): Progress {
     quick: { active: null, bests: { quiet: null, pursuit: null }, lostFound: [], runs: 0 },
     journal: [],
     sightings: [],
+    style: { ...DEFAULT_STYLE },
+    stats: { ...ZERO_STATS },
+    chatted: [],
   };
 }
 
@@ -447,7 +489,75 @@ export function dropQuick(p: Progress): Result {
   return { ok: true, progress: next, events: [{ type: 'quick_dropped', job: q.job }] };
 }
 
+// ---------------------------------------------------------------- free play
+
+/** Whether an unlock condition has been met, from saved progress only. */
+export function unlockMet(p: Progress, id: UnlockId): boolean {
+  switch (id) {
+    case 'market_friend':
+      return p.crews.market >= 1;
+    case 'ferry_friend':
+      return p.crews.ferry >= 1;
+    case 'pigeons_50':
+      return p.stats.pigeons >= 50;
+    case 'chips_3':
+      return p.stats.chips >= 3;
+    case 'chats_5':
+      return p.chatted.length >= 5;
+    case 'shift_one':
+      return p.shift.complete;
+    case 'honks_25':
+      return p.stats.honks >= 25;
+    case 'reedling':
+      return p.sightings.includes('reedling');
+    case 'lastpost_fast':
+      return p.quick.bests.quiet !== null && p.quick.bests.quiet <= 35;
+    case 'lost_all':
+      return p.quick.lostFound.length >= 3;
+  }
+}
+
+export const isUnlocked = (p: Progress, item: StyleItem): boolean => !item.unlock || unlockMet(p, item.unlock);
+
+/** Change how the courier or the van looks. Locked items are refused with their condition. */
+export function setStyle(p: Progress, part: StylePart, id: string): Result {
+  const item = STYLE_CATALOGUE[part].find((i) => i.id === id);
+  if (!item) return refuse('Not in the shop.');
+  if (!isUnlocked(p, item)) return refuse('Locked.');
+  if (p.style[part] === id) return refuse('Already wearing that.');
+  const next = clone(p);
+  next.style[part] = id;
+  return { ok: true, progress: next, events: [] };
+}
+
+/** Add free-play counts and newly met people. Never touches story or trust. */
+export function addStats(p: Progress, delta: Partial<Stats>, met: string[] = []): Result {
+  const next = clone(p);
+  for (const [k, v] of Object.entries(delta) as [keyof Stats, number][]) next.stats[k] += Math.max(0, Math.round(v));
+  addUnique(next.chatted, met);
+  const newly = (Object.keys(STYLE_CATALOGUE) as StylePart[]).flatMap((part) =>
+    STYLE_CATALOGUE[part].filter((i) => i.unlock && !isUnlocked(p, i) && isUnlocked(next, i)).map((i) => i.name),
+  );
+  return { ok: true, progress: next, events: newly.length ? [{ type: 'unlocked', items: newly }] : [] };
+}
+
+/** Everything that became available between two saves (for "New in the shops"). */
+export function newlyUnlocked(before: Progress, after: Progress): string[] {
+  return (Object.keys(STYLE_CATALOGUE) as StylePart[]).flatMap((part) =>
+    STYLE_CATALOGUE[part].filter((i) => i.unlock && !isUnlocked(before, i) && isUnlocked(after, i)).map((i) => i.name),
+  );
+}
+
 // ---------------------------------------------------------------- migration
+
+/** Bring a schema 2 progress up to schema 3 (free-play style and stats). */
+export function migrateProgressV2(old: Progress, jacket = 'amber'): Progress {
+  const p = structuredClone(old) as Progress;
+  p.style ??= { ...DEFAULT_STYLE, jacket: JACKET_STYLES.some((j) => j.id === jacket) ? jacket : 'amber' };
+  p.stats ??= { ...ZERO_STATS };
+  p.chatted ??= [];
+  return p;
+}
 
 /** Bring a schema 1 (M1) progress up to schema 2. Earned state is kept as it was. */
 export function migrateProgressV1(old: Progress): Progress {

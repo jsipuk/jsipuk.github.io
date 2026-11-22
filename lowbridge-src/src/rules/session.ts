@@ -6,7 +6,10 @@
 import type { CreatureId, Line, PersonId, QuickId, SymbolId } from './content.ts';
 import {
   BEATS,
+  CHIP_LINES,
   CLOSE_REPLY,
+  SHOPS,
+  WRONG_NUMBERS,
   CREATURES,
   LINES,
   LOST_SITES,
@@ -23,8 +26,12 @@ import type { Vec } from './math.ts';
 import { distanceToBox, forward, pointInRect, rightOf } from './math.ts';
 import type { StreetMap } from './map.ts';
 import { Surface, gapToRect, isBlocked, surfaceAt } from './map.ts';
-import type { EncounterAction, GameEvent, Progress, Result } from './progress.ts';
+import type { EncounterAction, GameEvent, Progress, Result, Stats, StylePart } from './progress.ts';
+import type { Ambient, AmbientEvent } from './ambient.ts';
+import { createAmbient, honk as honkAmbient, stepAmbient, talk as talkTo, talkTarget } from './ambient.ts';
 import {
+  addStats,
+  setStyle,
   acceptQ01,
   advanceQuick,
   carryingBattery,
@@ -51,7 +58,7 @@ import type { Checkpoint } from './save.ts';
 import type { VehicleSpec, VehicleState, WalkerState } from './vehicle.ts';
 import { EXPRESS, PATROL, VAN, WALKER, stepVehicle, stepWalker, walkerFits } from './vehicle.ts';
 
-export type Mode = 'world' | 'prompt' | 'encounter' | 'paused';
+export type Mode = 'world' | 'prompt' | 'encounter' | 'shop' | 'paused';
 export type Locomotion = 'foot' | 'van' | 'express';
 export type CommitOutcome = 'ok' | 'conflict' | 'failed';
 export type Commit = (progress: Progress, label: string) => Promise<CommitOutcome>;
@@ -92,7 +99,11 @@ export type WorldEvent =
   | { type: 'caught' }
   | { type: 'parked' }
   | { type: 'save_failed'; label: string }
-  | { type: 'checkpoint' };
+  | { type: 'checkpoint' }
+  | AmbientEvent
+  | { type: 'horn'; at: Vec }
+  | { type: 'wrong_call' }
+  | { type: 'chips' };
 
 export interface Session {
   map: StreetMap;
@@ -129,10 +140,37 @@ export interface Session {
   /** Step "near" captions already shown this session. */
   nearShown: Set<string>;
   seq: number;
+  /** People and pigeons around the courier. */
+  ambient: Ambient;
+  /** Free-play counts waiting to be saved together. */
+  pendingStats: Partial<Stats>;
+  pendingMet: string[];
+  statsFlushAt: number;
+  /** Wrong-number calls on the depot payphone during free roam. */
+  call: { nextAt: number; until: number };
+  hornReadyAt: number;
+  /** Which shop is open, if any. */
+  shop: 'tailor' | 'paint' | null;
 }
 
 export interface Action {
-  kind: 'answer' | 'enter_van' | 'enter_express' | 'exit' | 'inspect' | 'lift' | 'give' | 'talk' | 'step' | 'quick' | null;
+  kind:
+    | 'answer'
+    | 'enter_van'
+    | 'enter_express'
+    | 'exit'
+    | 'inspect'
+    | 'lift'
+    | 'give'
+    | 'talk'
+    | 'step'
+    | 'quick'
+    | 'talk_ped'
+    | 'wrong_call'
+    | 'chips'
+    | 'tailor'
+    | 'paint'
+    | null;
   verb: string;
   enabled: boolean;
   reason?: string;
@@ -180,6 +218,13 @@ export function createSession(
     puzzle: null,
     nearShown: new Set(),
     seq: 0,
+    ambient: createAmbient(),
+    pendingStats: {},
+    pendingMet: [],
+    statsFlushAt: 0,
+    call: { nextAt: 75, until: 0 },
+    hornReadyAt: 0,
+    shop: null,
   };
   if (checkpoint) restoreCheckpoint(s, checkpoint);
   return s;
@@ -326,6 +371,10 @@ export function availableAction(s: Session): Action {
   if (s.mode !== 'world') return { kind: null, verb: '', enabled: false };
   const d = driving(s);
   if (d) {
+    const bay = SHOPS.paint;
+    if (s.locomotion === 'van' && Math.hypot(d.state.x - bay.at.x, d.state.y - bay.at.y) < bay.reach && Math.abs(d.state.speed) <= d.spec.exitSpeed) {
+      return { kind: 'paint', verb: 'Body & Paint', enabled: true };
+    }
     if (Math.abs(d.state.speed) > d.spec.exitSpeed) return { kind: 'exit', verb: 'Get out', enabled: false, reason: 'Stop to get out' };
     if (!exitPoint(s)) return { kind: 'exit', verb: 'Get out', enabled: false, reason: 'No room to get out here' };
     return { kind: 'exit', verb: 'Get out', enabled: true };
@@ -342,6 +391,15 @@ export function availableAction(s: Session): Action {
   const phone = s.map.phone;
   if (prog.story.stage === 'offered') {
     add(Math.hypot(p.x - phone.x, p.y - phone.y) - phone.reach, { kind: 'answer', verb: 'Answer', enabled: true });
+  } else if (wrongCallRinging(s)) {
+    add(Math.hypot(p.x - phone.x, p.y - phone.y) - phone.reach, { kind: 'wrong_call', verb: 'Answer', enabled: true });
+  }
+  const shopGap = (at: Vec, reachPx: number) => Math.hypot(p.x - at.x, p.y - at.y) - reachPx;
+  add(shopGap(SHOPS.tailor.at, SHOPS.tailor.reach), { kind: 'tailor', verb: 'Second Thread · clothes', enabled: true });
+  add(shopGap(SHOPS.chips.at, SHOPS.chips.reach), { kind: 'chips', verb: 'Buy chips', enabled: true });
+  const who = talkTarget(s.ambient, p);
+  if (who) {
+    add(Math.hypot(p.x - who.x, p.y - who.y) - 20 + 0.6, { kind: 'talk_ped', verb: `Talk to ${who.name ?? 'a passer-by'}`, enabled: true });
   }
   add(distanceToBox(p, s.van.x, s.van.y, s.van.heading, VAN.halfLength, VAN.halfWidth) - ENTER_REACH, {
     kind: 'enter_van',
@@ -542,6 +600,65 @@ async function startJob(s: Session, job: QuickId): Promise<void> {
   });
 }
 
+// --------------------------------------------------------------- free play
+
+export const wrongCallRinging = (s: Session): boolean => s.simTime < s.call.until;
+
+/** The depot payphone rings for the story, or with a wrong number during free roam. */
+export const phoneRinging = (s: Session): boolean => s.progress.story.stage === 'offered' || wrongCallRinging(s);
+
+function note(s: Session, delta: Partial<Stats>, met: string[] = []): void {
+  for (const [k, v] of Object.entries(delta) as [keyof Stats, number][]) s.pendingStats[k] = (s.pendingStats[k] ?? 0) + v;
+  for (const m of met) if (!s.pendingMet.includes(m)) s.pendingMet.push(m);
+}
+
+/** Save free-play counts in one small commit. */
+function flushStats(s: Session): void {
+  if (!Object.keys(s.pendingStats).length && !s.pendingMet.length) return;
+  if (s.busy.has('stats')) return;
+  void transition(s, 'stats', (p) => {
+    const delta = s.pendingStats;
+    const met = s.pendingMet;
+    s.pendingStats = {};
+    s.pendingMet = [];
+    return addStats(p, delta, met);
+  });
+}
+
+/** The van's horn. Pigeons scatter and people grumble. */
+export function horn(s: Session): void {
+  const d = driving(s);
+  if (!d || s.mode !== 'world' || s.simTime < s.hornReadyAt) return;
+  s.hornReadyAt = s.simTime + 0.5;
+  const at = { x: d.state.x, y: d.state.y };
+  s.outbox.push({ type: 'horn', at });
+  note(s, { honks: 1 });
+  for (const e of honkAmbient(s.ambient, at)) handleAmbient(s, e);
+}
+
+function handleAmbient(s: Session, e: AmbientEvent): void {
+  s.outbox.push(e);
+  if (e.type === 'pigeons') note(s, { pigeons: e.count });
+  if (e.type === 'ped_bump') note(s, { pedBumps: 1 });
+  if (e.type === 'ped_bump' || e.type === 'ped_brush' || e.type === 'ped_horn') {
+    if (!s.caption || !s.caption.speaker || s.caption.speaker === 'Passer-by' || s.caption.until < s.simTime + 2) {
+      s.caption = { speaker: e.name ?? 'Passer-by', text: e.line, until: s.simTime + 3 };
+    }
+  }
+}
+
+/** Pick something in the open shop. */
+export async function shopChoose(s: Session, part: StylePart, id: string): Promise<void> {
+  if (s.mode !== 'shop') return;
+  await transition(s, `style:${part}`, (p) => setStyle(p, part, id));
+}
+
+export function shopClose(s: Session): void {
+  if (s.mode !== 'shop') return;
+  s.shop = null;
+  s.mode = 'world';
+}
+
 /** Do whatever the action button says. */
 export async function interact(s: Session): Promise<void> {
   const a = availableAction(s);
@@ -614,6 +731,34 @@ export async function interact(s: Session): Promise<void> {
       return;
     case 'step':
       await doStep(s);
+      return;
+    case 'talk_ped': {
+      const who = talkTarget(s.ambient, s.player);
+      if (!who) return;
+      const text = talkTo(s.ambient, who);
+      note(s, { chats: 1 }, [who.id]);
+      prompt(s, { kind: 'line', line: { speaker: who.name ?? 'Passer-by', role: 'Riverside', text }, choices: [{ id: 'ok', label: 'OK' }] });
+      return;
+    }
+    case 'wrong_call': {
+      s.call.until = 0;
+      note(s, { calls: 1 });
+      s.outbox.push({ type: 'wrong_call' });
+      const text = WRONG_NUMBERS[Math.floor(s.simTime * 7) % WRONG_NUMBERS.length];
+      prompt(s, { kind: 'line', line: { speaker: 'Payphone', role: 'Wrong number', text }, choices: [{ id: 'ok', label: 'Hang up' }] });
+      return;
+    }
+    case 'chips': {
+      note(s, { chips: 1 });
+      s.outbox.push({ type: 'chips' });
+      s.caption = { speaker: 'The Fry Light', text: CHIP_LINES[Math.floor(s.simTime * 3) % CHIP_LINES.length], until: s.simTime + 6 };
+      flushStats(s);
+      return;
+    }
+    case 'tailor':
+    case 'paint':
+      s.shop = a.kind;
+      s.mode = 'shop';
       return;
     case 'quick': {
       const job = s.progress.quick.active?.job;
@@ -908,6 +1053,30 @@ export function stepSession(s: Session, raw: RawInput, dt: number): void {
     });
   }
 
+  // The town: people step aside, pigeons scatter.
+  const dv0 = driving(s);
+  const ambientEvents = stepAmbient(
+    s.ambient,
+    s.map,
+    {
+      pos: body,
+      vehicle: dv0
+        ? { heading: dv0.state.heading, speed: dv0.state.speed, halfLength: dv0.spec.halfLength, halfWidth: dv0.spec.halfWidth }
+        : null,
+    },
+    dt,
+  );
+  for (const e of ambientEvents) handleAmbient(s, e);
+  // Wrong numbers on the depot payphone, now and then, once the story call is answered.
+  if (prog.story.stage !== 'offered' && !wrongCallRinging(s) && s.simTime >= s.call.nextAt) {
+    s.call.until = s.simTime + 25;
+    s.call.nextAt = s.simTime + 110 + ((s.simTime * 13) % 70);
+  }
+  if (s.simTime >= s.statsFlushAt) {
+    s.statsFlushAt = s.simTime + 2;
+    flushStats(s);
+  }
+
   if (s.pursuit) {
     const dv = driving(s);
     const outcome = stepPursuit(
@@ -1019,5 +1188,9 @@ export function snapshot(s: Session) {
     saveFailed: s.saveFailed?.label ?? null,
     parked: s.parked,
     handoverAt: s.handoverAt,
+    shop: s.shop,
+    phoneRinging: phoneRinging(s),
+    people: s.ambient.peds.map((p) => ({ id: p.id, name: p.name, x: Math.round(p.x), y: Math.round(p.y), state: p.state })),
+    pigeons: s.ambient.flocks.map((f) => ({ id: f.id, x: f.home.x, y: f.home.y, onGround: f.birds.filter((b) => b.state === 'ground').length })),
   };
 }

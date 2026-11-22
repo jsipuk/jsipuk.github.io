@@ -364,3 +364,195 @@ export const QUICK_JOBS: Record<QuickId, { name: string; minutes: number; summar
   last_post: { name: 'Last post', minutes: 3, summary: 'Sorted mail from the depot to the quay post box, against your best time.' },
   lost_property: { name: 'Lost property', minutes: 4, summary: 'One marked find, handed in at the depot.' },
 };
+
+// ------------------------------------------------------------------ free play
+// Things to do that are not on the job list. No money: shops are free, and
+// extra colours unlock by playing (the core design has no shop economy).
+
+export type UnlockId =
+  | 'market_friend'
+  | 'ferry_friend'
+  | 'pigeons_50'
+  | 'chips_3'
+  | 'chats_5'
+  | 'shift_one'
+  | 'honks_25'
+  | 'reedling'
+  | 'lastpost_fast'
+  | 'lost_all';
+
+export const UNLOCKS: Record<UnlockId, string> = {
+  market_friend: 'Make a friend of the Night Market',
+  ferry_friend: 'Make a friend of the Ferry Crew',
+  pigeons_50: 'Scatter 50 pigeons',
+  chips_3: 'Eat chips at The Fry Light three times',
+  chats_5: 'Chat with five different people',
+  shift_one: 'Finish shift one',
+  honks_25: 'Sound the van horn 25 times',
+  reedling: 'See the Reedlings',
+  lastpost_fast: 'Last post in 35 seconds or less (quiet run)',
+  lost_all: 'Find all three lost things',
+};
+
+export interface StyleItem {
+  id: string;
+  name: string;
+  fill: string;
+  trim: string;
+  unlock?: UnlockId;
+}
+
+export const JACKET_STYLES: StyleItem[] = [
+  { id: 'amber', name: 'Hi-vis amber', fill: '#f0a640', trim: '#e8e2cf' },
+  { id: 'teal', name: 'Canal teal', fill: '#2f9e95', trim: '#e8e2cf' },
+  { id: 'red', name: 'Post-box red', fill: '#c8372d', trim: '#efe4c8' },
+  { id: 'cream', name: 'Cream', fill: '#e6dcc0', trim: '#2f7f7a' },
+  { id: 'blue', name: 'Night blue', fill: '#4f7cc9', trim: '#e8e2cf' },
+  { id: 'plum', name: 'Market plum', fill: '#6b3a5e', trim: '#f2c94c', unlock: 'market_friend' },
+  { id: 'ferry', name: 'Ferry navy', fill: '#2b3f66', trim: '#f07a2c', unlock: 'ferry_friend' },
+  { id: 'pigeon', name: 'Pigeon grey', fill: '#8a9097', trim: '#b98fcf', unlock: 'pigeons_50' },
+  { id: 'chip', name: 'Chip paper', fill: '#efe4c8', trim: '#c8372d', unlock: 'chips_3' },
+];
+
+export const HAT_STYLES: StyleItem[] = [
+  { id: 'none', name: 'No hat', fill: 'transparent', trim: 'transparent' },
+  { id: 'beanie', name: 'Red beanie', fill: '#b5473a', trim: '#e6dcc0' },
+  { id: 'flat_cap', name: 'Flat cap', fill: '#6d5a45', trim: '#3a2f26', unlock: 'chats_5' },
+  { id: 'sou_wester', name: 'Sou’wester', fill: '#e8c25a', trim: '#8d6f2a', unlock: 'lost_all' },
+  { id: 'lamp_beanie', name: 'Lamp beanie', fill: '#2b3f66', trim: '#ffe9a8', unlock: 'shift_one' },
+];
+
+export const VAN_BODIES: StyleItem[] = [
+  { id: 'cream', name: 'Depot cream', fill: '#e6dcc0', trim: '#b9ae92' },
+  { id: 'teal', name: 'Canal teal', fill: '#3a8f88', trim: '#255f5a' },
+  { id: 'red', name: 'Post-box red', fill: '#b93a30', trim: '#7d241d' },
+  { id: 'black', name: 'Midnight', fill: '#2a2f33', trim: '#15191b', unlock: 'honks_25' },
+  { id: 'harbour', name: 'Harbour blue', fill: '#3d5f8f', trim: '#263c5c', unlock: 'ferry_friend' },
+  { id: 'plum', name: 'Market plum', fill: '#6b3a5e', trim: '#45253c', unlock: 'market_friend' },
+  { id: 'reed', name: 'Reedling green', fill: '#6f9a5e', trim: '#46663b', unlock: 'reedling' },
+];
+
+export const VAN_STRIPES: StyleItem[] = [
+  { id: 'teal', name: 'Teal stripe', fill: '#2f7f7a', trim: '#2f7f7a' },
+  { id: 'amber', name: 'Amber stripe', fill: '#f0a640', trim: '#f0a640' },
+  { id: 'cream', name: 'Cream stripe', fill: '#efe4c8', trim: '#efe4c8' },
+  { id: 'racing', name: 'Racing red', fill: '#e0392b', trim: '#efe4c8', unlock: 'lastpost_fast' },
+  { id: 'pigeon', name: 'Pigeon lilac', fill: '#b98fcf', trim: '#b98fcf', unlock: 'pigeons_50' },
+];
+
+export interface Local {
+  id: string;
+  name: string;
+  coat: string;
+  /** Pavement route walked back and forth; one point means they stand still. */
+  path: { x: number; y: number }[];
+  lines: string[];
+}
+
+export const LOCALS: Local[] = [
+  {
+    id: 'arthur',
+    name: 'Arthur',
+    coat: '#5a6e7a',
+    path: [{ x: 150, y: 32 }],
+    lines: [
+      'Forty years on that ferry. She sounds better tonight.',
+      'There was a phone on the slipway once. Ripped out in ’98. I still hear it some nights.',
+      'Tide’s turning. The mud talks when the tide turns.',
+    ],
+  },
+  {
+    id: 'priya',
+    name: 'Priya',
+    coat: '#3f7d6e',
+    path: [
+      { x: 430, y: 552 },
+      { x: 930, y: 552 },
+    ],
+    lines: [
+      'Night shift at the infirmary. You?',
+      'I saw a little crab carry a coin up the ticket machine. I need more sleep.',
+      'That yard shutter’s been jammed since spring.',
+    ],
+  },
+  {
+    id: 'kez',
+    name: 'Kez',
+    coat: '#c8372d',
+    path: [
+      { x: 760, y: 56 },
+      { x: 1000, y: 56 },
+    ],
+    lines: [
+      'Watch this— ah. Never mind.',
+      'Nell gave me free chips once. Legend.',
+      'Pigeons here are bold. Run through them, they hate it.',
+    ],
+  },
+  {
+    id: 'dee',
+    name: 'Dee',
+    coat: '#8a6d3b',
+    path: [
+      { x: 120, y: 440 },
+      { x: 560, y: 440 },
+    ],
+    lines: [
+      'You’re the courier, aren’t you? Bring us something nice for once.',
+      'My phone rang at two this morning. Nobody there. Just a sort of… ringing.',
+      'They say the old ticket office had a switchboard. Before my time.',
+    ],
+  },
+];
+
+/** Passers-by with no name: routes and a coat each. */
+export const PASSERS = [
+  { id: 'p1', coat: '#6b5a7a', path: [{ x: 208, y: 470 }, { x: 208, y: 700 }] },
+  { id: 'p2', coat: '#7a3b3b', path: [{ x: 930, y: 260 }, { x: 930, y: 500 }] },
+  { id: 'p3', coat: '#3b5a7a', path: [{ x: 230, y: 650 }, { x: 560, y: 650 }] },
+  { id: 'p4', coat: '#5a7a3b', path: [{ x: 280, y: 50 }, { x: 720, y: 50 }] },
+  { id: 'p5', coat: '#7a6a3b', path: [{ x: 600, y: 200 }, { x: 900, y: 200 }] },
+];
+
+export const PASSER_LINES = [
+  'Evening.',
+  'Cold one tonight.',
+  'Mind the pigeons. They’re organised.',
+  'Heard the ferry horn earlier. Haven’t heard that in a while.',
+  'If you’re going up the high street, the market’s something to see.',
+  'You look like you’ve been driving all night.',
+  'Lovely van. Bit loud.',
+];
+export const BUMP_LINES = ['Oi! Watch it!', 'Pavements are for people!', 'I’ll have your number plate!'];
+export const BRUSH_LINES = ['Sorry, love.', 'Excuse me.', 'Whoops. Evening.'];
+export const HORN_LINES = ['Alright, alright!', 'No need for that.', 'Some of us are sleeping!'];
+
+export const FLOCKS = [
+  { id: 'market', at: { x: 800, y: 52 } },
+  { id: 'quay', at: { x: 160, y: 46 } },
+  { id: 'tickets', at: { x: 250, y: 552 } },
+  { id: 'depot', at: { x: 92, y: 470 } },
+  { id: 'ring', at: { x: 1040, y: 250 } },
+  { id: 'harbour', at: { x: 560, y: 160 } },
+];
+
+export const WRONG_NUMBERS = [
+  'Is that the Golden Dragon? … No? Sorry, love.',
+  'This is a message about your car’s extended warranty— *click*',
+  'Mum? … You’re not my mum.',
+  'I’d like to report a pigeon. It knows what it did.',
+  'Is this the ferry? Hello? The ferry?',
+  'Three rings. Then nothing. Then three rings. … Sorry, wrong number.',
+];
+
+export const SHOPS = {
+  tailor: { name: 'Second Thread', at: { x: 672, y: 424 }, reach: 24 },
+  paint: { name: 'Riverside Body & Paint', at: { x: 720, y: 588 }, reach: 26 },
+  chips: { name: 'The Fry Light', at: { x: 336, y: 168 }, reach: 24 },
+} as const;
+
+export const CHIP_LINES = [
+  'Hot, salty, far too much vinegar. Wickwing hovers in the steam.',
+  'Mr Okafor wraps them in yesterday’s paper. “On the house, courier.”',
+  'You eat them on the kerb. The pigeons watch every chip.',
+];
