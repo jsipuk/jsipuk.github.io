@@ -255,6 +255,7 @@ Asked for after M2: "People will not simply follow the instructions and the stor
 | `npm run typecheck`, `npm test`, `npm run build` | Pass. 79 tests (14 for free play). | Container |
 | Free play in the browser | Walked through the depot pigeons (all 6 flew), got in the van and honked, drove to Body & Paint, painted it red with a cream stripe, a locked colour explained itself, closed the shop, crossed Station Road to Second Thread, teal jacket and red beanie, Escape closed the shop, talked to Priya, counts saved, journal shows "Around town", reload kept every look. No page errors. | `scripts/smoke.mjs` freeplay |
 | Touch layout | Horn sits left of Brake/Reverse; hidden on foot and in shops. | Headless Chromium, 844 × 390, touch |
+| Full browser suite | 12 of 12 scenarios pass in one run (7 from M1, 4 from M2, free play). An earlier run failed Last post on the scripted walker under load (it passed alone) and the save test still expected format 2; both fixed. | `scripts/smoke.mjs` |
 | On a phone | **Pending.** | |
 
 ### Known issues
