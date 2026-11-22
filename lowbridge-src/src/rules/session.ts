@@ -232,6 +232,10 @@ export function createSession(
     bayUsed: false,
   };
   if (checkpoint) restoreCheckpoint(s, checkpoint);
+  // A first night: say who the little light circling the courier is.
+  if (!checkpoint && progress.story.stage === 'offered') {
+    s.caption = { text: 'Wickwing, your lantern moth, circles your shoulder. Its glow brightens near anything that rings.', until: 9 };
+  }
   return s;
 }
 

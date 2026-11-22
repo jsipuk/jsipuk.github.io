@@ -298,6 +298,7 @@ function onEvents(events: WorldEvent[]): void {
     if (e.type === 'pigeons') Object.assign(detail, { count: e.count, x: Math.round(e.at.x), y: Math.round(e.at.y) });
     if (e.type === 'ped_bump' || e.type === 'ped_brush' || e.type === 'ped_horn') Object.assign(detail, { who: e.id });
     if (e.type === 'unlocked') detail.items = e.items;
+    if (e.type === 'save_failed') Object.assign(detail, { label: e.label, where: saveWhere, error: saves.lastError.slice(0, 200) });
     if (e.type === 'chat') detail.who = e.id;
     if (e.type === 'shop') detail.shop = e.shop;
     // Ambient chatter is frequent; only bumps and pigeons reach the log.
@@ -610,6 +611,10 @@ async function boot(): Promise<void> {
   }
   hud.showSheet(sheetFor('start', session.progress), session.progress);
   syncJackets();
+  // For the test page's log: where progress is being kept on this device.
+  window.dispatchEvent(
+    new CustomEvent('lowbridge:event', { detail: { type: 'storage', where: saveWhere, welcome, revision: saves.revision, note: storageNote, build: BUILD } }),
+  );
 
   const game = new Phaser.Game({
     type: Phaser.AUTO,

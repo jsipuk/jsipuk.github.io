@@ -277,4 +277,6 @@ First phone session on build m2fp-2026-11-22-f455cff (iPhone, iOS 18.7, Claude a
 
 Evidence: `tests/save.test.ts` covers the probe against working, refusing and silent IndexedDB. `scripts/smoke.mjs` nostorage breaks IndexedDB in Chromium: with a host slot the answered call survives a reload ("Welcome back"); without one the start screen says it can't save and no red bar appears. **Pending:** the same on the phone.
 
+Second phone session (m2fp-2026-11-22-e2edc0d): answered Mo's call with no save failure. The log could not show which store took it, so the game now logs a `storage` event at boot (where it saves, and why) and adds the store and error to `save_failed`. The same session showed the thumb pad through the call card (the hide rule still named an old mode) and asked what the dot circling the courier is: calls and the crab encounter now hide the touch controls, and a new game opens with a caption introducing Wickwing.
+
 Full screen: the Claude app's viewer keeps its own bar and frame round the page, and iPhone browsers don't let a page go full screen. Real full screen comes from jsip.uk/lowbridge added to the Home Screen (the manifest opens it standalone, landscape). That needs the release step.
