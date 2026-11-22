@@ -91,7 +91,8 @@ Top speed 150 px/s (9.4 tiles/s), reverse 55, accel 200 px/s², brake 460, coast
 
 ### Known issues and things to watch on the phone
 
-- Pull-back reverse is new and untested on a phone. Check that pulling back to stop and reverse feels natural, and that nobody triggers it by accident when swinging round a corner.
+- Lamp posts and the phone box caused every bump in the owner's two steering-A laps. Lamps sit 3 px from the kerb edge and the phone box 10 px from the bay. Candidate fix after the steering B comparison: move lamps to the back of the pavement and give the bay more clearance from the phone box.
+- Pull-back reverse is new; the owner rated it better than the separate button. With other testers, check that nobody triggers it by accident when swinging round a corner.
 - Keyboard in the pad preset gives eight directions only. A diagonal means "turn 45°", so a scripted driver weaved on straights and overshot corners. Touch is analogue and the rules tests lap cleanly with it, but watch for overshot junctions in the pad preset.
 - Turning late into a wall with the pad preset scrapes along it; pulling back or Brake/Reverse backs out. Note whether testers find that without coaching.
 - Look-ahead and zoom were tuned on desktop emulation. Check on the phone that the next junction is visible before you reach it.
