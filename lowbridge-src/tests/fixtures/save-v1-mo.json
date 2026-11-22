@@ -1,0 +1,30 @@
+{
+  "format": "lowbridge-save",
+  "exportedAt": "2026-11-22T12:00:00.000Z",
+  "build": "m1-2026-11-22-a6b6a70",
+  "envelope": {
+    "schemaVersion": 1,
+    "revision": 7,
+    "savedAt": "2026-11-22T12:00:00.000Z",
+    "progress": {
+      "story": { "job": "Q01", "stage": "delivered", "instance": "q01-1", "nextJob": "Q02F" },
+      "cargo": [],
+      "items": ["washer"],
+      "crews": { "ferry": 1, "market": -1 },
+      "flags": ["counteroffer_heard", "machine_noticed", "yard_shutter_open", "ferry_running"],
+      "recipient": "mo_vale",
+      "roster": ["wickwing", "clatterjack"],
+      "team": ["wickwing", "clatterjack"],
+      "guide": { "wickwing": ["recruited"], "clatterjack": ["recruited", "field_use"] },
+      "encounter": null,
+      "completed": [{ "group": "Q01_battery_handover", "outcome": "mo_vale", "instance": "q01-1" }]
+    },
+    "checkpoint": {
+      "locomotion": "foot",
+      "player": { "x": 210, "y": 70, "facing": -1.57 },
+      "van": { "x": 200, "y": 110, "heading": 3.14 },
+      "express": { "x": 344, "y": 536, "heading": 0, "borrowed": false },
+      "pursuit": false
+    }
+  }
+}

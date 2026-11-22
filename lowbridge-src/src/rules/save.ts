@@ -4,9 +4,11 @@
 // snapshot is kept as a backup in the same transaction.
 
 import type { Progress } from './progress.ts';
-import { initialProgress } from './progress.ts';
+import { initialProgress, migrateProgressV1 } from './progress.ts';
 
-export const SCHEMA_VERSION = 1;
+/** 1: M1 (Q01). 2: M2 adds shift beats, quick jobs, journal and sightings. */
+export const SCHEMA_VERSION = 2;
+export const EXPORT_FORMAT = 'lowbridge-save';
 export const DB_NAME = 'lowbridge';
 const STORE = 'saves';
 const CURRENT = 'current';
@@ -26,6 +28,9 @@ export interface Checkpoint {
   express: PoseData & { borrowed: boolean };
   /** A chase was on: restart it from the lay-by rather than mid-street. */
   pursuit: boolean;
+  /** Last post clock so far (simulation seconds) and whether heat touched the run. */
+  quickElapsed?: number;
+  quickPursuit?: boolean;
 }
 
 export interface SaveEnvelope {
@@ -53,7 +58,9 @@ export function freshEnvelope(): SaveEnvelope {
   return { schemaVersion: SCHEMA_VERSION, revision: 0, savedAt: '', progress: initialProgress(), checkpoint: null };
 }
 
-export type Validation = { ok: true; envelope: SaveEnvelope } | { ok: false; reason: 'newer' | 'invalid'; detail: string };
+export type Validation =
+  | { ok: true; envelope: SaveEnvelope; migratedFrom?: number }
+  | { ok: false; reason: 'newer' | 'invalid'; detail: string };
 
 const isInt = (v: unknown) => Number.isInteger(v);
 const isNum = (v: unknown) => typeof v === 'number' && Number.isFinite(v);
@@ -68,8 +75,14 @@ export function validateEnvelope(raw: unknown): Validation {
     return { ok: false, reason: 'newer', detail: `schema ${e.schemaVersion} is newer than ${SCHEMA_VERSION}` };
   }
   if (!isInt(e.revision) || (e.revision as number) < 0) return bad('revision');
-  const p = e.progress as Progress | undefined;
+  let p = e.progress as Progress | undefined;
   if (!p || typeof p !== 'object') return bad('progress');
+  let migratedFrom: number | undefined;
+  if (e.schemaVersion === 1) {
+    // Older supported format: migrate in memory; the next commit writes schema 2.
+    p = migrateProgressV1(p);
+    migratedFrom = 1;
+  }
   if (!['offered', 'carrying', 'delivered'].includes(p.story?.stage)) return bad('story.stage');
   if (!Array.isArray(p.cargo) || !Array.isArray(p.flags) || !Array.isArray(p.completed)) return bad('lists');
   for (const c of ['ferry', 'market'] as const) {
@@ -79,13 +92,66 @@ export function validateEnvelope(raw: unknown): Validation {
   if (!Array.isArray(p.roster) || !p.roster.every((c) => creatures.includes(c))) return bad('roster');
   if (!Array.isArray(p.team) || p.team.length > 2 || !p.team.every((c) => p.roster.includes(c))) return bad('team');
   if (p.recipient !== null && !['mo_vale', 'nell_price'].includes(p.recipient)) return bad('recipient');
+  const beats = ['Q02F', 'Q02M', 'Q03', 'Q04', 'SHIFT_01_CLOSE'];
+  const sh = p.shift;
+  if (!sh || typeof sh !== 'object') return bad('shift');
+  if (sh.lead !== null && !beats.includes(sh.lead)) return bad('shift.lead');
+  if (sh.active !== null && (!beats.includes(sh.active?.beat) || !isInt(sh.active?.step) || sh.active.step < 0)) return bad('shift.active');
+  if (!Array.isArray(sh.done) || !sh.done.every((b) => beats.includes(b))) return bad('shift.done');
+  const q = p.quick;
+  if (!q || typeof q !== 'object' || !Array.isArray(q.lostFound) || !isInt(q.runs)) return bad('quick');
+  if (q.active !== null && !['last_post', 'lost_property'].includes(q.active?.job)) return bad('quick.active');
+  for (const k of ['quiet', 'pursuit'] as const) {
+    const v = q.bests?.[k];
+    if (v !== null && (!isNum(v) || v < 0)) return bad(`quick.bests.${k}`);
+  }
+  if (!Array.isArray(p.journal) || !Array.isArray(p.sightings)) return bad('journal');
   const cp = e.checkpoint;
   if (cp) {
     const poses = [cp.player, cp.van, cp.express];
     if (!poses.every((q) => q && isNum(q.x) && isNum(q.y))) return bad('checkpoint positions');
     if (!['foot', 'van', 'express'].includes(cp.locomotion)) return bad('checkpoint locomotion');
   }
-  return { ok: true, envelope: e as SaveEnvelope };
+  const envelope = { ...(e as SaveEnvelope), schemaVersion: SCHEMA_VERSION, progress: p };
+  return migratedFrom ? { ok: true, envelope, migratedFrom } : { ok: true, envelope };
+}
+
+// ------------------------------------------------------------ export/import
+
+/** A versioned JSON file a player can keep and import elsewhere (Safari and Home Screen saves are separate). */
+export function exportSave(envelope: SaveEnvelope, build: string): string {
+  return JSON.stringify({ format: EXPORT_FORMAT, exportedAt: new Date().toISOString(), build, envelope }, null, 2);
+}
+
+export type ImportCheck =
+  | { ok: true; envelope: SaveEnvelope; exportedAt: string; build: string; migratedFrom?: number }
+  | { ok: false; reason: 'not_a_save' | 'newer' | 'invalid'; message: string };
+
+/** Parse and check an exported save without touching storage. */
+export function checkImport(text: string): ImportCheck {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return { ok: false, reason: 'not_a_save', message: 'That isn’t a Lowbridge save file.' };
+  }
+  const file = raw as { format?: unknown; envelope?: unknown; exportedAt?: unknown; build?: unknown };
+  if (!file || file.format !== EXPORT_FORMAT || !file.envelope) {
+    return { ok: false, reason: 'not_a_save', message: 'That isn’t a Lowbridge save file.' };
+  }
+  const v = validateEnvelope(file.envelope);
+  if (!v.ok) {
+    return v.reason === 'newer'
+      ? { ok: false, reason: 'newer', message: 'That save comes from a newer version of the game. Update first.' }
+      : { ok: false, reason: 'invalid', message: `That save is damaged (${v.detail}). Your current save is untouched.` };
+  }
+  return {
+    ok: true,
+    envelope: v.envelope,
+    exportedAt: String(file.exportedAt ?? ''),
+    build: String(file.build ?? ''),
+    migratedFrom: v.migratedFrom,
+  };
 }
 
 // ------------------------------------------------------------------ memory
@@ -279,6 +345,11 @@ export class SaveController {
     const p = this.queue.then(run, run);
     this.queue = p.catch(() => undefined);
     return p;
+  }
+
+  /** Replace the stored save with another envelope's progress and checkpoint (import, restore previous). */
+  replace(envelope: SaveEnvelope): Promise<boolean> {
+    return this.write(envelope.progress, envelope.checkpoint);
   }
 
   clear(): Promise<void> {

@@ -3,8 +3,20 @@
 // queues them, commits the next Progress through the injected `commit` and
 // only then applies it and emits its events. No rendering or DOM here.
 
-import type { CreatureId, Line, PersonId } from './content.ts';
-import { CREATURES, LINES, NEXT_JOBS, NOTICE_MACHINE, PEOPLE, RESULT_TEXT, TICKET_CRAB } from './content.ts';
+import type { CreatureId, Line, PersonId, QuickId, SymbolId } from './content.ts';
+import {
+  BEATS,
+  CLOSE_REPLY,
+  CREATURES,
+  LINES,
+  LOST_SITES,
+  NOTICE_MACHINE,
+  PEOPLE,
+  QUICK_JOBS,
+  RESULT_TEXT,
+  SYMBOLS,
+  TICKET_CRAB,
+} from './content.ts';
 import type { RawInput, SteeringPreset } from './controls.ts';
 import { vehicleControls, walkVector } from './controls.ts';
 import type { Vec } from './math.ts';
@@ -14,15 +26,22 @@ import { Surface, gapToRect, isBlocked, surfaceAt } from './map.ts';
 import type { EncounterAction, GameEvent, Progress, Result } from './progress.ts';
 import {
   acceptQ01,
+  advanceQuick,
   carryingBattery,
+  chooseCloseCrew,
+  completeStep,
   deliverBattery,
+  dropQuick,
   encounterAct,
   handoverConsequence,
   hasFlag,
   hearCounteroffer,
   liftShutter,
   noticeMachine,
+  quickStep,
   startEncounter,
+  startQuick,
+  takeCall,
 } from './progress.ts';
 import type { Pursuit } from './pursuit.ts';
 import { startPursuit, stepPursuit } from './pursuit.ts';
@@ -43,7 +62,19 @@ export interface Choice {
 }
 
 export interface Prompt {
-  kind: 'line' | 'confirm' | 'result' | 'caught' | 'save_failed' | 'next_call';
+  kind:
+    | 'line'
+    | 'confirm'
+    | 'result'
+    | 'caught'
+    | 'save_failed'
+    | 'next_call'
+    | 'board'
+    | 'beat_done'
+    | 'quick_result'
+    | 'puzzle'
+    | 'cutscene'
+    | 'close_choice';
   title?: string;
   text?: string;
   line?: Line;
@@ -90,10 +121,18 @@ export interface Session {
   queue: Promise<unknown>;
   /** Simulation time of the handover, for the five-minute gate. */
   handoverAt: number | null;
+  /** Last post clock (simulation seconds since the mail was collected) and whether heat touched it. */
+  quickElapsed: number;
+  quickPursuit: boolean;
+  /** Symbols picked so far at the yard cabinet. */
+  puzzle: SymbolId[] | null;
+  /** Step "near" captions already shown this session. */
+  nearShown: Set<string>;
+  seq: number;
 }
 
 export interface Action {
-  kind: 'answer' | 'enter_van' | 'enter_express' | 'exit' | 'inspect' | 'lift' | 'give' | 'talk' | null;
+  kind: 'answer' | 'enter_van' | 'enter_express' | 'exit' | 'inspect' | 'lift' | 'give' | 'talk' | 'step' | 'quick' | null;
   verb: string;
   enabled: boolean;
   reason?: string;
@@ -136,6 +175,11 @@ export function createSession(
     busy: new Set(),
     queue: Promise.resolve(),
     handoverAt: null,
+    quickElapsed: 0,
+    quickPursuit: false,
+    puzzle: null,
+    nearShown: new Set(),
+    seq: 0,
   };
   if (checkpoint) restoreCheckpoint(s, checkpoint);
   return s;
@@ -149,6 +193,8 @@ export function checkpoint(s: Session): Checkpoint {
     van: pose(s.van),
     express: { ...pose(s.express), borrowed: s.express.borrowed },
     pursuit: s.pursuit !== null,
+    quickElapsed: Number(s.quickElapsed.toFixed(2)),
+    quickPursuit: s.quickPursuit,
   };
 }
 
@@ -159,6 +205,8 @@ export function restoreCheckpoint(s: Session, cp: Checkpoint): void {
   if (okVehicle(cp.van)) Object.assign(s.van, cp.van, { speed: 0, steer: 0 });
   if (okVehicle(cp.express)) Object.assign(s.express, cp.express, { speed: 0, steer: 0 });
   s.express.borrowed = cp.express.borrowed;
+  s.quickElapsed = cp.quickElapsed ?? 0;
+  s.quickPursuit = cp.quickPursuit ?? false;
   if (cp.pursuit) {
     // Authored chase restart: in the express car at the lay-by, patrol on its way.
     Object.assign(s.express, map.expressStart, { speed: 0, steer: 0, borrowed: true });
@@ -326,6 +374,20 @@ export function availableAction(s: Session): Action {
     });
   }
 
+  const step = currentStep(s);
+  if (step) {
+    add(Math.hypot(p.x - step.at.x, p.y - step.at.y) - step.reach - 0.5, {
+      kind: 'step',
+      verb: step.verb,
+      enabled: !heat,
+      reason: heat ? 'Lose the patrol first' : undefined,
+    });
+  }
+  const qs = quickStep(prog);
+  if (qs) {
+    add(Math.hypot(p.x - qs.at.x, p.y - qs.at.y) - 24 - 0.5, { kind: 'quick', verb: qs.verb, enabled: true });
+  }
+
   for (const person of ['mo_vale', 'nell_price'] as const) {
     const at = s.map.people[person];
     const gap = Math.hypot(p.x - at.x, p.y - at.y) - at.reach;
@@ -361,6 +423,123 @@ function talkLine(s: Session, person: PersonId): Line {
     return person === 'mo_vale' ? LINES.moCold : LINES.nellCold;
   }
   return person === 'mo_vale' ? LINES.moWaiting : LINES.nellWaiting;
+}
+
+/** The active story step, if a beat is running and still has steps. */
+export function currentStep(s: Session) {
+  const a = s.progress.shift.active;
+  if (!a) return null;
+  return BEATS[a.beat].steps[a.step] ?? null;
+}
+
+const fmt = (sec: number | null) =>
+  sec === null ? '—' : `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}.${String(Math.floor((sec % 1) * 10))}`;
+export const formatTime = fmt;
+
+/** The dispatch board: the story call, the quick jobs, and Park up. One job at a time. */
+export function openBoard(s: Session): void {
+  const p = s.progress;
+  const sh = p.shift;
+  const busy = sh.active !== null || p.quick.active !== null;
+  const lines: string[] = [];
+  const choices: Choice[] = [];
+  if (p.story.stage !== 'delivered') {
+    lines.push('Story: Q01 One good battery is still running.');
+  } else if (sh.active) {
+    lines.push(`Story: ${BEATS[sh.active.beat].name} in progress.`);
+  } else if (sh.lead) {
+    const b = BEATS[sh.lead];
+    lines.push(`Story: ${b.name} is waiting · about ${b.minutes} min.`);
+    if (!busy) choices.push({ id: 'take', label: `Take the call: ${b.name} · ${b.minutes} min` });
+  } else if (sh.complete) {
+    lines.push('Story: shift one is complete. Shift two arrives in a later build.');
+  }
+  if (p.story.stage === 'delivered') {
+    const q = p.quick;
+    if (q.active) {
+      lines.push(`Quick job: ${QUICK_JOBS[q.active.job].name} in progress.`);
+      choices.push({ id: 'drop', label: `Drop ${QUICK_JOBS[q.active.job].name}` });
+    } else if (!sh.active) {
+      choices.push({ id: 'quick:last_post', label: `Last post · ${QUICK_JOBS.last_post.minutes} min · best ${fmt(q.bests.quiet)}` });
+      choices.push({
+        id: 'quick:lost_property',
+        label: `Lost property · ${QUICK_JOBS.lost_property.minutes} min · ${q.lostFound.length}/${LOST_SITES.length} found`,
+      });
+    }
+    lines.push(`Last post bests: quiet ${fmt(q.bests.quiet)} · with a chase ${fmt(q.bests.pursuit)}.`);
+  }
+  lines.push('One job at a time. A story call waits while you do a quick job.');
+  choices.push({ id: 'park', label: 'Park up' }, { id: 'close', label: 'Back to the street' });
+  prompt(s, { kind: 'board', title: 'Dispatch', text: lines.join(' '), choices });
+}
+
+function beatDonePrompt(s: Session, beatId: keyof typeof BEATS): void {
+  const beat = BEATS[beatId];
+  const lead = s.progress.shift.lead;
+  const choices: Choice[] = [{ id: 'park', label: 'Park up' }];
+  if (lead) choices.push({ id: 'take', label: `Take the next call · ${BEATS[lead].minutes} min` });
+  choices.push({ id: 'board', label: 'Dispatch board' });
+  prompt(s, { kind: 'beat_done', title: beat.done.title, text: beat.done.text, choices });
+}
+
+async function doStep(s: Session): Promise<void> {
+  const step = currentStep(s);
+  if (!step) return;
+  if (step.kind === 'puzzle') {
+    if (!s.progress.cargo.includes(step.requiresCargo ?? '')) {
+      prompt(s, { kind: 'line', text: 'The cabinet is open but the relay socket is empty. Bring the relay from the depot.', choices: [{ id: 'ok', label: 'OK' }] });
+      return;
+    }
+    s.puzzle = [];
+    puzzlePrompt(s, 'Two symbols are scratched beside the relay socket: match the two from your journal.');
+    return;
+  }
+  await transition(s, `step:${step.id}`, (p) => completeStep(p), (events) => afterStep(s, events));
+}
+
+function afterStep(s: Session, events: GameEvent[]): void {
+  for (const e of events) {
+    if (e.type === 'step_done') {
+      if (e.line) prompt(s, { kind: 'line', line: e.line, choices: [{ id: 'ok', label: 'OK' }] });
+      else if (e.caption) s.caption = { text: e.caption, until: s.simTime + 8 };
+      if (e.step === 'watch') {
+        prompt(s, {
+          kind: 'cutscene',
+          title: 'Three rings',
+          text: 'The warning lamp blinks. Along the mud, a line of pocket-sized creatures answers it, one after another: three rings, then three more. You record it.',
+          choices: [{ id: 'log', label: 'Log the sighting' }],
+        });
+      }
+    }
+    if (e.type === 'beat_done' && e.beat !== 'SHIFT_01_CLOSE') beatDonePrompt(s, e.beat);
+  }
+}
+
+function puzzlePrompt(s: Session, text: string): void {
+  const picked = s.puzzle ?? [];
+  const choices: Choice[] = (Object.keys(SYMBOLS) as SymbolId[])
+    .filter((id) => !picked.includes(id))
+    .map((id) => ({ id: `sym:${id}`, label: `${SYMBOLS[id].glyph} ${SYMBOLS[id].name}` }));
+  choices.push({ id: 'cancel', label: 'Close the cabinet' });
+  const chosen = picked.length ? ` Chosen: ${picked.map((id) => SYMBOLS[id].name).join(', ')}.` : '';
+  prompt(s, { kind: 'puzzle', title: 'Yard cabinet', text: `${text}${chosen}`, choices });
+}
+
+function callPrompt(s: Session): void {
+  const a = s.progress.shift.active;
+  if (!a) return;
+  const beat = BEATS[a.beat];
+  prompt(s, { kind: 'line', line: beat.caller, text: `${beat.name} · about ${beat.minutes} min`, choices: [{ id: 'ok', label: 'On my way' }] });
+}
+
+async function startJob(s: Session, job: QuickId): Promise<void> {
+  s.seq += 1;
+  await transition(s, 'quick_start', (p) => startQuick(p, job, `${job}-${p.quick.runs + 1}-${s.seq}`), () => {
+    s.quickElapsed = 0;
+    s.quickPursuit = false;
+    const qs = quickStep(s.progress);
+    if (qs) s.caption = { text: qs.objective, until: s.simTime + 6 };
+  });
 }
 
 /** Do whatever the action button says. */
@@ -433,6 +612,45 @@ export async function interact(s: Session): Promise<void> {
     case 'talk':
       prompt(s, { kind: 'line', line: talkLine(s, a.person!), choices: [{ id: 'ok', label: 'OK' }] });
       return;
+    case 'step':
+      await doStep(s);
+      return;
+    case 'quick': {
+      const job = s.progress.quick.active?.job;
+      await transition(
+        s,
+        'quick_step',
+        (p) => advanceQuick(p, s.quickElapsed, s.quickPursuit),
+        (events) => {
+          for (const e of events) {
+            if (e.type === 'quick_step') {
+              s.caption = { text: e.caption, until: s.simTime + 6 };
+              s.quickElapsed = 0;
+              s.quickPursuit = s.pursuit !== null;
+            }
+            if (e.type === 'quick_done') {
+              const text =
+                e.job === 'last_post'
+                  ? `${fmt(e.time)} ${e.category === 'pursuit' ? 'with a chase' : 'quiet run'}. ${e.improved ? 'New best!' : `Best ${fmt(e.best)}.`}`
+                  : e.newSite
+                    ? `Handed in. ${s.progress.quick.lostFound.length} of ${LOST_SITES.length} lost things found.`
+                    : 'Handed in. You’d already found that one before.';
+              prompt(s, {
+                kind: 'quick_result',
+                title: QUICK_JOBS[e.job].name,
+                text,
+                choices: [
+                  { id: 'park', label: 'Park up' },
+                  { id: 'board', label: 'Dispatch board' },
+                ],
+              });
+            }
+          }
+        },
+      );
+      void job;
+      return;
+    }
   }
 }
 
@@ -459,7 +677,8 @@ export async function choose(s: Session, choiceId: string): Promise<void> {
           line: recipient === 'mo_vale' ? LINES.moNext : LINES.nellNext,
           choices: [
             { id: 'park', label: 'Park up' },
-            { id: 'next', label: `Take the next call · ${NEXT_JOBS[next].minutes} min` },
+            { id: 'next', label: `Take the next call · ${BEATS[next].minutes} min` },
+            { id: 'board', label: 'Dispatch board' },
           ],
         } };
       },
@@ -483,20 +702,88 @@ export async function choose(s: Session, choiceId: string): Promise<void> {
     if (retry) await retry();
     return;
   }
-  if (pr.kind === 'result') {
+  if (choiceId === 'park') {
     closePrompt(s);
-    if (choiceId === 'park') {
-      s.parked = true;
-      s.outbox.push({ type: 'parked' }, { type: 'checkpoint' });
-    } else {
-      const next = NEXT_JOBS[s.progress.story.nextJob!];
-      prompt(s, {
-        kind: 'next_call',
-        title: `${next.name} · about ${next.minutes} min`,
-        text: `${next.lead}. This call arrives in the next build. Drive around Riverside until then.`,
-        choices: [{ id: 'ok', label: 'Free roam' }],
-      });
+    s.prompts = [];
+    if (s.mode === 'prompt') s.mode = 'world';
+    s.parked = true;
+    s.outbox.push({ type: 'parked' }, { type: 'checkpoint' });
+    return;
+  }
+  if (choiceId === 'take' || (pr.kind === 'result' && choiceId === 'next')) {
+    closePrompt(s);
+    await transition(s, 'take_call', takeCall, () => callPrompt(s));
+    return;
+  }
+  if (choiceId === 'board') {
+    closePrompt(s);
+    openBoard(s);
+    return;
+  }
+  if (choiceId.startsWith('quick:')) {
+    closePrompt(s);
+    await startJob(s, choiceId.slice(6) as QuickId);
+    return;
+  }
+  if (choiceId === 'drop') {
+    closePrompt(s);
+    await transition(s, 'quick_drop', dropQuick, () => {
+      s.caption = { text: 'Quick job dropped. Nothing gained, nothing lost.', until: s.simTime + 5 };
+    });
+    return;
+  }
+  if (pr.kind === 'puzzle') {
+    closePrompt(s);
+    if (choiceId === 'cancel') {
+      s.puzzle = null;
+      return;
     }
+    const picked = [...(s.puzzle ?? []), choiceId.slice(4) as SymbolId];
+    s.puzzle = picked;
+    if (picked.length < 2) {
+      puzzlePrompt(s, 'One more.');
+      return;
+    }
+    const step = currentStep(s);
+    const ok = await transition(s, 'step:cabinet', (p) => completeStep(p, picked), (events) => {
+      s.puzzle = null;
+      afterStep(s, events);
+    });
+    if (!ok && !s.saveFailed) {
+      s.puzzle = [];
+      puzzlePrompt(s, 'The relay buzzes and spits. Not those two. Check your journal and try again.');
+    }
+    void step;
+    return;
+  }
+  if (pr.kind === 'cutscene') {
+    closePrompt(s);
+    prompt(s, {
+      kind: 'close_choice',
+      title: 'Who hears it first?',
+      text: 'Both crews will want the recording. Radio one of them first.',
+      choices: [
+        { id: 'first:mo_vale', label: 'Radio Mo first' },
+        { id: 'first:nell_price', label: 'Radio Nell first' },
+      ],
+    });
+    return;
+  }
+  if (pr.kind === 'close_choice') {
+    closePrompt(s);
+    const first = choiceId.slice(6) as PersonId;
+    await transition(s, 'close', (p) => chooseCloseCrew(p, first), () => {
+      prompt(s, { kind: 'line', line: CLOSE_REPLY[first], choices: [{ id: 'ok', label: 'OK' }] });
+      prompt(s, {
+        kind: 'beat_done',
+        title: 'Shift one complete',
+        text: 'The sighting is logged and the line is ringing again. Shift two arrives in a later build; quick jobs are on the dispatch board.',
+        choices: [
+          { id: 'park', label: 'Park up' },
+          { id: 'board', label: 'Dispatch board' },
+        ],
+      });
+    });
     return;
   }
   closePrompt(s);
@@ -594,6 +881,17 @@ export function stepSession(s: Session, raw: RawInput, dt: number): void {
 
   const body = bodyPos(s);
   const prog = s.progress;
+  // Last post clock: simulation time only, from collecting the mail to posting it.
+  const q = prog.quick.active;
+  if (q && q.job === 'last_post' && q.step === 1) {
+    s.quickElapsed += dt;
+    if (s.pursuit) s.quickPursuit = true;
+  }
+  const step = currentStep(s);
+  if (step?.near && !s.nearShown.has(step.id) && Math.hypot(body.x - step.at.x, body.y - step.at.y) < 120) {
+    s.nearShown.add(step.id);
+    s.caption = { text: step.near, until: s.simTime + 6 };
+  }
   if (carryingBattery(prog) && !hasFlag(prog, 'counteroffer_heard') && !pointInRect(body, s.map.depotArea)) {
     void transition(s, 'counteroffer', hearCounteroffer, () => {
       s.caption = { speaker: LINES.nellCounter.speaker, text: LINES.nellCounter.text, until: s.simTime + 9 };
@@ -661,8 +959,22 @@ export function objective(s: Session): Objective {
     const text = options.length > 1 ? 'Battery: Mo at the quay, or Nell at the market' : 'Take the battery to Mo at the ferry quay';
     return { text, target: nextWaypoint(map, body, map.people[nearest], open) };
   }
-  const next = NEXT_JOBS[s.progress.story.nextJob!];
-  return { text: `Next: ${next.lead} · about ${next.minutes} min (next build)`, target: null };
+  const qs = quickStep(s.progress);
+  if (qs) return { text: qs.objective, target: nextWaypoint(map, body, qs.at, open) };
+  const step = currentStep(s);
+  if (step) return { text: step.objective, target: nextWaypoint(map, body, step.at, open) };
+  const sh = s.progress.shift;
+  if (sh.lead) {
+    const b = BEATS[sh.lead];
+    return { text: `Next call: ${b.name} · about ${b.minutes} min · Pause → Dispatch`, target: null };
+  }
+  if (sh.complete) return { text: 'Shift one complete · quick jobs on the dispatch board', target: null };
+  return { text: 'Free roam', target: null };
+}
+
+/** Where the current story or quick-job step happens, for a street pin. */
+export function stepPin(s: Session): Vec | null {
+  return quickStep(s.progress)?.at ?? currentStep(s)?.at ?? null;
 }
 
 export function teamNames(p: Progress): string[] {
