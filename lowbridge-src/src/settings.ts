@@ -4,6 +4,7 @@
 
 import type { SteeringPreset } from './rules/controls.ts';
 import { DEFAULT_PRESET } from './rules/controls.ts';
+import { DEFAULT_JACKET, JACKETS } from './art.ts';
 import type { LapRecord } from './rules/session.ts';
 
 const SETTINGS_KEY = 'lowbridge.settings.v1';
@@ -15,6 +16,7 @@ export interface Settings {
   muted: boolean;
   /** null follows the system setting. */
   reduceMotion: boolean | null;
+  jacket: string;
 }
 
 export interface StoredLap extends LapRecord {
@@ -22,7 +24,7 @@ export interface StoredLap extends LapRecord {
   at: string;
 }
 
-const DEFAULTS: Settings = { preset: DEFAULT_PRESET, muted: false, reduceMotion: null };
+const DEFAULTS: Settings = { preset: DEFAULT_PRESET, muted: false, reduceMotion: null, jacket: DEFAULT_JACKET };
 
 function read<T>(key: string): T | null {
   try {
@@ -48,6 +50,7 @@ export function loadSettings(): Settings {
     preset: s.preset === 'pad' || s.preset === 'hybrid' ? s.preset : DEFAULTS.preset,
     muted: s.muted === true,
     reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : null,
+    jacket: JACKETS.some((j) => j.id === s.jacket) ? (s.jacket as string) : DEFAULTS.jacket,
   };
 }
 

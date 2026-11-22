@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import './style.css';
+import { JACKETS } from './art.ts';
 import { createSfx } from './audio.ts';
 import { createHud, formatSeconds, presetLabel } from './hud.ts';
 import { createInput } from './input.ts';
@@ -122,6 +123,27 @@ byId('dlg-close').addEventListener('click', () => handleEvents(interact(session)
 for (const radio of document.querySelectorAll<HTMLInputElement>('input[name="preset"]')) {
   radio.addEventListener('change', () => radio.checked && setPreset(radio.value as SteeringPreset, false));
 }
+const jacketList = byId('jackets');
+for (const j of JACKETS) {
+  const label = document.createElement('label');
+  label.className = 'swatch';
+  const input = document.createElement('input');
+  input.type = 'radio';
+  input.name = 'jacket';
+  input.value = j.id;
+  input.id = `jacket-${j.id}`;
+  input.addEventListener('change', () => {
+    if (!input.checked) return;
+    settings.jacket = j.id;
+    saveSettings(settings);
+  });
+  const chip = document.createElement('span');
+  chip.className = 'chip';
+  chip.style.background = j.fill;
+  chip.style.borderColor = j.trim;
+  label.append(input, chip, document.createTextNode(j.name));
+  jacketList.append(label);
+}
 const muteBox = byId<HTMLInputElement>('mute');
 muteBox.addEventListener('change', () => setMuted(muteBox.checked));
 const motionBox = byId<HTMLInputElement>('reduce-motion');
@@ -181,6 +203,7 @@ game.scene.add('street', StreetScene, true, {
   hud,
   dpr,
   reduceMotion,
+  jacket: () => settings.jacket,
   touch: () => touch,
   onEvents: handleEvents,
   onReady: (ready: StreetScene) => (scene = ready),

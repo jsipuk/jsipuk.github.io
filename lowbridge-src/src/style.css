@@ -489,6 +489,59 @@ summary:focus-visible {
   opacity: 0.8;
 }
 
+.jackets {
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+
+.jackets legend {
+  margin-bottom: 6px;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px 0 8px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.swatch:has(input:checked) {
+  border-color: var(--amber);
+  background: rgba(255, 179, 71, 0.08);
+}
+
+.swatch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.swatch input:focus-visible + .chip {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid;
+}
+
 .toggles {
   display: flex;
   flex-wrap: wrap;

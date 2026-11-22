@@ -377,25 +377,84 @@ export function drawBeam(): HTMLCanvasElement {
   return c;
 }
 
-/** The courier on foot, facing east: hi-vis shoulders, dark head. */
-export function drawCourier(): HTMLCanvasElement {
-  const [c, g] = canvas(14, 14);
-  g.translate(7, 7);
+/** Jacket colours offered in the menu. Words go with each swatch, never colour alone. */
+export const JACKETS = [
+  { id: 'amber', name: 'Hi-vis amber', fill: '#f0a640', trim: '#e8e2cf' },
+  { id: 'teal', name: 'Canal teal', fill: '#2f9e95', trim: '#e8e2cf' },
+  { id: 'red', name: 'Post-box red', fill: '#c8372d', trim: '#efe4c8' },
+  { id: 'cream', name: 'Cream', fill: '#e6dcc0', trim: '#2f7f7a' },
+  { id: 'blue', name: 'Night blue', fill: '#4f7cc9', trim: '#e8e2cf' },
+] as const;
+export type JacketId = (typeof JACKETS)[number]['id'];
+export const DEFAULT_JACKET: JacketId = 'amber';
+
+/** Walk frames: 0 standing, 1 left foot forward, 2 right foot forward. */
+export const COURIER_FRAMES = 3;
+
+/**
+ * The courier on foot, seen from above and facing east: shoulders in the
+ * jacket colour with a reflective band, dark head. While walking,
+ * a foot pokes out in front and the opposite hand swings forward.
+ */
+export function drawCourier(jacketId: string, frame: number): HTMLCanvasElement {
+  const jacket = JACKETS.find((j) => j.id === jacketId) ?? JACKETS[0];
+  const [c, g] = canvas(18, 18);
+  g.translate(9, 9);
+  // Stride: how far the left foot is ahead (+) or behind (-); hands swing the other way.
+  const stride = frame === 1 ? 1 : frame === 2 ? -1 : 0;
+
   g.fillStyle = 'rgba(0,0,0,0.35)';
   g.beginPath();
-  g.ellipse(1, 1, 4.5, 6, 0, 0, Math.PI * 2);
+  g.ellipse(1, 1, 5, 6.5, 0, 0, Math.PI * 2);
   g.fill();
-  g.fillStyle = '#f0a640';
+
+  // Feet: dark trousers ending in shoes, one each side of the body's centre line.
+  // Light trainers so a stepping foot reads against dark, wet pavement.
+  const foot = (side: number, ahead: number) => {
+    const x = ahead * 5.4;
+    g.fillStyle = '#5b6470';
+    g.fillRect(Math.min(0, x), side * 2.3 - 1.2, Math.abs(x) + 0.5, 2.4);
+    g.fillStyle = '#e8e2cf';
+    roundRect(g, x - 1.4 + (ahead > 0 ? 1 : ahead < 0 ? -0.6 : 0.2), side * 2.3 - 1.3, 3, 2.6, 1.1);
+    g.fill();
+  };
+  foot(-1, stride);
+  foot(1, -stride);
+
+  // Hands swing opposite to the feet, just outside the shoulders.
+  const hand = (side: number, ahead: number) => {
+    const x = ahead * 2.2;
+    g.fillStyle = jacket.fill;
+    g.beginPath();
+    g.ellipse(x * 0.6, side * 4.9, 1.6, 1.2, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#d9b48c';
+    g.beginPath();
+    g.arc(x + 0.4, side * 5.4, 1.05, 0, Math.PI * 2);
+    g.fill();
+  };
+  hand(-1, -stride);
+  hand(1, stride);
+
+  // Shoulders and jacket.
+  g.fillStyle = jacket.fill;
   g.beginPath();
-  g.ellipse(0, 0, 4.2, 6, 0, 0, Math.PI * 2);
+  g.ellipse(0, 0, 3.6, 5.4, 0, 0, Math.PI * 2);
   g.fill();
-  g.fillStyle = '#e8e2cf';
-  g.fillRect(-0.6, -5.5, 1.2, 11);
+  g.strokeStyle = 'rgba(0,0,0,0.35)';
+  g.lineWidth = 0.5;
+  g.stroke();
+  // Reflective band across the back of the shoulders.
+  g.fillStyle = jacket.trim;
+  g.fillRect(-2.4, -4.9, 1.1, 9.8);
+  // Head, a little forward of the shoulders, with a hint of face at the front.
   g.fillStyle = '#2b211b';
   g.beginPath();
-  g.arc(0.6, 0, 2.9, 0, Math.PI * 2);
+  g.arc(0.7, 0, 2.15, 0, Math.PI * 2);
   g.fill();
   g.fillStyle = '#d9b48c';
-  g.fillRect(3, -0.8, 1.4, 1.6);
+  g.beginPath();
+  g.ellipse(2.4, 0, 0.75, 1.25, 0, 0, Math.PI * 2);
+  g.fill();
   return c;
 }

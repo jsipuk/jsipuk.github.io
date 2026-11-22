@@ -68,6 +68,7 @@ Built 21 November 2026 in `jsipuk.github.io/lowbridge-src/`, beside the site's o
 | Interruptions | Blur, hidden page and pagehide clear held input and pause. Orientation change clears held input. A key held through an interruption must be pressed again. | A01 and the two-minute test. |
 | Time | Fixed 1/60 s step; a frame counts at most 0.1 s; accumulated time resets on resume. | No giant step after backgrounding. |
 | Job arrow | While driving, the arrow points at the next junction along the roads (shortest way round), or straight at the target when it is on the same road. Built from the roads' overlaps in `src/rules/route.ts`. | The spec asks for "an arrow towards its street junction". The first build pointed straight at the target, which on Station Road meant through the ticket office; the owner's only bump on 4100c9d was that wall. |
+| Courier look | Seen from above: jacket shoulders with a reflective band, head a little forward. Walking steps a light trainer out in front and swings the opposite hand forward, timed by distance walked, so it stands still when you do. Jacket colour is a menu setting: Hi-vis amber (default), Canal teal, Post-box red, Cream, Night blue, each named beside its swatch. | Owner asked to see the courier walk, with legs poking out in front, arms optional depending on pixel detail, and a colour option. Hands are kept small; remove them if they read as clutter on the phone. |
 | Steering choice | Settings offer C (default) and A. | Owner, 22 November: keep both as options; slightly prefers C, final call depends on real missions. |
 | Camera | North-up. Zoom shows about 26 tiles across and at least 14 tiles top to bottom (1.74× on an 844 × 390 iPhone, 3× cap on desktop). Look-ahead is 0.6 s of travel, capped at 28% of the view. Bounds extend 10 tiles past the block so the courier stays mid-screen, clear of the thumb controls. | First screenshot showed the pad covering the van at the map edge. |
 | Storage | Steering, sound, reduced motion and a lap log in `localStorage`, guarded. | Convenience only. Story saves go to IndexedDB in M1. |
@@ -106,6 +107,10 @@ Top speed 110 px/s (6.9 tiles/s), reverse 45, pavement 60, accel 150 px/s², bra
 - Look-ahead and zoom were tuned on desktop emulation. Check on the phone that the next junction is visible before you reach it.
 - Each iPhone tap on Get in, Get out and Answer fires on release. Check it feels immediate while the other thumb holds the pad.
 - Audio is synthesised and quiet. Starts only after the Start tap.
+
+### Placeholder call
+
+Answering the payphone always plays Mo's opening line and changes nothing else. That is deliberate for M0. In M1 (T05) answering accepts Q01: the battery enters custody, the quay is marked, and Nell's counteroffer fires on leaving the depot.
 
 ### M0 gate status
 

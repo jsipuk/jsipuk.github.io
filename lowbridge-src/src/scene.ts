@@ -19,6 +19,7 @@ export interface SceneDeps {
   hud: Hud;
   dpr: number;
   reduceMotion(): boolean;
+  jacket(): string;
   touch(): boolean;
   onEvents(events: GameEvent[]): void;
   onReady(scene: StreetScene): void;
@@ -51,6 +52,7 @@ export class StreetScene extends Phaser.Scene {
   private bayFx!: Phaser.GameObjects.Graphics;
   private ringLabel!: Phaser.GameObjects.Text;
   private camPos: Vec | null = null;
+  private stride = { phase: 0, last: null as Vec | null, idle: 0 };
   private look: Vec = { x: 0, y: 0 };
 
   constructor() {
@@ -66,7 +68,7 @@ export class StreetScene extends Phaser.Scene {
     this.textures.addCanvas('street', drawStreet(map));
     this.textures.addCanvas('van', drawVan());
     this.textures.addCanvas('beam', drawBeam());
-    this.textures.addCanvas('courier', drawCourier());
+
 
     this.add.image(map.region.x, map.region.y, 'street').setOrigin(0).setScale(1 / ART_SCALE).setDepth(0);
     this.bayFx = this.add.graphics().setDepth(1);
@@ -78,7 +80,7 @@ export class StreetScene extends Phaser.Scene {
       .setBlendMode(Phaser.BlendModes.ADD)
       .setDepth(2);
     this.vanImg = this.add.image(0, 0, 'van').setScale(1 / ART_SCALE).setDepth(3);
-    this.courier = this.add.image(0, 0, 'courier').setScale(1 / ART_SCALE).setDepth(4);
+    this.courier = this.add.image(0, 0, this.courierKey(0)).setScale(1 / ART_SCALE).setDepth(4);
     this.ringFx = this.add.graphics().setDepth(5);
 
     const label = (text: string, x: number, y: number, angle = 0) =>
@@ -106,6 +108,29 @@ export class StreetScene extends Phaser.Scene {
     const cssW = this.scale.width / dpr;
     const cssH = this.scale.height / dpr;
     this.cameras.main.setZoom(cssZoom(cssW, cssH) * dpr);
+  }
+
+  /** Texture for one walk frame in the chosen jacket, drawn the first time it is needed. */
+  private courierKey(frame: number): string {
+    const key = `courier-${this.deps.jacket()}-${frame}`;
+    if (!this.textures.exists(key)) this.textures.addCanvas(key, drawCourier(this.deps.jacket(), frame));
+    return key;
+  }
+
+  /** Walk cycle from distance covered: left foot, together, right foot, together. */
+  private courierFrame(p: Vec, dt: number): number {
+    const st = this.stride;
+    const moved = st.last ? Math.hypot(p.x - st.last.x, p.y - st.last.y) : 0;
+    st.last = { x: p.x, y: p.y };
+    if (moved > 0.05) {
+      st.idle = 0;
+      st.phase = (st.phase + moved / 6) % 4;
+    } else {
+      st.idle += dt;
+      if (st.idle > 0.12) st.phase = 0;
+    }
+    if (st.idle > 0.12 && moved <= 0.05) return 0;
+    return [1, 0, 2, 0][Math.floor(st.phase)];
   }
 
   /** Forget time that passed while paused, hidden or in a dialogue. */
@@ -154,7 +179,12 @@ export class StreetScene extends Phaser.Scene {
       .setVisible(inVan)
       .setPosition(v.x + f.x * (VAN.halfLength - 1), v.y + f.y * (VAN.halfLength - 1))
       .setRotation(v.heading);
-    this.courier.setVisible(!inVan).setPosition(s.player.x, s.player.y).setRotation(s.player.facing);
+    if (inVan) this.stride.last = null;
+    this.courier
+      .setTexture(this.courierKey(inVan ? 0 : this.courierFrame(s.player, dt)))
+      .setVisible(!inVan)
+      .setPosition(s.player.x, s.player.y)
+      .setRotation(s.player.facing);
 
     // The ringing phone flashes; with reduced motion it blinks in place without growing rings.
     const still = this.deps.reduceMotion();

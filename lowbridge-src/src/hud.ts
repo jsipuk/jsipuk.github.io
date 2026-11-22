@@ -137,6 +137,9 @@ export function createHud(): Hud {
         input.checked = input.value === settings.preset;
       }
       $<HTMLInputElement>('mute').checked = settings.muted;
+      for (const input of document.querySelectorAll<HTMLInputElement>('input[name="jacket"]')) {
+        input.checked = input.value === settings.jacket;
+      }
     },
 
     renderLaps(laps) {
