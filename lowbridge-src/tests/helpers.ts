@@ -5,6 +5,7 @@ import { angleDiff, clamp } from '../src/rules/math.ts';
 import type { Vec } from '../src/rules/math.ts';
 import type { GameEvent, Session } from '../src/rules/session.ts';
 import { stepSession } from '../src/rules/session.ts';
+import { VAN } from '../src/rules/vehicle.ts';
 
 export const STEP = 1 / 60;
 
@@ -32,14 +33,14 @@ export function inputTowards(s: Session, target: Vec, preset: SteeringPreset, sp
     return { ...NO_INPUT, padX: (dx / d) * speedLimit, padY: (dy / d) * speedLimit };
   }
   if (preset === 'hybrid') {
-    return { ...NO_INPUT, padX: dx / d, padY: dy / d, goButton: s.van.speed < 150 * speedLimit ? 1 : 0 };
+    return { ...NO_INPUT, padX: dx / d, padY: dy / d, goButton: s.van.speed < VAN.maxForward * speedLimit ? 1 : 0 };
   }
   const diff = angleDiff(Math.atan2(dy, dx), s.van.heading);
   const wantSlow = Math.abs(diff) > 0.6;
   return {
     ...NO_INPUT,
     wheelSteer: clamp(diff / 0.35, -1, 1),
-    wheelThrottle: s.van.speed > 150 * speedLimit || (wantSlow && s.van.speed > 70) ? 0 : 1,
+    wheelThrottle: s.van.speed > VAN.maxForward * speedLimit || (wantSlow && s.van.speed > 70) ? 0 : 1,
   };
 }
 

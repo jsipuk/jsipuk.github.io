@@ -31,6 +31,8 @@ export interface LapRecord {
   preset: SteeringPreset | 'mixed';
   lapSeconds: number;
   bumps: number;
+  /** What each counted bump hit and the tile it was on, e.g. "lamp_station_2 at 20,26". */
+  hits: string[];
 }
 
 export interface RunState {
@@ -40,6 +42,7 @@ export interface RunState {
   parked: boolean;
   lapSeconds: number | null;
   bumps: number;
+  hits: string[];
   lastBumpAt: number;
   parkTimer: number;
   presetsUsed: SteeringPreset[];
@@ -98,6 +101,7 @@ const newRun = (n: number): RunState => ({
   parked: false,
   lapSeconds: null,
   bumps: 0,
+  hits: [],
   lastBumpAt: -Infinity,
   parkTimer: 0,
   presetsUsed: [],
@@ -156,6 +160,20 @@ export function exitPoint(s: Session): Vec | null {
     return surface === Surface.Pavement || surface === Surface.Yard;
   });
   return safe ?? fits[0] ?? null;
+}
+
+/** Name what the van hit at a bump point: a lamp post, the phone box, the barrier or a wall. */
+export function describeHit(map: StreetMap, at: Vec): string {
+  const tile = `${Math.floor(at.x / 16)},${Math.floor(at.y / 16)}`;
+  for (const prop of map.props) {
+    if (Math.hypot(prop.x - at.x, prop.y - at.y) < prop.r + 10) return `${prop.id} at ${tile}`;
+  }
+  const ph = map.phone;
+  if (Math.abs(ph.x - at.x) < ph.half + 10 && Math.abs(ph.y - at.y) < ph.half + 10) return `phone box at ${tile}`;
+  for (const [dx, dy] of [[0, 0], [8, 0], [-8, 0], [0, 8], [0, -8]]) {
+    if (surfaceAt(map, at.x + dx, at.y + dy) === Surface.Barrier) return `barrier at ${tile}`;
+  }
+  return `wall at ${tile}`;
 }
 
 // ---------------------------------------------------------------- actions
@@ -222,6 +240,7 @@ export function interact(s: Session): GameEvent[] {
           preset: used.length === 1 ? used[0] : 'mixed',
           lapSeconds: s.run.lapSeconds,
           bumps: s.run.bumps,
+          hits: [...s.run.hits],
         };
         s.log.push(record);
         s.run = newRun(s.run.n + 1);
@@ -263,6 +282,7 @@ export function stepSession(s: Session, raw: RawInput, dt: number): GameEvent[] 
     const controls = vehicleControls(raw, s.preset, s.van.heading, s.van.speed);
     const driving = controls.throttle > 0 || controls.brake || Math.abs(s.van.speed) > 1;
     if (driving && !s.run.presetsUsed.includes(s.preset)) s.run.presetsUsed.push(s.preset);
+    const speedBefore = s.van.speed;
     const result = stepVehicle(VAN, s.van, controls, dt, {
       blocked: (p) => isBlocked(s.map, p),
       onPavement: (p) => surfaceAt(s.map, p.x, p.y) === Surface.Pavement,
@@ -270,14 +290,15 @@ export function stepSession(s: Session, raw: RawInput, dt: number): GameEvent[] 
     });
     if (result.bump > 0) {
       const f = forward(s.van.heading);
-      const ahead = Math.sign(s.van.speed) <= 0 ? 1 : -1;
-      events.push({
-        type: 'bump',
-        strength: result.bump,
-        at: { x: s.van.x + f.x * VAN.halfLength * ahead, y: s.van.y + f.y * VAN.halfLength * ahead },
-      });
+      // The end that hit is the one it was travelling towards before the step.
+      const end = speedBefore >= 0 ? 1 : -1;
+      const at = { x: s.van.x + f.x * VAN.halfLength * end, y: s.van.y + f.y * VAN.halfLength * end };
+      events.push({ type: 'bump', strength: result.bump, at });
       const counting = s.run.enteredAt !== null && !s.run.parked;
-      if (counting && s.simTime - s.run.lastBumpAt > BUMP_DEBOUNCE) s.run.bumps++;
+      if (counting && s.simTime - s.run.lastBumpAt > BUMP_DEBOUNCE) {
+        s.run.bumps++;
+        if (s.run.hits.length < 12) s.run.hits.push(describeHit(s.map, at));
+      }
       s.run.lastBumpAt = s.simTime;
     }
     if (!s.run.lap && s.run.enteredAt !== null && pointInRect(s.van, s.map.lapCheckpoint.rect)) {

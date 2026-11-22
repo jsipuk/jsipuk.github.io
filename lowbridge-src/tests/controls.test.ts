@@ -78,11 +78,20 @@ test('steering C: the pad only points, Go drives', () => {
   assert.equal(half.throttle, 1, 'a small push still drives at full Go');
 });
 
-test('steering C: Go with the pad pulled back reverses; the up key is a direction, not Go', () => {
-  const back = vehicleControls({ ...NO_INPUT, padY: 1, goButton: 1 }, 'hybrid', NORTH, 0);
-  assert.equal(back.brake, true);
-  const noGo = vehicleControls({ ...NO_INPUT, padY: 1 }, 'hybrid', NORTH, 0);
-  assert.equal(noGo.brake, false, 'pulling back without Go does nothing');
+test('steering C: Go only drives forwards; pointing behind swings round', () => {
+  const behind = vehicleControls({ ...NO_INPUT, padY: 1, padX: 0.1, goButton: 1 }, 'hybrid', NORTH, 0);
+  assert.equal(behind.brake, false, 'never reverses on Go');
+  assert.ok(behind.throttle > 0 && behind.throttle < 1, 'eases off to turn round');
+  assert.equal(Math.abs(behind.steer), 1);
   const upKey = vehicleControls({ ...NO_INPUT, padY: -1, wheelThrottle: 1 }, 'hybrid', NORTH, 0);
-  assert.equal(upKey.throttle, 0);
+  assert.equal(upKey.throttle, 0, 'the up key points; it is not Go');
+});
+
+test('steering C: Brake/Reverse backs up straight, and the pad still sets where the front points', () => {
+  const straight = vehicleControls({ ...NO_INPUT, brake: true }, 'hybrid', NORTH, 0);
+  assert.deepEqual(straight, { throttle: 0, steer: 0, brake: true });
+  // Reversing, facing north, pad points north-east: nose turns right, so steer is negative while going back.
+  const turn = vehicleControls({ ...NO_INPUT, brake: true, padX: 0.7, padY: -0.7 }, 'hybrid', NORTH, -30);
+  assert.equal(turn.brake, true);
+  assert.ok(turn.steer < 0);
 });

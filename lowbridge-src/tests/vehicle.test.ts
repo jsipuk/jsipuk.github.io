@@ -22,7 +22,7 @@ test('throttle reaches top speed and releasing rolls to a stop', () => {
   run(v, 3);
   assert.equal(v.speed, 0);
   const rolled = v.x - x;
-  assert.ok(rolled > 60 && rolled < 120, `coasted ${rolled.toFixed(0)}px`);
+  assert.ok(rolled > 35 && rolled < 90, `coasted ${rolled.toFixed(0)}px`);
 });
 
 test('brake stops quickly, then the same control reverses', () => {

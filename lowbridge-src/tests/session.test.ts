@@ -176,3 +176,26 @@ test('lamp posts stand at the back of the pavement, clear of the kerb', () => {
     }
   }
 });
+
+test('steering C reversing: the front turns towards the pad', () => {
+  const s = fresh('hybrid');
+  walkTo(s, { x: 76, y: 664 });
+  interact(s);
+  // Facing east. Back up with the pad pointing north-east: the nose should swing towards north-east.
+  for (let t = 0; t < 0.5; t += STEP) stepSession(s, { ...NO_INPUT, brake: true, padX: 0.7, padY: -0.7 }, STEP);
+  assert.ok(s.van.speed < 0, 'reversing');
+  assert.ok(s.van.heading < -0.05, `nose turned anticlockwise towards north-east (${s.van.heading.toFixed(2)})`);
+});
+
+test('a bump into a lamp post is logged with what was hit', () => {
+  const s = fresh('pad');
+  walkTo(s, { x: 76, y: 664 });
+  interact(s);
+  // Drive north off Station Road, over the pavement, into lamp_station_1 at (200, 422).
+  s.van.x = 200;
+  s.van.y = 470;
+  s.van.heading = -Math.PI / 2;
+  for (let t = 0; t < 3 && s.run.bumps === 0; t += STEP) stepSession(s, { ...NO_INPUT, padY: -1 }, STEP);
+  assert.equal(s.run.bumps, 1);
+  assert.match(s.run.hits[0], /^lamp_station_1 at 12,26$/);
+});
