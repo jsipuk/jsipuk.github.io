@@ -7,6 +7,8 @@ import { clamp } from './rules/math.ts';
 
 export interface InputHandlers {
   onInteract(): void;
+  /** The van's horn (H, or the Horn button while driving). */
+  onHorn(): void;
   onPauseToggle(): void;
   onPreset(preset: SteeringPreset): void;
   onMuteToggle(): void;
@@ -43,7 +45,7 @@ export function createInput(h: InputHandlers): Input {
   window.addEventListener('keydown', (e) => {
     h.onGesture();
     const target = e.target as HTMLElement | null;
-    const onControl = !!target?.closest?.('.sheet, .dialogue');
+    const onControl = !!target?.closest?.('.sheet, .dialogue, .shop');
     if (e.code === 'Escape' || e.code === 'KeyP') {
       e.preventDefault();
       if (!e.repeat) h.onPauseToggle();
@@ -63,7 +65,8 @@ export function createInput(h: InputHandlers): Input {
     if (e.code === 'KeyE' || e.code === 'Enter') {
       e.preventDefault();
       h.onInteract();
-    } else if (e.code === 'Digit1') h.onPreset('pad');
+    } else if (e.code === 'KeyH') h.onHorn();
+    else if (e.code === 'Digit1') h.onPreset('pad');
     else if (e.code === 'Digit3') h.onPreset('hybrid');
     else if (e.code === 'KeyM') h.onMuteToggle();
   });
@@ -176,6 +179,7 @@ export function createInput(h: InputHandlers): Input {
     });
   };
   tapButton($('act-btn'), () => h.onInteract());
+  tapButton($('horn-btn'), () => h.onHorn());
   tapButton($('pause-btn'), () => h.onPauseToggle());
 
   return {

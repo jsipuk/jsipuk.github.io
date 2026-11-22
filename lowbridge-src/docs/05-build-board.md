@@ -225,3 +225,40 @@ Full browser suite on the final build: 11 scenarios (7 from M1, 4 from M2). Nine
 ### Next ticket
 
 T12's people gate, then M3 (T13): Riverside shifts 2–3, Reedling as a recruit, team selection, mastery, trust recovery and the first captain contest.
+
+## Free play record • the town between jobs (owner request, 2026-11-22)
+
+Asked for after M2: "People will not simply follow the instructions and the story." Riverside now has things to do that aren't on the job line. None of it changes trust or the story, and all of it saves.
+
+### Decisions where the build differs from or fills in the spec
+
+| Area | Built | Why |
+| --- | --- | --- |
+| Shops | **Second Thread** (Station Road, north side) sells jackets and hats. **Riverside Body & Paint** (forecourt south of Station Road) paints the van body and roof stripe; drive onto the dashed bay and stop. **The Fry Light** (Harbour Road) does chips. | The owner's three examples: clothes, a car paint shop, things to do. |
+| No money | Everything is free. Better pieces unlock by playing: make a friend of a crew, see the Reedlings, finish shift one, find all three lost things, a quiet Last post in 35 s, scatter 50 pigeons, chat to 5 people, eat chips 3 times, honk 25 times. Locked pieces say how to earn them. | The spec has no economy; a currency would need its own design. Unlocks reward exploring and the quick jobs. |
+| Looks live in the save | Schema 3 adds `style`, `stats` and `chatted`. Schema 1 and 2 saves migrate on load. The pause menu jacket list now writes to the save too; a jacket picked in device settings before this build is carried into the save once. | Looks should survive export/import and a new phone. |
+| People | Four named locals (Arthur on the quay, Priya on Station Road, Kez at the market, Dee on the north pavement of Station Road) and five passers-by walk set routes. Stand close and press Talk. Locals work through their own lines; passers-by pick at random. | "People you can bump into / talk to." |
+| Bumps | Vehicles make people step aside. A bump is a stumble, an "oof!" and a shout in the caption, counted as a near miss. Nobody is ever hurt and nothing is lost. Walking into someone gets a milder line. | Keeps the tone of the spec (no harm to people) while still being funny. |
+| Pigeons | Six flocks of six (quay, market, ticket street, depot, ring road, Harbour Road). Walk or drive through and they scatter; they land again 16–26 s later once you're 90 px away. | "Pigeons you can run through and scatter." |
+| Horn | H on a keyboard, or the Horn button left of Brake while driving. Pigeons within 150 px scatter; one person within 90 px grumbles. Half-second cooldown. | A toy for the van, and a second way to move pigeons. |
+| Wrong numbers | Once Mo's call is answered, the depot payphone rings now and then (first after 75 s of play, then every 110–180 s, for 25 s). Answer for a one-line wrong number. | Brings the phone back to life without a new job. |
+| Saves stay small | Free-play counts are batched and saved together at most every 2 s, and only while nothing else is saving. | Avoids a save per pigeon. |
+| Paint bay | After you close Body & Paint the button says "Get out" until the van leaves the bay. | Found in the browser run: the bay kept reopening the shop. |
+| No hiding in shops | With a patrol on you, shops and chips say "Lose the patrol first". | A shop pauses the street, which would freeze the chase. |
+| Talk comes last | A passer-by in reach never takes the button from the van, the phone, a shop or a job step. Away from those, Talk shows as normal. | People walk past constantly; "Get in" mustn't flip to "Talk" under your thumb. |
+| Journal | Pause → Journal → "Around town" counts pigeons, people met, chips, honks, wrong numbers, near misses and looks unlocked. | Shows progress for the free-play unlocks. |
+
+### Evidence
+
+| Check | Result | Environment |
+| --- | --- | --- |
+| `npm run typecheck`, `npm test`, `npm run build` | Pass. 79 tests (14 for free play). | Container |
+| Free play in the browser | Walked through the depot pigeons (all 6 flew), got in the van and honked, drove to Body & Paint, painted it red with a cream stripe, a locked colour explained itself, closed the shop, crossed Station Road to Second Thread, teal jacket and red beanie, Escape closed the shop, talked to Priya, counts saved, journal shows "Around town", reload kept every look. No page errors. | `scripts/smoke.mjs` freeplay |
+| Touch layout | Horn sits left of Brake/Reverse; hidden on foot and in shops. | Headless Chromium, 844 × 390, touch |
+| On a phone | **Pending.** | |
+
+### Known issues
+
+- People and pigeons don't block vehicles or the courier; they step aside or fly. Fine for now; a crowded market might want real blocking later.
+- Shops are menus over a paused street. There's no in-world changing room or spray animation yet.
+- The scripted browser walker is timing-sensitive; rerun a failed scenario alone before suspecting the game.

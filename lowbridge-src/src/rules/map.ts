@@ -159,6 +159,8 @@ export function buildRiverside(): StreetMap {
   paint({ x: 1, y: 39, w: 6, h: 6 }, Surface.Yard);
   paint({ x: 17, y: 33, w: 9, h: 1 }, Surface.Road);
   paint({ x: 46, y: 19, w: 3, h: 9 }, Surface.Pavement);
+  // Riverside Body & Paint: a forecourt off Station Road with a paint bay.
+  paint({ x: 42, y: 35, w: 6, h: 3 }, Surface.Yard);
 
   const buildings: Building[] = [
     { id: 'depot', rect: { x: 0, y: 26, w: 5, h: 13 }, label: 'DEPOT' },
@@ -172,7 +174,9 @@ export function buildRiverside(): StreetMap {
     { id: 'mid_east', rect: { x: 39, y: 21, w: 7, h: 5 } },
     { id: 'mid_east_2', rect: { x: 49, y: 21, w: 8, h: 5 } },
     { id: 'east_edge', rect: { x: 66, y: 0, w: 6, h: 48 } },
-    { id: 'south_east', rect: { x: 39, y: 35, w: 18, h: 13 } },
+    { id: 'south_east_w', rect: { x: 39, y: 35, w: 3, h: 13 } },
+    { id: 'garage', rect: { x: 42, y: 38, w: 6, h: 10 } },
+    { id: 'south_east_e', rect: { x: 48, y: 35, w: 9, h: 13 } },
     { id: 'ring_corner', rect: { x: 57, y: 35, w: 9, h: 13 } },
   ];
 
@@ -184,7 +188,7 @@ export function buildRiverside(): StreetMap {
     lamp('lamp_depot_south', 86, 744),
     lamp('lamp_station_1', 200, 422),
     lamp('lamp_station_4', 584, 422),
-    lamp('lamp_station_5', 680, 422),
+    lamp('lamp_station_5', 722, 422),
     lamp('lamp_station_6', 900, 422),
     lamp('lamp_block_ne', 264, 554),
     lamp('lamp_block_nw', 424, 554),

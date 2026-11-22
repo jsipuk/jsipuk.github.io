@@ -10,7 +10,8 @@
 // (reload: still open), patrol (pause freezes it), double tap, held key
 // through blur, storage failure (?failsave).
 // M2: the Mo branch from an imported M1 save to the shift close, Last post,
-// export and import, and offline relaunch. State is read through the
+// export and import, and offline relaunch. Free play: pigeons, horn, Body &
+// Paint, Second Thread, a chat, the journal. State is read through the
 // read-only window.lowbridge.snapshot().
 
 import { createRequire } from 'node:module';
@@ -211,6 +212,7 @@ async function clickChoice(page, id) {
 async function goToPin(page, p, want = 'step') {
   for (let attempt = 0; attempt < 3; attempt++) {
     let s = await p.snap();
+    if (process.env.SMOKE_DEBUG) console.log(`goToPin ${want} #${attempt}: ${s.locomotion} player ${Math.round(s.player.x)},${Math.round(s.player.y)} van ${Math.round(s.van.x)},${Math.round(s.van.y)} pin ${JSON.stringify(s.pin)} action ${s.action.kind}`);
     const pin = s.pin;
     if (!pin) throw new Error('no pin');
     const from = s.vehicle ?? s.player;
@@ -469,7 +471,7 @@ const scenarios = {
     await page.click('#export-btn');
     const text = await page.inputValue('#export-text');
     const file = JSON.parse(text);
-    if (file.format !== 'lowbridge-save' || file.envelope.schemaVersion !== 2) throw new Error('bad export');
+    if (file.format !== 'lowbridge-save' || file.envelope.schemaVersion !== 3) throw new Error('bad export');
     await page.click('#import-btn');
     await page.fill('#import-text', '{"format":"lowbridge-save","envelope":{"schemaVersion":99}}');
     await page.click('#import-check');
@@ -486,7 +488,7 @@ const scenarios = {
     if (JSON.stringify(moved) !== JSON.stringify(before)) throw new Error('round trip changed the save');
     await second.ctx.close();
     await ctx.close();
-    return `export is schema 2; newer refused (“${newer.slice(0, 40)}…”); junk refused (“${junk.slice(0, 32)}…”); round trip identical; errors ${errors.length}`;
+    return `export is schema 3; newer refused (“${newer.slice(0, 40)}…”); junk refused (“${junk.slice(0, 32)}…”); round trip identical; errors ${errors.length}`;
   },
 
   async offline(browser) {
@@ -504,6 +506,108 @@ const scenarios = {
     const caches = await page.evaluate(async () => (await window.caches.keys()).filter((k) => k.startsWith('lowbridge-')));
     await ctx.close();
     return `“${label}”; reloaded offline into ${build}; caches ${caches.join(', ')}; errors ${errors.length}`;
+  },
+
+  async freeplay(browser) {
+    const { ctx, page, errors, p } = await newPage(browser);
+    const log = [];
+    await page.evaluate(() => {
+      window.__events = [];
+      window.addEventListener('lowbridge:event', (e) => window.__events.push(e.detail));
+    });
+    const events = () => page.evaluate(() => window.__events);
+    // Walk through the pigeons by the depot.
+    await p.walkTo({ x: 92, y: 470 }, (s) => s.pigeons.find((f) => f.id === 'depot').onGround === 0, 15_000);
+    let s = await p.snap();
+    if (s.pigeons.find((f) => f.id === 'depot').onGround !== 0) throw new Error('depot pigeons did not scatter');
+    if (shots) await page.screenshot({ path: `${shots}/fp-pigeons.png` });
+    log.push('pigeons scattered');
+    // Into the van, a toot of the horn, then over to Body & Paint.
+    await p.walkTo({ x: 70, y: 664 }, (x) => x.action.kind === 'enter_van');
+    await p.press('KeyE');
+    await p.press('KeyH');
+    const BAY = { x: 720, y: 588 };
+    const onBay = (x) => x.vehicle && Math.hypot(x.vehicle.x - BAY.x, x.vehicle.y - BAY.y) < 16;
+    await p.followArrow(onBay, 120_000, 'paint');
+    s = await p.snap();
+    for (let i = 0; i < 3 && s.action.kind !== 'paint'; i++) {
+      // Overshot: back up and creep onto the forecourt bay again.
+      await p.hold(new Set(['Space']));
+      await page.waitForTimeout(700);
+      await p.hold(new Set());
+      await p.followArrow(onBay, 20_000, 'paint');
+      s = await p.snap();
+    }
+    if (s.action.kind !== 'paint') throw new Error(`no paint shop at ${Math.round(s.vehicle.x)},${Math.round(s.vehicle.y)}: ${s.action.verb}`);
+    await p.press('KeyE');
+    await page.waitForSelector('#shop:not([hidden])');
+    await page.click('#shop-parts button[data-item="vanBody:red"]');
+    await page.click('#shop-parts button[data-item="vanStripe:cream"]');
+    await page.waitForFunction(() => window.lowbridge.snapshot().progress.style.vanBody === 'red');
+    // A locked colour explains itself instead of applying.
+    await page.click('#shop-parts button[data-item="vanBody:black"]', { force: true });
+    const why = await page.textContent('#shop-status');
+    if (!/horn 25 times/.test(why)) throw new Error(`locked paint gave no reason: ${why}`);
+    if (shots) await page.screenshot({ path: `${shots}/fp-paint-shop.png` });
+    await page.click('#shop-done');
+    s = await p.snap();
+    if (s.mode !== 'world' || s.progress.style.vanStripe !== 'cream') throw new Error('paint did not save');
+    log.push('van painted red with a cream stripe');
+    if (shots) await page.screenshot({ path: `${shots}/fp-painted-van.png` });
+    // Out, across Station Road to Second Thread.
+    await p.press('KeyE');
+    await p.walkTo({ x: 672, y: 432 }, (x) => x.action.kind === 'tailor', 30_000);
+    s = await p.snap();
+    if (s.action.kind !== 'tailor') throw new Error(`no tailor: player ${Math.round(s.player.x)},${Math.round(s.player.y)} ${s.action.verb}`);
+    await p.press('KeyE');
+    await page.waitForSelector('#shop:not([hidden])');
+    await page.click('#shop-parts button[data-item="jacket:teal"]');
+    await page.click('#shop-parts button[data-item="hat:beanie"]');
+    await page.waitForFunction(() => window.lowbridge.snapshot().progress.style.hat === 'beanie');
+    if (shots) await page.screenshot({ path: `${shots}/fp-tailor.png` });
+    await page.keyboard.press('Escape');
+    s = await p.snap();
+    if (s.mode !== 'world' || s.progress.style.jacket !== 'teal') throw new Error('Escape did not close the shop, or the jacket did not save');
+    log.push('teal jacket and red beanie');
+    // Find someone to talk to.
+    let chatted = false;
+    for (let i = 0; i < 4 && !chatted; i++) {
+      s = await p.snap();
+      const near = [...s.people].sort((a, b) => Math.hypot(a.x - s.player.x, a.y - s.player.y) - Math.hypot(b.x - s.player.x, b.y - s.player.y))[0];
+      const t0 = Date.now();
+      while (Date.now() - t0 < 15_000) {
+        const x = await p.snap();
+        if (x.action.kind === 'talk_ped') break;
+        const who = x.people.find((q) => q.id === near.id);
+        await p.walkTo({ x: who.x, y: who.y }, (y) => y.action.kind === 'talk_ped', 600);
+      }
+      s = await p.snap();
+      if (s.action.kind === 'talk_ped') {
+        await p.press('KeyE');
+        const card = await page.textContent('#prompt-speaker');
+        await p.press('KeyE');
+        log.push(`talked to ${card}`);
+        chatted = true;
+      }
+    }
+    if (!chatted) throw new Error('could not catch anyone to talk to');
+    await page.waitForTimeout(2600);
+    s = await p.snap();
+    const st = s.progress.stats;
+    if (st.honks < 1 || st.pigeons < 6 || st.chats < 1) throw new Error(`stats not saved: ${JSON.stringify(st)}`);
+    // The journal counts it all.
+    await page.keyboard.press('Escape');
+    const journal = await page.textContent('#journal');
+    if (!/Around town/.test(journal)) throw new Error('no Around town row');
+    if (shots) await page.screenshot({ path: `${shots}/fp-journal.png` });
+    const ev = await events();
+    // Reload: the looks are in the save, not the browser.
+    await page.reload();
+    await page.waitForFunction(() => window.lowbridge?.snapshot());
+    const back = (await p.snap()).progress.style;
+    if (back.vanBody !== 'red' || back.hat !== 'beanie') throw new Error(`style lost on reload: ${JSON.stringify(back)}`);
+    await ctx.close();
+    return `${log.join('; ')}; stats ${JSON.stringify(st)}; ${ev.filter((e) => e.type === 'pigeons').length} pigeon events; style kept on reload; errors ${errors.length}`;
   },
 
   async failsave(browser) {

@@ -151,6 +151,8 @@ export interface Session {
   hornReadyAt: number;
   /** Which shop is open, if any. */
   shop: 'tailor' | 'paint' | null;
+  /** Set when you leave Body & Paint, so the button says "Get out" until the van leaves the bay. */
+  bayUsed: boolean;
 }
 
 export interface Action {
@@ -225,6 +227,7 @@ export function createSession(
     call: { nextAt: 75, until: 0 },
     hornReadyAt: 0,
     shop: null,
+    bayUsed: false,
   };
   if (checkpoint) restoreCheckpoint(s, checkpoint);
   return s;
@@ -372,8 +375,9 @@ export function availableAction(s: Session): Action {
   const d = driving(s);
   if (d) {
     const bay = SHOPS.paint;
-    if (s.locomotion === 'van' && Math.hypot(d.state.x - bay.at.x, d.state.y - bay.at.y) < bay.reach && Math.abs(d.state.speed) <= d.spec.exitSpeed) {
-      return { kind: 'paint', verb: 'Body & Paint', enabled: true };
+    if (!s.bayUsed && s.locomotion === 'van' && Math.hypot(d.state.x - bay.at.x, d.state.y - bay.at.y) < bay.reach && Math.abs(d.state.speed) <= d.spec.exitSpeed) {
+      // No hiding from the patrol in the paint shop.
+      if (!s.pursuit) return { kind: 'paint', verb: 'Body & Paint', enabled: true };
     }
     if (Math.abs(d.state.speed) > d.spec.exitSpeed) return { kind: 'exit', verb: 'Get out', enabled: false, reason: 'Stop to get out' };
     if (!exitPoint(s)) return { kind: 'exit', verb: 'Get out', enabled: false, reason: 'No room to get out here' };
@@ -384,8 +388,9 @@ export function availableAction(s: Session): Action {
   const prog = s.progress;
   const heat = s.pursuit !== null;
   const options: { gap: number; action: Action }[] = [];
-  const add = (gap: number, action: Action) => {
-    if (gap <= 0) options.push({ gap, action });
+  /** In reach when gap <= 0. A bias pushes an action behind others in reach without shrinking its own reach. */
+  const add = (gap: number, action: Action, bias = 0) => {
+    if (gap <= 0) options.push({ gap: gap + bias, action });
   };
 
   const phone = s.map.phone;
@@ -395,11 +400,13 @@ export function availableAction(s: Session): Action {
     add(Math.hypot(p.x - phone.x, p.y - phone.y) - phone.reach, { kind: 'wrong_call', verb: 'Answer', enabled: true });
   }
   const shopGap = (at: Vec, reachPx: number) => Math.hypot(p.x - at.x, p.y - at.y) - reachPx;
-  add(shopGap(SHOPS.tailor.at, SHOPS.tailor.reach), { kind: 'tailor', verb: 'Second Thread · clothes', enabled: true });
-  add(shopGap(SHOPS.chips.at, SHOPS.chips.reach), { kind: 'chips', verb: 'Buy chips', enabled: true });
+  const busy = heat ? 'Lose the patrol first' : undefined;
+  add(shopGap(SHOPS.tailor.at, SHOPS.tailor.reach), { kind: 'tailor', verb: 'Second Thread · clothes', enabled: !heat, reason: busy });
+  add(shopGap(SHOPS.chips.at, SHOPS.chips.reach), { kind: 'chips', verb: 'Buy chips', enabled: !heat, reason: busy });
   const who = talkTarget(s.ambient, p);
   if (who) {
-    add(Math.hypot(p.x - who.x, p.y - who.y) - 20 + 0.6, { kind: 'talk_ped', verb: `Talk to ${who.name ?? 'a passer-by'}`, enabled: true });
+    // People wander past: the van, the phone and the job come first while they're in reach too.
+    add(Math.hypot(p.x - who.x, p.y - who.y) - 20, { kind: 'talk_ped', verb: `Talk to ${who.name ?? 'a passer-by'}`, enabled: true }, 30);
   }
   add(distanceToBox(p, s.van.x, s.van.y, s.van.heading, VAN.halfLength, VAN.halfWidth) - ENTER_REACH, {
     kind: 'enter_van',
@@ -647,14 +654,15 @@ function handleAmbient(s: Session, e: AmbientEvent): void {
   }
 }
 
-/** Pick something in the open shop. */
+/** Pick something in the open shop, or a jacket from the pause menu. */
 export async function shopChoose(s: Session, part: StylePart, id: string): Promise<void> {
-  if (s.mode !== 'shop') return;
+  if (s.mode !== 'shop' && s.mode !== 'paused') return;
   await transition(s, `style:${part}`, (p) => setStyle(p, part, id));
 }
 
 export function shopClose(s: Session): void {
   if (s.mode !== 'shop') return;
+  if (s.shop === 'paint') s.bayUsed = true;
   s.shop = null;
   s.mode = 'world';
 }
@@ -1067,6 +1075,7 @@ export function stepSession(s: Session, raw: RawInput, dt: number): void {
     dt,
   );
   for (const e of ambientEvents) handleAmbient(s, e);
+  if (s.bayUsed && Math.hypot(body.x - SHOPS.paint.at.x, body.y - SHOPS.paint.at.y) > SHOPS.paint.reach + 12) s.bayUsed = false;
   // Wrong numbers on the depot payphone, now and then, once the story call is answered.
   if (prog.story.stage !== 'offered' && !wrongCallRinging(s) && s.simTime >= s.call.nextAt) {
     s.call.until = s.simTime + 25;
@@ -1179,9 +1188,10 @@ export function snapshot(s: Session) {
     /** Where the current story or quick-job step happens (the street pin). */
     pin: stepPin(s),
     /** The arrow's next waypoint towards each recipient, for choosing one deliberately. */
-    routes: Object.fromEntries(
-      (['mo_vale', 'nell_price'] as const).map((who) => [who, nextWaypoint(s.map, bodyPos(s), s.map.people[who], gates(s.progress))]),
-    ),
+    routes: Object.fromEntries([
+      ...(['mo_vale', 'nell_price'] as const).map((who) => [who, nextWaypoint(s.map, bodyPos(s), s.map.people[who], gates(s.progress))]),
+      ...(['tailor', 'paint', 'chips'] as const).map((shop) => [shop, nextWaypoint(s.map, bodyPos(s), SHOPS[shop].at, gates(s.progress))]),
+    ]),
     prompt: s.prompts[0] ? { kind: s.prompts[0].kind, title: s.prompts[0].title, choices: s.prompts[0].choices } : null,
     encounter: s.encounter,
     caption: s.caption?.text ?? null,

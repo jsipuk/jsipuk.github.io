@@ -1,7 +1,8 @@
 // Greybox art drawn to canvases at 2x: wet teal brick, amber lamps, cream
 // signs, a dark river. Original placeholders only.
 
-import { PLACES } from './rules/content.ts';
+import type { StyleItem } from './rules/content.ts';
+import { HAT_STYLES, JACKET_STYLES, PLACES, SHOPS, VAN_BODIES, VAN_STRIPES } from './rules/content.ts';
 import type { StreetMap, TileRect } from './rules/map.ts';
 import { Surface, TILE } from './rules/map.ts';
 import { EXPRESS, PATROL, VAN } from './rules/vehicle.ts';
@@ -362,6 +363,38 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
     g.fillRect(box.x - 2.5, box.y - 9, 5, 1);
   }
 
+  // Free-play shop fronts: the tailor's window, the chip shop, the garage door.
+  {
+    const window = (x: number, y: number, w: number, glow: string, awning: string) => {
+      g.fillStyle = glow;
+      g.fillRect(x, y, w, 5);
+      g.fillStyle = 'rgba(0,0,0,0.25)';
+      for (let i = x + 6; i < x + w; i += 7) g.fillRect(i, y, 1, 5);
+      g.fillStyle = awning;
+      for (let i = 0; i < w; i += 4) {
+        g.fillStyle = i % 8 === 0 ? awning : PALETTE.cream;
+        g.fillRect(x + i, y + 5, 4, 3);
+      }
+    };
+    const t = SHOPS.tailor.at;
+    window(t.x - 14, 410, 28, '#f6d58a', '#6b3a5e');
+    const ch = SHOPS.chips.at;
+    window(ch.x - 16, 176, 32, '#ffe6a3', '#2f7f7a');
+    // Body & Paint: a wide roller door with a lit strip over it, and the bay marked out.
+    const p = SHOPS.paint.at;
+    g.fillStyle = '#3b4247';
+    g.fillRect(p.x - 40, 600, 80, 8);
+    g.fillStyle = 'rgba(0,0,0,0.3)';
+    for (let i = 601; i < 608; i += 2) g.fillRect(p.x - 40, i, 80, 0.6);
+    g.fillStyle = '#f6d58a';
+    g.fillRect(p.x - 40, 598, 80, 2);
+    g.strokeStyle = 'rgba(255, 233, 168, 0.5)';
+    g.lineWidth = 1;
+    g.setLineDash([3, 2]);
+    g.strokeRect(p.x - 20, p.y - 12, 40, 22);
+    g.setLineDash([]);
+  }
+
   // Lamp pools, then posts and bollards on top.
   g.globalCompositeOperation = 'lighter';
   for (const lamp of map.props) {
@@ -387,8 +420,10 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
   return c;
 }
 
-/** Courier van facing east (heading 0). Cream body, teal stripe, cab at the front. */
-export function drawVan(): HTMLCanvasElement {
+/** Courier van facing east (heading 0), in any body paint and stripe from Body & Paint. */
+export function drawVan(bodyId = 'cream', stripeId = 'teal'): HTMLCanvasElement {
+  const body = VAN_BODIES.find((b) => b.id === bodyId) ?? VAN_BODIES[0];
+  const stripe = VAN_STRIPES.find((b) => b.id === stripeId) ?? VAN_STRIPES[0];
   const L = VAN.halfLength * 2;
   const W = VAN.halfWidth * 2;
   const pad = 3;
@@ -399,7 +434,7 @@ export function drawVan(): HTMLCanvasElement {
   roundRect(g, 1.5, 1.5, L, W, 3);
   g.fill();
   // Body: square rear, rounded nose.
-  g.fillStyle = '#e6dcc0';
+  g.fillStyle = body.fill;
   g.beginPath();
   g.moveTo(0, 0.5);
   g.lineTo(L - 4, 0);
@@ -409,9 +444,14 @@ export function drawVan(): HTMLCanvasElement {
   g.lineTo(0, W - 0.5);
   g.closePath();
   g.fill();
-  // Roof stripe.
-  g.fillStyle = '#2f7f7a';
+  // Roof stripe; the racing stripe gets a pinline each side.
+  g.fillStyle = stripe.fill;
   g.fillRect(2, W / 2 - 2, L - 12, 4);
+  if (stripe.trim !== stripe.fill) {
+    g.fillStyle = stripe.trim;
+    g.fillRect(2, W / 2 - 3, L - 12, 0.8);
+    g.fillRect(2, W / 2 + 2.2, L - 12, 0.8);
+  }
   // Windscreen.
   g.fillStyle = '#22383c';
   g.fillRect(L - 9, 2, 4, W - 4);
@@ -422,7 +462,7 @@ export function drawVan(): HTMLCanvasElement {
   g.fillRect(L - 1.5, 1.5, 1.5, 3);
   g.fillRect(L - 1.5, W - 4.5, 1.5, 3);
   // Rear doors and tail lights.
-  g.fillStyle = '#b9ae92';
+  g.fillStyle = body.trim;
   g.fillRect(0, W / 2 - 0.4, 3, 0.8);
   g.fillStyle = '#d23c2c';
   g.fillRect(0, 0.8, 1.5, 3);
@@ -457,16 +497,9 @@ export function drawBeam(): HTMLCanvasElement {
   return c;
 }
 
-/** Jacket colours offered in the menu. Words go with each swatch, never colour alone. */
-export const JACKETS = [
-  { id: 'amber', name: 'Hi-vis amber', fill: '#f0a640', trim: '#e8e2cf' },
-  { id: 'teal', name: 'Canal teal', fill: '#2f9e95', trim: '#e8e2cf' },
-  { id: 'red', name: 'Post-box red', fill: '#c8372d', trim: '#efe4c8' },
-  { id: 'cream', name: 'Cream', fill: '#e6dcc0', trim: '#2f7f7a' },
-  { id: 'blue', name: 'Night blue', fill: '#4f7cc9', trim: '#e8e2cf' },
-] as const;
-export type JacketId = (typeof JACKETS)[number]['id'];
-export const DEFAULT_JACKET: JacketId = 'amber';
+/** Jacket colours. Words go with each swatch, never colour alone. */
+export const JACKETS = JACKET_STYLES;
+export const DEFAULT_JACKET = 'amber';
 
 /** Walk frames: 0 standing, 1 left foot forward, 2 right foot forward. */
 export const COURIER_FRAMES = 3;
@@ -476,8 +509,9 @@ export const COURIER_FRAMES = 3;
  * jacket colour with a reflective band, dark head. While walking,
  * a foot pokes out in front and the opposite hand swings forward.
  */
-export function drawCourier(jacketId: string, frame: number): HTMLCanvasElement {
+export function drawCourier(jacketId: string, frame: number, hatId = 'none'): HTMLCanvasElement {
   const jacket = JACKETS.find((j) => j.id === jacketId) ?? JACKETS[0];
+  const hat = HAT_STYLES.find((h) => h.id === hatId) ?? HAT_STYLES[0];
   const [c, g] = canvas(18, 18);
   g.translate(9, 9);
   // Stride: how far the left foot is ahead (+) or behind (-); hands swing the other way.
@@ -536,8 +570,147 @@ export function drawCourier(jacketId: string, frame: number): HTMLCanvasElement 
   g.beginPath();
   g.ellipse(2.4, 0, 0.75, 1.25, 0, 0, Math.PI * 2);
   g.fill();
+  drawHat(g, hat, 0.7);
   return c;
 }
+
+/** A hat seen from above, centred on the head at (hx, 0), brim to the east. */
+function drawHat(g: CanvasRenderingContext2D, hat: StyleItem, hx: number): void {
+  if (hat.id === 'none') return;
+  if (hat.id === 'flat_cap') {
+    g.fillStyle = hat.trim;
+    g.beginPath();
+    g.ellipse(hx + 1.9, 0, 1.4, 2.1, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = hat.fill;
+    g.beginPath();
+    g.ellipse(hx + 0.2, 0, 2.3, 2.3, 0, 0, Math.PI * 2);
+    g.fill();
+    return;
+  }
+  if (hat.id === 'sou_wester') {
+    // Wide brim, longer at the back to keep rain off the collar.
+    g.fillStyle = hat.trim;
+    g.beginPath();
+    g.ellipse(hx - 0.5, 0, 3.6, 3.2, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = hat.fill;
+    g.beginPath();
+    g.ellipse(hx - 0.2, 0, 3.2, 2.8, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = hat.trim;
+    g.beginPath();
+    g.arc(hx, 0, 1.6, 0, Math.PI * 2);
+    g.fill();
+    return;
+  }
+  // Beanies: a knitted dome with a rolled band and a bobble.
+  g.fillStyle = hat.fill;
+  g.beginPath();
+  g.arc(hx - 0.2, 0, 2.25, 0, Math.PI * 2);
+  g.fill();
+  g.strokeStyle = 'rgba(0,0,0,0.25)';
+  g.lineWidth = 0.4;
+  g.beginPath();
+  g.arc(hx - 0.2, 0, 1.4, 0, Math.PI * 2);
+  g.stroke();
+  if (hat.id === 'lamp_beanie') {
+    const glow = g.createRadialGradient(hx - 0.4, 0, 0, hx - 0.4, 0, 3.4);
+    glow.addColorStop(0, 'rgba(255, 233, 168, 0.9)');
+    glow.addColorStop(1, 'rgba(255, 179, 71, 0)');
+    g.fillStyle = glow;
+    g.fillRect(hx - 4, -3.6, 7.2, 7.2);
+  }
+  g.fillStyle = hat.trim;
+  g.beginPath();
+  g.arc(hx - 0.4, 0, 0.95, 0, Math.PI * 2);
+  g.fill();
+}
+
+/** Walk frames for people in town. */
+export const PED_FRAMES = 2;
+
+/**
+ * Someone out for the evening, from above, facing east: a coat in their own
+ * colour, a dark head, feet that alternate. Frame 2 is a stumble pose.
+ */
+export function drawPedestrian(coat: string, frame: number): HTMLCanvasElement {
+  const [c, g] = canvas(16, 16);
+  g.translate(8, 8);
+  g.fillStyle = 'rgba(0,0,0,0.3)';
+  g.beginPath();
+  g.ellipse(0.8, 0.8, 4.4, 5.4, 0, 0, Math.PI * 2);
+  g.fill();
+  if (frame === 2) {
+    // Arms out, leaning back.
+    g.fillStyle = coat;
+    g.fillRect(-1, -6.2, 1.6, 12.4);
+  }
+  const stride = frame === 1 ? 1 : frame === 0 ? -1 : 0;
+  g.fillStyle = '#3a3f46';
+  g.fillRect(stride * 3.4 - 1, -2.6, 2.2, 1.9);
+  g.fillRect(-stride * 3.4 - 1, 0.7, 2.2, 1.9);
+  g.fillStyle = coat;
+  g.beginPath();
+  g.ellipse(0, 0, 3.2, 4.6, 0, 0, Math.PI * 2);
+  g.fill();
+  g.strokeStyle = 'rgba(0,0,0,0.35)';
+  g.lineWidth = 0.5;
+  g.stroke();
+  g.fillStyle = '#2b211b';
+  g.beginPath();
+  g.arc(0.6, 0, 1.9, 0, Math.PI * 2);
+  g.fill();
+  return c;
+}
+
+/** Pigeon frames: 0 and 1 pecking on the ground, 2 and 3 wings up and down in flight. */
+export const PIGEON_FRAMES = 4;
+
+export function drawPigeon(frame: number): HTMLCanvasElement {
+  const [c, g] = canvas(12, 12);
+  g.translate(6, 6);
+  const flying = frame >= 2;
+  if (!flying) {
+    g.fillStyle = 'rgba(0,0,0,0.3)';
+    g.beginPath();
+    g.ellipse(0.5, 0.6, 2.6, 1.7, 0, 0, Math.PI * 2);
+    g.fill();
+  }
+  if (flying) {
+    const span = frame === 2 ? 5.2 : 3.2;
+    g.fillStyle = '#7d848c';
+    g.beginPath();
+    g.moveTo(-0.5, 0);
+    g.lineTo(-1.6, -span);
+    g.lineTo(1.2, -span + 0.6);
+    g.lineTo(1, 0);
+    g.lineTo(1.2, span - 0.6);
+    g.lineTo(-1.6, span);
+    g.closePath();
+    g.fill();
+  }
+  // Tail, body, head with a green-purple neck sheen.
+  g.fillStyle = '#5f666e';
+  g.fillRect(-3.4, -0.8, 1.6, 1.6);
+  g.fillStyle = '#9aa1a8';
+  g.beginPath();
+  g.ellipse(0, 0, 2.5, 1.6, 0, 0, Math.PI * 2);
+  g.fill();
+  const peck = !flying && frame === 1 ? 0.8 : 0;
+  g.fillStyle = '#6d8f7d';
+  g.beginPath();
+  g.arc(2 + peck, 0, 1.1, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = '#4a5157';
+  g.beginPath();
+  g.arc(2.4 + peck, 0, 0.75, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = '#e2a04b';
+  g.fillRect(3 + peck, -0.25, 0.7, 0.5);
+  return c;
+}
+
 
 
 // ------------------------------------------------------------------ vehicles

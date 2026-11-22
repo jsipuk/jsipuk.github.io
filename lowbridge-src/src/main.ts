@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import './style.css';
-import { JACKETS } from './art.ts';
+import { DEFAULT_JACKET, JACKETS } from './art.ts';
 import { createSfx } from './audio.ts';
 import type { SheetInfo } from './hud.ts';
 import { createHud } from './hud.ts';
@@ -9,7 +9,8 @@ import type { SteeringPreset } from './rules/controls.ts';
 import { PRESETS } from './rules/controls.ts';
 import { buildRiverside } from './rules/map.ts';
 import type { Progress } from './rules/progress.ts';
-import { initialProgress, returnSummary } from './rules/progress.ts';
+import { initialProgress, isUnlocked, returnSummary } from './rules/progress.ts';
+import { UNLOCKS } from './rules/content.ts';
 import type { Checkpoint, SaveEnvelope, SaveStore } from './rules/save.ts';
 import { SCHEMA_VERSION, SaveController, checkImport, createIdbStore, createMemoryStore, exportSave } from './rules/save.ts';
 import { startOffline } from './offline.ts';
@@ -19,11 +20,15 @@ import {
   choose,
   createSession,
   encounterChoose,
+  horn,
   interact,
   openBoard,
   pause,
+  phoneRinging,
   resume,
   settled,
+  shopChoose,
+  shopClose,
   snapshot,
 } from './rules/session.ts';
 import { StreetScene } from './scene.ts';
@@ -93,6 +98,19 @@ const hud = createHud({
     if (retry) void retry().then(updateSaveState);
     else saveCheckpoint();
   },
+  onShop: (part, id) => {
+    sfx.unlock();
+    void shopChoose(session, part, id).then(() => {
+      if (part === 'vanBody' || part === 'vanStripe') sfx.rumble();
+      else sfx.door();
+    });
+  },
+  onShopClose: () => {
+    input.clear();
+    shopClose(session);
+    scene?.resetTime();
+    saveCheckpoint();
+  },
 });
 
 function sheetFor(kind: 'start' | 'pause' | 'parked', p: Progress): SheetInfo {
@@ -134,6 +152,7 @@ function openSheet(kind: 'pause' | 'parked'): void {
   input.clear();
   pause(session);
   hud.showSheet(sheetFor(kind, session.progress), session.progress);
+  syncJackets();
 }
 
 /** Real time since the player first pressed Start, for the five-minute gate. */
@@ -191,6 +210,20 @@ function onEvents(events: WorldEvent[]): void {
       case 'shift_complete':
         sfx.horn();
         break;
+      case 'horn':
+        sfx.honk();
+        break;
+      case 'pigeons':
+        sfx.flutter(e.count);
+        break;
+      case 'chips':
+      case 'wrong_call':
+        sfx.shopBell();
+        break;
+      case 'unlocked':
+        sfx.chime();
+        hud.toast(`New in the shops: ${e.items.join(', ')}`, 5);
+        break;
       case 'save_failed':
         // The red "Progress hasn't saved" bar stays up until a save succeeds.
         break;
@@ -223,6 +256,11 @@ function onEvents(events: WorldEvent[]): void {
     if (e.type === 'step_done') Object.assign(detail, { beat: e.beat, step: e.step });
     if (e.type === 'shift_complete') detail.first = e.first;
     if (e.type === 'quick_done') Object.assign(detail, { job: e.job, time: e.time, category: e.category, improved: e.improved, site: e.site });
+    if (e.type === 'pigeons') Object.assign(detail, { count: e.count, x: Math.round(e.at.x), y: Math.round(e.at.y) });
+    if (e.type === 'ped_bump' || e.type === 'ped_brush' || e.type === 'ped_horn') Object.assign(detail, { who: e.id });
+    if (e.type === 'unlocked') detail.items = e.items;
+    // Ambient chatter is frequent; only bumps and pigeons reach the log.
+    if (e.type === 'ped_brush' || e.type === 'ped_horn') continue;
     if (e.type !== 'checkpoint') window.dispatchEvent(new CustomEvent('lowbridge:event', { detail }));
   }
 }
@@ -252,8 +290,14 @@ const input = createInput({
       void choose(session, session.prompts[0].choices[0].id);
     }
   },
+  onHorn: () => session && horn(session),
   onPauseToggle: () => {
     if (!session) return;
+    if (session.mode === 'shop') {
+      shopClose(session);
+      scene?.resetTime();
+      return;
+    }
     if (hud.sheetOpen()) closeSheet();
     else openSheet('pause');
   },
@@ -284,16 +328,32 @@ for (const j of JACKETS) {
   radio.value = j.id;
   radio.id = `jacket-${j.id}`;
   radio.addEventListener('change', () => {
-    if (!radio.checked) return;
-    settings.jacket = j.id;
-    saveSettings(settings);
+    if (!radio.checked || !session) return;
+    void shopChoose(session, 'jacket', j.id).then(syncJackets);
   });
   const chip = document.createElement('span');
   chip.className = 'chip';
   chip.style.background = j.fill;
   chip.style.borderColor = j.trim;
-  label.append(radio, chip, document.createTextNode(j.name));
+  const words = document.createElement('span');
+  words.textContent = j.name;
+  label.append(radio, chip, words);
+  label.dataset.jacket = j.id;
   jacketList.append(label);
+}
+
+/** The menu jacket list follows the save: locked ones show how to earn them. */
+function syncJackets(): void {
+  if (!session) return;
+  for (const label of jacketList.querySelectorAll<HTMLLabelElement>('label[data-jacket]')) {
+    const j = JACKETS.find((x) => x.id === label.dataset.jacket)!;
+    const radio = label.querySelector('input')!;
+    const open = isUnlocked(session.progress, j);
+    radio.checked = session.progress.style.jacket === j.id;
+    radio.disabled = !open;
+    label.classList.toggle('locked', !open);
+    label.title = open || !j.unlock ? j.name : `Locked: ${UNLOCKS[j.unlock]}`;
+  }
 }
 const muteBox = byId<HTMLInputElement>('mute');
 muteBox.addEventListener('change', () => setMuted(muteBox.checked));
@@ -495,7 +555,19 @@ async function boot(): Promise<void> {
   if (welcome === 'new' || welcome === 'recovered') void saves.write(session.progress, checkpoint(session)).then(updateSaveState);
   pause(session);
   updateSaveState();
+  // Jackets used to live in device settings. Carry an older choice into the save once.
+  if (settings.jacket !== DEFAULT_JACKET && session.progress.style.jacket === DEFAULT_JACKET) {
+    const old = settings.jacket;
+    void shopChoose(session, 'jacket', old).then(() => {
+      if (session.progress.style.jacket === old) {
+        settings.jacket = DEFAULT_JACKET;
+        saveSettings(settings);
+      }
+      syncJackets();
+    });
+  }
   hud.showSheet(sheetFor('start', session.progress), session.progress);
+  syncJackets();
 
   const game = new Phaser.Game({
     type: Phaser.AUTO,
@@ -517,14 +589,13 @@ async function boot(): Promise<void> {
     hud,
     dpr,
     reduceMotion,
-    jacket: () => settings.jacket,
     touch: () => touch,
     onEvents,
     onReady: (ready: StreetScene) => (scene = ready),
     onFrame: (focus: { x: number; y: number }) => {
       const ph = map.phone;
       const world = session.mode === 'world';
-      sfx.updateRing(session.progress.story.stage === 'offered' && world, Math.hypot(ph.x - focus.x, ph.y - focus.y));
+      sfx.updateRing(phoneRinging(session) && world, Math.hypot(ph.x - focus.x, ph.y - focus.y));
       const p = session.pursuit;
       sfx.updateSiren(!!p && p.delay <= 0 && world, p ? Math.hypot(p.car.x - focus.x, p.car.y - focus.y) : 0);
       // Save where things are every five seconds of ordinary play, but not mid-chase.

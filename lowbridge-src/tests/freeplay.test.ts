@@ -9,6 +9,7 @@ import type { Progress, Result } from '../src/rules/progress.ts';
 import { JACKET_STYLES, HAT_STYLES } from '../src/rules/content.ts';
 import { createAmbient, honk, stepAmbient } from '../src/rules/ambient.ts';
 import { checkImport, freshEnvelope, validateEnvelope } from '../src/rules/save.ts';
+import { startPursuit } from '../src/rules/pursuit.ts';
 import { availableAction, choose, horn, pause, resume, settled, shopChoose, shopClose, stepSession } from '../src/rules/session.ts';
 import { STEP, act, harness, run, walkTo } from './helpers.ts';
 
@@ -123,6 +124,13 @@ test('Body & Paint opens only with the van in its bay', async () => {
   await shopChoose(s, 'vanStripe', 'amber');
   assert.equal(s.progress.style.vanBody, 'teal');
   assert.equal(s.progress.style.vanStripe, 'amber');
+  // Closing the shop gives the button back to "Get out" until the van leaves the bay.
+  shopClose(s);
+  assert.equal(availableAction(s).kind, 'exit');
+  s.van.y -= 60;
+  run(s, NO_INPUT, 0.1);
+  s.van.y += 60;
+  assert.equal(availableAction(s).kind, 'paint');
 });
 
 test('the depot payphone rings with wrong numbers in free roam; answering counts', async () => {
@@ -195,4 +203,36 @@ test('schema 3: M1 and M2 saves migrate with a default look and zero counts', ()
   const bad = structuredClone(freshEnvelope());
   bad.progress.style.jacket = 'gold-lamé';
   assert.equal(validateEnvelope(bad).ok, false);
+});
+
+test('no shopping with a patrol on your tail', async () => {
+  const { s } = harness();
+  s.player.x = SHOPS.tailor.at.x;
+  s.player.y = SHOPS.tailor.at.y + 10;
+  s.pursuit = startPursuit(s.map, { x: 600, y: 480 });
+  const a = availableAction(s);
+  assert.equal(a.kind, 'tailor');
+  assert.equal(a.enabled, false);
+  assert.equal(a.reason, 'Lose the patrol first');
+  await act(s);
+  assert.equal(s.mode, 'world');
+  s.locomotion = 'van';
+  Object.assign(s.van, { x: SHOPS.paint.at.x, y: SHOPS.paint.at.y, heading: -Math.PI / 2, speed: 0 });
+  assert.notEqual(availableAction(s).kind, 'paint');
+});
+
+test('a passer-by in reach never takes the button from the van', () => {
+  const { s } = harness();
+  s.progress = ok(acceptQ01(s.progress));
+  // Stand at the van's side with someone right beside you.
+  s.player.x = s.van.x;
+  s.player.y = s.van.y - 14;
+  const ped = s.ambient.peds.find((q) => !q.name)!;
+  ped.path = [{ x: s.player.x + 3, y: s.player.y }];
+  ped.x = s.player.x + 3;
+  ped.y = s.player.y;
+  assert.equal(availableAction(s).kind, 'enter_van');
+  // Away from the van, the same person can be talked to.
+  s.van.x += 200;
+  assert.equal(availableAction(s).kind, 'talk_ped');
 });

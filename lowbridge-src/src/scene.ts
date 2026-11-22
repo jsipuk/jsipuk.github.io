@@ -12,7 +12,9 @@ import {
   drawExpress,
   drawFerry,
   drawPatrol,
+  drawPedestrian,
   drawPerson,
+  drawPigeon,
   drawPin,
   drawStall,
   drawStreet,
@@ -24,10 +26,10 @@ import { STEP_SECONDS, createClock, framesToSteps, resetClock } from './rules/cl
 import { clamp, forward } from './rules/math.ts';
 import type { Vec } from './rules/math.ts';
 import { TILE } from './rules/map.ts';
-import { FOOTPRINTS, LOST_SITES, PLACES } from './rules/content.ts';
+import { FOOTPRINTS, LOST_SITES, PLACES, SHOPS } from './rules/content.ts';
 import { hasFlag } from './rules/progress.ts';
 import type { Session, WorldEvent } from './rules/session.ts';
-import { currentStep, destinations, driving, stepPin, stepSession } from './rules/session.ts';
+import { currentStep, destinations, driving, phoneRinging, stepPin, stepSession } from './rules/session.ts';
 import { EXPRESS, VAN } from './rules/vehicle.ts';
 
 export interface SceneDeps {
@@ -36,7 +38,6 @@ export interface SceneDeps {
   hud: Hud;
   dpr: number;
   reduceMotion(): boolean;
-  jacket(): string;
   touch(): boolean;
   /** Session events, drained once per frame after the simulation steps. */
   onEvents(events: WorldEvent[]): void;
@@ -77,6 +78,11 @@ export class StreetScene extends Phaser.Scene {
   private pocketCrab!: Phaser.GameObjects.Image;
   private fx!: Phaser.GameObjects.Graphics;
   private ringLabel!: Phaser.GameObjects.Text;
+  private peds: { img: Phaser.GameObjects.Image; name: Phaser.GameObjects.Text | null; phase: number; last: Vec | null }[] = [];
+  private birds: Phaser.GameObjects.Image[] = [];
+  private vanKey = '';
+  private hornAt = -1;
+  private hornPos: Vec = { x: 0, y: 0 };
   private camPos: Vec | null = null;
   private stride = { phase: 0, last: null as Vec | null, idle: 0 };
   private look: Vec = { x: 0, y: 0 };
@@ -95,7 +101,7 @@ export class StreetScene extends Phaser.Scene {
     const map = this.deps.session().map;
     const add = (key: string, c: HTMLCanvasElement) => this.textures.addCanvas(key, c);
     add('street', drawStreet(map));
-    add('van', drawVan());
+    add('van-cream-teal', drawVan());
     add('express', drawExpress());
     add('patrol-0', drawPatrol(0));
     add('patrol-1', drawPatrol(1));
@@ -124,7 +130,7 @@ export class StreetScene extends Phaser.Scene {
     });
     this.fx = this.add.graphics().setDepth(2);
     this.beam = img(0, 0, 'beam', 2).setOrigin(0, 0.5).setAlpha(0.55).setBlendMode(Phaser.BlendModes.ADD);
-    this.vanImg = img(0, 0, 'van', 3);
+    this.vanImg = img(0, 0, 'van-cream-teal', 3);
     this.expressImg = img(0, 0, 'express', 3);
     this.patrolImg = img(0, 0, 'patrol-0', 3).setVisible(false);
     this.mo = img(map.people.mo_vale.x, map.people.mo_vale.y, 'mo', 3);
@@ -132,6 +138,13 @@ export class StreetScene extends Phaser.Scene {
     this.wildCrab = img(map.machine.x + 9, map.machine.y + 1, 'crab', 3).setVisible(false);
     this.pocketCrab = img(0, 0, 'crab', 4).setVisible(false);
     this.courier = img(0, 0, this.courierKey(0), 4);
+    // People out for the evening, and the pigeons.
+    for (const p of this.deps.session().ambient.peds) {
+      const name = p.name ? this.add.text(p.x, p.y, p.name.toUpperCase(), LABEL_STYLE).setOrigin(0.5).setDepth(6).setVisible(false) : null;
+      this.peds.push({ img: img(p.x, p.y, this.pedKey(p.coat, 0), 3), name, phase: 0, last: null });
+    }
+    for (let i = 0; i < 4; i++) add(`pigeon-${i}`, drawPigeon(i));
+    for (const f of this.deps.session().ambient.flocks) for (const b of f.birds) this.birds.push(img(b.x, b.y, 'pigeon-0', 2.5));
     for (const id of ['mo_vale', 'nell_price', 'shutter', 'step']) this.pins[id] = img(0, 0, 'pin', 6).setOrigin(0.5, 1).setVisible(false);
 
     const label = (text: string, x: number, y: number) =>
@@ -147,6 +160,9 @@ export class StreetScene extends Phaser.Scene {
     label('NELL', map.people.nell_price.x, map.people.nell_price.y + 12);
     this.ringLabel = label('RING', map.phone.x, map.phone.y - 14).setDepth(7);
     label('SWITCHBOARD', 2.5 * TILE, 37.4 * TILE);
+    label('SECOND THREAD', SHOPS.tailor.at.x, 400);
+    label('THE FRY LIGHT', SHOPS.chips.at.x, 192);
+    label('BODY & PAINT', SHOPS.paint.at.x, 622);
     label('POST', PLACES.postBox.x, PLACES.postBox.y + 8);
 
     const cam = this.cameras.main;
@@ -163,11 +179,28 @@ export class StreetScene extends Phaser.Scene {
     this.cameras.main.setZoom(cssZoom(this.scale.width / dpr, this.scale.height / dpr) * dpr);
   }
 
-  /** Texture for one walk frame in the chosen jacket, drawn the first time it is needed. */
+  /** Texture for one walk frame in the saved jacket and hat, drawn the first time it is needed. */
   private courierKey(frame: number): string {
-    const key = `courier-${this.deps.jacket()}-${frame}`;
-    if (!this.textures.exists(key)) this.textures.addCanvas(key, drawCourier(this.deps.jacket(), frame));
+    const { jacket, hat } = this.deps.session().progress.style;
+    const key = `courier-${jacket}-${hat}-${frame}`;
+    if (!this.textures.exists(key)) this.textures.addCanvas(key, drawCourier(jacket, frame, hat));
     return key;
+  }
+
+  private pedKey(coat: string, frame: number): string {
+    const key = `ped-${coat}-${frame}`;
+    if (!this.textures.exists(key)) this.textures.addCanvas(key, drawPedestrian(coat, frame));
+    return key;
+  }
+
+  /** The van in its saved paint. */
+  private paintVan(): void {
+    const { vanBody, vanStripe } = this.deps.session().progress.style;
+    const key = `van-${vanBody}-${vanStripe}`;
+    if (key === this.vanKey) return;
+    if (!this.textures.exists(key)) this.textures.addCanvas(key, drawVan(vanBody, vanStripe));
+    this.vanImg.setTexture(key);
+    this.vanKey = key;
   }
 
   /** Walk cycle from distance covered: left foot, together, right foot, together. */
@@ -219,6 +252,12 @@ export class StreetScene extends Phaser.Scene {
       }
       if (e.type === 'shutter_opened') this.anim.shutter = now;
       if (e.type === 'recruited') this.pop('Clatterjack joined', { x: this.deps.session().player.x, y: this.deps.session().player.y }, PALETTE.amber);
+      if (e.type === 'ped_bump') this.pop('oof!', e.at);
+      if (e.type === 'horn') {
+        this.hornAt = now;
+        this.hornPos = { ...e.at };
+      }
+      if (e.type === 'pigeons' && e.count >= 4) this.pop('flap flap', e.at);
     }
   }
 
@@ -243,6 +282,7 @@ export class StreetScene extends Phaser.Scene {
     const map = s.map;
 
     // Vehicles.
+    this.paintVan();
     const d = driving(s);
     this.vanImg.setPosition(s.van.x, s.van.y).setRotation(s.van.heading);
     this.expressImg.setPosition(s.express.x, s.express.y).setRotation(s.express.heading);
@@ -335,8 +375,51 @@ export class StreetScene extends Phaser.Scene {
       this.fx.fillCircle(s.player.x + Math.cos(a) * 7, s.player.y + Math.sin(a) * 7 - 2, 4.5);
     }
 
-    // The ringing payphone flashes until Q01 is accepted.
-    const ringing = prog.story.stage === 'offered' && s.mode !== 'paused';
+    // People: walk frames from distance covered; locals' names show when you're close.
+    const me = d ? { x: d.state.x, y: d.state.y } : s.player;
+    s.ambient.peds.forEach((p, i) => {
+      const v = this.peds[i];
+      const moved = v.last ? Math.hypot(p.x - v.last.x, p.y - v.last.y) : 0;
+      v.last = { x: p.x, y: p.y };
+      v.phase = (v.phase + moved / 5) % 2;
+      const frame = p.state === 'stumble' ? 2 : moved > 0.02 ? Math.floor(v.phase) : 0;
+      const wobble = p.state === 'stumble' && !still ? Math.sin(time / 40) * 0.25 : 0;
+      v.img.setTexture(this.pedKey(p.coat, frame)).setPosition(p.x, p.y).setRotation(p.heading + wobble);
+      if (v.name) {
+        const near = Math.hypot(p.x - me.x, p.y - me.y) < 70;
+        v.name.setVisible(near).setPosition(p.x, p.y - 11);
+      }
+    });
+    // Pigeons: pecking on the ground, flapping when they scatter.
+    let bi = 0;
+    for (const f of s.ambient.flocks) {
+      for (const [j, b] of f.birds.entries()) {
+        const bird = this.birds[bi++];
+        if (b.state === 'gone') {
+          bird.setVisible(false);
+          continue;
+        }
+        const up = b.state === 'flying' || b.state === 'landing';
+        const frame = up ? 2 + (still ? 0 : Math.floor(time / 90 + j) % 2) : still ? 0 : (Math.floor(time / 400 + j * 1.7) % 5 === 0 ? 1 : 0);
+        const rot = up ? Math.atan2(b.vy, b.vx) : j * 1.1;
+        bird
+          .setVisible(true)
+          .setTexture(`pigeon-${frame}`)
+          .setPosition(b.x, b.y)
+          .setRotation(rot)
+          .setDepth(up ? 5 : 2.5)
+          .setScale((up ? 1.25 : 1) / ART_SCALE);
+      }
+    }
+    // A horn blast ripples out from the van.
+    if (this.hornAt >= 0 && time - this.hornAt < 500) {
+      const k = (time - this.hornAt) / 500;
+      this.fx.lineStyle(1.5, 0xfff1bf, (1 - k) * 0.6);
+      this.fx.strokeCircle(this.hornPos.x, this.hornPos.y, 10 + k * (still ? 20 : 60));
+    }
+
+    // The payphone flashes while it rings: Mo's first call, or a wrong number later on.
+    const ringing = phoneRinging(s) && s.mode !== 'paused';
     this.ringLabel.setVisible(ringing);
     if (ringing) {
       const on = Math.floor(time / 500) % 2 === 0;

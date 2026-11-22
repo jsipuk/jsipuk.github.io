@@ -11,6 +11,11 @@ export interface Sfx {
   /** Two-tone wail while the patrol is chasing; quieter with distance. */
   updateSiren(active: boolean, distancePx: number): void;
   horn(): void;
+  /** The van's own short horn. */
+  honk(): void;
+  /** Wings: busier for a bigger flock. */
+  flutter(count: number): void;
+  shopBell(): void;
   radio(): void;
   rumble(): void;
   /** Three short rings, as the Reedlings answer the lamp. */
@@ -118,6 +123,27 @@ export function createSfx(): Sfx {
       const now = a.ctx.currentTime;
       tone(165, now, 1.3, 0.16, 'sawtooth');
       tone(220, now, 1.3, 0.08, 'sawtooth');
+    },
+    honk() {
+      const a = ready();
+      if (!a) return;
+      const now = a.ctx.currentTime;
+      tone(392, now, 0.22, 0.09, 'square');
+      tone(494, now, 0.22, 0.06, 'square');
+    },
+    flutter(count) {
+      const a = ready();
+      if (!a) return;
+      const now = a.ctx.currentTime;
+      const n = Math.min(10, 3 + count);
+      for (let i = 0; i < n; i++) tone(1800 + ((i * 337) % 900), now + i * 0.035, 0.03, 0.025, 'square');
+    },
+    shopBell() {
+      const a = ready();
+      if (!a) return;
+      const now = a.ctx.currentTime;
+      tone(1568, now, 0.5, 0.05);
+      tone(2093, now + 0.12, 0.6, 0.04);
     },
     radio() {
       const a = ready();

@@ -41,6 +41,7 @@
       </div>
       <button class="hud-btn hold touch-only" id="go-btn" type="button" tabindex="-1">Go</button>
       <button class="hud-btn hold touch-only" id="brake-btn" type="button" tabindex="-1">Brake<br />Reverse</button>
+      <button class="hud-btn horn touch-only" id="horn-btn" type="button" tabindex="-1" aria-label="Horn">Horn</button>
       <button class="hud-btn act" id="act-btn" type="button" tabindex="-1" hidden>
         <span id="act-verb">Get in</span>
         <small id="act-reason"></small>
@@ -50,6 +51,7 @@
         <span><kbd>Shift</kbd> go</span>
         <span><kbd>Space</kbd> brake/reverse</span>
         <span><kbd>E</kbd> act</span>
+        <span><kbd>H</kbd> horn</span>
         <span><kbd>Esc</kbd> pause</span>
       </div>
     </div>
@@ -74,6 +76,18 @@
           <button type="button" data-act="leave">Leave</button>
           <button type="button" class="primary" data-act="continue" hidden>Continue</button>
         </div>
+      </div>
+    </div>
+
+    <div class="shop" id="shop" role="dialog" aria-labelledby="shop-title" hidden>
+      <div class="shop-preview" id="shop-preview" aria-hidden="true"></div>
+      <div class="shop-body">
+        <p class="eyebrow" id="shop-eyebrow">Station Road</p>
+        <h2 id="shop-title">Second Thread</h2>
+        <p class="shop-lede" id="shop-lede"></p>
+        <div id="shop-parts"></div>
+        <p class="shop-status" id="shop-status" role="status" aria-live="polite"></p>
+        <div class="choices"><button type="button" class="primary" id="shop-done">Done</button></div>
       </div>
     </div>
 
@@ -110,6 +124,7 @@
         <fieldset class="jackets">
           <legend>Courier jacket</legend>
           <div class="swatches" id="jackets"></div>
+          <p class="note">More jackets, hats and van paint at Second Thread on Station Road and Body &amp; Paint, just south of it.</p>
         </fieldset>
 
         <div class="toggles">

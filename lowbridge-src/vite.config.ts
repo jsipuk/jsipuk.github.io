@@ -13,9 +13,9 @@ function buildId(): string {
     const dirty = execSync('git status --porcelain -- .', { stdio: ['ignore', 'pipe', 'ignore'] })
       .toString()
       .trim();
-    return `m2-${day}-${hash}${dirty ? '-dirty' : ''}`;
+    return `m2fp-${day}-${hash}${dirty ? '-dirty' : ''}`;
   } catch {
-    return `m2-${day}-local`;
+    return `m2fp-${day}-local`;
   }
 }
 

@@ -2,10 +2,11 @@
 // captions, prompts with choices, the encounter, the patrol chip, the save
 // warning and the pause/return sheet with the journal.
 
-import { drawCrabPortrait } from './art.ts';
-import { BEATS, CREATURES, CREWS, JOURNAL, LOST_SITES, PEOPLE } from './rules/content.ts';
+import { drawCourier, drawCrabPortrait, drawVan } from './art.ts';
+import { BEATS, CREATURES, CREWS, JOURNAL, LOST_SITES, PEOPLE, SHOPS, UNLOCKS } from './rules/content.ts';
 import type { Vec } from './rules/math.ts';
-import type { Progress } from './rules/progress.ts';
+import type { Progress, StylePart } from './rules/progress.ts';
+import { STYLE_CATALOGUE, isUnlocked } from './rules/progress.ts';
 import { CAUGHT_SECONDS, ESCAPE_SECONDS } from './rules/pursuit.ts';
 import type { Session } from './rules/session.ts';
 import { availableAction, formatTime, objective } from './rules/session.ts';
@@ -17,6 +18,38 @@ export interface HudHandlers {
   onChoose(choiceId: string): void;
   onEncounter(action: 'dim' | 'offer_washer' | 'leave' | 'continue'): void;
   onRetrySave(): void;
+  onShop(part: StylePart, id: string): void;
+  onShopClose(): void;
+}
+
+const SHOP_PARTS: Record<'tailor' | 'paint', { part: StylePart; label: string }[]> = {
+  tailor: [
+    { part: 'jacket', label: 'Jackets' },
+    { part: 'hat', label: 'Hats' },
+  ],
+  paint: [
+    { part: 'vanBody', label: 'Body paint' },
+    { part: 'vanStripe', label: 'Roof stripe' },
+  ],
+};
+
+const SHOP_TEXT = {
+  tailor: {
+    eyebrow: 'Station Road',
+    title: SHOPS.tailor.name,
+    lede: 'Mrs Adeyemi’s secondhand rail. Try anything on; the depot pays. Locked pieces say how to earn them.',
+  },
+  paint: {
+    eyebrow: 'Station Road forecourt',
+    title: SHOPS.paint.name,
+    lede: 'Gaz sprays the van while you wait. Free for depot vans, he says, “as long as it’s not beige again.”',
+  },
+};
+
+/** How many style pieces are unlocked, for the journal. */
+export function unlockCount(p: Progress): { have: number; all: number } {
+  const items = Object.values(STYLE_CATALOGUE).flat();
+  return { have: items.filter((i) => isUnlocked(p, i)).length, all: items.length };
 }
 
 export interface SheetInfo {
@@ -67,6 +100,16 @@ function journal(p: Progress): [string, string][] {
   if (p.sightings.includes('reedling')) rows.push(['Sighted', 'Reedling, reed-bed mimic. Seen ringing along the mud; not yet befriended.']);
   if (p.flags.includes('yard_shutter_open')) rows.push(['Route', 'The builders’ yard shutter is open for good.']);
   for (const key of p.journal) if (JOURNAL[key]) rows.push(['Notebook', JOURNAL[key]]);
+  const st = p.stats;
+  const town: string[] = [];
+  if (st.pigeons) town.push(`${st.pigeons} pigeons scattered`);
+  if (p.chatted.length) town.push(`${p.chatted.length} people met`);
+  if (st.chips) town.push(`${st.chips} chips`);
+  if (st.honks) town.push(`${st.honks} honks`);
+  if (st.calls) town.push(`${st.calls} wrong numbers`);
+  if (st.pedBumps) town.push(`${st.pedBumps} near misses`);
+  const u = unlockCount(p);
+  rows.push(['Around town', `${town.length ? `${town.join(' · ')}. ` : 'Chat to people, find the shops, mind the pigeons. '}Looks unlocked: ${u.have} of ${u.all}.`]);
   if (p.story.stage === 'delivered') {
     rows.push(['Last post', `Best quiet run ${formatTime(p.quick.bests.quiet)} · with a chase ${formatTime(p.quick.bests.pursuit)}`]);
     rows.push(['Lost property', `${p.quick.lostFound.length} of ${LOST_SITES.length} found`]);
@@ -102,6 +145,11 @@ export function createHud(h: HudHandlers): Hud {
   const toastEl = $('toast');
   const sheet = $('sheet');
   const resumeBtn = $('resume-btn');
+  const shopEl = $('shop');
+  const shopParts = $('shop-parts');
+  const shopPreview = $('shop-preview');
+  const shopStatus = $('shop-status');
+  $('shop-done').addEventListener('click', () => h.onShopClose());
 
   for (const b of encButtons) b.addEventListener('click', () => h.onEncounter(b.dataset.act as never));
   $('save-retry').addEventListener('click', () => h.onRetrySave());
@@ -221,6 +269,72 @@ export function createHud(h: HudHandlers): Hud {
         for (const b of encButtons) b.hidden = e.done ? b.dataset.act !== 'continue' : b.dataset.act === 'continue';
         encButtons.find((b) => !b.hidden)?.focus({ preventScroll: true });
       });
+
+      // Shops: the tailor and Body & Paint.
+      const shop = s.mode === 'shop' ? s.shop : null;
+      const style = s.progress.style;
+      const shopKey = shop
+        ? `${shop}|${JSON.stringify(style)}|${SHOP_PARTS[shop].map(({ part }) => STYLE_CATALOGUE[part].map((i) => +isUnlocked(s.progress, i)).join('')).join()}`
+        : '';
+      set('shop', shopKey, () => {
+        const wasOpen = !shopEl.hidden;
+        shopEl.hidden = !shop;
+        if (!shop) return;
+        const text = SHOP_TEXT[shop];
+        $('shop-eyebrow').textContent = text.eyebrow;
+        $('shop-title').textContent = text.title;
+        $('shop-lede').textContent = text.lede;
+        const preview = shop === 'tailor' ? drawCourier(style.jacket, 1, style.hat) : drawVan(style.vanBody, style.vanStripe);
+        preview.setAttribute('aria-hidden', 'true');
+        shopPreview.replaceChildren(preview);
+        const focusId = (document.activeElement as HTMLElement | null)?.dataset?.item;
+        shopParts.replaceChildren(
+          ...SHOP_PARTS[shop].map(({ part, label }) => {
+            const fs = document.createElement('fieldset');
+            fs.className = 'shop-part';
+            const lg = document.createElement('legend');
+            lg.textContent = label;
+            const row = document.createElement('div');
+            row.className = 'shop-items';
+            for (const item of STYLE_CATALOGUE[part]) {
+              const open = isUnlocked(s.progress, item);
+              const b = document.createElement('button');
+              b.type = 'button';
+              b.className = open ? 'shop-item' : 'shop-item locked';
+              b.dataset.item = `${part}:${item.id}`;
+              b.setAttribute('aria-pressed', String(style[part] === item.id));
+              const chip = document.createElement('span');
+              chip.className = 'chip';
+              chip.setAttribute('aria-hidden', 'true');
+              chip.style.background = item.id === 'none' ? 'transparent' : item.fill;
+              chip.style.borderColor = item.id === 'none' ? 'var(--line)' : item.trim;
+              const words = document.createElement('span');
+              words.textContent = item.name;
+              if (!open && item.unlock) {
+                const why = document.createElement('small');
+                why.textContent = `Locked · ${UNLOCKS[item.unlock]}`;
+                words.append(why);
+                b.setAttribute('aria-disabled', 'true');
+              }
+              b.append(chip, words);
+              b.addEventListener('click', () => {
+                if (!open) {
+                  shopStatus.textContent = item.unlock ? `${item.name}: ${UNLOCKS[item.unlock]}.` : '';
+                  return;
+                }
+                h.onShop(part, item.id);
+              });
+              row.append(b);
+            }
+            fs.append(lg, row);
+            return fs;
+          }),
+        );
+        const u = unlockCount(s.progress);
+        if (!wasOpen) shopStatus.textContent = `${u.have} of ${u.all} looks unlocked across both shops.`;
+        const again = focusId ? shopParts.querySelector<HTMLButtonElement>(`[data-item="${focusId}"]`) : null;
+        (again ?? (wasOpen ? null : $('shop-done')))?.focus({ preventScroll: true });
+      });
     },
 
     toast(text, seconds = 4) {
@@ -265,9 +379,6 @@ export function createHud(h: HudHandlers): Hud {
         input.checked = input.value === settings.preset;
       }
       $<HTMLInputElement>('mute').checked = settings.muted;
-      for (const input of document.querySelectorAll<HTMLInputElement>('input[name="jacket"]')) {
-        input.checked = input.value === settings.jacket;
-      }
     },
 
     setSaveState(text, failed) {
