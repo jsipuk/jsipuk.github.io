@@ -85,6 +85,7 @@ Top speed 150 px/s (9.4 tiles/s), reverse 55, accel 200 px/s², brake 460, coast
 | Keyboard lap in the browser | Wheel preset: walk, get in, lap, park, get out, answer, lap logged; 36 s, 0 bumps (scripted driver, cautious). Pad preset: drove 82 px north, let go and rolled to a stop, pulled back and reversed 29 px, reversed on Brake, got out. | `scripts/smoke-m0.mjs` |
 | Hold a key, lose focus, resume with the key still down | Pass. Paused on blur; 0 px of movement after resume until a fresh press. | `scripts/smoke-m0.mjs` |
 | First phone session (owner) | "Felt smooth." Pad steering with the separate reverse button was tricky, which led to pull-back reverse. | iPhone, inside the private claude.ai page, not standalone Safari. Device and iOS version not recorded. |
+| Second phone session (owner), pull-back reverse | Two full laps logged with steering A: 28 s and 36 s, 2 bumps each, no page errors. | iPhone, iOS 18.7, inside the Claude app at 750 × 324. Captured automatically. |
 | Two thumbs at once, rotation, standalone Safari, Home Screen | **Not run.** | |
 | M0 gate: three people, iPhone, lap/park/exit/answer, preferred scheme | **Pending** | |
 
