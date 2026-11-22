@@ -31,6 +31,9 @@ export function inputTowards(s: Session, target: Vec, preset: SteeringPreset, sp
   if (preset === 'pad') {
     return { ...NO_INPUT, padX: (dx / d) * speedLimit, padY: (dy / d) * speedLimit };
   }
+  if (preset === 'hybrid') {
+    return { ...NO_INPUT, padX: dx / d, padY: dy / d, goButton: s.van.speed < 150 * speedLimit ? 1 : 0 };
+  }
   const diff = angleDiff(Math.atan2(dy, dx), s.van.heading);
   const wantSlow = Math.abs(diff) > 0.6;
   return {

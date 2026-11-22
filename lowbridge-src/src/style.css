@@ -330,6 +330,7 @@ kbd {
 #hud[data-loco='foot'] #brake-btn,
 #hud[data-loco='van'][data-preset='wheel'] .pad-zone,
 #hud[data-loco='van'][data-preset='pad'] .steer-zone,
+#hud[data-loco='van'][data-preset='hybrid'] .steer-zone,
 #hud[data-loco='van'][data-preset='pad'] #go-btn {
   display: none;
 }

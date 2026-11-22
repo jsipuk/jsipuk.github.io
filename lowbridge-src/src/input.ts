@@ -29,6 +29,7 @@ const KEYS = {
   left: ['ArrowLeft', 'KeyA'],
   right: ['ArrowRight', 'KeyD'],
   brake: ['Space'],
+  go: ['ShiftLeft', 'ShiftRight'],
 };
 const HELD_KEYS = new Set(Object.values(KEYS).flat());
 const PAD_TRAVEL = 52;
@@ -63,6 +64,7 @@ export function createInput(h: InputHandlers): Input {
       h.onInteract();
     } else if (e.code === 'Digit1') h.onPreset('pad');
     else if (e.code === 'Digit2') h.onPreset('wheel');
+    else if (e.code === 'Digit3') h.onPreset('hybrid');
     else if (e.code === 'KeyM') h.onMuteToggle();
   });
   window.addEventListener('keyup', (e) => {
@@ -229,6 +231,7 @@ export function createInput(h: InputHandlers): Input {
         padY,
         wheelSteer: touchSteer !== 0 ? touchSteer : Number(right) - Number(left),
         wheelThrottle: go.held() || up ? 1 : 0,
+        goButton: go.held() || any(KEYS.go) ? 1 : 0,
         brake: brake.held() || any(KEYS.brake),
         keyDown: down,
       };

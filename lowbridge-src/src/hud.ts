@@ -27,7 +27,7 @@ export const formatSeconds = (sec: number): string => {
 };
 
 export const presetLabel = (p: string): string =>
-  p === 'pad' || p === 'wheel' ? `${PRESETS[p].letter} · ${PRESETS[p].name}` : 'Mixed steering';
+  p in PRESETS ? `${PRESETS[p as keyof typeof PRESETS].letter} · ${PRESETS[p as keyof typeof PRESETS].name}` : 'Mixed steering';
 
 export function createHud(): Hud {
   const root = $('hud');
@@ -64,7 +64,8 @@ export function createHud(): Hud {
       set('loco', s.locomotion, (v) => (root.dataset.loco = v));
       set('preset', s.preset, (v) => (root.dataset.preset = v));
       set('touch', touch ? '1' : '0', (v) => (root.dataset.touch = v));
-      set('padLabel', s.locomotion === 'van' ? 'Drive' : 'Walk', (v) => (padLabel.textContent = v));
+      const padText = s.locomotion === 'foot' ? 'Walk' : s.preset === 'hybrid' ? 'Steer' : 'Drive';
+      set('padLabel', padText, (v) => (padLabel.textContent = v));
 
       const job = objective(s);
       set('job', job.text, (v) => (jobText.textContent = v));

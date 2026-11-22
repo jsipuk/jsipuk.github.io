@@ -14,7 +14,7 @@ import {
 } from '../src/rules/session.ts';
 import { STEP, driveLap, walkTo } from './helpers.ts';
 
-const fresh = (preset: 'pad' | 'wheel' = 'pad') => createSession(buildM0Map(), preset);
+const fresh = (preset: 'pad' | 'wheel' | 'hybrid' = 'pad') => createSession(buildM0Map(), preset);
 
 test('spawn: on the pavement, van outside the depot, phone ringing', () => {
   const s = fresh();
@@ -80,7 +80,7 @@ test('walkers cannot pass through buildings or the van', () => {
   assert.ok(Math.abs(s2.player.y - 700) > 5 || Math.abs(s2.player.x - 60) > 5);
 });
 
-for (const preset of ['pad', 'wheel'] as const) {
+for (const preset of ['pad', 'wheel', 'hybrid'] as const) {
   test(`full M0 lap with the ${preset} preset: drive, park, get out on the pavement, answer`, () => {
     const s = fresh(preset);
     walkTo(s, { x: 76, y: 664 });
@@ -165,4 +165,14 @@ test('pad preset: pull the pad back and the van backs up the way the thumb point
   // Push east again: it stops reversing and drives forwards.
   for (let t = 0; t < 1; t += STEP) stepSession(s, { ...NO_INPUT, padX: 1 }, STEP);
   assert.ok(s.van.speed > 0);
+});
+
+test('lamp posts stand at the back of the pavement, clear of the kerb', () => {
+  const map = buildM0Map();
+  for (const lamp of map.props) {
+    for (const [dx, dy] of [[8, 0], [-8, 0], [0, 8], [0, -8]]) {
+      const s = surfaceAt(map, lamp.x + dx, lamp.y + dy);
+      assert.notEqual(s, Surface.Road, `${lamp.id} is within 8 px of the road`);
+    }
+  }
 });

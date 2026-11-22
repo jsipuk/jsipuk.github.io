@@ -61,6 +61,7 @@ Built 21 November 2026 in `jsipuk.github.io/lowbridge-src/`, beside the site's o
 | Phone | Rings at spawn, as in Q01. Answering early plays Mo's line. It rings again once you park after a lap; answering then logs the lap. | Both "answer first" and "ignore it" stay valid, and each preset run still ends on answering. |
 | Pad preset (A) | The van moves towards the thumb. Ahead or to the side: it steers to face that way (full lock at 26° off), easing throttle on sharp turns. Pulled back more than about 115° from its facing: it brakes in a straight line, then reverses with the rear swinging towards the thumb, and stays in reverse until the thumb is back within about 80°. Release rolls to a stop. The Brake/Reverse button still works, with the same rear-towards-thumb steering. | Same physics as B; only the input mapping differs. Pull-back reverse added on 21 November after the first phone session found the pad plus a separate reverse button tricky. |
 | Wheel preset (B) | Left/Right steer zone (a thumb can slide across), Go, separate Brake/Reverse. On a keyboard, Down also brakes. | As specified. |
+| Third preset (C, "Pad and pedals") | A's thumb pad on the left only points (label "Steer"); Go and Brake/Reverse on the right as in B. Pointing without Go steers while rolling; Go with the thumb pulled back reverses as in A. Keyboard: arrows point, Shift is Go, 3 selects it. | Owner liked B's pedals but not its big Left/Right buttons, and asked for a direction pad on the left with Go on the right. Added beside A and B, not replacing B, so lap records stay comparable. |
 | Stopping near points of interest | Rolling drag doubles within 56 px of the bay. | "Short stopping distance near points of interest." |
 | Kerbs | Pavements are drivable but cap the van at 80 px/s. Buildings, lamp posts, the phone box and the barrier are solid. | Readable bumps without trapping the van. |
 | Getting out | Allowed below 14 px/s. Tries the driver's door (right, right-hand drive), the left door, a longer step to the kerb, then rear and front, preferring pavement. | "Exit only when slow and a walkable exit point exists." |
@@ -79,19 +80,20 @@ Top speed 150 px/s (9.4 tiles/s), reverse 55, accel 200 px/s², brake 460, coast
 
 | Check | Result | Environment |
 | --- | --- | --- |
-| Fresh `npm ci`, `npm run typecheck`, `npm test`, `npm run build` | Pass. 28 of 28 tests after pull-back reverse. JS 370 KB gzipped (budget 5 MB). | Linux container, Node 22.23.5, npm 10.9.9 |
+| Fresh `npm ci`, `npm run typecheck`, `npm test`, `npm run build` | Pass. 32 of 32 tests after steering C (full scripted lap with A, B and C). JS 370 KB gzipped (budget 5 MB). | Linux container, Node 22.23.5, npm 10.9.9 |
 | Rules: both presets complete the lap, park, get out on the pavement and answer (scripted, no rendering) | Pass, no bumps | `npm test` |
 | Preview at `/lowbridge/` loads with no page errors | Pass | Headless Chromium (Playwright 1.63), 844 × 390 |
 | Keyboard lap in the browser | Wheel preset: walk, get in, lap, park, get out, answer, lap logged; 36 s, 0 bumps (scripted driver, cautious). Pad preset: drove 82 px north, let go and rolled to a stop, pulled back and reversed 29 px, reversed on Brake, got out. | `scripts/smoke-m0.mjs` |
 | Hold a key, lose focus, resume with the key still down | Pass. Paused on blur; 0 px of movement after resume until a fresh press. | `scripts/smoke-m0.mjs` |
 | First phone session (owner) | "Felt smooth." Pad steering with the separate reverse button was tricky, which led to pull-back reverse. | iPhone, inside the private claude.ai page, not standalone Safari. Device and iOS version not recorded. |
+| Third phone session (owner), steering B | Two laps: 0:41 with 3 bumps, then 0:17 with no bumps (fastest so far). Liked the pedals, not the big Left/Right buttons. Led to steering C. | Same iPhone and Claude app as above. |
 | Second phone session (owner), pull-back reverse | Two full laps logged with steering A: 28 s and 36 s, 2 bumps each, no page errors. | iPhone, iOS 18.7, inside the Claude app at 750 × 324. Captured automatically. |
 | Two thumbs at once, rotation, standalone Safari, Home Screen | **Not run.** | |
 | M0 gate: three people, iPhone, lap/park/exit/answer, preferred scheme | **Pending** | |
 
 ### Known issues and things to watch on the phone
 
-- Lamp posts and the phone box caused every bump in the owner's two steering-A laps. Lamps sit 3 px from the kerb edge and the phone box 10 px from the bay. Candidate fix after the steering B comparison: move lamps to the back of the pavement and give the bay more clearance from the phone box.
+- Lamp posts and the phone box caused every bump in the owner's steering-A laps (lamps were 3 px from the kerb, the phone box 10 px from the bay). Fixed in build after c16a8ce: lamps moved to the back of the pavement, phone box moved 8 px further from the bay. Laps before and after this change are not directly comparable.
 - Pull-back reverse is new; the owner rated it better than the separate button. With other testers, check that nobody triggers it by accident when swinging round a corner.
 - Keyboard in the pad preset gives eight directions only. A diagonal means "turn 45°", so a scripted driver weaved on straights and overshot corners. Touch is analogue and the rules tests lap cleanly with it, but watch for overshot junctions in the pad preset.
 - Turning late into a wall with the pad preset scrapes along it; pulling back or Brake/Reverse backs out. Note whether testers find that without coaching.

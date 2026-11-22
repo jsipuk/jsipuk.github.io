@@ -1,6 +1,6 @@
 // M0 smoke check in a real browser, using only the player's keyboard controls:
 // a full lap with the wheel preset (walk, get in, drive, park, get out, answer),
-// a short pad-preset drive, and a held key through a lost-focus interruption.
+// short drives with steering A and C, and a held key through a lost-focus interruption.
 // SMOKE_LAPS=pad,wheel also tries a full keyboard lap with the pad preset.
 //
 //   npm run build && npm run preview      (in one terminal)
@@ -225,6 +225,51 @@ async function padCheck(page) {
   console.log(`pad: drove ${Math.round(start.y - moving.y)} px north, rolled to a stop, pulled back to reverse ${Math.round(pulledBack.y - rolled.y)} px, reversed on Brake, got out`);
 }
 
+// Steering C, short check: pointing alone does not drive, Shift (Go) does, letting go rolls to a stop.
+async function hybridCheck(page) {
+  const snap = () => page.evaluate(() => window.lowbridge.snapshot());
+  await page.keyboard.press('Digit3');
+  let s = await snap();
+  for (let i = 0; i < 300 && s.action.kind !== 'enter'; i++) {
+    const tx = s.van.x - 18;
+    const ty = s.van.y;
+    const keys = [];
+    if (tx - s.player.x > 3) keys.push(KEYS.right);
+    if (tx - s.player.x < -3) keys.push(KEYS.left);
+    if (ty - s.player.y > 3) keys.push(KEYS.down);
+    if (ty - s.player.y < -3) keys.push(KEYS.up);
+    for (const k of keys) await page.keyboard.down(k);
+    await page.waitForTimeout(40);
+    for (const k of keys) await page.keyboard.up(k);
+    s = await snap();
+  }
+  await page.keyboard.press('KeyE');
+  s = await snap();
+  if (s.locomotion !== 'van') throw new Error('hybrid check: could not get in');
+  const start = s.van;
+  await page.keyboard.down(KEYS.up);
+  await page.waitForTimeout(600);
+  const pointed = (await snap()).van;
+  await page.keyboard.down('ShiftLeft');
+  await page.waitForTimeout(800);
+  const driven = (await snap()).van;
+  await page.keyboard.up('ShiftLeft');
+  await page.keyboard.up(KEYS.up);
+  await page.waitForTimeout(1800);
+  const stopped = (await snap()).van;
+  await page.keyboard.press('KeyE');
+  const out = await snap();
+  const checks = {
+    'pointing alone does not drive': Math.abs(pointed.y - start.y) < 1,
+    'Shift (Go) drives north': start.y - driven.y > 30,
+    'let go and rolled to a stop': stopped.speed === 0,
+    'got out': out.locomotion === 'foot',
+  };
+  const failed = Object.entries(checks).filter(([, ok]) => !ok).map(([name]) => name);
+  if (failed.length) throw new Error(`hybrid check failed: ${failed.join(', ')}`);
+  console.log(`hybrid: pointing alone stayed put, Go drove ${Math.round(start.y - driven.y)} px north, rolled to a stop, got out`);
+}
+
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 844, height: 390 } });
 const errors = [];
@@ -238,6 +283,7 @@ for (const preset of (process.env.SMOKE_LAPS ?? 'wheel').split(',')) {
   console.log(`${preset}: parked and answered · lap ${r.lapSeconds.toFixed(1)} s · ${r.bumps} bump(s) · logged as ${r.preset}`);
 }
 await padCheck(page);
+await hybridCheck(page);
 
 // Interruption: hold the throttle, lose focus, come back. Nothing may move until a fresh press.
 await page.keyboard.press('Digit2');

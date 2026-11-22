@@ -20,7 +20,7 @@ Needs Node 22.18 or later (`.nvmrc` says 22) and npm. Run everything from this f
 
 `npm run build` does not touch the live site. Copying `dist/` to the repository's `/lowbridge/` folder is the separate release step.
 
-**Keyboard:** WASD or arrows move, Space brakes then reverses, E or Enter does the action on the amber button, Esc pauses, 1 and 2 switch steering, M mutes. In steering A, pressing away from where the van faces reverses it. A read-only `window.lowbridge.snapshot()` reports state for agents, and a `lowbridge:lap` window event fires when a lap is logged.
+**Keyboard:** WASD or arrows move, Space brakes then reverses, E or Enter does the action on the amber button, Esc pauses, 1, 2 and 3 switch steering, M mutes. In steering A, pressing away from where the van faces reverses it. In steering C the arrows only point and Shift is Go. A read-only `window.lowbridge.snapshot()` reports state for agents, and a `lowbridge:lap` window event fires when a lap is logged.
 
 ## Start in Codex or Claude Code
 

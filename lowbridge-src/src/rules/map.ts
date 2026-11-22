@@ -112,18 +112,19 @@ export function buildM0Map(): StreetMap {
   ];
 
   const lamp = (id: string, x: number, y: number): Prop => ({ id, kind: 'lamp', x, y, r: 3 });
+  // Lamp posts stand at the back of the pavement, so clipping a kerb on a corner doesn't hit one.
   const props: Prop[] = [
-    lamp('lamp_depot_north', 106, 456),
-    lamp('lamp_depot_south', 106, 744),
-    lamp('lamp_station_1', 200, 442),
-    lamp('lamp_station_2', 328, 442),
-    lamp('lamp_station_3', 456, 442),
-    lamp('lamp_station_4', 584, 442),
-    lamp('lamp_block_ne', 264, 534),
-    lamp('lamp_block_nw', 424, 534),
-    lamp('lamp_back_lane', 344, 666),
-    lamp('lamp_ticket_east', 598, 600),
-    lamp('lamp_depot_east', 198, 600),
+    lamp('lamp_depot_north', 86, 456),
+    lamp('lamp_depot_south', 86, 744),
+    lamp('lamp_station_1', 200, 422),
+    lamp('lamp_station_2', 328, 422),
+    lamp('lamp_station_3', 456, 422),
+    lamp('lamp_station_4', 584, 422),
+    lamp('lamp_block_ne', 264, 554),
+    lamp('lamp_block_nw', 424, 554),
+    lamp('lamp_back_lane', 344, 646),
+    lamp('lamp_ticket_east', 618, 600),
+    lamp('lamp_depot_east', 218, 600),
   ];
 
   return {
@@ -134,7 +135,7 @@ export function buildM0Map(): StreetMap {
     roads,
     buildings,
     props,
-    phone: { id: 'depot_payphone', x: 96, y: 546, half: 6, reach: 26 },
+    phone: { id: 'depot_payphone', x: 88, y: 546, half: 6, reach: 26 },
     // Kerbside bay on the northbound (left-hand) lane of Depot Lane, beside the phone box.
     bay: { id: 'depot_bay', rect: { x: 112, y: 544, w: 32, h: 48 }, axis: -Math.PI / 2 },
     lapCheckpoint: { id: 'ticket_street', rect: { x: 512, y: 544, w: 80, h: 112 } },

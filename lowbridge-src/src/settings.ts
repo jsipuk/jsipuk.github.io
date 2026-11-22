@@ -43,7 +43,7 @@ function write(key: string, value: unknown): void {
 export function loadSettings(): Settings {
   const s = read<Partial<Settings>>(SETTINGS_KEY) ?? {};
   return {
-    preset: s.preset === 'wheel' ? 'wheel' : DEFAULTS.preset,
+    preset: s.preset === 'wheel' || s.preset === 'hybrid' ? s.preset : DEFAULTS.preset,
     muted: s.muted === true,
     reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : null,
   };

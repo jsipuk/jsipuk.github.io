@@ -6,13 +6,15 @@
 // Let go and it rolls to a stop. Brake/Reverse is also a separate button.
 // Preset B, "wheel": left/right steer, Go is the throttle, let go to slow.
 // Brake/Reverse is the same separate control.
+// Preset C, "hybrid": A's pad on the left only points; Go on the right drives.
+// With Go held and the thumb pulled back, it reverses as in A.
 // Walking always uses the screen-relative pad in both presets.
 
 import type { Vec } from './math.ts';
 import { angleDiff, clamp } from './math.ts';
 import type { VehicleControls } from './vehicle.ts';
 
-export type SteeringPreset = 'pad' | 'wheel';
+export type SteeringPreset = 'pad' | 'wheel' | 'hybrid';
 
 export const PRESETS: Record<SteeringPreset, { letter: string; name: string; summary: string }> = {
   pad: {
@@ -25,6 +27,11 @@ export const PRESETS: Record<SteeringPreset, { letter: string; name: string; sum
     name: 'Wheel and pedals',
     summary: 'Left and right steer. Hold Go. Let go to slow down.',
   },
+  hybrid: {
+    letter: 'C',
+    name: 'Pad and pedals',
+    summary: 'Point the pad where to go. Hold Go to drive. Pull back with Go to reverse.',
+  },
 };
 
 export interface RawInput {
@@ -35,6 +42,8 @@ export interface RawInput {
   wheelSteer: number;
   /** 0..1 from the Go button or the up key. */
   wheelThrottle: number;
+  /** 0..1 from the Go button or Shift only; preset C keeps the arrow keys for pointing. */
+  goButton: number;
   /** Brake/Reverse button or Space. */
   brake: boolean;
   /** Down key. Brakes in the wheel preset; points the pad down in the pad preset. */
@@ -46,6 +55,7 @@ export const NO_INPUT: RawInput = {
   padY: 0,
   wheelSteer: 0,
   wheelThrottle: 0,
+  goButton: 0,
   brake: false,
   keyDown: false,
 };
@@ -85,13 +95,15 @@ export function vehicleControls(
 
   const pad = padVector(raw);
   const mag = Math.hypot(pad.x, pad.y);
-  if (mag === 0) return { throttle: 0, steer: 0, brake: raw.brake };
+  // A drives as hard as the pad is pushed; C drives only while Go is held.
+  const drive = preset === 'pad' ? mag : raw.goButton > 0 ? 1 : 0;
+  if (mag === 0) return { throttle: preset === 'pad' ? 0 : drive, steer: 0, brake: raw.brake };
   const target = Math.atan2(pad.y, pad.x);
   const diff = angleDiff(target, heading);
   const off = Math.abs(diff);
   const backwards = off > (speed < -2 ? PAD_REVERSE_HOLD : PAD_REVERSE_START);
 
-  if (backwards || raw.brake) {
+  if ((backwards && drive > 0) || raw.brake) {
     // Still rolling forwards: brake first. Pulling back brakes in a straight line.
     if (speed > 4) return { throttle: 0, steer: backwards ? 0 : clamp(diff / PAD_FULL_LOCK, -1, 1), brake: true };
     // Stopped or reversing: back up, swinging the rear towards the thumb.
@@ -99,7 +111,16 @@ export function vehicleControls(
     return { throttle: 0, steer: clamp(-rear / PAD_FULL_LOCK, -1, 1), brake: true };
   }
 
+  if (drive === 0) {
+    // C without Go: the pad only steers while the van rolls. Rolling back, the rear follows the thumb.
+    if (speed < -2) {
+      const rear = angleDiff(target, heading + Math.PI);
+      return { throttle: 0, steer: clamp(-rear / PAD_FULL_LOCK, -1, 1), brake: false };
+    }
+    return { throttle: 0, steer: backwards ? 0 : clamp(diff / PAD_FULL_LOCK, -1, 1), brake: false };
+  }
+
   // Ease off while swinging round so a sharp push turns rather than overshoots.
   const ease = off > 1.2 ? 0.75 : 1;
-  return { throttle: mag * ease, steer: clamp(diff / PAD_FULL_LOCK, -1, 1), brake: false };
+  return { throttle: drive * ease, steer: clamp(diff / PAD_FULL_LOCK, -1, 1), brake: false };
 }
