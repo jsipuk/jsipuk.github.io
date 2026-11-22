@@ -2,7 +2,7 @@
 
 A single-player, top-down iPhone game set in a British river town. You work the night shift as a courier. The roads belong to rival crews. Some of the things living beside them will ride with you.
 
-**Status** • M0 handling test built in `lowbridge-src/`. Desktop and headless-browser checks pass; the physical iPhone gate is still pending. Production deployment is future work.
+**Status** • M1 five-minute demo built in `lowbridge-src/`: Riverside, Q01 with both endings, the crab and shutter shortcut, the express car and patrol, saves that survive a reload. Container and headless-browser checks pass; phone and people gates are pending. Production deployment is future work.
 
 ## Run the M0 build
 
@@ -16,7 +16,8 @@ Needs Node 22.18 or later (`.nvmrc` says 22) and npm. Run everything from this f
 | Production build | `npm run build` | writes `dist/` |
 | Preview the build | `npm run preview` | http://localhost:4173/lowbridge/ |
 | Phone on the same Wi-Fi | `npm run preview:lan` | the `Network:` address it prints, plus `/lowbridge/` |
-| Browser smoke lap | `node scripts/smoke-m0.mjs` while the preview runs | needs Playwright and Chromium |
+| Browser play-through | `node scripts/smoke-m1.mjs` while the preview runs | needs Playwright and Chromium; `SMOKE_ONLY=ferry,market` runs a subset |
+| Storage failure test | open the preview with `?failsave=1` | saving is switched off for that tab |
 
 `npm run build` does not touch the live site. Copying `dist/` to the repository's `/lowbridge/` folder is the separate release step.
 

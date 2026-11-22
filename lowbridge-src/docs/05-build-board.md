@@ -88,8 +88,8 @@ Top speed 110 px/s (6.9 tiles/s), reverse 45, pavement 60, accel 150 px/s², bra
 | Fresh `npm ci`, `npm run typecheck`, `npm test`, `npm run build` | Pass. 37 of 37 tests: full scripted laps with C and A, and a sweep from over 500 road positions showing the job arrow never points through a building. JS about 370 KB gzipped (budget 5 MB). | Linux container, Node 22.23.5, npm 10.9.9 |
 | Rules: both presets complete the lap, park, get out on the pavement and answer (scripted, no rendering) | Pass, no bumps | `npm test` |
 | Preview at `/lowbridge/` loads with no page errors | Pass | Headless Chromium (Playwright 1.63), 844 × 390 |
-| Keyboard lap in the browser | Steering C: walk, get in, lap, park, get out, answer, lap logged; 32 s, 0 bumps. Steering A: drove north, let go and rolled to a stop, pulled back and reversed, reversed on Brake, got out. Steering C short check: pointing alone stays put, Go drives. | `scripts/smoke-m0.mjs` |
-| Hold a key, lose focus, resume with the key still down | Pass. Paused on blur; 0 px of movement after resume until a fresh press. | `scripts/smoke-m0.mjs` |
+| Keyboard lap in the browser | Steering C: walk, get in, lap, park, get out, answer, lap logged; 32 s, 0 bumps. Steering A: drove north, let go and rolled to a stop, pulled back and reversed, reversed on Brake, got out. Steering C short check: pointing alone stays put, Go drives. | `scripts/smoke-m0.mjs` (retired in M1; in git history) |
+| Hold a key, lose focus, resume with the key still down | Pass. Paused on blur; 0 px of movement after resume until a fresh press. | `scripts/smoke-m0.mjs` (retired in M1; in git history) |
 | First phone session (owner) | "Felt smooth." Pad steering with the separate reverse button was tricky, which led to pull-back reverse. | iPhone, inside the private claude.ai page, not standalone Safari. Device and iOS version not recorded. |
 | Fifth phone session (owner), slower van | C: 0:17 with no bumps, then 0:27 with 1 ("wall at 23,34", the ticket office front). A: 0:34, no bumps. Owner slightly prefers C; keep A as an option. | Same iPhone and Claude app, build 4100c9d. |
 | Fourth phone session (owner), first steering C | Two laps: 0:45 with 3 bumps, 0:31 with 2. Still "a bit tricky"; forward/back and Go/reverse felt counterintuitive; asked for a slower van. Led to the slower tune, the simpler C and bump logging. | Same iPhone and Claude app. Lamps already moved for these laps. |
@@ -119,3 +119,55 @@ The owner has completed laps with every scheme on a physical iPhone, but inside 
 ### Next ticket
 
 T04: expand the block from the fixture (closed yard, ring road, quay and market), after the M0 phone gate records a preferred steering scheme.
+
+## M1 record • five-minute demo (T04–T08)
+
+Built 22 November 2026, autonomously, on the C and A steering chosen in M0. Every check below ran in the Linux container (Node 22.23.5, headless Chromium via Playwright 1.63). **No M1 check has run on a phone or with a person yet.**
+
+### Decisions where the build differs from or fills in the spec
+
+| Area | Chosen behaviour | Reason |
+| --- | --- | --- |
+| Node positions | Connections match the fixture; four nodes moved: ring_north (61,12→16), merge (34,12→16), yard_in and yard_out (y 20→23), fork, quay and market (y 7→6). | Five-tile roads need pavement and a building row between them. At the fixture's y 7 and y 12 the harbour road and the ring road would touch. The spec allows the skeleton to move if connections stay. |
+| Shutter position | In the yard's south gateway, 4 tiles north of Station Road, instead of on the yard_in–yard_out stretch inside. The gated route is still the only shortcut, and routing treats the gate road as closed until the flag is set. | "On the first lap a camera sightline should reveal the shutter from the main road." At 14 tiles of view height, anything 10 tiles north of Station Road is off-screen. |
+| Yard | Fenced on all sides. Reached from Station Road only through the shutter; the inside is also reachable from the north via the yard lane (as in the fixture, where yard_out–merge is always open). | Matches the fixture's open edges. Tests check the fence has no gaps. |
+| Footpath | A three-tile alley from Station Road to the ring road, closed to vehicles by bollards a walker can pass between. | "Footpaths also let a player reach either recipient." |
+| Washer | The courier carries one from the start (the van's toolbox) and never loses it. | The spec offers a washer without saying where it comes from. |
+| Job arrow with two recipients | Points to whichever of Mo or Nell is nearer by road; pins mark both. | One line, one arrow; the pins keep both choices visible. |
+| Counteroffer | Captioned radio line that does not stop play, fired the first time the courier leaves the depot area with the battery, on foot or in any vehicle. | "A radio call is captioned." Stopping play mid-drive would be worse. |
+| Patrol | Spawns at the ring road's north-east corner 2 s after the car is taken, drives to where it was reported, then chases whatever it can see within 15 tiles. It only knows where it last saw you. The 6 s escape clock starts once it reaches the report or has seen you. Top speed 120 (van 110, express car 165). | First version always knew where you were, so escape was near impossible; a person hides round corners. |
+| Express car | Quicker (165), wider turning circle (34 px + 0.34 × speed). Heat once per new taking: taking it from the lay-by. After capture it returns to the lay-by, so the next taking raises heat again. | "Borrowing the express car triggers the patrol once per new taking." |
+| Capture | Courier on foot at the depot, van recovered to the forecourt, express car back in the lay-by, battery kept, a "Caught" card. | As specified. |
+| Saving | IndexedDB database `lowbridge`, store `saves`, keys `current` and `previous`. Every story change is one transaction that checks the revision, writes the new envelope and keeps the old one as `previous`. Position checkpoints every 5 s of play, never mid-chase, and always with the last committed progress so they cannot roll a story change back. Settings stay in `localStorage`. | Save contract in the technical plan. |
+| Reload mid-chase | Restarts the chase from the lay-by in the express car. | "Restore an authored safe chase restart without paying rewards." |
+| Storage failure | "Progress hasn’t saved" bar with Try again; the handover is refused until it commits ("Nothing has changed hands"). `?failsave=1` simulates it. | As specified; the query is for testing. |
+| Newer or damaged saves | A newer schema is left untouched and the session plays without saving. A damaged current save falls back to `previous` with a "Recovered your last good save" screen. | As specified. Export/import is still M2 (T11). |
+| Result card | Appears 2 s after the handover, so the ferry lights or the stalls light up before the card covers the street. Park up and Take the next call are styled the same. | "Stand in the street and see what you changed." |
+| Take the next call | Shows the next call's name, lead and duration and says it arrives in the next build; free roam continues. | Q02 is M2 (T09). |
+| Playtest events | The game fires `lowbridge:event` on the window for answers, recruits, the shutter, handovers (with simulation and real seconds since Start), heat, escape, capture and bumps. Only the private claude.ai test page records them. | Gate evidence without telemetry in the game. |
+
+### Evidence
+
+| Check | Result | Environment |
+| --- | --- | --- |
+| `npm run typecheck`, `npm test`, `npm run build` | Pass. 53 tests. JS about 384 KB gzipped. | Container |
+| Fixture match | Q01 IDs, branches, trust deltas, flags, next jobs and initial state equal the fixture; every fixture node exists on a road. | `tests/content.test.ts`, `tests/map.test.ts` |
+| T04: both destinations by the ring road, shutter shut | Pass; the yard route is less than half the distance once open. | `tests/map.test.ts` |
+| T05/A02: direct run to Mo, and to Nell, no recruit | Pass in rules tests and in the browser. Browser handovers at 37 s (Mo) and 41 s (Nell) of simulation by a cautious scripted driver. | `tests/session.test.ts`, `scripts/smoke-m1.mjs` |
+| A07: double tap, stale tab, damaged save | One receipt and one trust award; the stale tab adopts the committed outcome; a damaged current save falls back to `previous`. Double tap also passes in the browser. | Tests and smoke |
+| Reload | After Park up, reload shows "You gave Mo the battery…". After recruit and Lift, reload keeps the shutter open and Clatterjack in the roster. | `scripts/smoke-m1.mjs` (real IndexedDB) |
+| T06/A04: encounter | Early washer bounces and costs a turn; leaving and resuming keeps the turn; Dim then washer recruits once; full team sends to roster; Lift needs Clatterjack. | Tests and smoke |
+| T07/A05/A06: express car and patrol | Heat on taking; handover and encounter refused with "Lose the patrol first"; pause freezes the chase; sitting still gets you caught with the battery kept; hiding for 6 s clears heat; reload mid-chase restarts at the lay-by. | Tests; capture and pause also in the browser |
+| A10 (failure message part) | `?failsave=1`: "Progress hasn’t saved" shows and nothing changes. | Smoke |
+| M1 gate: five people, four reach a handover within five minutes | **Pending.** Needs people. The test page records each handover's real time since Start. | |
+
+### Known issues
+
+- The arrow picks the nearer recipient; a player heading for the other one follows the pins instead. Watch whether that confuses anyone.
+- Driving is still the main source of bumps; the patrol now adds car-to-car contact.
+- On a narrow phone frame (750 × 324) the job line, caption and toast stack at the top; the patrol chip sits bottom centre between the thumbs.
+- Unnamed buildings have no roof outline, so some blocks read as plain dark brick.
+
+### Next ticket
+
+T09–T11 (M2): Q02 both branches, Q03, Q04 and the shift close; quick jobs and the dispatch board; offline assets and export/import. First, run the M1 gate with five people and the M0 controls gate in Safari.

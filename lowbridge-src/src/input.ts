@@ -49,7 +49,9 @@ export function createInput(h: InputHandlers): Input {
       if (!e.repeat) h.onPauseToggle();
       return;
     }
-    if (!h.worldKeysActive() || onControl) return;
+    if (!h.worldKeysActive()) return;
+    // A focused prompt button handles Enter, Space, Tab and arrows itself; E still acts.
+    if (onControl && (e.code === 'Enter' || e.code === 'Space' || e.code === 'Tab' || e.code.startsWith('Arrow'))) return;
     if (HELD_KEYS.has(e.code)) {
       e.preventDefault();
       // A repeat for a key we are not tracking means it was held through an interruption.

@@ -77,6 +77,8 @@ export interface Session {
   progress: Progress;
   pursuit: Pursuit | null;
   prompts: Prompt[];
+  /** A prompt held back briefly so the street change can be seen first. */
+  pending: { prompt: Prompt; at: number } | null;
   /** Captioned radio or street text that does not stop play. */
   caption: { speaker?: string; text: string; until: number } | null;
   encounter: { text: string; done: boolean } | null;
@@ -99,6 +101,8 @@ export interface Action {
 }
 
 const ENTER_REACH = 14;
+/** Seconds between a handover and its result card. */
+export const RESULT_DELAY = 2;
 
 // ------------------------------------------------------------------ setup
 
@@ -122,6 +126,7 @@ export function createSession(
     progress,
     pursuit: null,
     prompts: [],
+    pending: null,
     caption: null,
     encounter: null,
     saveFailed: null,
@@ -445,7 +450,9 @@ export async function choose(s: Session, choiceId: string): Promise<void> {
       () => {
         s.handoverAt = s.simTime;
         const next = s.progress.story.nextJob!;
-        prompt(s, {
+        // Let the ferry start or the stalls light before the card covers the street.
+        s.caption = { text: `Battery handed to ${PEOPLE[recipient].short}.`, until: s.simTime + 2 };
+        s.pending = { at: s.simTime + RESULT_DELAY, prompt: {
           kind: 'result',
           title: recipient === 'mo_vale' ? 'The ferry’s running' : 'The market’s lit',
           text: RESULT_TEXT[recipient],
@@ -454,7 +461,7 @@ export async function choose(s: Session, choiceId: string): Promise<void> {
             { id: 'park', label: 'Park up' },
             { id: 'next', label: `Take the next call · ${NEXT_JOBS[next].minutes} min` },
           ],
-        });
+        } };
       },
     );
     if (!ok && s.saveFailed) {
@@ -555,6 +562,12 @@ export function stepSession(s: Session, raw: RawInput, dt: number): void {
   if (s.mode !== 'world') return;
   s.simTime += dt;
   if (s.caption && s.simTime > s.caption.until) s.caption = null;
+  if (s.pending && s.simTime >= s.pending.at) {
+    const pr = s.pending.prompt;
+    s.pending = null;
+    prompt(s, pr);
+    return;
+  }
 
   const d = driving(s);
   if (d) {
@@ -634,7 +647,7 @@ export function objective(s: Session): Objective {
   const map = s.map;
   const body = bodyPos(s);
   const open = gates(s.progress);
-  if (s.pursuit) return { text: 'Lose the patrol: stay out of its sight for 6 seconds', target: null };
+  if (s.pursuit) return { text: 'Lose the patrol', target: null };
   const stage = s.progress.story.stage;
   if (stage === 'offered') {
     const phone = { x: map.phone.x, y: map.phone.y };
@@ -682,6 +695,10 @@ export function snapshot(s: Session) {
     objective: objective(s).text,
     /** Where the job arrow points, for scripted drivers that follow it like a player. */
     arrow: objective(s).target,
+    /** The arrow's next waypoint towards each recipient, for choosing one deliberately. */
+    routes: Object.fromEntries(
+      (['mo_vale', 'nell_price'] as const).map((who) => [who, nextWaypoint(s.map, bodyPos(s), s.map.people[who], gates(s.progress))]),
+    ),
     prompt: s.prompts[0] ? { kind: s.prompts[0].kind, title: s.prompts[0].title, choices: s.prompts[0].choices } : null,
     encounter: s.encounter,
     caption: s.caption?.text ?? null,

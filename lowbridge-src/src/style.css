@@ -630,9 +630,11 @@ summary:focus-visible {
 
 .heat {
   position: absolute;
-  top: calc(var(--sa-top) + 8px);
-  right: calc(var(--sa-right) + 8px);
-  max-width: 34vw;
+  bottom: calc(var(--sa-bottom) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 40vw;
+  text-align: center;
   padding: 8px 12px;
   background: var(--panel);
   border: 2px solid var(--line);

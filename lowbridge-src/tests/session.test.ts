@@ -2,9 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { NO_INPUT } from '../src/rules/controls.ts';
 import { TILE, buildRiverside } from '../src/rules/map.ts';
-import { createMemoryStore } from '../src/rules/save.ts';
+import { SaveController, createMemoryStore } from '../src/rules/save.ts';
 import type { Session } from '../src/rules/session.ts';
-import { availableAction, choose, encounterChoose, objective, pause, resume, settled } from '../src/rules/session.ts';
+import { availableAction, checkpoint, choose, encounterChoose, objective, pause, restoreCheckpoint, resume, settled } from '../src/rules/session.ts';
 import { STEP, act, driveTo, harness, run, walkTo } from './helpers.ts';
 
 const map = buildRiverside();
@@ -38,6 +38,7 @@ async function handOver(s: Session, who: 'mo_vale' | 'nell_price') {
   assert.match(s.prompts[0].text!, /−1/);
   await choose(s, 'give');
   await settled(s);
+  run(s, NO_INPUT, 2.2); // The result card waits while the street changes.
 }
 
 for (const who of ['mo_vale', 'nell_price'] as const) {
@@ -224,4 +225,69 @@ test('encounter and shutter are blocked while the patrol is on you', async () =>
   assert.equal(a.kind, 'inspect');
   assert.equal(a.enabled, false);
   assert.equal(a.reason, 'Lose the patrol first');
+});
+
+test('A05: leaving the depot on foot with the battery brings Nell’s radio call', async () => {
+  const { s } = harness();
+  await walkTo(s, { x: 92, y: 566 });
+  await act(s);
+  await choose(s, 'ok');
+  await walkTo(s, { x: 100, y: 500 });
+  await walkTo(s, { x: 100, y: 470 });
+  assert.ok(s.progress.flags.includes('counteroffer_heard'));
+  assert.equal(s.caption?.speaker, 'Nell Price');
+  assert.match(objective(s).text, /Mo at the quay, or Nell at the market/);
+});
+
+test('A06: the handover is refused with “Lose the patrol first” while heat is up', async () => {
+  const { s } = harness();
+  await answerAndBoard(s);
+  await act(s);
+  s.player.x = s.map.expressStart.x - 6;
+  s.player.y = s.map.expressStart.y - 18;
+  await act(s); // take the car: heat
+  await act(s); // out again
+  s.player.x = NEAR.mo_vale.x;
+  s.player.y = NEAR.mo_vale.y;
+  const a = availableAction(s);
+  assert.equal(a.kind, 'give');
+  assert.equal(a.enabled, false);
+  assert.equal(a.reason, 'Lose the patrol first');
+});
+
+test('A06: a reload mid-chase restarts it from the lay-by, without paying anything', async () => {
+  const { s, store } = harness();
+  await answerAndBoard(s);
+  await act(s);
+  s.player.x = s.map.expressStart.x - 6;
+  s.player.y = s.map.expressStart.y - 18;
+  await act(s);
+  await driveTo(s, { x: 40 * TILE, y: 30.5 * TILE }, { stop: 40, maxSeconds: 6, top: 150 });
+  const saved = await store.load();
+  const cp = { ...checkpoint(s), pursuit: true };
+  const again = harness(store);
+  restoreCheckpoint(again.s, cp);
+  again.s.progress = saved!.progress;
+  assert.equal(again.s.locomotion, 'express');
+  assert.ok(again.s.pursuit, 'chase restarted');
+  assert.equal(again.s.express.x, map.expressStart.x);
+  assert.deepEqual(again.s.progress.cargo, ['spare_battery']);
+});
+
+test('A07: a damaged current save falls back to the previous good one', async () => {
+  const store = createMemoryStore();
+  const { s, saves } = harness(store);
+  await walkTo(s, { x: 92, y: 566 });
+  await act(s); // accept: revision 1
+  await choose(s, 'ok');
+  await saves.writeCheckpoint(() => checkpoint(s)); // revision 2
+  // Corrupt the current snapshot in place.
+  const bad = (await store.load())!;
+  (bad.progress as unknown as { crews: unknown }).crews = 'nonsense';
+  await store.commit(bad.revision, { ...bad, revision: bad.revision + 1 });
+  const fresh = new SaveController(store);
+  const v = await fresh.load();
+  assert.equal(v!.ok, false);
+  const prev = await fresh.loadPrevious();
+  assert.equal(prev!.progress.story.stage, 'carrying');
 });

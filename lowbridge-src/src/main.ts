@@ -134,7 +134,11 @@ function openSheet(kind: 'pause' | 'parked'): void {
   hud.showSheet(sheetFor(kind, session.progress), session.progress);
 }
 
+/** Real time since the player first pressed Start, for the five-minute gate. */
+let startedWall = 0;
+
 function closeSheet(): void {
+  if (!startedWall) startedWall = performance.now();
   input.clear();
   sfx.unlock();
   resume(session);
@@ -189,7 +193,15 @@ function onEvents(events: WorldEvent[]): void {
     }
     // A plain DOM hook for test harnesses; the game itself sends nothing anywhere.
     const detail: Record<string, unknown> = { type: e.type, simTime: Number(session.simTime.toFixed(2)), build: BUILD };
-    if (e.type === 'delivered') Object.assign(detail, { recipient: e.recipient, handoverAt: session.handoverAt });
+    if (e.type === 'delivered') {
+      Object.assign(detail, {
+        recipient: e.recipient,
+        handoverAt: session.handoverAt,
+        wallSeconds: startedWall ? Math.round((performance.now() - startedWall) / 1000) : null,
+        shortcut: session.progress.flags.includes('yard_shutter_open'),
+        recruited: session.progress.roster.includes('clatterjack'),
+      });
+    }
     if (e.type === 'bump') Object.assign(detail, { x: Math.round(e.at.x), y: Math.round(e.at.y) });
     if (e.type === 'enter') detail.vehicle = e.vehicle;
     if (e.type !== 'checkpoint') window.dispatchEvent(new CustomEvent('lowbridge:event', { detail }));
