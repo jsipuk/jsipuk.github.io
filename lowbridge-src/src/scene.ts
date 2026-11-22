@@ -24,9 +24,10 @@ import { STEP_SECONDS, createClock, framesToSteps, resetClock } from './rules/cl
 import { clamp, forward } from './rules/math.ts';
 import type { Vec } from './rules/math.ts';
 import { TILE } from './rules/map.ts';
+import { FOOTPRINTS, LOST_SITES, PLACES } from './rules/content.ts';
 import { hasFlag } from './rules/progress.ts';
 import type { Session, WorldEvent } from './rules/session.ts';
-import { destinations, driving, stepSession } from './rules/session.ts';
+import { currentStep, destinations, driving, stepPin, stepSession } from './rules/session.ts';
 import { EXPRESS, VAN } from './rules/vehicle.ts';
 
 export interface SceneDeps {
@@ -131,7 +132,7 @@ export class StreetScene extends Phaser.Scene {
     this.wildCrab = img(map.machine.x + 9, map.machine.y + 1, 'crab', 3).setVisible(false);
     this.pocketCrab = img(0, 0, 'crab', 4).setVisible(false);
     this.courier = img(0, 0, this.courierKey(0), 4);
-    for (const id of ['mo_vale', 'nell_price', 'shutter']) this.pins[id] = img(0, 0, 'pin', 6).setOrigin(0.5, 1).setVisible(false);
+    for (const id of ['mo_vale', 'nell_price', 'shutter', 'step']) this.pins[id] = img(0, 0, 'pin', 6).setOrigin(0.5, 1).setVisible(false);
 
     const label = (text: string, x: number, y: number) =>
       this.add.text(x, y, text, LABEL_STYLE).setOrigin(0.5).setDepth(6);
@@ -145,6 +146,8 @@ export class StreetScene extends Phaser.Scene {
     label('MO', map.people.mo_vale.x, map.people.mo_vale.y + 12);
     label('NELL', map.people.nell_price.x, map.people.nell_price.y + 12);
     this.ringLabel = label('RING', map.phone.x, map.phone.y - 14).setDepth(7);
+    label('SWITCHBOARD', 2.5 * TILE, 37.4 * TILE);
+    label('POST', PLACES.postBox.x, PLACES.postBox.y + 8);
 
     const cam = this.cameras.main;
     cam.setBackgroundColor(PALETTE.void);
@@ -351,12 +354,61 @@ export class StreetScene extends Phaser.Scene {
       this.ringLabel.setAlpha(still || on ? 1 : 0.55);
     }
 
-    // Pins over who can take the battery, and over the shutter once you can lift it.
+    // Shift one: wet footprints along the quay while you follow them.
+    const step = currentStep(s);
+    if (step?.id === 'rubbing') {
+      this.fx.fillStyle(0x5d8f9a, 0.85);
+      for (const [i, f] of FOOTPRINTS.entries()) {
+        this.fx.fillEllipse(f.x, f.y + (i % 2 ? 2 : -2), 3, 2);
+      }
+    }
+    // A lost thing waiting at its marked site.
+    const q = prog.quick.active;
+    if (q?.job === 'lost_property' && q.step === 0) {
+      const site = LOST_SITES.find((x) => x.id === q.site)!;
+      this.fx.fillStyle(0xd6b06b, 1);
+      this.fx.fillRect(site.at.x - 3, site.at.y - 2, 6, 4);
+    }
+    // The riverside warning lamp, once the line is fixed.
+    const lampLit = hasFlag(prog, 'warning_lamp_lit');
+    if (lampLit) {
+      const blink = still ? 1 : 0.55 + 0.45 * Math.abs(Math.sin(time / 400));
+      this.fx.fillStyle(0xffb347, blink);
+      this.fx.fillCircle(PLACES.viewpoint.x, PLACES.viewpoint.y - 14, 2.4);
+      this.fx.fillStyle(0xffb347, 0.18 * blink);
+      this.fx.fillCircle(PLACES.viewpoint.x, PLACES.viewpoint.y - 14, 14);
+    }
+    // Reedlings along the mud, ringing in turn once you have watched them.
+    const watching = s.prompts[0]?.kind === 'cutscene' || s.prompts[0]?.kind === 'close_choice';
+    if (watching || prog.sightings.includes('reedling')) {
+      for (let i = 0; i < 6; i++) {
+        const x = PLACES.viewpoint.x - 75 + i * 30;
+        const y = 12 + (i % 2) * 5;
+        const lit = still ? i % 3 === 0 : Math.floor(time / 330) % 6 === i;
+        this.fx.fillStyle(0x7fa57a, 1);
+        this.fx.fillEllipse(x, y, 5, 3.5);
+        if (lit) {
+          this.fx.fillStyle(0xfff1bf, 0.9);
+          this.fx.fillCircle(x, y - 2, 1.6);
+          this.fx.lineStyle(1, 0xfff1bf, 0.5);
+          this.fx.strokeCircle(x, y, 7);
+        }
+      }
+    }
+
+    // Pins: who can take the battery, the shutter once you can lift it, and the current step.
     const hop = still ? 0 : Math.abs(Math.sin(time / 300)) * 3;
     const targets = new Set<string>(destinations(s));
     if (prog.team.includes('clatterjack') && !open) targets.add('shutter');
+    const stepAt = stepPin(s);
+    if (stepAt) targets.add('step');
     for (const [id, pin] of Object.entries(this.pins)) {
-      const at = id === 'shutter' ? { x: sh.x + sh.w / 2, y: sh.y } : map.people[id as 'mo_vale' | 'nell_price'];
+      const at =
+        id === 'shutter'
+          ? { x: sh.x + sh.w / 2, y: sh.y }
+          : id === 'step'
+            ? (stepAt ?? { x: 0, y: 0 })
+            : map.people[id as 'mo_vale' | 'nell_price'];
       pin.setVisible(targets.has(id)).setPosition(at.x, at.y - 8 - hop);
     }
     this.mo.setAlpha(1);

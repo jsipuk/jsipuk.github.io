@@ -3,12 +3,12 @@
 // warning and the pause/return sheet with the journal.
 
 import { drawCrabPortrait } from './art.ts';
-import { CREATURES, CREWS, NEXT_JOBS, PEOPLE } from './rules/content.ts';
+import { BEATS, CREATURES, CREWS, JOURNAL, LOST_SITES, PEOPLE } from './rules/content.ts';
 import type { Vec } from './rules/math.ts';
 import type { Progress } from './rules/progress.ts';
 import { CAUGHT_SECONDS, ESCAPE_SECONDS } from './rules/pursuit.ts';
 import type { Session } from './rules/session.ts';
-import { availableAction, objective } from './rules/session.ts';
+import { availableAction, formatTime, objective } from './rules/session.ts';
 import type { Settings } from './settings.ts';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -50,10 +50,11 @@ function journal(p: Progress): [string, string][] {
         ? 'Q01 One good battery · carrying the spare battery'
         : `Q01 done · battery to ${PEOPLE[p.recipient!].name}`,
   ]);
-  if (p.story.nextJob) {
-    const n = NEXT_JOBS[p.story.nextJob];
-    rows.push(['Next lead', `${n.name}: ${n.lead} · about ${n.minutes} min (arrives in the next build)`]);
-  }
+  const sh = p.shift;
+  if (sh.active) rows.push(['Story', `${BEATS[sh.active.beat].name} in progress`]);
+  else if (sh.lead) rows.push(['Next call', `${BEATS[sh.lead].name} · about ${BEATS[sh.lead].minutes} min · on the dispatch board`]);
+  else if (sh.complete) rows.push(['Shift one', 'Complete. Shift two arrives in a later build.']);
+  if (sh.done.length) rows.push(['Done', sh.done.map((b) => BEATS[b].name).join(' · ')]);
   for (const crew of ['ferry', 'market'] as const) {
     rows.push([CREWS[crew].name, `${PEOPLE[CREWS[crew].person].name} · trust ${signed(p.crews[crew])}`]);
   }
@@ -63,7 +64,13 @@ function journal(p: Progress): [string, string][] {
     const marks = p.guide[c] ?? [];
     rows.push([`Guide: ${info.name}`, `${info.guide} ${info.field}. Habitat: ${info.habitat}. Noted: ${marks.join(', ') || 'seen'}.`]);
   }
+  if (p.sightings.includes('reedling')) rows.push(['Sighted', 'Reedling, reed-bed mimic. Seen ringing along the mud; not yet befriended.']);
   if (p.flags.includes('yard_shutter_open')) rows.push(['Route', 'The builders’ yard shutter is open for good.']);
+  for (const key of p.journal) if (JOURNAL[key]) rows.push(['Notebook', JOURNAL[key]]);
+  if (p.story.stage === 'delivered') {
+    rows.push(['Last post', `Best quiet run ${formatTime(p.quick.bests.quiet)} · with a chase ${formatTime(p.quick.bests.pursuit)}`]);
+    rows.push(['Lost property', `${p.quick.lostFound.length} of ${LOST_SITES.length} found`]);
+  }
   return rows;
 }
 

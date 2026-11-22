@@ -1,6 +1,7 @@
 // Greybox art drawn to canvases at 2x: wet teal brick, amber lamps, cream
 // signs, a dark river. Original placeholders only.
 
+import { PLACES } from './rules/content.ts';
 import type { StreetMap, TileRect } from './rules/map.ts';
 import { Surface, TILE } from './rules/map.ts';
 import { EXPRESS, PATROL, VAN } from './rules/vehicle.ts';
@@ -307,6 +308,58 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
     g.fill();
     g.fillStyle = PALETTE.cream;
     g.fillRect(p.x - p.half + 1, p.y + p.half - 2.2, p.half * 2 - 2, 1.2);
+  }
+
+  // Shift-one landmarks: the old council post, the bell hatch, the yard cabinet,
+  // the riverside warning lamp and the quay post box.
+  {
+    const post = PLACES.oldPost;
+    g.fillStyle = 'rgba(0,0,0,0.35)';
+    g.fillRect(post.x - 2, post.y - 9, 6, 6);
+    g.fillStyle = '#5f6b62';
+    g.fillRect(post.x - 3, post.y - 10, 6, 6);
+    g.fillStyle = '#b7b09a';
+    g.fillRect(post.x - 2, post.y - 9, 4, 2);
+
+    const hatch = PLACES.nellHatch;
+    g.strokeStyle = '#6a5a44';
+    g.lineWidth = 1;
+    g.strokeRect(hatch.x - 6, hatch.y - 14, 12, 8);
+    g.fillStyle = '#3a3028';
+    g.fillRect(hatch.x - 5.5, hatch.y - 13.5, 11, 7);
+    g.fillStyle = '#8a7a5a';
+    g.fillRect(hatch.x - 1, hatch.y - 11, 2, 2);
+
+    const cab = PLACES.cabinet;
+    g.fillStyle = 'rgba(0,0,0,0.35)';
+    g.fillRect(cab.x - 6, cab.y - 6, 13, 10);
+    g.fillStyle = '#4a6a52';
+    roundRect(g, cab.x - 7, cab.y - 7, 13, 10, 1.5);
+    g.fill();
+    g.fillStyle = '#d9cfb2';
+    g.fillRect(cab.x - 5, cab.y - 5, 9, 1.5);
+
+    const lamp = PLACES.viewpoint;
+    g.fillStyle = '#1a1d1c';
+    g.beginPath();
+    g.arc(lamp.x, lamp.y - 14, 3.5, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#5a2320';
+    g.beginPath();
+    g.arc(lamp.x, lamp.y - 14, 2, 0, Math.PI * 2);
+    g.fill();
+
+    const box = PLACES.postBox;
+    g.fillStyle = 'rgba(0,0,0,0.35)';
+    g.beginPath();
+    g.arc(box.x + 1, box.y - 7, 4.5, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = PALETTE.red;
+    g.beginPath();
+    g.arc(box.x, box.y - 8, 4.5, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#1a1d1c';
+    g.fillRect(box.x - 2.5, box.y - 9, 5, 1);
   }
 
   // Lamp pools, then posts and bollards on top.

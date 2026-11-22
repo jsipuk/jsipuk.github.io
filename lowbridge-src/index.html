@@ -9,6 +9,8 @@
     <meta name="robots" content="noindex" />
     <title>Lowbridge After Dark</title>
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
   </head>
   <body>
     <div id="game" aria-hidden="true"></div>
@@ -83,6 +85,9 @@
         <p class="lede next" id="sheet-next"></p>
         <p class="portrait-hint" id="portrait-hint">Turn your phone sideways for driving. This menu works either way.</p>
         <button class="primary" id="resume-btn" type="button">Start</button>
+        <div class="row sheet-actions">
+          <button type="button" id="board-btn">Dispatch board</button>
+        </div>
 
         <section class="journal" aria-labelledby="journal-title">
           <h2 id="journal-title">Journal</h2>
@@ -111,6 +116,34 @@
           <label class="toggle"><input type="checkbox" id="mute" /> Sound off</label>
           <label class="toggle"><input type="checkbox" id="reduce-motion" /> Reduce motion</label>
         </div>
+
+        <section class="saves" aria-labelledby="saves-title">
+          <h2 id="saves-title">Your save</h2>
+          <p class="note" id="offline-state">Offline play is checked when the game is installed from the website.</p>
+          <button type="button" id="update-btn" hidden>Update ready · restart now</button>
+          <div class="row">
+            <button type="button" id="export-btn">Export save</button>
+            <button type="button" id="import-btn">Import save</button>
+            <button type="button" id="restore-btn">Restore previous save</button>
+          </div>
+          <p class="note">Safari and a Home Screen icon keep separate saves. Export from one and import into the other to move your progress.</p>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
+          <div class="save-box" id="export-box" hidden>
+            <p class="note">If no file downloaded, copy this text and keep it somewhere safe. Import accepts the file or this text.</p>
+            <textarea id="export-text" rows="5" readonly aria-label="Exported save"></textarea>
+          </div>
+          <div class="save-box" id="import-box" hidden>
+            <p class="note">Choose a save file, or paste the text from an export.</p>
+            <div class="row"><button type="button" id="import-choose">Choose a file</button></div>
+            <textarea id="import-text" rows="4" placeholder="Paste an exported save here" aria-label="Save to import"></textarea>
+            <div class="row"><button type="button" id="import-check">Check this save</button></div>
+          </div>
+          <p class="note" id="import-result" role="status" aria-live="polite"></p>
+          <div class="row" id="import-confirm" hidden>
+            <button type="button" id="import-yes">Replace my save with this one</button>
+            <button type="button" id="import-no">Keep my current save</button>
+          </div>
+        </section>
 
         <section class="danger">
           <button type="button" id="new-game-btn">New game</button>

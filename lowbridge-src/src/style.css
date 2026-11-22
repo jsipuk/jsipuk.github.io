@@ -804,3 +804,60 @@ summary:focus-visible {
   color: #ff8a7a;
   font-weight: 700;
 }
+
+/* ------------------------------------------------------------------ M2 */
+
+.dialogue[data-kind='puzzle'] .choices button {
+  flex: 1 1 30%;
+  font-size: 17px;
+}
+
+.dialogue[data-kind='puzzle'] .choices button:last-child,
+.dialogue[data-kind='board'] .choices button {
+  flex: 1 1 100%;
+}
+
+.dialogue[data-kind='board'] .choices button.primary {
+  background: var(--teal);
+  color: var(--cream);
+  border-color: var(--line);
+}
+
+.dialogue[data-kind='board'] .choices button:first-child {
+  background: var(--amber);
+  color: var(--ink);
+  border-color: var(--amber);
+}
+
+.sheet-actions {
+  margin: 10px 0 4px;
+}
+
+.saves {
+  margin: 4px 0 16px;
+}
+
+.saves h2 {
+  margin-bottom: 4px;
+}
+
+.save-box textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 6px 0;
+  padding: 8px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--teal-deep);
+  color: var(--cream);
+  font: 12px ui-monospace, Menlo, monospace;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+#update-btn {
+  margin: 4px 0 8px;
+  background: var(--amber);
+  color: var(--ink);
+  border-color: var(--amber);
+}

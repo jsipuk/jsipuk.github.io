@@ -16,7 +16,7 @@ Needs Node 22.18 or later (`.nvmrc` says 22) and npm. Run everything from this f
 | Production build | `npm run build` | writes `dist/` |
 | Preview the build | `npm run preview` | http://localhost:4173/lowbridge/ |
 | Phone on the same Wi-Fi | `npm run preview:lan` | the `Network:` address it prints, plus `/lowbridge/` |
-| Browser play-through | `node scripts/smoke-m1.mjs` while the preview runs | needs Playwright and Chromium; `SMOKE_ONLY=ferry,market` runs a subset |
+| Browser play-through | `node scripts/smoke.mjs` while the preview runs | needs Playwright and Chromium; `SMOKE_ONLY=shift,offline` runs a subset |
 | Storage failure test | open the preview with `?failsave=1` | saving is switched off for that tab |
 
 `npm run build` does not touch the live site. Copying `dist/` to the repository's `/lowbridge/` folder is the separate release step.

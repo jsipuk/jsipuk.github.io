@@ -1,16 +1,20 @@
-// M1 smoke check in a real browser, using only the player's keyboard and the
-// on-screen buttons. Each scenario runs in a fresh browser profile, so it
-// starts from a new IndexedDB save.
+// Browser play-through, using only the player's keyboard and the on-screen
+// buttons. Each scenario runs in a fresh browser profile, so it starts from a
+// new IndexedDB save (some import a saved file first, through the menu).
 //
 //   npm run build && npm run preview      (in one terminal)
-//   node scripts/smoke-m1.mjs [url]       (in another; needs Playwright + Chromium)
+//   node scripts/smoke.mjs [url]          (in another; needs Playwright + Chromium)
+//   SMOKE_ONLY=shift,offline node scripts/smoke.mjs
 //
-// Scenarios: ferry ending (then reload: welcome back), market ending, the crab
-// and shutter (then reload: still open), the patrol (pause freezes it), a
-// double-tapped handover, and storage failure (?failsave). State is read
-// through window.lowbridge.snapshot(), which is read-only.
+// M1: ferry ending (reload: welcome back), market ending, crab and shutter
+// (reload: still open), patrol (pause freezes it), double tap, held key
+// through blur, storage failure (?failsave).
+// M2: the Mo branch from an imported M1 save to the shift close, Last post,
+// export and import, and offline relaunch. State is read through the
+// read-only window.lowbridge.snapshot().
 
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 
 const url = process.argv[2] ?? 'http://localhost:4173/lowbridge/';
 const shots = process.env.SMOKE_SHOTS ?? '';
@@ -181,6 +185,66 @@ async function deliver(page, p, who) {
   return p.snap();
 }
 
+const FIXTURE = readFileSync(new URL('../tests/fixtures/save-v1-mo.json', import.meta.url), 'utf8');
+
+/** Import a save file through the pause menu, as a player would, then resume. */
+async function importThroughMenu(page, text) {
+  await page.keyboard.press('Escape');
+  await page.waitForSelector('#sheet:not([hidden])');
+  await page.click('#import-btn');
+  await page.fill('#import-text', text);
+  await page.click('#import-check');
+  await page.waitForSelector('#import-confirm:not([hidden])');
+  await Promise.all([page.waitForEvent('load'), page.click('#import-yes')]);
+  await page.waitForFunction(() => window.lowbridge?.snapshot());
+  await page.click('#resume-btn');
+}
+
+/** Answer whatever card is up, choosing by id where it matters. */
+async function clickChoice(page, id) {
+  await page.click(`#prompt-choices button[data-choice="${id}"]`);
+  await page.waitForTimeout(150);
+}
+
+/** Walk or drive to the current step's pin, then stand where its button appears. */
+async function goToPin(page, p, want = 'step') {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let s = await p.snap();
+    const pin = s.pin;
+    if (!pin) throw new Error('no pin');
+    const from = s.vehicle ?? s.player;
+    const stand = { x: pin.x, y: pin.y + (pin.y < 70 ? 18 : pin.y > 540 && pin.y < 600 && pin.x > 300 ? -14 : pin.y < 340 ? 22 : 0) };
+    if (s.locomotion === 'foot' && Math.hypot(pin.x - from.x, pin.y - from.y) < 170) {
+      await p.walkTo(stand, (x) => x.action.kind === want);
+      s = await p.snap();
+      if (s.action.kind === want) return;
+    }
+    if (s.locomotion === 'foot') {
+      // Step up to whichever side of the van is nearest, as a person would.
+      const h = s.van.heading;
+      const sides = [
+        { x: s.van.x - Math.sin(h) * 20, y: s.van.y + Math.cos(h) * 20 },
+        { x: s.van.x + Math.sin(h) * 20, y: s.van.y - Math.cos(h) * 20 },
+        { x: s.van.x - Math.cos(h) * 26, y: s.van.y - Math.sin(h) * 26 },
+        { x: s.van.x + Math.cos(h) * 26, y: s.van.y + Math.sin(h) * 26 },
+      ].sort((a, b) => Math.hypot(a.x - s.player.x, a.y - s.player.y) - Math.hypot(b.x - s.player.x, b.y - s.player.y));
+      for (const side of sides) {
+        await p.walkTo(side, (x) => x.action.kind === 'enter_van', 12_000);
+        if ((await p.snap()).action.kind === 'enter_van') break;
+      }
+      await p.press('KeyE');
+      if ((await p.snap()).locomotion !== 'van') throw new Error('could not get back in the van');
+    }
+    await p.followArrow((x) => x.vehicle && x.pin && Math.hypot(x.vehicle.x - x.pin.x, x.vehicle.y - x.pin.y) < 75);
+    await p.press('KeyE');
+    await p.walkTo(stand, (x) => x.action.kind === want);
+    s = await p.snap();
+    if (s.action.kind === want) return;
+  }
+  const s = await p.snap();
+  throw new Error(`could not reach the pin at ${JSON.stringify(s.pin)}: player ${Math.round(s.player.x)},${Math.round(s.player.y)} action ${s.action.verb}`);
+}
+
 const scenarios = {
   async ferry(browser) {
     const { ctx, page, errors, p } = await newPage(browser);
@@ -207,10 +271,13 @@ const scenarios = {
     if (s.progress.recipient !== 'nell_price' || s.progress.crews.market !== 1 || s.progress.crews.ferry !== -1) throw new Error('wrong outcome');
     if (shots) await page.screenshot({ path: `${shots}/m1-market-result.png` });
     await page.click('#prompt-choices button[data-choice="next"]');
-    await page.waitForFunction(() => window.lowbridge.snapshot().prompt?.kind === 'next_call');
+    await page.waitForFunction(() => window.lowbridge.snapshot().prompt?.kind === 'line');
+    const caller = (await p.snap()).prompt;
     await p.press('KeyE');
+    const after = await p.snap();
+    if (after.progress.shift.active?.beat !== 'Q02M') throw new Error('next call did not start Under the stalls');
     await ctx.close();
-    return `delivered to Nell at ${s.handoverAt.toFixed(0)} s; next call shown; errors ${errors.length}`;
+    return `delivered to Nell at ${s.handoverAt.toFixed(0)} s; took the next call (${caller.title ?? 'Nell'}), Q02M active; errors ${errors.length}`;
   },
 
   async crab(browser) {
@@ -316,6 +383,121 @@ const scenarios = {
     return `paused on blur; 0 px of movement after resume with the key held; errors ${errors.length}`;
   },
 
+  async shift(browser) {
+    const { ctx, page, errors, p } = await newPage(browser);
+    await importThroughMenu(page, FIXTURE);
+    let s = await p.snap();
+    if (s.progress.shift.lead !== 'Q02F') throw new Error(`imported save has lead ${s.progress.shift.lead}`);
+    await page.keyboard.press('Escape');
+    await page.click('#board-btn');
+    await clickChoice(page, 'take');
+    const log = [];
+    for (let guard = 0; guard < 40; guard++) {
+      s = await p.snap();
+      if (s.progress.shift.complete) break;
+      if (s.prompt) {
+        const ids = s.prompt.choices.map((c) => c.id);
+        if (s.prompt.kind === 'puzzle') {
+          await clickChoice(page, 'sym:waves');
+          await clickChoice(page, 'sym:three_rings');
+        } else if (s.prompt.kind === 'cutscene') await clickChoice(page, 'log');
+        else if (s.prompt.kind === 'close_choice') await clickChoice(page, 'first:mo_vale');
+        else if (ids.includes('take')) await clickChoice(page, 'take');
+        else await clickChoice(page, ids[0]);
+        continue;
+      }
+      if (s.mode !== 'world') {
+        await page.waitForTimeout(200);
+        continue;
+      }
+      const beat = s.progress.shift.active?.beat;
+      await goToPin(page, p);
+      s = await p.snap();
+      log.push(`${beat}:${s.action.verb}`);
+      await p.press('KeyE');
+      await page.waitForTimeout(250);
+    }
+    s = await p.snap();
+    if (!s.progress.shift.complete) throw new Error(`shift not complete; stopped after ${log.join(' > ')}`);
+    if (shots) await page.screenshot({ path: `${shots}/m2-shift-complete.png` });
+    while ((await p.snap()).prompt) {
+      const pr = (await p.snap()).prompt;
+      await clickChoice(page, pr.choices.some((c) => c.id === 'park') ? 'park' : pr.choices[0].id);
+    }
+    await page.reload();
+    await page.waitForFunction(() => window.lowbridge?.snapshot());
+    const lede = await page.textContent('#sheet-lede');
+    if (!/Shift one is done/.test(lede)) throw new Error(`no shift-complete line on return: ${lede}`);
+    await ctx.close();
+    return `${log.length} steps: ${log.join(' > ')}; reload says “${lede.slice(0, 48)}…”; errors ${errors.length}`;
+  },
+
+  async lastpost(browser) {
+    const { ctx, page, errors, p } = await newPage(browser);
+    await importThroughMenu(page, FIXTURE);
+    await page.keyboard.press('Escape');
+    await page.click('#board-btn');
+    await clickChoice(page, 'quick:last_post');
+    await goToPin(page, p, 'quick');
+    await p.press('KeyE'); // collect the mail
+    let s = await p.snap();
+    if (!s.progress.cargo.includes('mail')) throw new Error('no mail collected');
+    await goToPin(page, p, 'quick');
+    await p.press('KeyE'); // post it
+    await page.waitForFunction(() => window.lowbridge.snapshot().prompt?.kind === 'quick_result');
+    s = await p.snap();
+    const best = s.progress.quick.bests.quiet;
+    if (best === null) throw new Error('no quiet best recorded');
+    if (s.progress.crews.ferry !== 1 || s.progress.crews.market !== -1) throw new Error('quick job changed trust');
+    await ctx.close();
+    return `Last post quiet best ${best.toFixed(1)} s of simulation; trust unchanged; errors ${errors.length}`;
+  },
+
+  async saves(browser) {
+    const { ctx, page, errors, p } = await newPage(browser);
+    await importThroughMenu(page, FIXTURE);
+    const before = (await p.snap()).progress;
+    await page.keyboard.press('Escape');
+    await page.click('#export-btn');
+    const text = await page.inputValue('#export-text');
+    const file = JSON.parse(text);
+    if (file.format !== 'lowbridge-save' || file.envelope.schemaVersion !== 2) throw new Error('bad export');
+    await page.click('#import-btn');
+    await page.fill('#import-text', '{"format":"lowbridge-save","envelope":{"schemaVersion":99}}');
+    await page.click('#import-check');
+    const newer = await page.textContent('#import-result');
+    await page.fill('#import-text', 'definitely not a save');
+    await page.click('#import-check');
+    const junk = await page.textContent('#import-result');
+    const after = (await p.snap()).progress;
+    if (JSON.stringify(after) !== JSON.stringify(before)) throw new Error('a refused import changed the save');
+    // Round trip into a fresh profile.
+    const second = await newPage(browser);
+    await importThroughMenu(second.page, text);
+    const moved = (await second.p.snap()).progress;
+    if (JSON.stringify(moved) !== JSON.stringify(before)) throw new Error('round trip changed the save');
+    await second.ctx.close();
+    await ctx.close();
+    return `export is schema 2; newer refused (“${newer.slice(0, 40)}…”); junk refused (“${junk.slice(0, 32)}…”); round trip identical; errors ${errors.length}`;
+  },
+
+  async offline(browser) {
+    const { ctx, page, errors } = await newPage(browser);
+    page.on('requestfailed', (r) => errors.push(`failed ${r.url()}`));
+    page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+    await page.waitForFunction(() => window.lowbridge.saveStatus().offlineReady === true, null, { timeout: 20_000 });
+    const label = await page.textContent('#offline-state');
+    await ctx.setOffline(true);
+    await page.reload();
+    await page.waitForFunction(() => window.lowbridge?.snapshot(), null, { timeout: 15_000 }).catch(() => {
+      throw new Error(`offline reload did not boot: ${errors.join(' | ').slice(0, 400)}`);
+    });
+    const build = await page.evaluate(() => window.lowbridge.build);
+    const caches = await page.evaluate(async () => (await window.caches.keys()).filter((k) => k.startsWith('lowbridge-')));
+    await ctx.close();
+    return `“${label}”; reloaded offline into ${build}; caches ${caches.join(', ')}; errors ${errors.length}`;
+  },
+
   async failsave(browser) {
     const { ctx, page, errors, p } = await newPage(browser, '?failsave=1');
     await p.walkTo({ x: 92, y: 566 }, (s) => s.action.kind === 'answer');
@@ -342,5 +524,5 @@ for (const [name, fn] of Object.entries(scenarios)) {
   }
 }
 await browser.close();
-console.log(failed ? `M1 smoke: ${failed} failed` : 'M1 smoke: pass');
+console.log(failed ? `Smoke: ${failed} failed` : 'Smoke: pass');
 process.exit(failed ? 1 : 0);

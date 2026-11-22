@@ -1007,6 +1007,8 @@ export function snapshot(s: Session) {
     objective: objective(s).text,
     /** Where the job arrow points, for scripted drivers that follow it like a player. */
     arrow: objective(s).target,
+    /** Where the current story or quick-job step happens (the street pin). */
+    pin: stepPin(s),
     /** The arrow's next waypoint towards each recipient, for choosing one deliberately. */
     routes: Object.fromEntries(
       (['mo_vale', 'nell_price'] as const).map((who) => [who, nextWaypoint(s.map, bodyPos(s), s.map.people[who], gates(s.progress))]),

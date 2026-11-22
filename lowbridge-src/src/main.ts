@@ -10,8 +10,9 @@ import { PRESETS } from './rules/controls.ts';
 import { buildRiverside } from './rules/map.ts';
 import type { Progress } from './rules/progress.ts';
 import { initialProgress, returnSummary } from './rules/progress.ts';
-import type { Checkpoint, SaveStore } from './rules/save.ts';
-import { SaveController, createIdbStore, createMemoryStore } from './rules/save.ts';
+import type { Checkpoint, SaveEnvelope, SaveStore } from './rules/save.ts';
+import { SCHEMA_VERSION, SaveController, checkImport, createIdbStore, createMemoryStore, exportSave } from './rules/save.ts';
+import { startOffline } from './offline.ts';
 import type { Commit, Session, WorldEvent } from './rules/session.ts';
 import {
   checkpoint,
@@ -19,6 +20,7 @@ import {
   createSession,
   encounterChoose,
   interact,
+  openBoard,
   pause,
   resume,
   settled,
@@ -174,7 +176,20 @@ function onEvents(events: WorldEvent[]): void {
         else sfx.chime();
         break;
       case 'escaped':
+      case 'step_done':
+      case 'beat_done':
+      case 'quick_done':
         sfx.chime();
+        break;
+      case 'call_taken':
+      case 'quick_started':
+        sfx.radio();
+        break;
+      case 'sighting':
+        sfx.ringOnce();
+        break;
+      case 'shift_complete':
+        sfx.horn();
         break;
       case 'save_failed':
         // The red "Progress hasn't saved" bar stays up until a save succeeds.
@@ -204,6 +219,10 @@ function onEvents(events: WorldEvent[]): void {
     }
     if (e.type === 'bump') Object.assign(detail, { x: Math.round(e.at.x), y: Math.round(e.at.y) });
     if (e.type === 'enter') detail.vehicle = e.vehicle;
+    if (e.type === 'call_taken' || e.type === 'beat_done') detail.beat = e.beat;
+    if (e.type === 'step_done') Object.assign(detail, { beat: e.beat, step: e.step });
+    if (e.type === 'shift_complete') detail.first = e.first;
+    if (e.type === 'quick_done') Object.assign(detail, { job: e.job, time: e.time, category: e.category, improved: e.improved, site: e.site });
     if (e.type !== 'checkpoint') window.dispatchEvent(new CustomEvent('lowbridge:event', { detail }));
   }
 }
@@ -296,6 +315,119 @@ byId('new-game-yes').addEventListener('click', () => {
   void saves.clear().finally(() => window.location.reload());
 });
 byId('build-id').textContent = BUILD;
+
+// ------------------------------------------------------ dispatch and saves
+
+byId('board-btn').addEventListener('click', () => {
+  if (!session) return;
+  closeSheet();
+  openBoard(session);
+});
+
+const importResult = byId('import-result');
+const importConfirm = byId('import-confirm');
+let pendingImport: SaveEnvelope | null = null;
+
+function currentEnvelope(): SaveEnvelope {
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    revision: saves.revision,
+    savedAt: new Date().toISOString(),
+    progress: saves.committed ?? session.progress,
+    checkpoint: checkpoint(session),
+  };
+}
+
+byId('export-btn').addEventListener('click', () => {
+  if (!session) return;
+  const text = exportSave(currentEnvelope(), BUILD);
+  byId('export-box').hidden = false;
+  byId<HTMLTextAreaElement>('export-text').value = text;
+  try {
+    const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lowbridge-save-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch {
+    // Some views block downloads; the text box above still works.
+  }
+  importResult.textContent = 'Exported. Keep the file (or the text) somewhere safe.';
+});
+
+function previewImport(text: string): void {
+  const c = checkImport(text);
+  pendingImport = null;
+  importConfirm.hidden = true;
+  if (!c.ok) {
+    importResult.textContent = c.message;
+    return;
+  }
+  const sum = returnSummary(c.envelope.progress);
+  const when = c.exportedAt ? new Date(c.exportedAt).toLocaleString('en-GB') : 'unknown time';
+  importResult.textContent = `Save from ${when}${c.migratedFrom ? ' (older version, will be upgraded)' : ''}: ${sum.recall} ${sum.next}.`;
+  pendingImport = c.envelope;
+  importConfirm.hidden = false;
+}
+
+byId('import-btn').addEventListener('click', () => {
+  byId('import-box').hidden = false;
+  importResult.textContent = '';
+});
+byId('import-choose').addEventListener('click', () => byId<HTMLInputElement>('import-file').click());
+byId<HTMLInputElement>('import-file').addEventListener('change', async (e) => {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  const text = await file.text();
+  byId<HTMLTextAreaElement>('import-text').value = text;
+  previewImport(text);
+});
+byId('import-check').addEventListener('click', () => previewImport(byId<HTMLTextAreaElement>('import-text').value));
+byId('restore-btn').addEventListener('click', async () => {
+  const prev = await saves.loadPrevious();
+  if (!prev) {
+    importResult.textContent = 'There’s no earlier save on this device yet.';
+    importConfirm.hidden = true;
+    return;
+  }
+  const sum = returnSummary(prev.progress);
+  importResult.textContent = `The save before your last change: ${sum.recall}`;
+  pendingImport = prev;
+  importConfirm.hidden = false;
+});
+byId('import-no').addEventListener('click', () => {
+  pendingImport = null;
+  importConfirm.hidden = true;
+  importResult.textContent = 'Kept your current save.';
+});
+byId('import-yes').addEventListener('click', async () => {
+  if (!pendingImport) return;
+  // The current save becomes "previous", so this can be undone with Restore previous save.
+  const ok = await saves.replace(pendingImport);
+  if (!ok) {
+    importResult.textContent = 'That didn’t save. Your current save is untouched; try again.';
+    return;
+  }
+  window.location.reload();
+});
+
+let offlineReady = false;
+const offline = startOffline((st) => {
+  offlineReady = st.ready;
+  byId('offline-state').textContent = !st.supported
+    ? 'Offline play works when the game is opened from jsip.uk.'
+    : st.ready
+      ? 'Available offline on this device.'
+      : `Getting ready for offline play${st.missing ? ` (${st.missing} files to go)` : ''}…`;
+  byId('update-btn').hidden = !st.updateReady;
+});
+byId('update-btn').addEventListener('click', () => {
+  saveCheckpoint();
+  offline.applyUpdate();
+});
 hud.syncSettings(settings);
 
 // --------------------------------------------------------- interruptions
@@ -413,7 +545,7 @@ Object.defineProperty(window, 'lowbridge', {
   value: Object.freeze({
     build: BUILD,
     snapshot: () => (session ? snapshot(session) : null),
-    saveStatus: () => ({ status: saves.status, revision: saves.revision }),
+    saveStatus: () => ({ status: saves.status, revision: saves.revision, offlineReady }),
   }),
 });
 

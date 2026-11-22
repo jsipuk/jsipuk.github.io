@@ -13,6 +13,8 @@ export interface Sfx {
   horn(): void;
   radio(): void;
   rumble(): void;
+  /** Three short rings, as the Reedlings answer the lamp. */
+  ringOnce(): void;
   suspend(): void;
 }
 
@@ -129,6 +131,15 @@ export function createSfx(): Sfx {
       if (!a) return;
       const now = a.ctx.currentTime;
       for (let i = 0; i < 6; i++) tone(90 + i * 6, now + i * 0.15, 0.14, 0.12, 'square');
+    },
+    ringOnce() {
+      const a = ready();
+      if (!a) return;
+      const now = a.ctx.currentTime;
+      for (let i = 0; i < 3; i++) {
+        tone(880 - i * 60, now + i * 0.45, 0.25, 0.08);
+        tone(1320 - i * 90, now + i * 0.45, 0.25, 0.04);
+      }
     },
     suspend() {
       nextRing = 0;
