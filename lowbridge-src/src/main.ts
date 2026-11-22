@@ -101,8 +101,10 @@ const hud = createHud({
   onShop: (part, id) => {
     sfx.unlock();
     void shopChoose(session, part, id).then(() => {
+      if (session.progress.style[part] !== id) return;
       if (part === 'vanBody' || part === 'vanStripe') sfx.rumble();
       else sfx.door();
+      window.dispatchEvent(new CustomEvent('lowbridge:event', { detail: { type: 'style', part, id, simTime: Number(session.simTime.toFixed(2)), build: BUILD } }));
     });
   },
   onShopClose: () => {
@@ -218,6 +220,7 @@ function onEvents(events: WorldEvent[]): void {
         break;
       case 'chips':
       case 'wrong_call':
+      case 'shop':
         sfx.shopBell();
         break;
       case 'unlocked':
@@ -259,6 +262,8 @@ function onEvents(events: WorldEvent[]): void {
     if (e.type === 'pigeons') Object.assign(detail, { count: e.count, x: Math.round(e.at.x), y: Math.round(e.at.y) });
     if (e.type === 'ped_bump' || e.type === 'ped_brush' || e.type === 'ped_horn') Object.assign(detail, { who: e.id });
     if (e.type === 'unlocked') detail.items = e.items;
+    if (e.type === 'chat') detail.who = e.id;
+    if (e.type === 'shop') detail.shop = e.shop;
     // Ambient chatter is frequent; only bumps and pigeons reach the log.
     if (e.type === 'ped_brush' || e.type === 'ped_horn') continue;
     if (e.type !== 'checkpoint') window.dispatchEvent(new CustomEvent('lowbridge:event', { detail }));

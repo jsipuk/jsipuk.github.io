@@ -40,6 +40,43 @@ Open the preview in landscape. Begin on the pavement. Walk to the van, enter it,
 
 A small test group gives directional feedback. Record observations in a simple local sheet with build, device, session length, observed choice and one friction point. Timing budgets and content quantity can change in response. End each round by naming one change to test next.
 
+## Phone test plan, M1 to free play
+
+Play on the claude.ai test page (it logs events and errors for review) or a local preview. Start each numbered run from Pause → New game unless it says otherwise. Copy the build ID from the bottom of Pause into the results log.
+
+**Sitting 1 · M1, about 20 minutes**
+
+| # | Do | Look for |
+| --- | --- | --- |
+| 1 | Answer the phone, drive the roads to Mo, give him the battery. Park up, close the page, reopen. | Ferry lights up first, result card about 2 s later. Reopen says you gave Mo the battery. Time to handover under 5 minutes. |
+| 2 | New game. Answer, walk to the ticket machine, recruit the crab (try a wrong move once), lift the yard shutter, shortcut to Nell. | Stalls light one by one. Shutter stays open after a reload. Clatterjack in the journal. |
+| 3 | New game. Answer, take the red express car by the ticket office. Lose the patrol once (out of sight 6 s). Next time, let it box you in. | Heat chip reads clearly. Caught puts you at the depot on foot with the battery still yours. |
+| 4 | Mid-drive: lock the phone, swipe home, turn to portrait, come back. | Paused, nothing moved, no stuck steering. |
+
+**Sitting 2 · M2, about 30 minutes plus a split run over a day**
+
+| # | Do | Look for |
+| --- | --- | --- |
+| 5 | From run 1 or 2: Take the next call and play straight through Q02, Q03, Q04 and Three rings. | Total time (aim 20–30 min). Can you say how the battery choice led to the last call? Where did you hesitate? |
+| 6 | Same shift on a fresh save, in five parts: Park up after each call, close the page, come back later. | Each return line says where you are and what's next. Same ending as the straight run. |
+| 7 | Pause → Dispatch board: Last post (one quiet run, one with a chase), then Lost property three times. | Quiet and chase bests kept apart. Trust never moves. |
+| 8 | Pause → Your save: Export, New game, Import (check the preview), then Restore previous save. | Nothing changes until you confirm. Restore undoes the import. |
+
+**Sitting 3 · free play, about 15 minutes**
+
+| # | Do | Look for |
+| --- | --- | --- |
+| 9 | Give someone the game with one word: "explore". Watch for 10 minutes, don't help. | What they found first. Did they find a shop on their own? What did they do twice? |
+| 10 | Walk through the pigeons by the depot; drive through some; honk near a flock. | They scatter and come back. Horn button is easy to hit and not in the way. |
+| 11 | Talk to Arthur (quay), Priya (Station Road), Kez (market), Dee (north side of Station Road) and a passer-by. Nudge someone with the van. | Lines read well. A bump is funny, not upsetting. "Get in" never turns into "Talk" by accident. |
+| 12 | Drive onto the dashed bay at Body & Paint and stop. Walk to the lit window at Second Thread. Buy chips on Harbour Road. | Shop panel readable on the phone. Locked pieces explain themselves. Van and jacket change on the street. |
+| 13 | After Mo's call, hang around the depot until the phone rings again. Then Pause → Journal → Around town. | Wrong number answers. Counts match what you did. An unlock toast when you earn one (five chats unlocks the flat cap). |
+| 14 | Pause: switch steering A and C, pick a jacket, Sound off, Reduce motion. | Each one sticks after a reload. |
+
+**Blocked until the jsip.uk release (needs the owner's OK)**: offline relaunch in flight mode and from the Home Screen (A11), an update over an older build (A12), plain Safari outside the Claude app.
+
+**People gates**: M1 wants five fresh testers on run 1; M2 wants three testers on run 5 and one on run 6; free play wants one tester on run 9. Record device, time, where they stopped and one friction point each.
+
 ## Results log
 
 Simulated and physical results stay in separate rows. Copy the build ID from the bottom of the pause screen.

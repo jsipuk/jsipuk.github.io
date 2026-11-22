@@ -103,7 +103,9 @@ export type WorldEvent =
   | AmbientEvent
   | { type: 'horn'; at: Vec }
   | { type: 'wrong_call' }
-  | { type: 'chips' };
+  | { type: 'chips' }
+  | { type: 'chat'; id: string }
+  | { type: 'shop'; shop: 'tailor' | 'paint' };
 
 export interface Session {
   map: StreetMap;
@@ -745,6 +747,7 @@ export async function interact(s: Session): Promise<void> {
       if (!who) return;
       const text = talkTo(s.ambient, who);
       note(s, { chats: 1 }, [who.id]);
+      s.outbox.push({ type: 'chat', id: who.id });
       prompt(s, { kind: 'line', line: { speaker: who.name ?? 'Passer-by', role: 'Riverside', text }, choices: [{ id: 'ok', label: 'OK' }] });
       return;
     }
@@ -767,6 +770,7 @@ export async function interact(s: Session): Promise<void> {
     case 'paint':
       s.shop = a.kind;
       s.mode = 'shop';
+      s.outbox.push({ type: 'shop', shop: a.kind });
       return;
     case 'quick': {
       const job = s.progress.quick.active?.job;
