@@ -177,7 +177,7 @@ function onEvents(events: WorldEvent[]): void {
         sfx.chime();
         break;
       case 'save_failed':
-        hud.toast('Progress hasn’t saved. Nothing has changed hands.', 5);
+        // The red "Progress hasn't saved" bar stays up until a save succeeds.
         break;
       case 'checkpoint':
         saveCheckpoint();
