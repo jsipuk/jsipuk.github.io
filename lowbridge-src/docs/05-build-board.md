@@ -171,3 +171,54 @@ Built 22 November 2026, autonomously, on the C and A steering chosen in M0. Ever
 ### Next ticket
 
 T09–T11 (M2): Q02 both branches, Q03, Q04 and the shift close; quick jobs and the dispatch board; offline assets and export/import. First, run the M1 gate with five people and the M0 controls gate in Safari.
+
+## M2 record • one whole shift (T09–T12)
+
+Built 22 November 2026, autonomously, straight after M1 (the owner asked to continue without testing M1). Every check below ran in the Linux container (Node 22.23.5, headless Chromium via Playwright 1.63). **No M2 check has run on a phone or with a person yet.**
+
+### Decisions where the build differs from or fills in the spec
+
+| Area | Chosen behaviour | Reason |
+| --- | --- | --- |
+| Story beats as data | Each beat in `src/rules/content.ts` is a caller line plus steps at authored places (talk, act, Wickwing reveal, pickup, puzzle, watch). Small named handlers in `session.ts` do the special parts. One commit per step, so every step is a checkpoint. | "Plain data with small named rule handlers." |
+| Q02F Low water | Talk to Mo on the quay, then follow wet footprints (drawn only during that step) to an old council post: a rubbing of the left half of the plate, stamped ≈ Waves, and the old ticket-office address. | As specified; the stamp feeds Q04. |
+| Q02M Under the stalls | Talk to Nell, then listen along the stalls; a caption says when the ringing is louder; open the hatch under the end stall: the right half, stamped Ω Bell, and the same address. | "Trace a bell under her stall." Both branches give the same address, so they converge at Q03. |
+| Q03 Return to sender | At the ticket office: look under the counter (matching half), then "Dim · Wickwing" reads the painted-over number: depot switchboard, line 3, stamped ◎ Three rings. A missed Clatterjack is still hinted by the coins on the ticket machine. | Uses the starter's field skill. |
+| Q04 Crossed lines | Take the relay from the depot switchboard, carry it to a cabinet inside the builders' yard (through the shutter if open, otherwise round the ring road and in by the yard lane), then pick the two symbols from your journal: your branch's stamp plus Three rings. A wrong pair buzzes and you try again; nothing is lost. | "Match two large symbols shown in the journal." Works with or without Clatterjack. |
+| Shift close Three rings | The riverside warning lamp lights after Q04. At the viewing point, "Watch the mud": Reedlings ring in turn along the water's edge; log the sighting, then radio Mo or Nell first. Their reply and the journal line differ. Shift one is then complete; shift two is marked as a later build. | As specified. Reedling is a sighting only (recruitable in M3). |
+| Next lead | Saved as `shift.lead` and offered by "Take the next call" on every result card, and on the dispatch board (Pause → Dispatch board). | "Persist the next lead between calls." |
+| Dispatch board | One card: the waiting story call with its duration, Last post with your best, Lost property with how many found, Drop for a running quick job, Park up, Back to the street. One job at a time. | "Compact dispatch board with Park/Continue and duration estimates." |
+| Last post | Collect the sorted mail at the depot switchboard, post it at the quay post box. The clock runs in simulation time only, from collecting the mail. Any heat during the run puts it in the chase category, even if heat clears before posting. Quiet and chase bests are kept apart. | "Quiet runs compete against quiet runs." |
+| Lost property | Three sites (a glove at the market, an umbrella by the ring road, a scarf on Back Lane). Each run marks the first one not yet found, then goes round again; hand it in at the depot. Each site is recorded once. Never moves trust. | As specified. |
+| Save schema 2 | Adds `shift`, `quick`, `journal` and `sightings`. Schema 1 (M1) saves and exports are migrated in memory on load and written as schema 2 at the next commit. `tests/fixtures/save-v1-mo.json` is a saved M1 export used as the migration fixture. | "An older supported format migrates in a transaction; test with a saved older fixture." |
+| Export and import | Pause → Your save. Export downloads a `lowbridge-save` JSON file and also shows the text to copy, because some views block downloads. Import takes a file or pasted text, previews it with its return line, and only replaces the save when you confirm. The replaced save becomes the "previous" slot, so Restore previous save undoes it. Newer, malformed and damaged files are refused and nothing changes. | "Preview the import and retain the previous good save." Safari and Home Screen saves are separate; export/import is the transfer route. |
+| Offline | `vite.config.ts` writes `sw.js` at build time with this build's exact file list and a `lowbridge-<build>` cache. Housekeeping deletes only `lowbridge-` caches, as the site's other apps do. Cache-first, with the page shell for navigations. "Available offline" appears in Pause only after the worker reports every file cached and controls the page. Manifest (landscape, standalone) and 192/512 icons added. | Technical plan, offline section. |
+| Staged updates | A new build installs beside the old one and waits (no automatic skipWaiting). Pause shows "Update ready · restart now"; pressing it saves a checkpoint, switches workers and reloads. | "Offer a restart at a saved boundary." Pause is a safe boundary. |
+
+### Evidence
+
+| Check | Result | Environment |
+| --- | --- | --- |
+| `npm run typecheck`, `npm test`, `npm run build` | Pass. 65 tests. | Container |
+| T09: both branches reach the close (rules) | Q02F and Q02M run through Q03, Q04 (wrong pair refused) and the close; trust only moves with the battery. | `tests/shift.test.ts` |
+| T09: both branches in a session | The Mo branch played straight through; the Nell branch played straight through and split across five relaunches from the save. | `tests/shift.test.ts` |
+| A09: continuous vs split | Identical progress for the same choices (receipts compared without instance IDs). | `tests/shift.test.ts` |
+| A08: quick job between calls | Park after Q01, relaunch, do Lost property, then take the call: Nell calls, Q02M starts; no trust from the quick job. | `tests/shift.test.ts` |
+| A16: chase category and paused time | Paused time is not scored; heat during the run files it as a chase even after heat clears; the quiet best is untouched. | `tests/shift.test.ts` |
+| A10: import cases | Saved M1 export migrates with everything earned and the next lead; malformed, newer and damaged files refused; failed import leaves the slot untouched; export round-trips. Browser: export, two refusals with no change, round trip into a fresh profile. | Tests and `scripts/smoke.mjs` |
+| A11 (browser half) | After "Available offline on this device", cutting the network and reloading boots the cached build. | `scripts/smoke.mjs` offline |
+| Last post in the browser | From an imported M1 save: board, collect, post, quiet best recorded, trust unchanged. | `scripts/smoke.mjs` lastpost |
+| Full Mo branch in the browser | From an imported M1 save: Q02F (talk, rubbing), Q03 (counter, Wickwing), Q04 (relay, cabinet pair), the close (watch, radio Mo first), then reload shows “Shift one is done…”. No page errors. | `scripts/smoke.mjs` shift |
+| Safari, Home Screen, flight-mode relaunch on a phone (A11), preview deploy over an older build (A12) | **Pending.** Needs a phone and a hosted preview at /lowbridge/. | |
+| M2 gate: three first-time shift runs, one five-part split run | **Pending.** Needs people. | |
+
+### Known issues
+
+- Story steps are short walks between existing landmarks. Playtests may find the shift under 20 minutes; the spec says to add a return journey or discovery rather than slow driving.
+- The dispatch board lives in Pause and on result cards; there is no in-world board yet.
+- Offline was checked in headless Chromium only. iOS Safari and Home Screen behave differently and must be checked on the phone.
+- The claude.ai test page cannot use a service worker or start downloads, so offline and the export file only work from jsip.uk or a local preview; the export text box works everywhere.
+
+### Next ticket
+
+T12's people gate, then M3 (T13): Riverside shifts 2–3, Reedling as a recruit, team selection, mastery, trust recovery and the first captain contest.

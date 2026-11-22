@@ -55,6 +55,8 @@ Simulated and physical results stay in separate rows. Copy the build ID from the
 | 2026-11-22 | m0-2026-11-22-2bc0b49 | Owner notes | Free play | Yes, framed in the Claude app | Notes | Phone line never changes (expected for M0). Wants to see the courier walk, legs stepping in front, arms maybe, and a jacket colour option: added. |
 | 2026-11-22 | m1 (this branch) | Linux container, headless Chromium 844 × 390 | A02–A07 scripted: both endings, crab and shutter with reload, patrol with pause and capture, double tap, ?failsave | No (simulated) | Pass, 7 of 7 scenarios (incl. A01 held key through blur) | Scripted driver, not a person. Handovers at 37 s and 39–41 s of simulation. |
 | | | iPhone ___, iOS ___, Safari | M1 five-minute test, tester 1 to 5 | Yes | Pending | Record real seconds to handover and the answer to “What changed because of your delivery?” |
+| 2026-11-22 | m2 (this branch) | Linux container, headless Chromium 844 × 390 | A08–A11 and A16 scripted: Mo branch to the close from an imported M1 save, Last post, export/import, offline relaunch; plus all M1 scenarios | No (simulated) | See build board M2 record | Scripted driver, not a person. |
+| | | iPhone ___, iOS ___, Safari and Home Screen | M2 shift run, testers 1 to 3, and one five-part split run | Yes | Pending | Record total time, where they stopped, and whether they can say how the battery choice led to the final call. |
 | | | iPhone ___, iOS ___, Safari | Two-minute M0 test, tester 1 | Yes | Pending | |
 | | | iPhone ___, iOS ___, Safari | Two-minute M0 test, tester 2 | Yes | Pending | |
 | | | iPhone ___, iOS ___, Safari | Two-minute M0 test, tester 3 | Yes | Pending | |

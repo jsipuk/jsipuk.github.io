@@ -2,7 +2,7 @@
 
 A single-player, top-down iPhone game set in a British river town. You work the night shift as a courier. The roads belong to rival crews. Some of the things living beside them will ride with you.
 
-**Status** • M1 five-minute demo built in `lowbridge-src/`: Riverside, Q01 with both endings, the crab and shutter shortcut, the express car and patrol, saves that survive a reload. Container and headless-browser checks pass; phone and people gates are pending. Production deployment is future work.
+**Status** • M2 one whole shift built in `lowbridge-src/`: Q01 plus both Q02 branches, Q03, Q04 and the Three rings close; Last post and Lost property on a dispatch board; saves with export/import; offline play from the built site. Container and headless-browser checks pass; phone and people gates are pending. Production deployment is future work.
 
 ## Run the M0 build
 

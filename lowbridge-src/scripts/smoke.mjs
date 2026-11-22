@@ -240,6 +240,13 @@ async function goToPin(page, p, want = 'step') {
     await p.walkTo(stand, (x) => x.action.kind === want);
     s = await p.snap();
     if (s.action.kind === want) return;
+    // Blocked (often by the van we just parked): walk round by a detour, as a person would.
+    for (const [dx, dy] of [[48, 0], [-48, 0], [0, 48], [0, -48], [64, 64], [-64, -64]]) {
+      const here = (await p.snap()).player;
+      await p.walkTo({ x: here.x + dx, y: here.y + dy }, () => false, 4000);
+      await p.walkTo(stand, (x) => x.action.kind === want, 10_000);
+      if ((await p.snap()).action.kind === want) return;
+    }
   }
   const s = await p.snap();
   throw new Error(`could not reach the pin at ${JSON.stringify(s.pin)}: player ${Math.round(s.player.x)},${Math.round(s.player.y)} action ${s.action.verb}`);
