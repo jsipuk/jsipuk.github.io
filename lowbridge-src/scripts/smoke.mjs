@@ -79,9 +79,10 @@ function player(page) {
         if (d < 4 || Date.now() - t0 > maxMs) break;
         let ang = Math.atan2(target.y - s.player.y, target.x - s.player.x);
         // Walked into something (a parked van): step round it, as a person would.
+        // Only treat it as stuck after a good half-second without movement (a slow page polls faster than it draws).
         still = last && Math.hypot(s.player.x - last.x, s.player.y - last.y) < 0.3 ? still + 1 : 0;
         last = s.player;
-        if (still > 8) {
+        if (still > 20) {
           sidestep = 20;
           side = -side;
           still = 0;

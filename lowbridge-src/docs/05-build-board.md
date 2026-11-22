@@ -212,8 +212,11 @@ Built 22 November 2026, autonomously, straight after M1 (the owner asked to cont
 | Safari, Home Screen, flight-mode relaunch on a phone (A11), preview deploy over an older build (A12) | **Pending.** Needs a phone and a hosted preview at /lowbridge/. | |
 | M2 gate: three first-time shift runs, one five-part split run | **Pending.** Needs people. | |
 
+Full browser suite on the final build: 11 scenarios (7 from M1, 4 from M2). Nine passed in one run; ferry and Last post failed on the scripted walker (it side-stepped too eagerly on a slow page), passed after a fix to the script's stuck check. The game code did not change between the runs.
+
 ### Known issues
 
+- The scripted browser walker is timing-sensitive on a busy machine. Rerun a failed scenario on its own before suspecting the game.
 - Story steps are short walks between existing landmarks. Playtests may find the shift under 20 minutes; the spec says to add a return journey or discovery rather than slow driving.
 - The dispatch board lives in Pause and on result cards; there is no in-world board yet.
 - Offline was checked in headless Chromium only. iOS Safari and Home Screen behave differently and must be checked on the phone.
