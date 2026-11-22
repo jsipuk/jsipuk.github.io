@@ -229,12 +229,37 @@ export function createIdbStore(idb: IDBFactory, name = DB_NAME): SaveStore {
     const value = await request(db.transaction(STORE, 'readonly').objectStore(STORE).get(key));
     return (value as SaveEnvelope | undefined) ?? null;
   };
+  const attempt = async (expected: number, next: SaveEnvelope): Promise<CommitResult> => {
+    try {
+      const db = await open();
+      return await new Promise<CommitResult>((resolve) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        const store = tx.objectStore(STORE);
+        let result: CommitResult = { ok: true, envelope: next };
+        const get = store.get(CURRENT);
+        get.onsuccess = () => {
+          const current = (get.result as SaveEnvelope | undefined) ?? null;
+          if ((current?.revision ?? 0) !== expected) {
+            result = { ok: false, reason: 'conflict', current };
+            return;
+          }
+          if (current) store.put(current, PREVIOUS);
+          store.put(next, CURRENT);
+        };
+        tx.oncomplete = () => resolve(result);
+        tx.onerror = () => resolve({ ok: false, reason: 'error', message: String(tx.error ?? 'transaction failed') });
+        tx.onabort = () => resolve({ ok: false, reason: 'error', message: String(tx.error ?? 'transaction aborted') });
+      });
+    } catch (err) {
+      return { ok: false, reason: 'error', message: String(err) };
+    }
+  };
   return {
     load: () => read(CURRENT),
     loadPrevious: () => read(PREVIOUS),
     async probe(timeoutMs = 2500) {
       // Write and delete a scratch key. Some views hang instead of failing, so give up after a moment.
-      const attempt = (async () => {
+      const trial = (async () => {
         const db = await open();
         return await new Promise<boolean>((resolve) => {
           const tx = db.transaction(STORE, 'readwrite');
@@ -247,32 +272,15 @@ export function createIdbStore(idb: IDBFactory, name = DB_NAME): SaveStore {
         });
       })().catch(() => false);
       const timeout = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), timeoutMs));
-      return Promise.race([attempt, timeout]);
+      return Promise.race([trial, timeout]);
     },
     async commit(expected, next) {
-      try {
-        const db = await open();
-        return await new Promise<CommitResult>((resolve) => {
-          const tx = db.transaction(STORE, 'readwrite');
-          const store = tx.objectStore(STORE);
-          let result: CommitResult = { ok: true, envelope: next };
-          const get = store.get(CURRENT);
-          get.onsuccess = () => {
-            const current = (get.result as SaveEnvelope | undefined) ?? null;
-            if ((current?.revision ?? 0) !== expected) {
-              result = { ok: false, reason: 'conflict', current };
-              return;
-            }
-            if (current) store.put(current, PREVIOUS);
-            store.put(next, CURRENT);
-          };
-          tx.oncomplete = () => resolve(result);
-          tx.onerror = () => resolve({ ok: false, reason: 'error', message: String(tx.error ?? 'transaction failed') });
-          tx.onabort = () => resolve({ ok: false, reason: 'error', message: String(tx.error ?? 'transaction aborted') });
-        });
-      } catch (err) {
-        return { ok: false, reason: 'error', message: String(err) };
-      }
+      // A storage error can be a dropped connection (iPhone web views lose it now and then):
+      // reconnect and try once more before reporting a failure.
+      const first = await attempt(expected, next);
+      if (first.ok || first.reason !== 'error') return first;
+      dbPromise = null;
+      return attempt(expected, next);
     },
     async clear() {
       const db = await open();

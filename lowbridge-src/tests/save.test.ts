@@ -102,3 +102,31 @@ test('the storage probe passes where IndexedDB writes, and fails fast where it c
   assert.equal(await createIdbStore(silent).probe!(50), false);
   assert.ok(Date.now() - t0 < 1000);
 });
+
+test('a dropped storage connection is retried once before a save is reported as failed', async () => {
+  const factory = new IDBFactory();
+  const realOpen = factory.open.bind(factory);
+  let drops = 1;
+  factory.open = ((name: string, v?: number) => {
+    const req = realOpen(name, v);
+    req.addEventListener('success', () => {
+      const db = req.result;
+      const real = db.transaction.bind(db);
+      db.transaction = ((...args: Parameters<typeof real>) => {
+        if (drops > 0) {
+          drops--;
+          throw new DOMException('Connection to Indexed Database server lost. Refresh the page to try again', 'UnknownError');
+        }
+        return real(...args);
+      }) as typeof db.transaction;
+    });
+    return req;
+  }) as typeof factory.open;
+  const saves = new SaveController(createIdbStore(factory));
+  assert.equal(await saves.write(initialProgress(), null), true);
+  assert.equal(saves.status, 'saved');
+  // Two drops in a row is a real failure.
+  drops = 2;
+  assert.equal(await saves.write(initialProgress(), null), false);
+  assert.equal(saves.status, 'failed');
+});

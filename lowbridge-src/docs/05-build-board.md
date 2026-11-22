@@ -294,3 +294,5 @@ Owner, iPhone in the Claude app: "why is it so to the right?", wants the pad see
 | Job line | Slightly smaller and lighter. | Same. |
 
 The Claude app's own top bar and side strips stay; a page can't remove them. Full screen comes from jsip.uk/lowbridge added to the Home Screen.
+
+**Correction, same evening.** The new `storage` log shows two later phone sessions in the Claude app saving to the phone's own IndexedDB (`where: device`, "Welcome back", revision 25). So the first red bar was a one-off storage error, not a blanket block. Saves now reconnect and retry once on a storage error before the red bar shows (tested with a dropped connection: one drop saves, two in a row fails). The probe and the host slot stay as a safety net.
