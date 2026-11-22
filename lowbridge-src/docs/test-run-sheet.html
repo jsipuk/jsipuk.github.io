@@ -1,0 +1,499 @@
+<title>Lowbridge Test Run Sheet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one A4 depot run sheet. Header docket, then controls + map, then two columns of numbered runs to tick off. */
+:root {
+  --paper: #ffffff;
+  --desk: #e3e8e7;
+  --ink: #14211f;
+  --muted: #55625f;
+  --rule: #c4cecb;
+  --hivis: #e8891c;
+  --teal: #2f7f7a;
+  --road: #4a5553;
+  --water: #b9d3d6;
+  --block: #eef1f0;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@page { size: A4; margin: 8mm; }
+* { box-sizing: border-box; }
+html { background: var(--desk); }
+body {
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 8pt;
+  line-height: 1.3;
+  padding-block: 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.sheet {
+  background: var(--paper);
+  max-width: 194mm;
+  margin: 0 auto;
+  padding: 7mm 7mm 6mm;
+  box-shadow: 0 1px 2px rgba(20, 33, 31, 0.12), 0 8px 28px rgba(20, 33, 31, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 2.6mm;
+}
+
+/* Docket header */
+.docket {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2mm 6mm;
+  align-items: end;
+  border-bottom: 2.2px solid var(--ink);
+  padding-bottom: 2.4mm;
+}
+.eyebrow {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 9pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin: 0;
+}
+h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 20pt;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin: 0.6mm 0 0;
+  text-wrap: balance;
+}
+h1 span { color: var(--hivis); }
+.build {
+  margin: 1mm 0 0;
+  font-family: var(--mono);
+  font-size: 7pt;
+  color: var(--muted);
+}
+.fields {
+  display: grid;
+  grid-template-columns: auto 34mm;
+  gap: 1.6mm 2mm;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 8.5pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.fields span:nth-child(even) { border-bottom: 1px solid var(--ink); }
+
+/* Controls and map */
+.top {
+  display: grid;
+  grid-template-columns: 1fr 62mm 37mm;
+  gap: 4mm;
+  align-items: start;
+}
+h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 11pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 1.2mm;
+  display: flex;
+  align-items: baseline;
+  gap: 2mm;
+}
+h2 small {
+  font-family: var(--body);
+  font-weight: 500;
+  font-size: 7.4pt;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+}
+.controls { display: flex; flex-direction: column; gap: 1.8mm; min-width: 0; }
+.keys { display: grid; grid-template-columns: 19mm 1fr; gap: 0.6mm 2mm; margin: 0; }
+.keys dt { font-weight: 700; }
+.keys dd { margin: 0; }
+.tips { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.8mm; }
+.tips li { padding-left: 3.2mm; position: relative; }
+.tips li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1.3mm;
+  width: 1.5mm;
+  height: 1.5mm;
+  background: var(--hivis);
+}
+.btn {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 7.2pt;
+  padding: 0 1.2mm;
+  border: 1px solid var(--ink);
+  border-radius: 1mm;
+  line-height: 1.35;
+}
+.btn.act { background: var(--hivis); border-color: var(--hivis); }
+
+.map { margin: 0; }
+.map svg { width: 100%; height: auto; display: block; border: 1px solid var(--rule); }
+.legend {
+  display: grid;
+  gap: 0.5mm;
+  font-size: 7pt;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  line-height: 1.2;
+}
+.legend b {
+  display: inline-grid;
+  place-items: center;
+  width: 3.4mm;
+  height: 3.4mm;
+  border-radius: 50%;
+  background: var(--hivis);
+  font-size: 6.4pt;
+  margin-right: 1mm;
+  vertical-align: -0.6mm;
+}
+.legend i {
+  display: inline-block;
+  width: 1.8mm;
+  height: 1.8mm;
+  border-radius: 50%;
+  background: var(--teal);
+  margin: 0 1.8mm 0 0.8mm;
+}
+
+/* Runs */
+.runs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5mm;
+  align-items: start;
+}
+.col { display: flex; flex-direction: column; gap: 2.4mm; min-width: 0; }
+.sitting { display: flex; flex-direction: column; gap: 1.3mm; }
+.sitting h2 {
+  border-top: 2.2px solid var(--ink);
+  padding-top: 1.2mm;
+  margin: 0;
+}
+.sitting h2 .tag {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0 1.4mm;
+  font-size: 9pt;
+}
+ol.run-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4mm; }
+.run {
+  display: grid;
+  grid-template-columns: 4.6mm 5mm 1fr;
+  gap: 0 1.4mm;
+  align-items: start;
+  break-inside: avoid;
+}
+.box {
+  width: 4mm;
+  height: 4mm;
+  border: 1.4px solid var(--ink);
+  margin-top: 0.2mm;
+}
+.num {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 11pt;
+  line-height: 1;
+  color: var(--hivis);
+  font-variant-numeric: tabular-nums;
+}
+.run h3 { font-size: 8.6pt; font-weight: 700; margin: 0; }
+.run p { margin: 0.3mm 0 0; }
+.run .look { color: var(--muted); }
+.run .look::before { content: "Look for · "; font-weight: 600; color: var(--teal); }
+.fill {
+  display: inline-block;
+  min-width: 18mm;
+  border-bottom: 1px solid var(--ink);
+  height: 3mm;
+  vertical-align: -0.4mm;
+}
+.fill.wide { min-width: 30mm; }
+.ticks { display: inline-flex; flex-wrap: wrap; gap: 0.6mm 2.4mm; }
+.ticks span::before {
+  content: "";
+  display: inline-block;
+  width: 2.6mm;
+  height: 2.6mm;
+  border: 1.1px solid var(--ink);
+  margin-right: 0.8mm;
+  vertical-align: -0.4mm;
+}
+
+.unlocks {
+  border: 1px solid var(--rule);
+  padding: 1.6mm 2mm;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8mm;
+}
+.unlocks h2 { font-size: 9pt; margin: 0; }
+.unlocks dl { display: grid; grid-template-columns: auto 1fr; gap: 0.2mm 2.5mm; margin: 0; font-size: 7.1pt; }
+.unlocks dt { font-weight: 700; font-variant-numeric: tabular-nums; }
+.unlocks dd { margin: 0; color: var(--muted); }
+
+.notes { display: flex; flex-direction: column; gap: 1mm; }
+.notes h2 { font-size: 9pt; margin: 0; }
+.line { border-bottom: 1px solid var(--rule); height: 5mm; }
+
+.foot {
+  border-top: 1px solid var(--rule);
+  padding-top: 1.6mm;
+  display: flex;
+  justify-content: space-between;
+  gap: 4mm;
+  flex-wrap: wrap;
+  font-size: 7pt;
+  color: var(--muted);
+}
+.foot strong { color: var(--ink); }
+
+@media (max-width: 720px) {
+  .docket, .top, .runs { grid-template-columns: 1fr; }
+  .map { max-width: 420px; }
+  .sheet { padding: 16px; }
+  body { font-size: 10pt; }
+}
+@media print {
+  html, body { background: var(--paper); }
+  body { padding: 0; }
+  .sheet { box-shadow: none; max-width: none; padding: 0; }
+}
+</style>
+
+<main class="sheet">
+  <header class="docket">
+    <div>
+      <p class="eyebrow">Riverside depot · night shift · test run sheet</p>
+      <h1>Lowbridge <span>After Dark</span></h1>
+      <p class="build">Build m2fp-2026-11-22-f455cff · claude.ai/artifact/VzGiiAzsVk2MBz6UvWwwCk</p>
+    </div>
+    <div class="fields" aria-label="Fill in">
+      <span>Date</span><span></span>
+      <span>Phone</span><span></span>
+      <span>Tester</span><span></span>
+    </div>
+  </header>
+
+  <section class="top">
+    <div class="controls">
+      <div>
+        <h2>Controls <small>Steering C, the default. Phone sideways.</small></h2>
+        <dl class="keys">
+          <dt>Left thumb</dt><dd>Pad. Walk, or point where the van's nose should face.</dd>
+          <dt>Right thumb</dt><dd>Hold <span class="btn">Go</span> to drive, <span class="btn">Brake Reverse</span> to stop or back up. <span class="btn">Horn</span> beside them.</dd>
+          <dt>Orange</dt><dd><span class="btn act">Answer</span> <span class="btn act">Get in</span> <span class="btn act">Talk</span> does what it says.</dd>
+          <dt>Pause</dt><dd>Top left. Journal, Dispatch board, settings, Your save, New game, build ID.</dd>
+        </dl>
+      </div>
+      <div>
+        <h2>Before each run</h2>
+        <ul class="tips">
+          <li>Fresh start: Pause → New game, unless the run says carry on.</li>
+          <li>The page logs events and errors, so only time what it asks.</li>
+          <li>Offline, Home Screen and Safari wait for the jsip.uk release.</li>
+        </ul>
+      </div>
+    </div>
+
+    <figure class="map">
+      <svg viewBox="0 0 72 48" role="img" aria-label="Sketch map of Riverside with the places used in these runs">
+        <rect x="0" y="0" width="72" height="48" fill="#eef1f0"/>
+        <rect x="0" y="0" width="46" height="2" fill="#b9d3d6"/>
+        <text x="1" y="1.5" font-size="1.4" fill="#2f5f63" font-family="Inter, Arial, sans-serif">River</text>
+        <g fill="#4a5553">
+          <rect x="7" y="28" width="5" height="19"/>
+          <rect x="7" y="28" width="57" height="5"/>
+          <rect x="32" y="28" width="5" height="19"/>
+          <rect x="7" y="42" width="30" height="5"/>
+          <rect x="59" y="14" width="5" height="19"/>
+          <rect x="32" y="14" width="32" height="5"/>
+          <rect x="32" y="4" width="5" height="22"/>
+          <rect x="20" y="21" width="17" height="5"/>
+          <rect x="6" y="4" width="53" height="5"/>
+        </g>
+        <rect x="20" y="25.6" width="5" height="1.4" fill="#e8891c"/>
+        <g font-family="Inter, Arial, sans-serif" font-size="1.7" fill="#ffffff" font-weight="600">
+          <text x="44" y="31.1">Station Road</text>
+          <text x="40" y="7.1">Harbour Road</text>
+          <text x="44" y="17.1">Ring Road</text>
+          <text x="14" y="45.1">Back Lane</text>
+          <text x="25.5" y="24.1">Yard</text>
+        </g>
+        <g fill="#2f7f7a">
+          <circle cx="50" cy="3.3" r="0.8"/>
+          <circle cx="10" cy="2.9" r="0.8"/>
+          <circle cx="15.6" cy="34.5" r="0.8"/>
+          <circle cx="5.8" cy="29.4" r="0.8"/>
+          <circle cx="65" cy="15.6" r="0.8"/>
+          <circle cx="35" cy="10" r="0.8"/>
+        </g>
+        <g font-family="Inter, Arial, sans-serif" font-size="1.9" font-weight="700" text-anchor="middle">
+          <g><circle cx="5.5" cy="35.6" r="1.7" fill="#e8891c"/><text x="5.5" y="36.3" fill="#14211f">D</text></g>
+          <g><circle cx="13" cy="3.4" r="1.7" fill="#e8891c"/><text x="13" y="4.1" fill="#14211f">M</text></g>
+          <g><circle cx="57.5" cy="3.4" r="1.7" fill="#e8891c"/><text x="57.5" y="4.1" fill="#14211f">N</text></g>
+          <g><circle cx="21.5" cy="35.6" r="1.7" fill="#e8891c"/><text x="21.5" y="36.3" fill="#14211f">T</text></g>
+          <g><circle cx="22.5" cy="28.2" r="1.7" fill="#e8891c"/><text x="22.5" y="28.9" fill="#14211f">Y</text></g>
+          <g><circle cx="42" cy="26.4" r="1.7" fill="#e8891c"/><text x="42" y="27.1" fill="#14211f">S</text></g>
+          <g><circle cx="45" cy="36.8" r="1.7" fill="#e8891c"/><text x="45" y="37.5" fill="#14211f">P</text></g>
+          <g><circle cx="21" cy="10.4" r="1.7" fill="#e8891c"/><text x="21" y="11.1" fill="#14211f">C</text></g>
+          <g><circle cx="17.4" cy="2.4" r="1.7" fill="#e8891c"/><text x="17.4" y="3.1" fill="#14211f">L</text></g>
+        </g>
+        <path d="M0 0H72V48H0Z" fill="none" stroke="#c4cecb" stroke-width="0.2"/>
+      </svg>
+    </figure>
+    <ul class="legend" aria-label="Map key">
+        <li><b>D</b>Depot, phone, van</li>
+        <li><b>T</b>Tickets, express car</li>
+        <li><b>M</b>Mo, ferry quay</li>
+        <li><b>N</b>Nell, night market</li>
+        <li><b>Y</b>Yard shutter</li>
+        <li><b>L</b>Post box (Last post)</li>
+        <li><b>S</b>Second Thread, clothes</li>
+        <li><b>P</b>Body &amp; Paint bay</li>
+        <li><b>C</b>The Fry Light, chips</li>
+        <li><i></i>Pigeons, six flocks</li>
+    </ul>
+  </section>
+
+  <section class="runs">
+    <div class="col">
+      <div class="sitting">
+        <h2><span class="tag">Sitting 1</span> The battery job <small>M1 · about 20 min</small></h2>
+        <ol class="run-list">
+          <li class="run"><span class="box"></span><span class="num">1</span><div>
+            <h3>Ferry ending</h3>
+            <p>Answer the phone at D, drive to Mo at M, hand over the battery. Park up, close the page, reopen.</p>
+            <p class="look">Ferry lights, then the card. Reopen remembers. Handover in <span class="fill"></span> min (aim under 5).</p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">2</span><div>
+            <h3>Crab, shutter, Nell</h3>
+            <p>New game. Answer, recruit the crab at T (one wrong move first), lift the shutter at Y, cut through to Nell at N.</p>
+            <p class="look">Stalls light up. Shutter stays open after a reload.</p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">3</span><div>
+            <h3>The patrol</h3>
+            <p>New game. Answer, take the red express car at T. Lose the patrol (6 s out of sight); next time, let it box you in.</p>
+            <p class="look">Heat chip readable. Caught = back at D on foot, battery kept.</p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">4</span><div>
+            <h3>Interruptions</h3>
+            <p>Mid-drive: lock the phone, swipe home, turn to portrait.</p>
+            <p class="look">Paused when you return. Nothing stuck.</p>
+          </div></li>
+        </ol>
+      </div>
+
+      <div class="sitting">
+        <h2><span class="tag">Sitting 2</span> One whole shift <small>M2 · 30 min + split run</small></h2>
+        <ol class="run-list">
+          <li class="run"><span class="box"></span><span class="num">5</span><div>
+            <h3>Straight through</h3>
+            <p>From run 1 or 2: Take the next call, then Q02 → Q03 → Q04 → Three rings.</p>
+            <p class="look">Total <span class="fill"></span> min (aim 20–30). Battery led to the last call? <span class="ticks"><span>Clear</span><span>Lost</span></span></p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">6</span><div>
+            <h3>Split run, five parts</h3>
+            <p>Fresh save, same shift. Park up and close the page after each call.</p>
+            <p class="look">Each return says where you are. Same ending as run 5.</p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">7</span><div>
+            <h3>Dispatch board</h3>
+            <p>Pause → Dispatch board. Last post quiet, then with a chase. Lost property ×3.</p>
+            <p class="look">Bests kept apart. Trust never moves.</p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">8</span><div>
+            <h3>Your save</h3>
+            <p>Pause → Your save: Export, New game, Import, then Restore previous save.</p>
+            <p class="look">Nothing changes until you confirm. Restore undoes it.</p>
+          </div></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="sitting">
+        <h2><span class="tag">Sitting 3</span> Free play <small>about 15 min</small></h2>
+        <ol class="run-list">
+          <li class="run"><span class="box"></span><span class="num">9</span><div>
+            <h3>“Explore”</h3>
+            <p>Hand someone the phone and say only “explore”. Watch 10 min.</p>
+            <p class="look">Found first <span class="fill wide"></span> Did twice <span class="fill wide"></span> Found a shop alone? <span class="ticks"><span>Yes</span><span>No</span></span></p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">10</span><div>
+            <h3>Pigeons and the horn</h3>
+            <p>Walk through the flock by D, drive through one, honk at a third.</p>
+            <p class="look">They scatter and come back. Horn easy to hit, never in the way.</p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">11</span><div>
+            <h3>People</h3>
+            <p>Talk to <span class="ticks"><span>Arthur</span><span>Priya</span><span>Kez</span><span>Dee</span><span>a passer-by</span></span> then nudge someone with the van.</p>
+            <p class="look">A bump is funny. “Get in” never flips to “Talk”.</p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">12</span><div>
+            <h3>Shops</h3>
+            <p><span class="ticks"><span>Paint the van at P</span><span>Clothes at S</span><span>Chips at C</span></span></p>
+            <p class="look">Panel readable. New look shows on the street.</p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">13</span><div>
+            <h3>Wrong number and journal</h3>
+            <p>After Mo's call, wait by D for the phone. Then Pause → Journal.</p>
+            <p class="look">Around town counts match. “New in the shops” toasts.</p>
+          </div></li>
+          <li class="run"><span class="box"></span><span class="num">14</span><div>
+            <h3>Settings</h3>
+            <p>Pause: steering A and C, a jacket, Sound off, Reduce motion. Reload.</p>
+            <p class="look">Every choice sticks.</p>
+          </div></li>
+        </ol>
+      </div>
+
+      <div class="unlocks">
+        <h2>Unlocks to aim for</h2>
+        <dl>
+          <dt>5 chats</dt><dd>Flat cap</dd>
+          <dt>3 chips</dt><dd>Chip-paper jacket</dd>
+          <dt>25 honks</dt><dd>Midnight van paint</dd>
+          <dt>50 pigeons</dt><dd>Pigeon-grey jacket, lilac stripe</dd>
+          <dt>Crew friend</dt><dd>Ferry: navy jacket, harbour-blue van · Market: plum jacket and van</dd>
+          <dt>Story</dt><dd>See the Reedlings: green van · Finish shift one: lamp beanie</dd>
+          <dt>Quick jobs</dt><dd>Quiet Last post in 35 s: racing stripe · All 3 lost things: sou'wester</dd>
+        </dl>
+      </div>
+
+      <div class="notes">
+        <h2>Notes · one sticking point per sitting</h2>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span><strong>After each sitting:</strong> tell Claude “done” and it reads the log.</span>
+    <span>People gates: 5 testers on run 1 · 3 on run 5 · 1 on run 6 · 1 on run 9</span>
+  </footer>
+</main>

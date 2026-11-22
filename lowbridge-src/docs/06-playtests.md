@@ -42,6 +42,8 @@ A small test group gives directional feedback. Record observations in a simple l
 
 ## Phone test plan, M1 to free play
 
+A printable one-page version is in [test-run-sheet.html](test-run-sheet.html) (A4; print it, or render it to PDF with Chromium). Update its build ID when a new test build goes out.
+
 Play on the claude.ai test page (it logs events and errors for review) or a local preview. Start each numbered run from Pause → New game unless it says otherwise. Copy the build ID from the bottom of Pause into the results log.
 
 **Sitting 1 · M1, about 20 minutes**
