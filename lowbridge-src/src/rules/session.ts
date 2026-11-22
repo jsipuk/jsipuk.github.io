@@ -44,6 +44,7 @@ import {
   hasFlag,
   hearCounteroffer,
   liftShutter,
+  newlyUnlocked,
   noticeMachine,
   quickStep,
   startEncounter,
@@ -335,9 +336,15 @@ export function transition(
         s.outbox.push({ type: 'save_failed', label });
         return false;
       }
+      const before = s.progress;
       s.progress = r.progress;
       s.saveFailed = null;
       s.outbox.push(...r.events);
+      // Story moments unlock looks too (a crew friend, the Reedlings, shift one): announce them.
+      if (!r.events.some((e) => e.type === 'unlocked')) {
+        const items = newlyUnlocked(before, r.progress);
+        if (items.length) s.outbox.push({ type: 'unlocked', items });
+      }
       after?.(r.events);
       return true;
     } finally {

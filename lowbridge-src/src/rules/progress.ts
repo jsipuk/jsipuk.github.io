@@ -535,16 +535,22 @@ export function addStats(p: Progress, delta: Partial<Stats>, met: string[] = [])
   const next = clone(p);
   for (const [k, v] of Object.entries(delta) as [keyof Stats, number][]) next.stats[k] += Math.max(0, Math.round(v));
   addUnique(next.chatted, met);
-  const newly = (Object.keys(STYLE_CATALOGUE) as StylePart[]).flatMap((part) =>
-    STYLE_CATALOGUE[part].filter((i) => i.unlock && !isUnlocked(p, i) && isUnlocked(next, i)).map((i) => i.name),
-  );
+  const newly = newlyUnlocked(p, next);
   return { ok: true, progress: next, events: newly.length ? [{ type: 'unlocked', items: newly }] : [] };
+}
+
+/** "Market plum jacket", "Midnight van paint": an unlock names what it is, since jackets and paints share colours. */
+function unlockLabel(part: StylePart, item: StyleItem): string {
+  if (part === 'jacket') return `${item.name} jacket`;
+  if (part === 'vanBody') return `${item.name} van paint`;
+  if (part === 'vanStripe') return /stripe$/i.test(item.name) ? item.name : `${item.name} stripe`;
+  return item.name;
 }
 
 /** Everything that became available between two saves (for "New in the shops"). */
 export function newlyUnlocked(before: Progress, after: Progress): string[] {
   return (Object.keys(STYLE_CATALOGUE) as StylePart[]).flatMap((part) =>
-    STYLE_CATALOGUE[part].filter((i) => i.unlock && !isUnlocked(before, i) && isUnlocked(after, i)).map((i) => i.name),
+    STYLE_CATALOGUE[part].filter((i) => i.unlock && !isUnlocked(before, i) && isUnlocked(after, i)).map((i) => unlockLabel(part, i)),
   );
 }
 

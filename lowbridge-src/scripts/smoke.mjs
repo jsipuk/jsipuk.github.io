@@ -279,6 +279,11 @@ const scenarios = {
     await answerAndBoard(p);
     const s = await deliver(page, p, 'nell_price');
     if (s.progress.recipient !== 'nell_price' || s.progress.crews.market !== 1 || s.progress.crews.ferry !== -1) throw new Error('wrong outcome');
+    // Making friends with the market unlocks looks; the toast says so.
+    await page.waitForFunction(() => /New in the shops/.test(document.getElementById('toast').textContent), null, { timeout: 5000 }).catch(() => {
+      throw new Error('no unlock toast after the market handover');
+    });
+    const toast = await page.textContent('#toast');
     if (shots) await page.screenshot({ path: `${shots}/m1-market-result.png` });
     await page.click('#prompt-choices button[data-choice="next"]');
     await page.waitForFunction(() => window.lowbridge.snapshot().prompt?.kind === 'line');
@@ -287,7 +292,7 @@ const scenarios = {
     const after = await p.snap();
     if (after.progress.shift.active?.beat !== 'Q02M') throw new Error('next call did not start Under the stalls');
     await ctx.close();
-    return `delivered to Nell at ${s.handoverAt.toFixed(0)} s; took the next call (${caller.title ?? 'Nell'}), Q02M active; errors ${errors.length}`;
+    return `delivered to Nell at ${s.handoverAt.toFixed(0)} s; “${toast}”; took the next call (${caller.title ?? 'Nell'}), Q02M active; errors ${errors.length}`;
   },
 
   async crab(browser) {

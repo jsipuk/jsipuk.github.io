@@ -10,7 +10,7 @@ import { JACKET_STYLES, HAT_STYLES } from '../src/rules/content.ts';
 import { createAmbient, honk, stepAmbient } from '../src/rules/ambient.ts';
 import { checkImport, freshEnvelope, validateEnvelope } from '../src/rules/save.ts';
 import { startPursuit } from '../src/rules/pursuit.ts';
-import { availableAction, choose, horn, pause, resume, settled, shopChoose, shopClose, stepSession } from '../src/rules/session.ts';
+import { availableAction, choose, horn, pause, resume, settled, shopChoose, shopClose, stepSession, transition } from '../src/rules/session.ts';
 import { STEP, act, harness, run, walkTo } from './helpers.ts';
 
 const map = buildRiverside();
@@ -92,7 +92,7 @@ test('unlocks follow saved progress, and locked items are refused', () => {
   const r = addStats(p, { pigeons: 50 }, ['a', 'b', 'c', 'd', 'e']);
   assert.ok(r.ok);
   const names = r.ok ? r.events.flatMap((e) => (e.type === 'unlocked' ? e.items : [])) : [];
-  assert.ok(names.includes('Pigeon grey') && names.includes('Flat cap'), names.join(', '));
+  assert.ok(names.includes('Pigeon grey jacket') && names.includes('Pigeon lilac stripe') && names.includes('Flat cap'), names.join(', '));
   assert.ok(isUnlocked(r.ok ? r.progress : p, HAT_STYLES.find((h) => h.id === 'flat_cap')!));
 });
 
@@ -235,4 +235,14 @@ test('a passer-by in reach never takes the button from the van', () => {
   // Away from the van, the same person can be talked to.
   s.van.x += 200;
   assert.equal(availableAction(s).kind, 'talk_ped');
+});
+
+test('a story moment that unlocks looks announces them once', async () => {
+  const { s } = harness();
+  s.progress = ok(acceptQ01(s.progress));
+  s.outbox.length = 0;
+  await transition(s, 'deliver', (p) => deliverBattery(p, 'nell_price'));
+  const unlocked = s.outbox.filter((e) => e.type === 'unlocked');
+  assert.equal(unlocked.length, 1);
+  assert.deepEqual(unlocked[0].type === 'unlocked' ? unlocked[0].items : [], ['Market plum jacket', 'Market plum van paint']);
 });
