@@ -1,15 +1,12 @@
-// Per-device preferences and the M0 lap log. Browser storage can be missing or
+// Per-device preferences. Browser storage can be missing or
 // throw (private mode, blocked site data), so every access is guarded and the
-// game runs without it. Story progress moves to IndexedDB in M1.
+// game runs without it. Story progress is saved in IndexedDB (src/rules/save.ts).
 
 import type { SteeringPreset } from './rules/controls.ts';
 import { DEFAULT_PRESET } from './rules/controls.ts';
 import { DEFAULT_JACKET, JACKETS } from './art.ts';
-import type { LapRecord } from './rules/session.ts';
 
 const SETTINGS_KEY = 'lowbridge.settings.v1';
-const LAPS_KEY = 'lowbridge.m0.laps.v1';
-const MAX_LAPS = 40;
 
 export interface Settings {
   preset: SteeringPreset;
@@ -17,11 +14,6 @@ export interface Settings {
   /** null follows the system setting. */
   reduceMotion: boolean | null;
   jacket: string;
-}
-
-export interface StoredLap extends LapRecord {
-  build: string;
-  at: string;
 }
 
 const DEFAULTS: Settings = { preset: DEFAULT_PRESET, muted: false, reduceMotion: null, jacket: DEFAULT_JACKET };
@@ -55,21 +47,6 @@ export function loadSettings(): Settings {
 }
 
 export const saveSettings = (s: Settings): void => write(SETTINGS_KEY, s);
-
-export function loadLaps(): StoredLap[] {
-  const laps = read<StoredLap[]>(LAPS_KEY);
-  return Array.isArray(laps) ? laps.filter((l) => l && typeof l.lapSeconds === 'number').slice(-MAX_LAPS) : [];
-}
-
-export function appendLap(record: LapRecord, build: string): StoredLap[] {
-  const laps = [...loadLaps(), { ...record, build, at: new Date().toISOString() }].slice(-MAX_LAPS);
-  write(LAPS_KEY, laps);
-  return laps;
-}
-
-export function clearLaps(): void {
-  write(LAPS_KEY, []);
-}
 
 export function systemPrefersReducedMotion(): boolean {
   try {

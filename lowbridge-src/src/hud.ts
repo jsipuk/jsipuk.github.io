@@ -1,37 +1,73 @@
-// HTML overlay: one-line job with an arrow, the labelled action button,
-// captions, the phone dialogue and the pause/start sheet.
+// HTML overlay: the one-line job with its arrow, the labelled action button,
+// captions, prompts with choices, the encounter, the patrol chip, the save
+// warning and the pause/return sheet with the journal.
 
+import { drawCrabPortrait } from './art.ts';
+import { CREATURES, CREWS, NEXT_JOBS, PEOPLE } from './rules/content.ts';
 import type { Vec } from './rules/math.ts';
-import { PRESETS, RETIRED_PRESETS } from './rules/controls.ts';
+import type { Progress } from './rules/progress.ts';
+import { CAUGHT_SECONDS, ESCAPE_SECONDS } from './rules/pursuit.ts';
 import type { Session } from './rules/session.ts';
 import { availableAction, objective } from './rules/session.ts';
-import type { Settings, StoredLap } from './settings.ts';
+import type { Settings } from './settings.ts';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
+export interface HudHandlers {
+  onChoose(choiceId: string): void;
+  onEncounter(action: 'dim' | 'offer_washer' | 'leave' | 'continue'): void;
+  onRetrySave(): void;
+}
+
+export interface SheetInfo {
+  eyebrow: string;
+  title: string;
+  lede: string;
+  next: string;
+  button: string;
+}
+
 export interface Hud {
-  /** Called every frame; only touches the DOM when something changed. */
   render(s: Session, focus: Vec, touch: boolean): void;
   toast(text: string, seconds?: number): void;
-  showSheet(kind: 'start' | 'pause'): void;
+  showSheet(info: SheetInfo, progress: Progress): void;
   hideSheet(): void;
   sheetOpen(): boolean;
   syncSettings(settings: Settings): void;
-  renderLaps(laps: StoredLap[]): void;
+  setSaveState(text: string, failed: boolean): void;
 }
 
-export const formatSeconds = (sec: number): string => {
-  const m = Math.floor(sec / 60);
-  const s = Math.round(sec - m * 60);
-  return `${m}:${String(s).padStart(2, '0')}`;
-};
+const signed = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : '0');
 
-export const presetLabel = (p: string): string =>
-  p in PRESETS
-    ? `${PRESETS[p as keyof typeof PRESETS].letter} · ${PRESETS[p as keyof typeof PRESETS].name}`
-    : (RETIRED_PRESETS[p] ?? 'Mixed steering');
+function journal(p: Progress): [string, string][] {
+  const rows: [string, string][] = [];
+  const stage = p.story.stage;
+  rows.push([
+    'Job',
+    stage === 'offered'
+      ? 'Q01 One good battery · the depot payphone is ringing'
+      : stage === 'carrying'
+        ? 'Q01 One good battery · carrying the spare battery'
+        : `Q01 done · battery to ${PEOPLE[p.recipient!].name}`,
+  ]);
+  if (p.story.nextJob) {
+    const n = NEXT_JOBS[p.story.nextJob];
+    rows.push(['Next lead', `${n.name}: ${n.lead} · about ${n.minutes} min (arrives in the next build)`]);
+  }
+  for (const crew of ['ferry', 'market'] as const) {
+    rows.push([CREWS[crew].name, `${PEOPLE[CREWS[crew].person].name} · trust ${signed(p.crews[crew])}`]);
+  }
+  rows.push(['Team', p.team.map((c) => `${CREATURES[c].name} (${CREATURES[c].kind})`).join(' · ')]);
+  for (const c of p.roster) {
+    const info = CREATURES[c];
+    const marks = p.guide[c] ?? [];
+    rows.push([`Guide: ${info.name}`, `${info.guide} ${info.field}. Habitat: ${info.habitat}. Noted: ${marks.join(', ') || 'seen'}.`]);
+  }
+  if (p.flags.includes('yard_shutter_open')) rows.push(['Route', 'The builders’ yard shutter is open for good.']);
+  return rows;
+}
 
-export function createHud(): Hud {
+export function createHud(h: HudHandlers): Hud {
   const root = $('hud');
   const jobText = $('job-text');
   const jobArrow = $('job-arrow');
@@ -39,18 +75,29 @@ export function createHud(): Hud {
   const actVerb = $('act-verb');
   const actReason = $('act-reason');
   const caption = $('caption');
+  const heat = $('heat');
+  const savebar = $('savebar');
   const padLabel = $('pad-label');
-  const dialogue = $('dialogue');
-  const dlgSpeaker = $('dlg-speaker');
-  const dlgRole = $('dlg-role');
-  const dlgText = $('dlg-text');
+  const promptEl = $('prompt');
+  const promptTitle = $('prompt-title');
+  const promptSpeakerRow = $('prompt-speaker-row');
+  const promptSpeaker = $('prompt-speaker');
+  const promptRole = $('prompt-role');
+  const promptLine = $('prompt-line');
+  const promptText = $('prompt-text');
+  const promptChoices = $('prompt-choices');
+  const enc = $('encounter');
+  const encPortrait = $('enc-portrait');
+  const encTurn = $('enc-turn');
+  const encTitle = $('enc-title');
+  const encCue = $('enc-cue');
+  const encButtons = Array.from(enc.querySelectorAll<HTMLButtonElement>('button[data-act]'));
   const toastEl = $('toast');
   const sheet = $('sheet');
-  const sheetTitle = $('sheet-title');
   const resumeBtn = $('resume-btn');
-  const lede = $('sheet-lede');
-  const lapLog = $('lap-log');
-  const lapsEmpty = $('laps-empty');
+
+  for (const b of encButtons) b.addEventListener('click', () => h.onEncounter(b.dataset.act as never));
+  $('save-retry').addEventListener('click', () => h.onRetrySave());
 
   const last: Record<string, string> = {};
   const set = (key: string, value: string, apply: (v: string) => void) => {
@@ -63,7 +110,7 @@ export function createHud(): Hud {
   return {
     render(s, focus, touch) {
       set('mode', s.mode, (v) => (root.dataset.mode = v));
-      set('loco', s.locomotion, (v) => (root.dataset.loco = v));
+      set('loco', s.locomotion === 'foot' ? 'foot' : 'van', (v) => (root.dataset.loco = v));
       set('preset', s.preset, (v) => (root.dataset.preset = v));
       set('touch', touch ? '1' : '0', (v) => (root.dataset.touch = v));
       const padText = s.locomotion === 'foot' ? 'Walk' : s.preset === 'hybrid' ? 'Steer' : 'Drive';
@@ -82,31 +129,90 @@ export function createHud(): Hud {
       }
 
       const a = availableAction(s);
-      const showAct = s.mode === 'world' && a.kind !== null;
-      set('actShown', String(showAct), (v) => (act.hidden = v !== 'true'));
+      set('actShown', String(s.mode === 'world' && a.kind !== null), (v) => (act.hidden = v !== 'true'));
       set('actVerb', a.verb, (v) => (actVerb.textContent = v));
       set('actReason', a.enabled ? '' : (a.reason ?? ''), (v) => (actReason.textContent = v));
       set('actEnabled', String(a.enabled), (v) => {
         act.classList.toggle('disabled', v !== 'true');
         act.setAttribute('aria-disabled', v === 'true' ? 'false' : 'true');
       });
-      const label = a.enabled ? a.verb : `${a.verb}: ${a.reason ?? 'not available'}`;
-      set('actLabel', label, (v) => act.setAttribute('aria-label', v));
+      set('actLabel', a.enabled ? a.verb : `${a.verb}: ${a.reason ?? 'not available'}`, (v) => act.setAttribute('aria-label', v));
 
-      const ringing = s.phoneRinging && s.mode === 'world';
-      set('caption', ringing ? 'The payphone outside the depot is ringing.' : '', (v) => {
+      const cap = s.mode === 'world' && s.caption ? `${s.caption.speaker ? `${s.caption.speaker}: ` : ''}${s.caption.text}` : '';
+      set('caption', cap, (v) => {
         caption.hidden = v === '';
-        caption.textContent = v ? `☎ ${v}` : '';
+        caption.textContent = v;
+        caption.classList.toggle('radio', !!s.caption?.speaker);
       });
 
-      const line = s.mode === 'dialogue' ? s.dialogue : null;
-      set('dialogue', line ? line.text : '', () => {
-        dialogue.hidden = !line;
-        if (line) {
-          dlgSpeaker.textContent = line.speaker;
-          dlgRole.textContent = line.role;
-          dlgText.textContent = `“${line.text}”`;
+      const p = s.pursuit;
+      const heatText = !p
+        ? ''
+        : p.delay > 0
+          ? 'Patrol on its way'
+          : p.boxed > 0.2
+            ? `Boxed in · ${p.boxed.toFixed(1)} / ${CAUGHT_SECONDS} s · move!`
+            : p.inSight
+              ? 'Patrol · in sight'
+              : p.searching
+                ? `Patrol · out of sight ${p.outOfSight.toFixed(1)} / ${ESCAPE_SECONDS} s`
+                : 'Patrol · heading to where you took the car';
+      set('heat', heatText, (v) => {
+        heat.hidden = v === '';
+        heat.textContent = v;
+        heat.classList.toggle('danger', !!p && (p.inSight || p.boxed > 0.2));
+      });
+      set('savebar', String(!!s.saveFailed), (v) => (savebar.hidden = v !== 'true'));
+
+      // Prompts: one at a time, with their choices as buttons.
+      const pr = s.mode === 'prompt' ? s.prompts[0] : null;
+      const key = pr ? `${pr.kind}|${pr.title ?? ''}|${pr.text ?? ''}|${pr.line?.text ?? ''}|${pr.choices.map((c) => c.id).join()}` : '';
+      set('prompt', key, () => {
+        promptEl.hidden = !pr;
+        if (!pr) return;
+        promptEl.dataset.kind = pr.kind;
+        promptTitle.textContent = pr.title ?? '';
+        promptTitle.hidden = !pr.title;
+        promptSpeakerRow.hidden = !pr.line;
+        promptLine.hidden = !pr.line;
+        if (pr.line) {
+          promptSpeaker.textContent = pr.line.speaker;
+          promptRole.textContent = pr.line.role;
+          promptLine.textContent = `“${pr.line.text}”`;
         }
+        promptText.textContent = pr.text ?? '';
+        promptText.hidden = !pr.text;
+        promptChoices.replaceChildren(
+          ...pr.choices.map((c, i) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = c.label;
+            b.dataset.choice = c.id;
+            // The handover and dispatch choices carry equal weight; elsewhere the first is primary.
+            if (pr.kind === 'result' || pr.kind === 'confirm' || i === 0) b.className = 'primary';
+            b.addEventListener('click', () => h.onChoose(c.id));
+            return b;
+          }),
+        );
+        // Safe default focus: "Not yet" on a handover, the first choice otherwise.
+        const focusIndex = pr.kind === 'confirm' ? pr.choices.length - 1 : 0;
+        (promptChoices.children[focusIndex] as HTMLButtonElement | undefined)?.focus({ preventScroll: true });
+      });
+
+      // Encounter.
+      const e = s.mode === 'encounter' ? s.encounter : null;
+      const pose = s.progress.encounter?.pose ?? 'claws_lowered';
+      const encKey = e ? `${pose}|${e.text}|${e.done}|${s.progress.encounter?.turn ?? 0}` : '';
+      set('enc', encKey, () => {
+        enc.hidden = !e;
+        if (!e) return;
+        encPortrait.replaceChildren(drawCrabPortrait(pose));
+        encPortrait.dataset.pose = pose;
+        encTurn.textContent = e.done ? 'Recruited' : `Turn ${(s.progress.encounter?.turn ?? 0) + 1}`;
+        encTitle.textContent = e.done ? 'Clatterjack, bottle-cap crab' : 'A crab in the coin return';
+        encCue.textContent = e.text;
+        for (const b of encButtons) b.hidden = e.done ? b.dataset.act !== 'continue' : b.dataset.act === 'continue';
+        encButtons.find((b) => !b.hidden)?.focus({ preventScroll: true });
       });
     },
 
@@ -117,10 +223,25 @@ export function createHud(): Hud {
       toastTimer = window.setTimeout(() => (toastEl.hidden = true), seconds * 1000);
     },
 
-    showSheet(kind) {
-      sheetTitle.textContent = kind === 'start' ? 'Lowbridge After Dark' : 'Paused';
-      resumeBtn.textContent = kind === 'start' ? 'Start' : 'Resume';
-      lede.hidden = kind !== 'start';
+    showSheet(info, progress) {
+      $('sheet-eyebrow').textContent = info.eyebrow;
+      $('sheet-title').textContent = info.title;
+      $('sheet-lede').textContent = info.lede;
+      $('sheet-lede').hidden = !info.lede;
+      $('sheet-next').textContent = info.next;
+      $('sheet-next').hidden = !info.next;
+      resumeBtn.textContent = info.button;
+      $('journal').replaceChildren(
+        ...journal(progress).flatMap(([k, v]) => {
+          const dt = document.createElement('dt');
+          dt.textContent = k;
+          const dd = document.createElement('dd');
+          dd.textContent = v;
+          return [dt, dd];
+        }),
+      );
+      $('new-game-confirm').hidden = true;
+      $('new-game-btn').hidden = false;
       sheet.hidden = false;
       resumeBtn.focus({ preventScroll: true });
     },
@@ -142,20 +263,9 @@ export function createHud(): Hud {
       }
     },
 
-    renderLaps(laps) {
-      lapsEmpty.hidden = laps.length > 0;
-      lapLog.replaceChildren(
-        ...laps
-          .slice()
-          .reverse()
-          .map((lap) => {
-            const li = document.createElement('li');
-            const bumps = lap.bumps === 0 ? 'no bumps' : lap.bumps === 1 ? '1 bump' : `${lap.bumps} bumps`;
-            const when = new Date(lap.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-            li.textContent = `${presetLabel(lap.preset)} · ${formatSeconds(lap.lapSeconds)} · ${bumps} · ${when}`;
-            return li;
-          }),
-      );
+    setSaveState(text, failed) {
+      $('save-state').textContent = text;
+      $('save-state').classList.toggle('failed', failed);
     },
   };
 }

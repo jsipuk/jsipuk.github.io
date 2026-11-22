@@ -25,6 +25,11 @@
         <span aria-hidden="true">❚❚</span> Pause
       </button>
       <div class="caption" id="caption" role="status" aria-live="polite" hidden></div>
+      <div class="heat" id="heat" role="status" aria-live="polite" hidden></div>
+      <div class="savebar" id="savebar" role="alert" hidden>
+        <span>Progress hasn’t saved</span>
+        <button type="button" id="save-retry">Try again</button>
+      </div>
 
       <div class="pad-zone touch-only" id="pad-zone">
         <div class="pad-base" id="pad-base">
@@ -47,22 +52,42 @@
       </div>
     </div>
 
-    <div class="dialogue" id="dialogue" role="dialog" aria-labelledby="dlg-speaker" hidden>
-      <p class="dlg-speaker"><span id="dlg-speaker">Mo Vale</span> <small id="dlg-role"></small></p>
-      <p class="dlg-text" id="dlg-text"></p>
-      <button class="primary" id="dlg-close" type="button">Hang up</button>
+    <div class="dialogue" id="prompt" role="dialog" aria-labelledby="prompt-title" hidden>
+      <h2 class="prompt-title" id="prompt-title"></h2>
+      <p class="dlg-speaker" id="prompt-speaker-row"><span id="prompt-speaker"></span> <small id="prompt-role"></small></p>
+      <p class="dlg-text" id="prompt-line"></p>
+      <p class="prompt-text" id="prompt-text"></p>
+      <div class="choices" id="prompt-choices"></div>
+    </div>
+
+    <div class="encounter" id="encounter" role="dialog" aria-labelledby="enc-title" hidden>
+      <div class="enc-portrait" id="enc-portrait" aria-hidden="true"></div>
+      <div class="enc-body">
+        <p class="eyebrow" id="enc-turn">Turn 1</p>
+        <h2 id="enc-title">A crab in the coin return</h2>
+        <p class="enc-cue" id="enc-cue" role="status" aria-live="polite"></p>
+        <div class="choices" id="enc-choices">
+          <button type="button" class="primary" data-act="dim">Dim · Wickwing</button>
+          <button type="button" data-act="offer_washer">Offer washer</button>
+          <button type="button" data-act="leave">Leave</button>
+          <button type="button" class="primary" data-act="continue" hidden>Continue</button>
+        </div>
+      </div>
     </div>
 
     <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
       <div class="sheet-body">
-        <p class="eyebrow">M0 · handling test</p>
+        <p class="eyebrow" id="sheet-eyebrow">Riverside · shift one</p>
         <h1 id="sheet-title">Lowbridge After Dark</h1>
-        <p class="lede" id="sheet-lede">
-          Walk to the van. Drive round the block, park in the marked bay by the phone box, get out and answer the
-          phone.
-        </p>
+        <p class="lede" id="sheet-lede"></p>
+        <p class="lede next" id="sheet-next"></p>
         <p class="portrait-hint" id="portrait-hint">Turn your phone sideways for driving. This menu works either way.</p>
         <button class="primary" id="resume-btn" type="button">Start</button>
+
+        <section class="journal" aria-labelledby="journal-title">
+          <h2 id="journal-title">Journal</h2>
+          <dl id="journal"></dl>
+        </section>
 
         <fieldset class="presets">
           <legend>Steering</legend>
@@ -74,7 +99,7 @@
             <input type="radio" name="preset" value="pad" />
             <span><b>A · Thumb pad</b> <span>Push where you want to go. Pull back to reverse. Let go to stop.</span></span>
           </label>
-          <p class="note">Both drive the same van, and both have a Brake/Reverse button. Change this any time from Pause.</p>
+          <p class="note">Both drive the same vehicles, and both have a Brake/Reverse button.</p>
         </fieldset>
 
         <fieldset class="jackets">
@@ -87,28 +112,27 @@
           <label class="toggle"><input type="checkbox" id="reduce-motion" /> Reduce motion</label>
         </div>
 
-        <section class="laps" aria-labelledby="laps-title">
-          <h2 id="laps-title">Lap log</h2>
-          <p class="note" id="laps-empty">No laps yet. A lap is logged when you answer the phone after parking.</p>
-          <ol id="lap-log"></ol>
+        <section class="danger">
+          <button type="button" id="new-game-btn">New game</button>
+          <div class="confirm-row" id="new-game-confirm" hidden>
+            <p>Erase this save on this device and start shift one again?</p>
+            <div class="row">
+              <button type="button" id="new-game-yes">Erase and start again</button>
+              <button type="button" id="new-game-no">Keep my progress</button>
+            </div>
+          </div>
         </section>
-
-        <div class="row">
-          <button type="button" id="restart-btn">Restart the test</button>
-          <button type="button" id="clear-log-btn">Clear lap log</button>
-        </div>
 
         <details class="keyhelp">
           <summary>Keyboard</summary>
           <ul>
             <li><kbd>W A S D</kbd> or arrows: walk, and point the pad while driving</li>
-            <li><kbd>Shift</kbd>: Go (steering C)</li>
-            <li><kbd>Space</kbd>: brake, then reverse</li>
-            <li><kbd>E</kbd> or <kbd>Enter</kbd>: the action on the button (Get in, Get out, Answer, Hang up)</li>
+            <li><kbd>Shift</kbd>: Go (steering C) · <kbd>Space</kbd>: brake, then reverse</li>
+            <li><kbd>E</kbd> or <kbd>Enter</kbd>: the action on the amber button</li>
             <li><kbd>Esc</kbd> or <kbd>P</kbd>: pause · <kbd>1</kbd>/<kbd>3</kbd>: steering A/C · <kbd>M</kbd>: sound</li>
           </ul>
         </details>
-        <p class="build">Build <span id="build-id"></span> · local placeholder art</p>
+        <p class="build">Build <span id="build-id"></span> · <span id="save-state">not saved yet</span> · local placeholder art</p>
       </div>
     </div>
 

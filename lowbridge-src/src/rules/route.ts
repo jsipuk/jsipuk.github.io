@@ -20,38 +20,46 @@ interface RouteGraph {
   rects: Map<string, Rect>;
 }
 
-const graphs = new WeakMap<StreetMap, RouteGraph>();
+const graphs = new WeakMap<StreetMap, Map<string, RouteGraph>>();
 
-function graphFor(map: StreetMap): RouteGraph {
-  const cached = graphs.get(map);
+/** Flags that open gated roads (the yard shutter). */
+export type OpenGates = ReadonlySet<string>;
+const NONE: OpenGates = new Set();
+
+function graphFor(map: StreetMap, open: OpenGates): RouteGraph {
+  const usable = map.roads.filter((r) => !r.gate || open.has(r.gate));
+  const key = usable.map((r) => r.id).join(',');
+  let byKey = graphs.get(map);
+  if (!byKey) graphs.set(map, (byKey = new Map()));
+  const cached = byKey.get(key);
   if (cached) return cached;
   const rects = new Map<string, Rect>();
-  for (const road of map.roads) {
+  for (const road of usable) {
     const r = road.rect;
     rects.set(road.id, { x: r.x * TILE, y: r.y * TILE, w: r.w * TILE, h: r.h * TILE });
   }
   const junctions: Junction[] = [];
-  for (let i = 0; i < map.roads.length; i++) {
-    for (let j = i + 1; j < map.roads.length; j++) {
-      const a = rects.get(map.roads[i].id)!;
-      const b = rects.get(map.roads[j].id)!;
+  for (let i = 0; i < usable.length; i++) {
+    for (let j = i + 1; j < usable.length; j++) {
+      const a = rects.get(usable[i].id)!;
+      const b = rects.get(usable[j].id)!;
       const x = Math.max(a.x, b.x);
       const y = Math.max(a.y, b.y);
       const r = Math.min(a.x + a.w, b.x + b.w);
       const btm = Math.min(a.y + a.h, b.y + b.h);
       if (r > x && btm > y) {
         junctions.push({
-          id: `${map.roads[i].id}+${map.roads[j].id}`,
+          id: `${usable[i].id}+${usable[j].id}`,
           at: { x: (x + r) / 2, y: (y + btm) / 2 },
-          roads: [map.roads[i].id, map.roads[j].id],
+          roads: [usable[i].id, usable[j].id],
         });
       }
     }
   }
   const byRoad = new Map<string, Junction[]>();
-  for (const road of map.roads) byRoad.set(road.id, junctions.filter((j) => j.roads.includes(road.id)));
+  for (const road of usable) byRoad.set(road.id, junctions.filter((j) => j.roads.includes(road.id)));
   const graph = { junctions, byRoad, rects };
-  graphs.set(map, graph);
+  byKey.set(key, graph);
   return graph;
 }
 
@@ -84,11 +92,20 @@ function roadsAt(graph: RouteGraph, p: Vec): string[] {
  * itself if both are on the same road, otherwise the next junction along the
  * shortest road route. A junction the driver is already in is skipped.
  */
-export function nextWaypoint(map: StreetMap, from: Vec, to: Vec, arrivedPx = 32): Vec {
-  const graph = graphFor(map);
+export function nextWaypoint(map: StreetMap, from: Vec, to: Vec, open: OpenGates = NONE, arrivedPx = 32): Vec {
+  return routeFrom(map, from, to, open, arrivedPx).next;
+}
+
+/** Shortest road distance in px from `from` to `to`, or Infinity if unreachable. */
+export function roadDistance(map: StreetMap, from: Vec, to: Vec, open: OpenGates = NONE): number {
+  return routeFrom(map, from, to, open, 0).distance;
+}
+
+function routeFrom(map: StreetMap, from: Vec, to: Vec, open: OpenGates, arrivedPx: number): { next: Vec; distance: number } {
+  const graph = graphFor(map, open);
   const fromRoads = roadsAt(graph, from);
   const toRoads = new Set(roadsAt(graph, to));
-  if (fromRoads.some((r) => toRoads.has(r))) return to;
+  if (fromRoads.some((r) => toRoads.has(r))) return { next: to, distance: dist(from, to) };
 
   // Dijkstra over junctions, entered from the roads `from` is on.
   const best = new Map<string, number>();
@@ -116,11 +133,10 @@ export function nextWaypoint(map: StreetMap, from: Vec, to: Vec, arrivedPx = 32)
       }
     }
   }
-  if (!finish) return to;
+  if (!finish) return { next: to, distance: Infinity };
   // Already standing in that junction: point at the one after it, or the target.
-  if (dist(from, finish.first.at) < arrivedPx) {
-    const onward = nextWaypoint(map, finish.first.at, to, 0);
-    return onward;
+  if (arrivedPx > 0 && dist(from, finish.first.at) < arrivedPx) {
+    return { next: routeFrom(map, finish.first.at, to, open, 0).next, distance: finish.d };
   }
-  return finish.first.at;
+  return { next: finish.first.at, distance: finish.d };
 }

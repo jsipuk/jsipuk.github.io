@@ -1,17 +1,33 @@
 // The street scene draws the session. All rules live in src/rules; this file
-// only advances the fixed-step clock, positions sprites and moves the camera.
+// advances the fixed-step clock, drains session events, positions sprites and
+// plays effects only after the session reports a committed change.
 
 import Phaser from 'phaser';
-import { ART_SCALE, PALETTE, drawBeam, drawCourier, drawStreet, drawVan } from './art.ts';
+import {
+  ART_SCALE,
+  PALETTE,
+  drawBeam,
+  drawCourier,
+  drawCrab,
+  drawExpress,
+  drawFerry,
+  drawPatrol,
+  drawPerson,
+  drawPin,
+  drawStall,
+  drawStreet,
+  drawVan,
+} from './art.ts';
 import type { Hud } from './hud.ts';
 import type { Input } from './input.ts';
 import { STEP_SECONDS, createClock, framesToSteps, resetClock } from './rules/clock.ts';
-import { clamp, forward, rectCentre } from './rules/math.ts';
+import { clamp, forward } from './rules/math.ts';
 import type { Vec } from './rules/math.ts';
 import { TILE } from './rules/map.ts';
-import type { GameEvent, Session } from './rules/session.ts';
-import { stepSession } from './rules/session.ts';
-import { VAN } from './rules/vehicle.ts';
+import { hasFlag } from './rules/progress.ts';
+import type { Session, WorldEvent } from './rules/session.ts';
+import { destinations, driving, stepSession } from './rules/session.ts';
+import { EXPRESS, VAN } from './rules/vehicle.ts';
 
 export interface SceneDeps {
   session(): Session;
@@ -21,9 +37,9 @@ export interface SceneDeps {
   reduceMotion(): boolean;
   jacket(): string;
   touch(): boolean;
-  onEvents(events: GameEvent[]): void;
+  /** Session events, drained once per frame after the simulation steps. */
+  onEvents(events: WorldEvent[]): void;
   onReady(scene: StreetScene): void;
-  /** Distance from the courier (or van) to the phone, for the ring volume. */
   onFrame(focus: Vec): void;
 }
 
@@ -46,14 +62,25 @@ export class StreetScene extends Phaser.Scene {
   private deps!: SceneDeps;
   private clock = createClock();
   private vanImg!: Phaser.GameObjects.Image;
+  private expressImg!: Phaser.GameObjects.Image;
+  private patrolImg!: Phaser.GameObjects.Image;
   private beam!: Phaser.GameObjects.Image;
   private courier!: Phaser.GameObjects.Image;
-  private ringFx!: Phaser.GameObjects.Graphics;
-  private bayFx!: Phaser.GameObjects.Graphics;
+  private ferryDark!: Phaser.GameObjects.Image;
+  private ferryLit!: Phaser.GameObjects.Image;
+  private stallsLit: Phaser.GameObjects.Image[] = [];
+  private mo!: Phaser.GameObjects.Image;
+  private nell!: Phaser.GameObjects.Image;
+  private pins: Record<string, Phaser.GameObjects.Image> = {};
+  private wildCrab!: Phaser.GameObjects.Image;
+  private pocketCrab!: Phaser.GameObjects.Image;
+  private fx!: Phaser.GameObjects.Graphics;
   private ringLabel!: Phaser.GameObjects.Text;
   private camPos: Vec | null = null;
   private stride = { phase: 0, last: null as Vec | null, idle: 0 };
   private look: Vec = { x: 0, y: 0 };
+  /** Times (scene ms) when committed changes happened this session, for their animations. */
+  private anim = { ferry: -1, market: -1, shutter: -1 };
 
   constructor() {
     super({ key: 'street' });
@@ -65,39 +92,64 @@ export class StreetScene extends Phaser.Scene {
 
   create(): void {
     const map = this.deps.session().map;
-    this.textures.addCanvas('street', drawStreet(map));
-    this.textures.addCanvas('van', drawVan());
-    this.textures.addCanvas('beam', drawBeam());
+    const add = (key: string, c: HTMLCanvasElement) => this.textures.addCanvas(key, c);
+    add('street', drawStreet(map));
+    add('van', drawVan());
+    add('express', drawExpress());
+    add('patrol-0', drawPatrol(0));
+    add('patrol-1', drawPatrol(1));
+    add('beam', drawBeam());
+    add('ferry-dark', drawFerry(false));
+    add('ferry-lit', drawFerry(true));
+    add('mo', drawPerson('mo_vale'));
+    add('nell', drawPerson('nell_price'));
+    add('crab', drawCrab());
+    add('pin', drawPin());
+    map.stalls.forEach((_, i) => {
+      add(`stall-dark-${i}`, drawStall(false, i));
+      add(`stall-lit-${i}`, drawStall(true, i));
+    });
 
-
+    const img = (x: number, y: number, key: string, depth: number) =>
+      this.add.image(x, y, key).setScale(1 / ART_SCALE).setDepth(depth);
     this.add.image(map.region.x, map.region.y, 'street').setOrigin(0).setScale(1 / ART_SCALE).setDepth(0);
-    this.bayFx = this.add.graphics().setDepth(1);
-    this.beam = this.add
-      .image(0, 0, 'beam')
-      .setOrigin(0, 0.5)
-      .setScale(1 / ART_SCALE)
-      .setAlpha(0.55)
-      .setBlendMode(Phaser.BlendModes.ADD)
-      .setDepth(2);
-    this.vanImg = this.add.image(0, 0, 'van').setScale(1 / ART_SCALE).setDepth(3);
-    this.courier = this.add.image(0, 0, this.courierKey(0)).setScale(1 / ART_SCALE).setDepth(4);
-    this.ringFx = this.add.graphics().setDepth(5);
 
-    const label = (text: string, x: number, y: number, angle = 0) =>
-      this.add.text(x, y, text, LABEL_STYLE).setOrigin(0.5).setAngle(angle).setDepth(6);
+    const f = map.ferry;
+    this.ferryDark = img(f.x, f.y, 'ferry-dark', 1).setOrigin(0);
+    this.ferryLit = img(f.x, f.y, 'ferry-lit', 1).setOrigin(0).setAlpha(0);
+    map.stalls.forEach((r, i) => {
+      img(r.x, r.y, `stall-dark-${i}`, 1).setOrigin(0);
+      this.stallsLit.push(img(r.x, r.y, `stall-lit-${i}`, 1).setOrigin(0).setAlpha(0));
+    });
+    this.fx = this.add.graphics().setDepth(2);
+    this.beam = img(0, 0, 'beam', 2).setOrigin(0, 0.5).setAlpha(0.55).setBlendMode(Phaser.BlendModes.ADD);
+    this.vanImg = img(0, 0, 'van', 3);
+    this.expressImg = img(0, 0, 'express', 3);
+    this.patrolImg = img(0, 0, 'patrol-0', 3).setVisible(false);
+    this.mo = img(map.people.mo_vale.x, map.people.mo_vale.y, 'mo', 3);
+    this.nell = img(map.people.nell_price.x, map.people.nell_price.y, 'nell', 3);
+    this.wildCrab = img(map.machine.x + 9, map.machine.y + 1, 'crab', 3).setVisible(false);
+    this.pocketCrab = img(0, 0, 'crab', 4).setVisible(false);
+    this.courier = img(0, 0, this.courierKey(0), 4);
+    for (const id of ['mo_vale', 'nell_price', 'shutter']) this.pins[id] = img(0, 0, 'pin', 6).setOrigin(0.5, 1).setVisible(false);
+
+    const label = (text: string, x: number, y: number) =>
+      this.add.text(x, y, text, LABEL_STYLE).setOrigin(0.5).setDepth(6);
     for (const b of map.buildings) {
       if (!b.label) continue;
-      const c = rectCentre({ x: b.rect.x * TILE, y: b.rect.y * TILE, w: b.rect.w * TILE, h: b.rect.h * TILE });
-      label(b.label, c.x, c.y);
+      label(b.label, (b.rect.x + b.rect.w / 2) * TILE, (b.rect.y + b.rect.h / 2) * TILE);
     }
-    label('CLOSED', map.barrier.x * TILE + 8, (map.barrier.y + map.barrier.h / 2) * TILE, -90);
+    label("BUILDERS' YARD", 30 * TILE, 26.5 * TILE);
+    label('FERRY QUAY', 10 * TILE, 2.4 * TILE);
+    label('NIGHT MARKET', 54.5 * TILE, 3.6 * TILE);
+    label('MO', map.people.mo_vale.x, map.people.mo_vale.y + 12);
+    label('NELL', map.people.nell_price.x, map.people.nell_price.y + 12);
     this.ringLabel = label('RING', map.phone.x, map.phone.y - 14).setDepth(7);
 
     const cam = this.cameras.main;
     cam.setBackgroundColor(PALETTE.void);
-    // A margin past the block edge keeps the courier mid-screen, clear of the thumb controls.
-    const margin = 10 * TILE;
-    cam.setBounds(map.region.x - margin, map.region.y - margin, map.region.w + margin * 2, map.region.h + margin * 2);
+    const margin = 8 * TILE;
+    cam.setBounds(map.region.x - margin, map.region.y, map.region.w + margin * 2, map.region.h + margin);
     this.fitCamera();
     this.scale.on('resize', () => this.fitCamera());
     this.deps.onReady(this);
@@ -105,9 +157,7 @@ export class StreetScene extends Phaser.Scene {
 
   private fitCamera(): void {
     const { dpr } = this.deps;
-    const cssW = this.scale.width / dpr;
-    const cssH = this.scale.height / dpr;
-    this.cameras.main.setZoom(cssZoom(cssW, cssH) * dpr);
+    this.cameras.main.setZoom(cssZoom(this.scale.width / dpr, this.scale.height / dpr) * dpr);
   }
 
   /** Texture for one walk frame in the chosen jacket, drawn the first time it is needed. */
@@ -133,12 +183,12 @@ export class StreetScene extends Phaser.Scene {
     return [1, 0, 2, 0][Math.floor(st.phase)];
   }
 
-  /** Forget time that passed while paused, hidden or in a dialogue. */
+  /** Forget time that passed while paused, hidden or in a menu. */
   resetTime(): void {
     resetClock(this.clock);
   }
 
-  /** Small floating word over the street, e.g. "bump" or "Parked". */
+  /** Small floating word over the street, e.g. "bump". */
   pop(text: string, at: Vec, colour: string = PALETTE.cream): void {
     const t = this.add
       .text(at.x, at.y - 10, text, { ...LABEL_STYLE, color: colour, backgroundColor: 'rgba(17,32,31,0.85)' })
@@ -155,77 +205,173 @@ export class StreetScene extends Phaser.Scene {
     });
   }
 
+  /** Effects that follow committed changes. */
+  private react(events: WorldEvent[]): void {
+    const now = this.time.now;
+    for (const e of events) {
+      if (e.type === 'bump') this.pop('bump', e.at);
+      if (e.type === 'delivered') {
+        if (e.recipient === 'mo_vale') this.anim.ferry = now;
+        else this.anim.market = now;
+      }
+      if (e.type === 'shutter_opened') this.anim.shutter = now;
+      if (e.type === 'recruited') this.pop('Clatterjack joined', { x: this.deps.session().player.x, y: this.deps.session().player.y }, PALETTE.amber);
+    }
+  }
+
   update(time: number, deltaMs: number): void {
     const s = this.deps.session();
     const dt = deltaMs / 1000;
 
     if (s.mode === 'world') {
       const steps = framesToSteps(this.clock, dt);
-      for (let i = 0; i < steps; i++) {
-        const events = stepSession(s, this.deps.input.read(), STEP_SECONDS);
-        if (events.length) this.deps.onEvents(events);
-        if (s.mode !== 'world') break;
-      }
+      for (let i = 0; i < steps && s.mode === 'world'; i++) stepSession(s, this.deps.input.read(), STEP_SECONDS);
     } else {
       resetClock(this.clock);
     }
+    if (s.outbox.length) {
+      const events = s.outbox.splice(0);
+      this.react(events);
+      this.deps.onEvents(events);
+    }
 
-    // Sprites.
-    const v = s.van;
-    const inVan = s.locomotion === 'van';
-    this.vanImg.setPosition(v.x, v.y).setRotation(v.heading);
-    const f = forward(v.heading);
-    this.beam
-      .setVisible(inVan)
-      .setPosition(v.x + f.x * (VAN.halfLength - 1), v.y + f.y * (VAN.halfLength - 1))
-      .setRotation(v.heading);
-    if (inVan) this.stride.last = null;
+    const still = this.deps.reduceMotion();
+    const prog = s.progress;
+    const map = s.map;
+
+    // Vehicles.
+    const d = driving(s);
+    this.vanImg.setPosition(s.van.x, s.van.y).setRotation(s.van.heading);
+    this.expressImg.setPosition(s.express.x, s.express.y).setRotation(s.express.heading);
+    if (d) {
+      const f = forward(d.state.heading);
+      const nose = (d.spec === VAN ? VAN : EXPRESS).halfLength - 1;
+      this.beam.setVisible(true).setPosition(d.state.x + f.x * nose, d.state.y + f.y * nose).setRotation(d.state.heading);
+    } else {
+      this.beam.setVisible(false);
+    }
+    if (s.pursuit) {
+      const c = s.pursuit.car;
+      const flash = Math.floor(time / (still ? 600 : 250)) % 2;
+      this.patrolImg.setVisible(true).setTexture(`patrol-${flash}`).setPosition(c.x, c.y).setRotation(c.heading);
+    } else {
+      this.patrolImg.setVisible(false);
+    }
+
+    // Courier, with Wickwing's glow and Clatterjack once recruited.
+    const onFoot = s.locomotion === 'foot';
+    if (!onFoot) this.stride.last = null;
     this.courier
-      .setTexture(this.courierKey(inVan ? 0 : this.courierFrame(s.player, dt)))
-      .setVisible(!inVan)
+      .setTexture(this.courierKey(onFoot ? this.courierFrame(s.player, dt) : 0))
+      .setVisible(onFoot)
       .setPosition(s.player.x, s.player.y)
       .setRotation(s.player.facing);
+    const recruited = prog.roster.includes('clatterjack');
+    const behind = { x: s.player.x - Math.cos(s.player.facing) * 9, y: s.player.y - Math.sin(s.player.facing) * 9 };
+    this.pocketCrab.setVisible(onFoot && prog.team.includes('clatterjack')).setPosition(behind.x + 4, behind.y + 3);
 
-    // The ringing phone flashes; with reduced motion it blinks in place without growing rings.
-    const still = this.deps.reduceMotion();
-    const ringing = s.phoneRinging && s.mode !== 'paused';
-    const phone = s.map.phone;
-    this.ringFx.clear();
-    this.ringLabel.setVisible(ringing);
-    if (ringing) {
-      const on = Math.floor(time / 500) % 2 === 0;
-      if (still) {
-        this.ringFx.lineStyle(2, 0xffb347, on ? 0.95 : 0.35);
-        this.ringFx.strokeCircle(phone.x, phone.y, 12);
-        this.ringLabel.setAlpha(1);
-      } else {
-        for (const offset of [0, 600]) {
-          const phase = ((time + offset) % 1200) / 1200;
-          this.ringFx.lineStyle(1.5, 0xffb347, (1 - phase) * 0.9);
-          this.ringFx.strokeCircle(phone.x, phone.y, 8 + phase * 22);
-        }
-        this.ringLabel.setAlpha(on ? 1 : 0.55);
+    // Street state from saved flags, animated when it changed this session.
+    const ferryOn = hasFlag(prog, 'ferry_running');
+    const ferryAlpha = !ferryOn ? 0 : this.anim.ferry < 0 ? 1 : clamp((time - this.anim.ferry) / 1500, 0, 1);
+    this.ferryLit.setAlpha(ferryAlpha);
+    const bob = ferryOn && !still ? Math.sin(time / 700) * 1.2 : 0;
+    this.ferryLit.setY(map.ferry.y + bob);
+    this.ferryDark.setY(map.ferry.y + bob);
+    const marketOn = hasFlag(prog, 'market_lit');
+    this.stallsLit.forEach((st, i) => {
+      const a = !marketOn ? 0 : this.anim.market < 0 ? 1 : clamp((time - this.anim.market - i * 450) / 400, 0, 1);
+      st.setAlpha(a);
+    });
+
+    this.fx.clear();
+    // Ferry lights on the water, and a soft glow over lit stalls.
+    if (ferryAlpha > 0) {
+      this.fx.fillStyle(0xffcf73, 0.12 * ferryAlpha);
+      this.fx.fillEllipse(map.ferry.x + map.ferry.w / 2, map.ferry.y + map.ferry.h / 2 + bob, map.ferry.w * 1.3, map.ferry.h * 2);
+    }
+    if (marketOn) {
+      for (const [i, r] of map.stalls.entries()) {
+        this.fx.fillStyle(0xffd27a, 0.14 * this.stallsLit[i].alpha);
+        this.fx.fillEllipse(r.x + r.w / 2, r.y + r.h, r.w * 1.6, r.h * 2.2);
       }
     }
 
-    // Highlight the bay while it is the job.
-    this.bayFx.clear();
-    if (inVan && s.run.lap && !s.run.parked) {
-      const b = s.map.bay.rect;
-      const alpha = still ? 0.8 : 0.45 + 0.4 * Math.sin(time / 260);
-      this.bayFx.lineStyle(2, 0xffb347, alpha);
-      this.bayFx.strokeRect(b.x - 1, b.y - 1, b.w + 2, b.h + 2);
+    // The yard shutter: corrugated and shut, or rolled up once Clatterjack lifts it.
+    const sh = map.shutter.rect;
+    const open = hasFlag(prog, 'yard_shutter_open');
+    const lift = !open ? 0 : this.anim.shutter < 0 ? 1 : clamp((time - this.anim.shutter) / 1200, 0, 1);
+    const h = sh.h * (1 - lift) + 3 * lift;
+    this.fx.fillStyle(0x8a8f86, 1);
+    this.fx.fillRect(sh.x, sh.y, sh.w, h);
+    this.fx.fillStyle(0x5c635d, 1);
+    for (let x = sh.x + 2; x < sh.x + sh.w; x += 4) this.fx.fillRect(x, sh.y, 1, h);
+    if (!open) {
+      this.fx.fillStyle(0xf2c94c, 1);
+      for (let x = sh.x; x < sh.x + sh.w; x += 8) this.fx.fillRect(x, sh.y + sh.h - 3, 4, 3);
     }
 
-    // Camera: north-up, centred on the courier, leaning ahead of the van while it moves.
-    const focus: Vec = inVan ? { x: v.x, y: v.y } : { x: s.player.x, y: s.player.y };
+    // Coins creeping uphill into the ticket machine while the crab lives there.
+    const m = map.machine;
+    if (!recruited) {
+      for (let i = 0; i < 3; i++) {
+        const t = still ? 0.3 + i * 0.25 : ((time / 900 + i / 3) % 1);
+        this.fx.fillStyle(0xe8c25a, 1 - t * 0.6);
+        this.fx.fillCircle(m.x + 9 - t * 9, m.y + 6 - t * 5, 1.1);
+      }
+    }
+    const crabOut = hasFlag(prog, 'machine_noticed') && !recruited && s.mode !== 'encounter';
+    const scuttle = still ? 0 : Math.sin(time / 260) * 2.5;
+    this.wildCrab.setVisible(crabOut).setPosition(m.x + 11 + scuttle, m.y + 2);
+
+    // Wickwing's glow beside the courier on foot.
+    if (onFoot) {
+      const a = still ? 0.8 : time / 500;
+      this.fx.fillStyle(0xffe9a8, 0.9);
+      this.fx.fillCircle(s.player.x + Math.cos(a) * 7, s.player.y + Math.sin(a) * 7 - 2, 1.4);
+      this.fx.fillStyle(0xffb347, 0.18);
+      this.fx.fillCircle(s.player.x + Math.cos(a) * 7, s.player.y + Math.sin(a) * 7 - 2, 4.5);
+    }
+
+    // The ringing payphone flashes until Q01 is accepted.
+    const ringing = prog.story.stage === 'offered' && s.mode !== 'paused';
+    this.ringLabel.setVisible(ringing);
+    if (ringing) {
+      const on = Math.floor(time / 500) % 2 === 0;
+      const ph = map.phone;
+      if (still) {
+        this.fx.lineStyle(2, 0xffb347, on ? 0.95 : 0.35);
+        this.fx.strokeCircle(ph.x, ph.y, 12);
+      } else {
+        for (const offset of [0, 600]) {
+          const phase = ((time + offset) % 1200) / 1200;
+          this.fx.lineStyle(1.5, 0xffb347, (1 - phase) * 0.9);
+          this.fx.strokeCircle(ph.x, ph.y, 8 + phase * 22);
+        }
+      }
+      this.ringLabel.setAlpha(still || on ? 1 : 0.55);
+    }
+
+    // Pins over who can take the battery, and over the shutter once you can lift it.
+    const hop = still ? 0 : Math.abs(Math.sin(time / 300)) * 3;
+    const targets = new Set<string>(destinations(s));
+    if (prog.team.includes('clatterjack') && !open) targets.add('shutter');
+    for (const [id, pin] of Object.entries(this.pins)) {
+      const at = id === 'shutter' ? { x: sh.x + sh.w / 2, y: sh.y } : map.people[id as 'mo_vale' | 'nell_price'];
+      pin.setVisible(targets.has(id)).setPosition(at.x, at.y - 8 - hop);
+    }
+    this.mo.setAlpha(1);
+    this.nell.setAlpha(1);
+
+    // Camera: north-up, centred on the courier, leaning ahead of a moving vehicle.
+    const focus: Vec = d ? { x: d.state.x, y: d.state.y } : { x: s.player.x, y: s.player.y };
     const cam = this.cameras.main;
     const viewW = cam.width / cam.zoom;
     const viewH = cam.height / cam.zoom;
-    const target = inVan
+    const fwd = d ? forward(d.state.heading) : { x: 0, y: 0 };
+    const target = d
       ? {
-          x: clamp(f.x * v.speed * 0.6, -viewW * 0.28, viewW * 0.28),
-          y: clamp(f.y * v.speed * 0.6, -viewH * 0.28, viewH * 0.28),
+          x: clamp(fwd.x * d.state.speed * 0.6, -viewW * 0.28, viewW * 0.28),
+          y: clamp(fwd.y * d.state.speed * 0.6, -viewH * 0.28, viewH * 0.28),
         }
       : { x: 0, y: 0 };
     const k = s.mode === 'world' ? 1 - Math.exp(-Math.min(dt, 0.1) * 2.5) : 0;

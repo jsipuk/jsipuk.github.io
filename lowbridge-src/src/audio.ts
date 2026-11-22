@@ -8,6 +8,11 @@ export interface Sfx {
   bump(strength: number): void;
   door(): void;
   chime(): void;
+  /** Two-tone wail while the patrol is chasing; quieter with distance. */
+  updateSiren(active: boolean, distancePx: number): void;
+  horn(): void;
+  radio(): void;
+  rumble(): void;
   suspend(): void;
 }
 
@@ -16,6 +21,7 @@ export function createSfx(): Sfx {
   let master: GainNode | null = null;
   let muted = false;
   let nextRing = 0;
+  let nextSiren = 0;
 
   const ready = () => (ctx && master && !muted && ctx.state === 'running' ? { ctx, master } : null);
 
@@ -91,8 +97,42 @@ export function createSfx(): Sfx {
       tone(660, now, 0.15, 0.1);
       tone(880, now + 0.12, 0.22, 0.1);
     },
+    updateSiren(active, distancePx) {
+      const a = ready();
+      if (!a || !active) {
+        nextSiren = 0;
+        return;
+      }
+      const now = a.ctx.currentTime;
+      if (now < nextSiren) return;
+      nextSiren = now + 1.2;
+      const level = Math.max(0.03, Math.min(1, 1 - distancePx / 500)) * 0.07;
+      tone(640, now, 0.6, level, 'triangle');
+      tone(820, now + 0.6, 0.6, level, 'triangle');
+    },
+    horn() {
+      const a = ready();
+      if (!a) return;
+      const now = a.ctx.currentTime;
+      tone(165, now, 1.3, 0.16, 'sawtooth');
+      tone(220, now, 1.3, 0.08, 'sawtooth');
+    },
+    radio() {
+      const a = ready();
+      if (!a) return;
+      const now = a.ctx.currentTime;
+      tone(1200, now, 0.06, 0.05, 'square');
+      tone(900, now + 0.08, 0.06, 0.05, 'square');
+    },
+    rumble() {
+      const a = ready();
+      if (!a) return;
+      const now = a.ctx.currentTime;
+      for (let i = 0; i < 6; i++) tone(90 + i * 6, now + i * 0.15, 0.14, 0.12, 'square');
+    },
     suspend() {
       nextRing = 0;
+      nextSiren = 0;
       if (ctx && ctx.state === 'running') void ctx.suspend();
     },
   };

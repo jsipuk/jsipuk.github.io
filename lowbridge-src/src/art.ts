@@ -1,9 +1,9 @@
 // Greybox art drawn to canvases at 2x: wet teal brick, amber lamps, cream
-// signs. Original placeholders only; replace once the handling test passes.
+// signs, a dark river. Original placeholders only.
 
 import type { StreetMap, TileRect } from './rules/map.ts';
 import { Surface, TILE } from './rules/map.ts';
-import { VAN } from './rules/vehicle.ts';
+import { EXPRESS, PATROL, VAN } from './rules/vehicle.ts';
 
 export const ART_SCALE = 2;
 const S = ART_SCALE;
@@ -22,6 +22,9 @@ export const PALETTE = {
   roadSpeck: '#222a2d',
   line: 'rgba(233, 223, 196, 0.55)',
   yard: '#262d2d',
+  water: '#0c2430',
+  waterLight: '#16384a',
+  fence: '#2b3134',
   amber: '#ffb347',
   cream: '#efe4c8',
   ink: '#11201f',
@@ -38,7 +41,7 @@ function canvas(w: number, h: number): [HTMLCanvasElement, CanvasRenderingContex
   return [c, g];
 }
 
-// Deterministic speckle so the road texture is the same every load.
+// Deterministic speckle so the textures are the same every load.
 function rng(seed: number) {
   let s = seed >>> 0;
   return () => {
@@ -65,7 +68,7 @@ const overlap = (a: TileRect, b: TileRect): TileRect | null => {
   return r > x && btm > y ? { x, y, w: r - x, h: btm - y } : null;
 };
 
-/** The whole play region as one image, positioned at map.region.x/y. */
+/** The whole district as one image, positioned at map.region.x/y. */
 export function drawStreet(map: StreetMap): HTMLCanvasElement {
   const { region } = map;
   const [c, g] = canvas(region.w, region.h);
@@ -75,10 +78,11 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
   const ty0 = region.y / TILE;
   const tx1 = tx0 + region.w / TILE;
   const ty1 = ty0 + region.h / TILE;
-  const at = (x: number, y: number) =>
-    x < 0 || y < 0 || x >= map.w || y >= map.h ? Surface.Void : map.tiles[y * map.w + x];
+  const at = (x: number, y: number) => {
+    if (y < 0 && x >= 0 && x < map.w) return Surface.Water;
+    return x < 0 || y < 0 || x >= map.w || y >= map.h ? Surface.Void : map.tiles[y * map.w + x];
+  };
 
-  // Base surfaces.
   for (let ty = ty0; ty < ty1; ty++) {
     for (let tx = tx0; tx < tx1; tx++) {
       const s = at(tx, ty);
@@ -106,8 +110,7 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
           g.fillRect(x + 8, y, 0.5, TILE);
           break;
         }
-        case Surface.Road:
-        case Surface.Barrier: {
+        case Surface.Road: {
           g.fillStyle = PALETTE.road;
           g.fillRect(x, y, TILE, TILE);
           g.fillStyle = PALETTE.roadSpeck;
@@ -125,6 +128,22 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
           g.stroke();
           break;
         }
+        case Surface.Water: {
+          g.fillStyle = PALETTE.water;
+          g.fillRect(x, y, TILE, TILE);
+          g.fillStyle = PALETTE.waterLight;
+          for (let i = 0; i < 2; i++) g.fillRect(x + rand() * 10, y + rand() * TILE, 4 + rand() * 4, 0.8);
+          break;
+        }
+        case Surface.Fence: {
+          g.fillStyle = PALETTE.yard;
+          g.fillRect(x, y, TILE, TILE);
+          g.fillStyle = PALETTE.fence;
+          g.fillRect(x + 1, y + 5, TILE - 2, 6);
+          g.fillStyle = '#4a5357';
+          for (let px = x + 2; px < x + TILE; px += 4) g.fillRect(px, y + 4, 1, 8);
+          break;
+        }
         default: {
           g.fillStyle = PALETTE.void;
           g.fillRect(x, y, TILE, TILE);
@@ -133,22 +152,34 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
     }
   }
 
-  // Kerbs: a light edge wherever pavement meets road or yard.
+  // Kerbs: a light edge wherever pavement meets road.
   g.fillStyle = PALETTE.kerb;
-  for (let ty = ty0; ty < ty1; ty++) {
-    for (let tx = tx0; tx < tx1; tx++) {
+  for (let ty = 0; ty < map.h; ty++) {
+    for (let tx = 0; tx < map.w; tx++) {
       if (at(tx, ty) !== Surface.Pavement) continue;
       const x = tx * TILE;
       const y = ty * TILE;
-      const drive = (s: number) => s === Surface.Road || s === Surface.Barrier;
-      if (drive(at(tx + 1, ty))) g.fillRect(x + TILE - 1.5, y, 1.5, TILE);
-      if (drive(at(tx - 1, ty))) g.fillRect(x, y, 1.5, TILE);
-      if (drive(at(tx, ty + 1))) g.fillRect(x, y + TILE - 1.5, TILE, 1.5);
-      if (drive(at(tx, ty - 1))) g.fillRect(x, y, TILE, 1.5);
+      const road = (s: number) => s === Surface.Road;
+      if (road(at(tx + 1, ty))) g.fillRect(x + TILE - 1.5, y, 1.5, TILE);
+      if (road(at(tx - 1, ty))) g.fillRect(x, y, 1.5, TILE);
+      if (road(at(tx, ty + 1))) g.fillRect(x, y + TILE - 1.5, TILE, 1.5);
+      if (road(at(tx, ty - 1))) g.fillRect(x, y, TILE, 1.5);
+    }
+  }
+  // The quay edge: a bright stone lip along the water.
+  g.fillStyle = '#8a8f86';
+  for (let tx = 0; tx < map.w; tx++) {
+    if (at(tx, 0) === Surface.Water) continue;
+    if (at(tx, -1) === Surface.Water) g.fillRect(tx * TILE, 0, TILE, 1.5);
+  }
+  for (let tx = 0; tx < map.w; tx++) {
+    for (let ty = 0; ty < 3; ty++) {
+      if (at(tx, ty) === Surface.Water && at(tx, ty + 1) !== Surface.Water) g.fillRect(tx * TILE, (ty + 1) * TILE - 1.5, TILE, 1.5);
     }
   }
 
-  // Centre lines, broken at junctions and corners.
+  // Centre lines on public roads, broken at junctions. None in the yard.
+  const publicRoads = map.roads.filter((r) => !['yard_road', 'yard_gate'].includes(r.id));
   const junctions: TileRect[] = [];
   for (let i = 0; i < map.roads.length; i++) {
     for (let j = i + 1; j < map.roads.length; j++) {
@@ -157,9 +188,9 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
     }
   }
   const inJunction = (px: number, py: number) =>
-    junctions.some((j) => px >= j.x * TILE && px <= (j.x + j.w) * TILE && py >= j.y * TILE && py <= (j.y + j.h) * TILE);
+    junctions.some((j) => px >= j.x * TILE - 2 && px <= (j.x + j.w) * TILE + 2 && py >= j.y * TILE - 2 && py <= (j.y + j.h) * TILE + 2);
   g.fillStyle = PALETTE.line;
-  for (const road of map.roads) {
+  for (const road of publicRoads) {
     const r = road.rect;
     const horizontal = r.w > r.h;
     const cx = (r.x + r.w / 2) * TILE;
@@ -175,41 +206,26 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
     }
   }
 
-  // Give-way line where Ticket Street meets Station Road.
-  const ticket = map.roads.find((r) => r.id === 'ticket_street');
-  if (ticket) {
-    g.fillStyle = PALETTE.line;
-    const y = (28 + 5) * TILE + 2;
-    for (let x = ticket.rect.x * TILE + 2; x < (ticket.rect.x + ticket.rect.w) * TILE - 2; x += 6) g.fillRect(x, y, 4, 1.5);
-  }
-
-  // Roofs and facades over the brick.
+  // Roofs over named buildings.
   for (const b of map.buildings) {
     const x = b.rect.x * TILE;
     const y = b.rect.y * TILE;
     const w = b.rect.w * TILE;
     const h = b.rect.h * TILE;
+    if (w < 24 || h < 24) continue;
     g.fillStyle = 'rgba(0,0,0,0.25)';
     g.fillRect(x + 3, y + 3, w - 4, h - 4);
-    g.fillStyle = b.id === 'builders_yard_gate' ? '#3b3f3c' : PALETTE.roof;
+    g.fillStyle = PALETTE.roof;
     g.fillRect(x + 2, y + 2, w - 5, h - 5);
     g.strokeStyle = PALETTE.roofEdge;
     g.lineWidth = 1;
     g.strokeRect(x + 2.5, y + 2.5, w - 6, h - 6);
-    if (b.id === 'builders_yard_gate') {
-      // Corrugated shutter, seen from above.
-      g.fillStyle = 'rgba(239,228,200,0.12)';
-      for (let gx = x + 4; gx < x + w - 4; gx += 3) g.fillRect(gx, y + h - 10, 1, 8);
-    } else if (w > h) {
-      g.fillStyle = PALETTE.roofEdge;
-      g.fillRect(x + 6, y + h / 2 - 0.5, w - 13, 1);
-    } else {
-      g.fillStyle = PALETTE.roofEdge;
-      g.fillRect(x + w / 2 - 0.5, y + 6, 1, h - 13);
-    }
+    g.fillStyle = PALETTE.roofEdge;
+    if (w > h) g.fillRect(x + 6, y + h / 2 - 0.5, w - 13, 1);
+    else g.fillRect(x + w / 2 - 0.5, y + 6, 1, h - 13);
   }
 
-  // Ticket office awning faces Station Road.
+  // Ticket office awning faces Station Road; the lay-by in front is marked.
   const office = map.buildings.find((b) => b.id === 'ticket_office');
   if (office) {
     const x = office.rect.x * TILE;
@@ -220,6 +236,24 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
       g.fillRect(x + 4 + i, y - 4, 8, 6);
     }
   }
+  g.strokeStyle = 'rgba(242, 201, 76, 0.4)';
+  g.setLineDash([4, 3]);
+  g.strokeRect(17 * TILE + 1, 33 * TILE + 1, 9 * TILE - 2, TILE - 2);
+  g.setLineDash([]);
+
+  // Ticket machine: a squat cabinet with a coin slot.
+  {
+    const m = map.machine;
+    g.fillStyle = 'rgba(0,0,0,0.35)';
+    g.fillRect(m.x - 5, m.y - 3, 12, 9);
+    g.fillStyle = '#3e5a5d';
+    roundRect(g, m.x - 6, m.y - 5, 12, 9, 1.5);
+    g.fill();
+    g.fillStyle = '#d9cfb2';
+    g.fillRect(m.x - 4, m.y - 3.5, 8, 2.5);
+    g.fillStyle = '#11201f';
+    g.fillRect(m.x - 1.5, m.y + 1, 3, 1.5);
+  }
 
   // Depot door and forecourt markings.
   g.fillStyle = PALETTE.amber;
@@ -228,28 +262,7 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
   g.lineWidth = 1;
   g.strokeRect(1 * TILE + 4, 39 * TILE + 4, 6 * TILE - 8, 6 * TILE - 8);
 
-  // Road closed barrier.
-  {
-    const bx = map.barrier.x * TILE;
-    const by = map.barrier.y * TILE;
-    const bh = map.barrier.h * TILE;
-    g.save();
-    g.beginPath();
-    g.rect(bx + 3, by, 10, bh);
-    g.clip();
-    for (let i = -12; i < bh + 12; i += 8) {
-      g.fillStyle = (i / 8) % 2 === 0 ? PALETTE.red : PALETTE.cream;
-      g.beginPath();
-      g.moveTo(bx, by + i);
-      g.lineTo(bx + 16, by + i - 8);
-      g.lineTo(bx + 16, by + i);
-      g.lineTo(bx, by + i + 8);
-      g.fill();
-    }
-    g.restore();
-  }
-
-  // The bay: a painted box with BAY written in it.
+  // The depot bay.
   {
     const b = map.bay.rect;
     g.strokeStyle = PALETTE.bay;
@@ -268,6 +281,19 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
     g.restore();
   }
 
+  // Quay: a ferry ramp running down into the water.
+  g.fillStyle = '#4b514c';
+  g.fillRect(5 * TILE, -1.5 * TILE, 4 * TILE, 3 * TILE);
+  g.fillStyle = '#5c635d';
+  for (let y = -1.5 * TILE; y < 1.5 * TILE; y += 4) g.fillRect(5 * TILE, y, 4 * TILE, 1);
+  // Mooring bollards along the quay edge.
+  g.fillStyle = '#1a1d1c';
+  for (const x of [11, 14, 17]) {
+    g.beginPath();
+    g.arc(x * TILE, 1.2 * TILE, 2, 0, Math.PI * 2);
+    g.fill();
+  }
+
   // Phone box: red, with a darker roof crown.
   {
     const p = map.phone;
@@ -283,9 +309,10 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
     g.fillRect(p.x - p.half + 1, p.y + p.half - 2.2, p.half * 2 - 2, 1.2);
   }
 
-  // Lamp pools, then the posts on top.
+  // Lamp pools, then posts and bollards on top.
   g.globalCompositeOperation = 'lighter';
   for (const lamp of map.props) {
+    if (lamp.kind !== 'lamp') continue;
     const grad = g.createRadialGradient(lamp.x, lamp.y, 2, lamp.x, lamp.y, 46);
     grad.addColorStop(0, 'rgba(255, 179, 71, 0.30)');
     grad.addColorStop(0.5, 'rgba(255, 160, 60, 0.10)');
@@ -294,14 +321,14 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
     g.fillRect(lamp.x - 46, lamp.y - 46, 92, 92);
   }
   g.globalCompositeOperation = 'source-over';
-  for (const lamp of map.props) {
-    g.fillStyle = '#1a1d1c';
+  for (const prop of map.props) {
+    g.fillStyle = prop.kind === 'lamp' ? '#1a1d1c' : '#5a6266';
     g.beginPath();
-    g.arc(lamp.x, lamp.y, lamp.r, 0, Math.PI * 2);
+    g.arc(prop.x, prop.y, prop.r, 0, Math.PI * 2);
     g.fill();
-    g.fillStyle = PALETTE.amber;
+    g.fillStyle = prop.kind === 'lamp' ? PALETTE.amber : PALETTE.cream;
     g.beginPath();
-    g.arc(lamp.x, lamp.y, 1.4, 0, Math.PI * 2);
+    g.arc(prop.x, prop.y, prop.kind === 'lamp' ? 1.4 : 1, 0, Math.PI * 2);
     g.fill();
   }
   return c;
@@ -455,6 +482,307 @@ export function drawCourier(jacketId: string, frame: number): HTMLCanvasElement 
   g.fillStyle = '#d9b48c';
   g.beginPath();
   g.ellipse(2.4, 0, 0.75, 1.25, 0, 0, Math.PI * 2);
+  g.fill();
+  return c;
+}
+
+
+// ------------------------------------------------------------------ vehicles
+
+/** The express car: low, red, pointed nose, cream stripe. Distinct rear lights. */
+export function drawExpress(): HTMLCanvasElement {
+  const L = EXPRESS.halfLength * 2;
+  const W = EXPRESS.halfWidth * 2;
+  const pad = 3;
+  const [c, g] = canvas(L + pad * 2, W + pad * 2);
+  g.translate(pad, pad);
+  g.fillStyle = 'rgba(0,0,0,0.4)';
+  roundRect(g, 1.5, 1.5, L, W, 4);
+  g.fill();
+  g.fillStyle = '#9b2c2c';
+  g.beginPath();
+  g.moveTo(1, 1);
+  g.lineTo(L - 7, 0.5);
+  g.quadraticCurveTo(L + 1, W / 2, L - 7, W - 0.5);
+  g.lineTo(1, W - 1);
+  g.closePath();
+  g.fill();
+  g.fillStyle = PALETTE.cream;
+  g.fillRect(2, W / 2 - 1, L - 6, 2);
+  g.fillStyle = '#1b2a2d';
+  roundRect(g, L - 12, 2.5, 4.5, W - 5, 1.5);
+  g.fill();
+  roundRect(g, 4, 2.5, 3, W - 5, 1);
+  g.fill();
+  g.fillStyle = '#fff1bf';
+  g.fillRect(L - 3, 1.5, 1.5, 2.5);
+  g.fillRect(L - 3, W - 4, 1.5, 2.5);
+  g.fillStyle = '#ff5a3c';
+  g.fillRect(0.5, 1, 1.5, W - 2);
+  return c;
+}
+
+/** The patrol car: dark with white doors and a roof bar. Frame 0/1 swap the lit side. */
+export function drawPatrol(frame: number): HTMLCanvasElement {
+  const L = PATROL.halfLength * 2;
+  const W = PATROL.halfWidth * 2;
+  const pad = 3;
+  const [c, g] = canvas(L + pad * 2, W + pad * 2);
+  g.translate(pad, pad);
+  g.fillStyle = 'rgba(0,0,0,0.4)';
+  roundRect(g, 1.5, 1.5, L, W, 3);
+  g.fill();
+  g.fillStyle = '#28303a';
+  roundRect(g, 0, 0, L, W, 3);
+  g.fill();
+  g.fillStyle = '#d8dde0';
+  g.fillRect(L * 0.3, 0, L * 0.35, 2.5);
+  g.fillRect(L * 0.3, W - 2.5, L * 0.35, 2.5);
+  g.fillStyle = '#16202a';
+  g.fillRect(L - 9, 2, 4, W - 4);
+  // Roof light bar: amber one side, white the other, swapping each frame.
+  g.fillStyle = frame === 0 ? '#ffb347' : '#5f6b70';
+  g.fillRect(L * 0.45, 1.5, 3, W / 2 - 1.5);
+  g.fillStyle = frame === 0 ? '#5f6b70' : '#f4f6ff';
+  g.fillRect(L * 0.45, W / 2, 3, W / 2 - 1.5);
+  g.fillStyle = '#fff1bf';
+  g.fillRect(L - 1.5, 1.5, 1.5, 3);
+  g.fillRect(L - 1.5, W - 4.5, 1.5, 3);
+  g.fillStyle = '#d23c2c';
+  g.fillRect(0, 1, 1.5, 3);
+  g.fillRect(0, W - 4, 1.5, 3);
+  return c;
+}
+
+// -------------------------------------------------------------------- people
+
+/** Mo (navy coat, orange life jacket) and Nell (plum shawl, cream scarf), seen from above facing south. */
+export function drawPerson(who: 'mo_vale' | 'nell_price'): HTMLCanvasElement {
+  const [c, g] = canvas(18, 18);
+  g.translate(9, 9);
+  g.fillStyle = 'rgba(0,0,0,0.35)';
+  g.beginPath();
+  g.ellipse(1, 1, 6, 5, 0, 0, Math.PI * 2);
+  g.fill();
+  const coat = who === 'mo_vale' ? '#2b3f66' : '#6b3a5e';
+  const trim = who === 'mo_vale' ? '#f07a2c' : '#e6dcc0';
+  g.fillStyle = coat;
+  g.beginPath();
+  g.ellipse(0, 0, 5.8, 4, 0, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = trim;
+  if (who === 'mo_vale') {
+    g.fillRect(-5, -1, 10, 2.4);
+  } else {
+    g.beginPath();
+    g.ellipse(0, 1.2, 3.6, 1.6, 0, 0, Math.PI * 2);
+    g.fill();
+  }
+  g.fillStyle = who === 'mo_vale' ? '#3b2a22' : '#b9b2a6';
+  g.beginPath();
+  g.arc(0, 0.6, 2.3, 0, Math.PI * 2);
+  g.fill();
+  return c;
+}
+
+// ------------------------------------------------------------------ creatures
+
+/** Small street sprite of the bottle-cap crab. */
+export function drawCrab(): HTMLCanvasElement {
+  const [c, g] = canvas(12, 10);
+  g.translate(6, 5.5);
+  g.fillStyle = '#c4a14a';
+  g.beginPath();
+  g.arc(0, 0, 3.2, 0, Math.PI * 2);
+  g.fill();
+  g.strokeStyle = '#8d6f2a';
+  g.lineWidth = 0.6;
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    g.beginPath();
+    g.moveTo(Math.cos(a) * 2.4, Math.sin(a) * 2.4);
+    g.lineTo(Math.cos(a) * 3.2, Math.sin(a) * 3.2);
+    g.stroke();
+  }
+  g.fillStyle = '#b5473a';
+  g.beginPath();
+  g.arc(-4, -2, 1.3, 0, Math.PI * 2);
+  g.arc(4, -2, 1.3, 0, Math.PI * 2);
+  g.fill();
+  return c;
+}
+
+/**
+ * Large two-tone portrait for the encounter: the crab under its bottle cap,
+ * claws raised (keep away) or lowered (calm). Drawn at display size in CSS px.
+ */
+export function drawCrabPortrait(pose: 'raised_claws' | 'claws_lowered', size = 220): HTMLCanvasElement {
+  const c = document.createElement('canvas');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  c.width = size * dpr;
+  c.height = size * dpr;
+  c.style.width = `${size}px`;
+  c.style.height = `${size}px`;
+  const g = c.getContext('2d')!;
+  g.scale(dpr, dpr);
+  const ink = '#11201f';
+  const tone = pose === 'raised_claws' ? '#e8a33c' : '#9fd3c7';
+  g.fillStyle = tone;
+  g.fillRect(0, 0, size, size);
+  g.fillStyle = ink;
+  const cx = size / 2;
+  const cy = size * 0.6;
+  const r = size * 0.26;
+  // Legs.
+  g.lineWidth = size * 0.03;
+  g.strokeStyle = ink;
+  g.lineCap = 'round';
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 3; i++) {
+      g.beginPath();
+      g.moveTo(cx + side * r * 0.7, cy + r * 0.1 + i * r * 0.22);
+      g.lineTo(cx + side * r * 1.35, cy + r * 0.35 + i * r * 0.3);
+      g.stroke();
+    }
+  }
+  // Claws.
+  const claw = (side: number) => {
+    const raised = pose === 'raised_claws';
+    const ax = cx + side * r * 0.9;
+    const ay = cy - r * 0.2;
+    const bx = cx + side * r * (raised ? 1.25 : 1.45);
+    const by = raised ? cy - r * 1.35 : cy + r * 0.25;
+    g.lineWidth = size * 0.045;
+    g.beginPath();
+    g.moveTo(ax, ay);
+    g.lineTo(bx, by);
+    g.stroke();
+    g.beginPath();
+    g.ellipse(bx, by, r * 0.32, r * 0.22, raised ? side * -0.5 : side * 0.3, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = tone;
+    g.beginPath();
+    g.moveTo(bx, by);
+    g.lineTo(bx + side * r * 0.35, by + (raised ? -r * 0.12 : r * 0.12));
+    g.lineTo(bx + side * r * 0.1, by + (raised ? -r * 0.28 : r * 0.28));
+    g.closePath();
+    g.fill();
+    g.fillStyle = ink;
+  };
+  claw(-1);
+  claw(1);
+  // The bottle-cap shell with its crimped edge.
+  g.beginPath();
+  for (let i = 0; i <= 42; i++) {
+    const a = (i / 42) * Math.PI * 2;
+    const rr = i % 2 ? r : r * 1.08;
+    g.lineTo(cx + Math.cos(a) * rr, cy - r * 0.15 + Math.sin(a) * rr * 0.62);
+  }
+  g.closePath();
+  g.fill();
+  g.fillStyle = tone;
+  g.beginPath();
+  g.ellipse(cx, cy - r * 0.25, r * 0.62, r * 0.32, 0, 0, Math.PI * 2);
+  g.fill();
+  // Eyes on stalks.
+  g.fillStyle = ink;
+  for (const side of [-1, 1]) {
+    g.lineWidth = size * 0.02;
+    g.beginPath();
+    g.moveTo(cx + side * r * 0.25, cy - r * 0.55);
+    g.lineTo(cx + side * r * 0.32, cy - r * 0.95);
+    g.stroke();
+    g.beginPath();
+    g.arc(cx + side * r * 0.32, cy - r * 0.98, size * 0.028, 0, Math.PI * 2);
+    g.fill();
+  }
+  return c;
+}
+
+// ------------------------------------------------------------ ferry and market
+
+/** The ferry seen from above, bow to the right. Lit when running. */
+export function drawFerry(lit: boolean): HTMLCanvasElement {
+  const L = 11 * TILE;
+  const W = 3.4 * TILE;
+  const [c, g] = canvas(L, W);
+  g.fillStyle = 'rgba(0,0,0,0.35)';
+  roundRect(g, 3, 3, L - 4, W - 4, 10);
+  g.fill();
+  g.fillStyle = '#3d4a4f';
+  g.beginPath();
+  g.moveTo(2, 4);
+  g.lineTo(L - 22, 2);
+  g.quadraticCurveTo(L - 1, W / 2, L - 22, W - 2);
+  g.lineTo(2, W - 4);
+  g.closePath();
+  g.fill();
+  g.fillStyle = lit ? '#e6dcc0' : '#6d7570';
+  roundRect(g, 18, 9, L - 58, W - 18, 3);
+  g.fill();
+  // Windows: dark when moored, warm when running.
+  g.fillStyle = lit ? '#ffcf73' : '#2a3134';
+  for (let x = 22; x < L - 44; x += 9) {
+    g.fillRect(x, 11, 5, 3);
+    g.fillRect(x, W - 14, 5, 3);
+  }
+  g.fillStyle = lit ? '#c8372d' : '#5a3a36';
+  g.beginPath();
+  g.arc(L - 32, W / 2, 5, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = PALETTE.cream;
+  g.font = 'bold 7px system-ui, sans-serif';
+  g.fillText('LOWBRIDGE FERRY', 22, W / 2 + 2.5);
+  return c;
+}
+
+/** One market stall from above: awning stripes, dark or lit. */
+export function drawStall(lit: boolean, index: number): HTMLCanvasElement {
+  const w = 3 * TILE;
+  const h = 2 * TILE;
+  const [c, g] = canvas(w, h);
+  const colours = [
+    ['#2f7f7a', '#e6dcc0'],
+    ['#c8372d', '#e6dcc0'],
+    ['#6b3a5e', '#f2c94c'],
+    ['#2b3f66', '#e6dcc0'],
+  ][index % 4];
+  for (let i = 0; i < 6; i++) {
+    g.fillStyle = colours[i % 2];
+    g.fillRect((i * w) / 6, 0, w / 6 + 0.5, h - 6);
+  }
+  g.fillStyle = 'rgba(0,0,0,0.35)';
+  g.fillRect(0, h - 6, w, 6);
+  g.fillStyle = '#3a3028';
+  g.fillRect(2, h - 5, w - 4, 4);
+  if (!lit) {
+    g.fillStyle = 'rgba(6, 12, 14, 0.62)';
+    g.fillRect(0, 0, w, h);
+  } else {
+    g.fillStyle = '#ffd27a';
+    for (let x = 5; x < w; x += 9) {
+      g.beginPath();
+      g.arc(x, h - 3, 1.4, 0, Math.PI * 2);
+      g.fill();
+    }
+  }
+  return c;
+}
+
+/** A map pin for a destination: amber diamond with a dark centre. */
+export function drawPin(): HTMLCanvasElement {
+  const [c, g] = canvas(12, 16);
+  g.fillStyle = PALETTE.amber;
+  g.beginPath();
+  g.moveTo(6, 15);
+  g.lineTo(1, 6);
+  g.arc(6, 5.5, 5, Math.PI, 0);
+  g.lineTo(11, 6);
+  g.closePath();
+  g.fill();
+  g.fillStyle = PALETTE.ink;
+  g.beginPath();
+  g.arc(6, 5.5, 2, 0, Math.PI * 2);
   g.fill();
   return c;
 }

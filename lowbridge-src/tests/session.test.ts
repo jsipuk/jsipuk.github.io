@@ -1,201 +1,227 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildM0Map, Surface, surfaceAt } from '../src/rules/map.ts';
 import { NO_INPUT } from '../src/rules/controls.ts';
-import { createClock, framesToSteps, resetClock } from '../src/rules/clock.ts';
-import {
-  availableAction,
-  createSession,
-  interact,
-  objective,
-  pause,
-  resume,
-  stepSession,
-} from '../src/rules/session.ts';
-import { STEP, driveLap, walkTo } from './helpers.ts';
+import { TILE, buildRiverside } from '../src/rules/map.ts';
+import { createMemoryStore } from '../src/rules/save.ts';
+import type { Session } from '../src/rules/session.ts';
+import { availableAction, choose, encounterChoose, objective, pause, resume, settled } from '../src/rules/session.ts';
+import { STEP, act, driveTo, harness, run, walkTo } from './helpers.ts';
 
-const fresh = (preset: 'pad' | 'hybrid' = 'pad') => createSession(buildM0Map(), preset);
+const map = buildRiverside();
+const PARK = { mo_vale: { x: 13 * TILE, y: 6 * TILE }, nell_price: { x: 57 * TILE, y: 6 * TILE } };
+const NEAR = { mo_vale: { x: 13 * TILE, y: 3.9 * TILE }, nell_price: { x: 57.5 * TILE, y: 3.9 * TILE } };
 
-test('spawn: on the pavement, van outside the depot, phone ringing', () => {
-  const s = fresh();
-  assert.equal(s.locomotion, 'foot');
-  assert.equal(surfaceAt(s.map, s.player.x, s.player.y), Surface.Pavement);
-  assert.equal(surfaceAt(s.map, s.van.x, s.van.y), Surface.Yard);
-  assert.equal(s.phoneRinging, true);
-  assert.equal(objective(s).text, 'Walk to the van');
-});
-
-test('fixture nodes sit on road tiles', () => {
-  const map = buildM0Map();
-  for (const [id, p] of Object.entries(map.nodes)) {
-    assert.equal(surfaceAt(map, p.x, p.y), Surface.Road, id);
-  }
-});
-
-test('walking to the phone offers Answer, with a captioned call and no lap logged', () => {
-  const s = fresh();
-  walkTo(s, { x: 92, y: 562 });
-  const action = availableAction(s);
-  assert.equal(action.kind, 'answer');
-  assert.equal(action.verb, 'Answer');
-  const events = interact(s);
-  assert.equal(s.mode, 'dialogue');
-  assert.equal(s.phoneRinging, false);
-  assert.ok(events.some((e) => e.type === 'answer' && e.line.speaker === 'Mo Vale'));
-  assert.equal(s.log.length, 0);
-  assert.deepEqual(stepSession(s, { ...NO_INPUT, padX: 1 }, STEP), [], 'dialogue holds the world still');
-  assert.equal(availableAction(s).verb, 'Hang up');
-  interact(s);
+async function answerAndBoard(s: Session) {
+  await walkTo(s, { x: 92, y: 566 });
+  assert.equal(availableAction(s).kind, 'answer');
+  await act(s);
+  assert.equal(s.mode, 'prompt');
+  assert.equal(s.prompts[0].line!.speaker, 'Mo Vale');
+  await choose(s, 'ok');
   assert.equal(s.mode, 'world');
-});
-
-test('Get in appears only beside the van', () => {
-  const s = fresh();
-  assert.equal(availableAction(s).kind, null);
-  walkTo(s, { x: 76, y: 664 });
-  assert.equal(availableAction(s).kind, 'enter');
-  interact(s);
+  assert.deepEqual(s.progress.cargo, ['spare_battery']);
+  await walkTo(s, { x: 70, y: 664 });
+  assert.equal(availableAction(s).kind, 'enter_van');
+  await act(s);
   assert.equal(s.locomotion, 'van');
-  assert.equal(objective(s).text, 'Drive round the block by Ticket Street');
-});
+}
 
-test('cannot get out while moving; can once stopped', () => {
-  const s = fresh();
-  walkTo(s, { x: 76, y: 664 });
-  interact(s);
-  for (let t = 0; t < 0.4; t += STEP) stepSession(s, { ...NO_INPUT, padX: 1 }, STEP);
-  const moving = availableAction(s);
-  assert.equal(moving.enabled, false);
-  assert.equal(moving.reason, 'Stop to get out');
-  for (let t = 0; t < 1; t += STEP) stepSession(s, { ...NO_INPUT, brake: s.van.speed > 0 }, STEP);
-  assert.equal(availableAction(s).enabled, true);
-});
+async function handOver(s: Session, who: 'mo_vale' | 'nell_price') {
+  await driveTo(s, PARK[who], { stop: 30 });
+  await act(s); // get out
+  assert.equal(s.locomotion, 'foot');
+  await walkTo(s, NEAR[who]);
+  const a = availableAction(s);
+  assert.equal(a.kind, 'give', `next to ${who}: ${a.verb}`);
+  await act(s);
+  assert.equal(s.prompts[0].kind, 'confirm');
+  assert.match(s.prompts[0].text!, /−1/);
+  await choose(s, 'give');
+  await settled(s);
+}
 
-test('walkers cannot pass through buildings or the van', () => {
-  const s = fresh();
-  walkTo(s, { x: 20, y: 604 }, 5); // west, into the depot wall
-  assert.ok(s.player.x > 80, `stopped at the depot wall, x=${s.player.x.toFixed(1)}`);
-  const s2 = fresh();
-  walkTo(s2, { x: 60, y: 700 }, 5); // into the van
-  assert.ok(Math.abs(s2.player.y - 700) > 5 || Math.abs(s2.player.x - 60) > 5);
-});
-
-for (const preset of ['hybrid', 'pad'] as const) {
-  test(`full M0 lap with the ${preset} preset: drive, park, get out on the pavement, answer`, () => {
-    const s = fresh(preset);
-    walkTo(s, { x: 76, y: 664 });
-    interact(s);
-    const events = driveLap(s, preset);
-    assert.ok(events.some((e) => e.type === 'lap'), 'passed Ticket Street');
-    assert.equal(s.run.parked, true, `parked; van at ${s.van.x.toFixed(0)},${s.van.y.toFixed(0)}`);
-    assert.equal(objective(s).text, 'Parked. Get out');
-    const bumps = events.filter((e) => e.type === 'bump').length;
-    assert.equal(bumps, 0, 'the scripted lap is clean');
-
-    interact(s);
-    assert.equal(s.locomotion, 'foot');
-    assert.equal(surfaceAt(s.map, s.player.x, s.player.y), Surface.Pavement, 'stepped out onto the pavement');
-    assert.equal(s.phoneRinging, true);
-    assert.equal(objective(s).text, 'Answer the phone');
-
-    walkTo(s, { x: 100, y: 562 });
-    assert.equal(availableAction(s).kind, 'answer');
-    const answered = interact(s);
-    const logged = answered.find((e) => e.type === 'logged');
-    assert.ok(logged && logged.type === 'logged');
-    assert.equal(logged.record.preset, preset);
-    assert.ok(logged.record.lapSeconds > 8 && logged.record.lapSeconds < 60, `${logged.record.lapSeconds}s`);
-    interact(s); // hang up
-    assert.equal(objective(s).text, 'Lap 2 · get back in the van');
+for (const who of ['mo_vale', 'nell_price'] as const) {
+  test(`direct run by the ring road, shutter shut, no recruit: hand the battery to ${who}`, async () => {
+    const { s, store } = harness();
+    await answerAndBoard(s);
+    if (who === 'nell_price') {
+      // Nell's radio fires on leaving the depot; drive out first so it lands.
+      await driveTo(s, map.nodes.depot_corner, { stop: 40 });
+      assert.ok(s.progress.flags.includes('counteroffer_heard'), 'counteroffer heard on departure');
+    }
+    await handOver(s, who);
+    const p = s.progress;
+    assert.equal(p.recipient, who);
+    assert.ok(p.flags.includes('counteroffer_heard'));
+    assert.ok(!p.flags.includes('yard_shutter_open'));
+    assert.equal(p.completed.length, 1);
+    assert.equal(s.prompts[0].kind, 'result');
+    assert.ok(s.handoverAt! < 240, `handover at ${s.handoverAt!.toFixed(0)} s of driving and walking`);
+    // The save holds the same outcome.
+    const saved = await store.load();
+    assert.equal(saved!.progress.recipient, who);
+    await choose(s, 'park');
+    assert.equal(s.parked, true);
   });
 }
 
-test('parking before the lap does not count', () => {
-  const s = fresh();
-  walkTo(s, { x: 76, y: 664 });
-  interact(s);
-  s.van.x = 128;
-  s.van.y = 568;
-  s.van.heading = -Math.PI / 2;
-  for (let t = 0; t < 1; t += STEP) stepSession(s, NO_INPUT, STEP);
-  assert.equal(s.run.parked, false);
-});
-
-test('pause freezes world time and movement; resume returns to the same state', () => {
-  const s = fresh();
-  walkTo(s, { x: 76, y: 664 });
-  interact(s);
-  for (let t = 0; t < 0.5; t += STEP) stepSession(s, { ...NO_INPUT, padX: 1 }, STEP);
-  const before = { x: s.van.x, t: s.simTime, speed: s.van.speed };
-  pause(s);
-  for (let i = 0; i < 120; i++) assert.deepEqual(stepSession(s, { ...NO_INPUT, padX: 1 }, STEP), []);
-  assert.deepEqual({ x: s.van.x, t: s.simTime, speed: s.van.speed }, before);
-  resume(s);
+test('curious route: recruit Clatterjack, lift the shutter, cut through the yard to Mo', async () => {
+  const { s } = harness();
+  await answerAndBoard(s);
+  await driveTo(s, { x: 21 * TILE, y: 30.5 * TILE }, { stop: 30 });
+  await act(s); // out at the ticket office
+  await walkTo(s, { x: 326, y: 552 });
+  assert.equal(availableAction(s).verb, 'Look closer');
+  await act(s);
+  assert.equal(s.mode, 'encounter');
+  await encounterChoose(s, 'offer_washer'); // too early
+  assert.equal(s.progress.encounter!.turn, 1);
+  await encounterChoose(s, 'leave');
   assert.equal(s.mode, 'world');
+  await act(s); // come back: same settled turn
+  assert.equal(s.progress.encounter!.turn, 1);
+  await encounterChoose(s, 'dim');
+  await encounterChoose(s, 'offer_washer');
+  assert.ok(s.progress.roster.includes('clatterjack'));
+  assert.equal(s.encounter!.done, true);
+  await encounterChoose(s, 'continue');
+  // Round the express car parked in the lay-by, across Station Road, up to the shutter.
+  await walkTo(s, { x: 314, y: 552 });
+  await walkTo(s, { x: 314, y: 500 });
+  await walkTo(s, { x: 22 * TILE, y: 27.6 * TILE });
+  assert.equal(availableAction(s).kind, 'lift');
+  await act(s);
+  assert.ok(s.progress.flags.includes('yard_shutter_open'));
+  await walkTo(s, { x: 330, y: 506 });
+  await walkTo(s, { x: s.van.x + 6, y: s.van.y - 16 }, 60);
+  assert.equal(availableAction(s).kind, 'enter_van');
+  await act(s);
+  // The arrow now routes through the yard.
+  await handOver(s, 'mo_vale');
+  assert.equal(s.progress.recipient, 'mo_vale');
 });
 
-test('a long frame or a return from the background never becomes a giant step', () => {
-  const clock = createClock();
-  assert.equal(framesToSteps(clock, 5), 6, 'five seconds away simulates at most 0.1 s');
-  assert.equal(clock.acc, 0);
-  assert.equal(framesToSteps(clock, 1 / 60 + 1e-6), 1);
-  resetClock(clock);
-  assert.equal(clock.acc, 0);
+test('double tap on the handover gives one receipt and one trust award', async () => {
+  const { s } = harness();
+  await answerAndBoard(s);
+  await handOver(s, 'mo_vale');
+  // A second confirm arriving late is refused by the receipt.
+  s.prompts.unshift({ kind: 'confirm', recipient: 'mo_vale', choices: [] });
+  s.mode = 'prompt';
+  await Promise.all([choose(s, 'give'), choose(s, 'give')]);
+  assert.equal(s.progress.completed.length, 1);
+  assert.deepEqual(s.progress.crews, { ferry: 1, market: -1 });
 });
 
-test('with no input after an interruption the van stays put', () => {
-  const s = fresh();
-  walkTo(s, { x: 76, y: 664 });
-  interact(s);
-  const x = s.van.x;
-  for (let t = 0; t < 2; t += STEP) stepSession(s, NO_INPUT, STEP);
-  assert.equal(s.van.x, x);
+test('a stale second tab cannot give the same battery to the other crew', async () => {
+  const store = createMemoryStore();
+  const a = harness(store);
+  const b = harness(store);
+  await answerAndBoard(a.s);
+  // Tab B loads the carrying state, then tab A delivers to Mo.
+  b.s.progress = structuredClone(a.s.progress);
+  b.saves.revision = a.saves.revision;
+  b.s.progress.flags.push('counteroffer_heard');
+  await handOver(a.s, 'mo_vale');
+  b.s.prompts.push({ kind: 'confirm', recipient: 'nell_price', choices: [] });
+  b.s.mode = 'prompt';
+  await choose(b.s, 'give');
+  assert.equal(b.s.progress.recipient, 'mo_vale', 'stale tab refreshed to the committed outcome');
+  const saved = await store.load();
+  assert.equal(saved!.progress.completed.length, 1);
+  assert.equal(saved!.progress.recipient, 'mo_vale');
 });
 
-test('pad preset: pull the pad back and the van backs up the way the thumb points', () => {
-  const s = fresh('pad');
-  walkTo(s, { x: 76, y: 664 });
-  interact(s);
-  // Facing east in the forecourt. Pull the pad west: it should reverse, nose still east.
-  const x = s.van.x;
-  for (let t = 0; t < 0.4; t += STEP) stepSession(s, { ...NO_INPUT, padX: -1 }, STEP);
-  assert.ok(s.van.speed < 0, `reversing at ${s.van.speed.toFixed(1)} px/s`);
-  assert.ok(s.van.x < x - 5, 'moved west');
-  assert.ok(Math.abs(s.van.heading) < 0.05, 'still facing east');
-  // Push east again: it stops reversing and drives forwards.
-  for (let t = 0; t < 1; t += STEP) stepSession(s, { ...NO_INPUT, padX: 1 }, STEP);
-  assert.ok(s.van.speed > 0);
+test('storage failure: the handover waits, nothing changes hands, retry commits it', async () => {
+  const { s, store } = harness(createMemoryStore());
+  await answerAndBoard(s);
+  await driveTo(s, PARK.mo_vale, { stop: 30 });
+  await act(s);
+  await walkTo(s, NEAR.mo_vale);
+  store.failWrites = true;
+  await act(s);
+  await choose(s, 'give');
+  assert.equal(s.prompts[0].kind, 'save_failed');
+  assert.deepEqual(s.progress.cargo, ['spare_battery']);
+  assert.equal(s.progress.recipient, null);
+  store.failWrites = false;
+  await choose(s, 'retry');
+  await settled(s);
+  assert.equal(s.progress.recipient, 'mo_vale');
 });
 
-test('lamp posts stand at the back of the pavement, clear of the kerb', () => {
-  const map = buildM0Map();
-  for (const lamp of map.props) {
-    for (const [dx, dy] of [[8, 0], [-8, 0], [0, 8], [0, -8]]) {
-      const s = surfaceAt(map, lamp.x + dx, lamp.y + dy);
-      assert.notEqual(s, Surface.Road, `${lamp.id} is within 8 px of the road`);
-    }
+test('express car: heat once per taking, handover blocked during heat, caught keeps the battery', async () => {
+  const { s } = harness();
+  await answerAndBoard(s);
+  await act(s); // out of the van in the forecourt
+  // Walk to the lay-by and take the express car.
+  s.player.x = s.map.expressStart.x - 6;
+  s.player.y = s.map.expressStart.y - 18;
+  assert.equal(availableAction(s).verb, 'Take the express car');
+  await act(s);
+  assert.equal(s.locomotion, 'express');
+  assert.ok(s.pursuit, 'heat raised');
+  assert.equal(objective(s).text.startsWith('Lose the patrol'), true);
+  // Pause freezes the chase timers.
+  run(s, NO_INPUT, 1);
+  const frozen = { ...s.pursuit! };
+  pause(s);
+  run(s, NO_INPUT, 2);
+  assert.equal(s.pursuit!.outOfSight, frozen.outOfSight);
+  assert.equal(s.pursuit!.boxed, frozen.boxed);
+  resume(s);
+  // Sit still and let the patrol box us in.
+  let t = 0;
+  while (s.pursuit && t < 60) {
+    run(s, NO_INPUT, STEP);
+    t += STEP;
   }
+  assert.equal(s.prompts[0]?.kind, 'caught', `caught after ${t.toFixed(1)} s`);
+  await choose(s, 'ok');
+  assert.equal(s.locomotion, 'foot');
+  assert.deepEqual(s.progress.cargo, ['spare_battery'], 'battery survives');
+  assert.equal(s.express.borrowed, false, 'car back in its lay-by');
+  assert.ok(Math.hypot(s.player.x - s.map.playerStart.x, s.player.y - s.map.playerStart.y) < 1);
+  // Both recipients are still possible: drive to Mo and hand over.
+  await walkTo(s, { x: 70, y: 664 });
+  await act(s);
+  await handOver(s, 'mo_vale');
+  assert.equal(s.progress.recipient, 'mo_vale');
 });
 
-test('steering C reversing: the front turns towards the pad', () => {
-  const s = fresh('hybrid');
-  walkTo(s, { x: 76, y: 664 });
-  interact(s);
-  // Facing east. Back up with the pad pointing north-east: the nose should swing towards north-east.
-  for (let t = 0; t < 0.5; t += STEP) stepSession(s, { ...NO_INPUT, brake: true, padX: 0.7, padY: -0.7 }, STEP);
-  assert.ok(s.van.speed < 0, 'reversing');
-  assert.ok(s.van.heading < -0.05, `nose turned anticlockwise towards north-east (${s.van.heading.toFixed(2)})`);
+test('the patrol gives up after six seconds without seeing you', async () => {
+  const { s } = harness();
+  await answerAndBoard(s);
+  await act(s);
+  s.player.x = s.map.expressStart.x - 6;
+  s.player.y = s.map.expressStart.y - 18;
+  await act(s);
+  // Gone before it arrives: the car is down by the quay, far out of sight of the lay-by.
+  Object.assign(s.express, { x: 13 * TILE, y: 6.5 * TILE, heading: Math.PI, speed: 0 });
+  let t = 0;
+  while (s.pursuit && t < 40) {
+    run(s, NO_INPUT, STEP);
+    t += STEP;
+  }
+  assert.equal(s.pursuit, null, 'heat cleared');
+  assert.equal(s.prompts.length, 0, 'not caught');
+  // It drove to the report (about 8 s), then searched for 6 s.
+  assert.ok(t > 6 && t < 25, `gave up after ${t.toFixed(1)} s`);
 });
 
-test('a bump into a lamp post is logged with what was hit', () => {
-  const s = fresh('pad');
-  walkTo(s, { x: 76, y: 664 });
-  interact(s);
-  // Drive north off Station Road, over the pavement, into lamp_station_1 at (200, 422).
-  s.van.x = 200;
-  s.van.y = 470;
-  s.van.heading = -Math.PI / 2;
-  for (let t = 0; t < 3 && s.run.bumps === 0; t += STEP) stepSession(s, { ...NO_INPUT, padY: -1 }, STEP);
-  assert.equal(s.run.bumps, 1);
-  assert.match(s.run.hits[0], /^lamp_station_1 at 12,26$/);
+test('encounter and shutter are blocked while the patrol is on you', async () => {
+  const { s } = harness();
+  await answerAndBoard(s);
+  await act(s);
+  s.player.x = s.map.expressStart.x - 6;
+  s.player.y = s.map.expressStart.y - 18;
+  await act(s); // take the car: heat
+  await act(s); // straight back out
+  await walkTo(s, { x: 314, y: s.player.y }, 5);
+  await walkTo(s, { x: 314, y: 552 }, 5);
+  await walkTo(s, { x: 326, y: 552 }, 5);
+  const a = availableAction(s);
+  assert.equal(a.kind, 'inspect');
+  assert.equal(a.enabled, false);
+  assert.equal(a.reason, 'Lose the patrol first');
 });

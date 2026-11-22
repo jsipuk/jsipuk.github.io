@@ -50,6 +50,34 @@ export const VAN: VehicleSpec = {
   exitSpeed: 14,
 };
 
+/** The express car: quicker, with a wider turning circle. Taking it brings the patrol. */
+export const EXPRESS: VehicleSpec = {
+  ...VAN,
+  id: 'express_car',
+  halfLength: 13,
+  halfWidth: 7.5,
+  maxForward: 165,
+  maxReverse: 50,
+  pavementMax: 70,
+  accel: 230,
+  minRadius: 34,
+  radiusPerSpeed: 0.34,
+};
+
+/** The patrol car: faster than the van, slower than the express car. */
+export const PATROL: VehicleSpec = {
+  ...VAN,
+  id: 'patrol_car',
+  halfLength: 14,
+  halfWidth: 8,
+  maxForward: 120,
+  maxReverse: 60,
+  pavementMax: 80,
+  accel: 190,
+  minRadius: 26,
+  radiusPerSpeed: 0.24,
+};
+
 export interface VehicleState {
   x: number;
   y: number;
