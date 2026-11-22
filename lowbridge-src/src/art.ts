@@ -420,6 +420,43 @@ export function drawStreet(map: StreetMap): HTMLCanvasElement {
   return c;
 }
 
+/** Rooftops for beyond the edge of the job area: two terraces of slate with chimney stacks. Tiles seamlessly. */
+export const ROOF_TILE = { w: 96, h: 64 };
+export function drawRoofTile(): HTMLCanvasElement {
+  const { w, h } = ROOF_TILE;
+  const [c, g] = canvas(w, h);
+  g.fillStyle = '#0d1a1c';
+  g.fillRect(0, 0, w, h);
+  // Two terraces per tile, each a run of slate roofs split by party walls, with a dark alley between.
+  for (const [row, y0] of [[0, 2], [1, 34]] as const) {
+    const off = row ? 13 : 0;
+    g.fillStyle = '#182c2f';
+    g.fillRect(0, y0, w, 26);
+    g.fillStyle = '#1f383b';
+    g.fillRect(0, y0, w, 12);
+    // Ridge line and slate courses.
+    g.fillStyle = '#284649';
+    g.fillRect(0, y0 + 12, w, 1.2);
+    g.fillStyle = 'rgba(0,0,0,0.22)';
+    for (let yy = y0 + 3; yy < y0 + 26; yy += 3) g.fillRect(0, yy, w, 0.5);
+    // Party walls between houses.
+    g.fillStyle = '#10201f';
+    for (let x = off % 24; x < w; x += 24) g.fillRect(x, y0, 1.2, 26);
+    // Chimney stacks on the ridge, with a warm pot or two.
+    for (let x = (off + 9) % 24; x < w; x += 24) {
+      g.fillStyle = '#3a2a24';
+      g.fillRect(x, y0 + 10, 5, 4);
+      g.fillStyle = x % 48 < 24 ? '#6b4a33' : '#4a3a30';
+      g.fillRect(x + 0.6, y0 + 10.6, 1.6, 1.6);
+      g.fillRect(x + 2.8, y0 + 10.6, 1.6, 1.6);
+    }
+    // A lit skylight now and then.
+    g.fillStyle = 'rgba(255, 196, 110, 0.35)';
+    g.fillRect(((off + 40) % w) + 2, y0 + 17, 4, 3);
+  }
+  return c;
+}
+
 /** Courier van facing east (heading 0), in any body paint and stripe from Body & Paint. */
 export function drawVan(bodyId = 'cream', stripeId = 'teal'): HTMLCanvasElement {
   const body = VAN_BODIES.find((b) => b.id === bodyId) ?? VAN_BODIES[0];

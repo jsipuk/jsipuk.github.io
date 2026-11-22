@@ -280,3 +280,17 @@ Evidence: `tests/save.test.ts` covers the probe against working, refusing and si
 Second phone session (m2fp-2026-11-22-e2edc0d): answered Mo's call with no save failure. The log could not show which store took it, so the game now logs a `storage` event at boot (where it saves, and why) and adds the store and error to `save_failed`. The same session showed the thumb pad through the call card (the hide rule still named an old mode) and asked what the dot circling the courier is: calls and the crab encounter now hide the touch controls, and a new game opens with a caption introducing Wickwing.
 
 Full screen: the Claude app's viewer keeps its own bar and frame round the page, and iPhone browsers don't let a page go full screen. Real full screen comes from jsip.uk/lowbridge added to the Home Screen (the manifest opens it standalone, landscape). That needs the release step.
+
+## Phone feedback • more screen for the street (2026-11-22)
+
+Owner, iPhone in the Claude app: "why is it so to the right?", wants the pad see-through, Pause as a menu icon, and more of the screen for the game.
+
+| Area | Built | Why |
+| --- | --- | --- |
+| Edge of town | The camera may still look 8 tiles past the west, east and south edges, so the van and courier stay clear of the thumb pad near the depot, but that margin now shows dimmed terraced rooftops instead of black. | The depot sits on the west edge; the black margin read as a sidebar. |
+| Menu | A 44 px icon (three lines) top left replaces the "Pause" button. It still pauses and opens the menu; its label for screen readers says so. | Frees the corner. |
+| Pad | Base and knob are see-through at rest and firm up while your thumb is on them. The Walk/Steer label is quieter. | The street shows through. |
+| Go, Brake, Horn | See-through until pressed. The orange action button stays solid, because it's the one to find. | Same. |
+| Job line | Slightly smaller and lighter. | Same. |
+
+The Claude app's own top bar and side strips stay; a page can't remove them. Full screen comes from jsip.uk/lowbridge added to the Home Screen.

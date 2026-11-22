@@ -16,6 +16,7 @@ import {
   drawPerson,
   drawPigeon,
   drawPin,
+  drawRoofTile,
   drawStall,
   drawStreet,
   drawVan,
@@ -101,6 +102,7 @@ export class StreetScene extends Phaser.Scene {
     const map = this.deps.session().map;
     const add = (key: string, c: HTMLCanvasElement) => this.textures.addCanvas(key, c);
     add('street', drawStreet(map));
+    add('roofs', drawRoofTile());
     add('van-cream-teal', drawVan());
     add('express', drawExpress());
     add('patrol-0', drawPatrol(0));
@@ -119,6 +121,15 @@ export class StreetScene extends Phaser.Scene {
 
     const img = (x: number, y: number, key: string, depth: number) =>
       this.add.image(x, y, key).setScale(1 / ART_SCALE).setDepth(depth);
+    // Past the edge of the job area the town carries on as rooftops, so the screen never shows a black band.
+    const margin = 8 * TILE;
+    const around = { x: map.region.x - margin, y: map.region.y, w: map.region.w + margin * 2, h: map.region.h + margin };
+    this.add
+      .tileSprite(around.x, around.y, around.w * ART_SCALE, around.h * ART_SCALE, 'roofs')
+      .setOrigin(0)
+      .setScale(1 / ART_SCALE)
+      .setAlpha(0.6)
+      .setDepth(-1);
     this.add.image(map.region.x, map.region.y, 'street').setOrigin(0).setScale(1 / ART_SCALE).setDepth(0);
 
     const f = map.ferry;
@@ -167,8 +178,7 @@ export class StreetScene extends Phaser.Scene {
 
     const cam = this.cameras.main;
     cam.setBackgroundColor(PALETTE.void);
-    const margin = 8 * TILE;
-    cam.setBounds(map.region.x - margin, map.region.y, map.region.w + margin * 2, map.region.h + margin);
+    cam.setBounds(around.x, around.y, around.w, around.h);
     this.fitCamera();
     this.scale.on('resize', () => this.fitCamera());
     this.deps.onReady(this);
